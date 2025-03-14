@@ -7,6 +7,7 @@ import MacroChart from '@/components/dashboard/MacroChart';
 import WorkoutsList from '@/components/dashboard/WorkoutsList';
 import MealsList from '@/components/dashboard/MealsList';
 import ProgressChart from '@/components/dashboard/ProgressChart';
+import MacroProgressTracker from '@/components/dashboard/MacroProgressTracker';
 
 const macroData = [
   { name: 'Protein', value: 130, color: '#4F46E5' },
@@ -118,6 +119,8 @@ const Dashboard = () => {
           description="Goal: 75 kg"
         />
       </div>
+
+      <MacroProgressTracker />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="glassy-card rounded-xl overflow-hidden card-shadow hover-scale col-span-1">

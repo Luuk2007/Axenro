@@ -2,7 +2,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { BarChart3, Dumbbell, Home, LucideIcon, User2, Utensils } from 'lucide-react';
+import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils } from 'lucide-react';
 
 type NavItem = {
   title: string;
@@ -35,6 +35,11 @@ const navItems: NavItem[] = [
     title: 'Profile',
     href: '/profile',
     icon: User2,
+  },
+  {
+    title: 'Settings',
+    href: '/settings',
+    icon: Settings,
   },
 ];
 
