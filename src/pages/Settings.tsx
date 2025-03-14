@@ -8,13 +8,13 @@ import {
   Globe,
   Sun,
   Moon,
-  User,
   Bell,
   Lock,
   LogOut,
   Trash,
 } from 'lucide-react';
 
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,6 +59,7 @@ type SettingsFormValues = z.infer<typeof settingsFormSchema>;
 
 const Settings = () => {
   const [theme, setTheme] = useState<string>('light');
+  const { language, setLanguage, t } = useLanguage();
   
   // Load saved settings from localStorage if available
   const getSavedSettings = () => {
@@ -85,10 +86,14 @@ const Settings = () => {
         setTheme(value.theme);
         updateTheme(value.theme);
       }
+      // Update language when form value changes
+      if (value.language && value.language !== language) {
+        setLanguage(value.language as any);
+      }
     });
     
     return () => subscription.unsubscribe();
-  }, [form.watch]);
+  }, [form.watch, language, setLanguage]);
 
   // Apply theme to document
   const updateTheme = (newTheme: string) => {
@@ -109,30 +114,30 @@ const Settings = () => {
   const onSubmit = (data: SettingsFormValues) => {
     // Save to localStorage
     localStorage.setItem("userSettings", JSON.stringify(data));
-    toast.success("Settings updated successfully");
+    toast.success(t("settingsUpdated"));
   };
 
   const handleLogout = () => {
     // For now, just show a success toast
-    toast.success("Logged out successfully");
+    toast.success(t("loggedOut"));
   };
 
   const handleDeleteAccount = () => {
     // Clear all localStorage data
     localStorage.removeItem("userProfile");
     localStorage.removeItem("userSettings");
-    toast.success("Account deleted successfully");
+    toast.success(t("accountDeleted"));
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold tracking-tight">Settings</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{t("settings")}</h1>
       </div>
       
       <Card>
         <CardHeader>
-          <CardTitle>App Settings</CardTitle>
+          <CardTitle>{t("appSettings")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -149,26 +154,26 @@ const Settings = () => {
                       name="language"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Language</FormLabel>
+                          <FormLabel>{t("language")}</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
                               <SelectTrigger className="w-full md:w-52">
-                                <SelectValue placeholder="Select language" />
+                                <SelectValue placeholder={t("selectLanguage")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="english">English</SelectItem>
-                              <SelectItem value="dutch">Dutch</SelectItem>
-                              <SelectItem value="french">French</SelectItem>
-                              <SelectItem value="german">German</SelectItem>
-                              <SelectItem value="spanish">Spanish</SelectItem>
+                              <SelectItem value="dutch">Nederlands</SelectItem>
+                              <SelectItem value="french">Français</SelectItem>
+                              <SelectItem value="german">Deutsch</SelectItem>
+                              <SelectItem value="spanish">Español</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormDescription>
-                            Select your preferred language
+                            {t("selectLanguage")}
                           </FormDescription>
                         </FormItem>
                       )}
@@ -190,23 +195,23 @@ const Settings = () => {
                       name="theme"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Theme</FormLabel>
+                          <FormLabel>{t("theme")}</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
                               <SelectTrigger className="w-full md:w-52">
-                                <SelectValue placeholder="Select theme" />
+                                <SelectValue placeholder={t("theme")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="light">Light Mode</SelectItem>
-                              <SelectItem value="dark">Dark Mode</SelectItem>
+                              <SelectItem value="light">{t("lightMode")}</SelectItem>
+                              <SelectItem value="dark">{t("darkMode")}</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormDescription>
-                            Choose between light and dark mode
+                            {theme === 'light' ? t("lightMode") : t("darkMode")}
                           </FormDescription>
                         </FormItem>
                       )}
@@ -219,7 +224,7 @@ const Settings = () => {
                 <div className="flex items-center gap-4">
                   <Bell className="h-5 w-5 text-muted-foreground" />
                   <div className="flex-1 space-y-4">
-                    <h3 className="text-lg font-medium">Notifications</h3>
+                    <h3 className="text-lg font-medium">{t("notifications")}</h3>
                     
                     <FormField
                       control={form.control}
@@ -227,9 +232,9 @@ const Settings = () => {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between">
                           <div className="space-y-0.5">
-                            <FormLabel>Workout Reminders</FormLabel>
+                            <FormLabel>{t("workoutReminders")}</FormLabel>
                             <FormDescription>
-                              Receive reminders for scheduled workouts
+                              {t("receiveReminders")}
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -248,9 +253,9 @@ const Settings = () => {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between">
                           <div className="space-y-0.5">
-                            <FormLabel>Meal Logging Reminders</FormLabel>
+                            <FormLabel>{t("mealLoggingReminders")}</FormLabel>
                             <FormDescription>
-                              Get reminders to log your meals throughout the day
+                              {t("getReminders")}
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -270,7 +275,7 @@ const Settings = () => {
                 <div className="flex items-center gap-4">
                   <Lock className="h-5 w-5 text-muted-foreground" />
                   <div className="flex-1 space-y-4">
-                    <h3 className="text-lg font-medium">Privacy</h3>
+                    <h3 className="text-lg font-medium">{t("privacy")}</h3>
                     
                     <FormField
                       control={form.control}
@@ -278,9 +283,9 @@ const Settings = () => {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between">
                           <div className="space-y-0.5">
-                            <FormLabel>Save Profile Data</FormLabel>
+                            <FormLabel>{t("saveProfileData")}</FormLabel>
                             <FormDescription>
-                              Store your profile data for future sessions
+                              {t("storeProfileData")}
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -296,7 +301,7 @@ const Settings = () => {
                 </div>
               </div>
 
-              <Button type="submit">Save Settings</Button>
+              <Button type="submit">{t("saveChanges")}</Button>
             </form>
           </Form>
         </CardContent>
@@ -304,18 +309,18 @@ const Settings = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-destructive">Account Actions</CardTitle>
+          <CardTitle className="text-destructive">{t("accountActions")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <LogOut className="h-5 w-5 text-muted-foreground" />
               <div>
-                <h3 className="font-medium">Log Out</h3>
-                <p className="text-sm text-muted-foreground">Sign out of your account</p>
+                <h3 className="font-medium">{t("logOut")}</h3>
+                <p className="text-sm text-muted-foreground">{t("signOut")}</p>
               </div>
             </div>
-            <Button variant="outline" onClick={handleLogout}>Log Out</Button>
+            <Button variant="outline" onClick={handleLogout}>{t("logOut")}</Button>
           </div>
           
           <Separator />
@@ -324,26 +329,25 @@ const Settings = () => {
             <div className="flex items-center gap-3">
               <Trash className="h-5 w-5 text-destructive" />
               <div>
-                <h3 className="font-medium">Delete Account</h3>
-                <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
+                <h3 className="font-medium">{t("deleteAccount")}</h3>
+                <p className="text-sm text-muted-foreground">{t("permanentlyDelete")}</p>
               </div>
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">Delete Account</Button>
+                <Button variant="destructive">{t("deleteAccount")}</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your
-                    account and remove all of your data from our servers.
+                    {t("cannotBeUndone")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction onClick={handleDeleteAccount}>
-                    Yes, delete my account
+                    {t("yesDelete")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

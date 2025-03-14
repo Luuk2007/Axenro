@@ -3,47 +3,50 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type NavItem = {
-  title: string;
+  titleKey: string;
   href: string;
   icon: LucideIcon;
 };
 
 const navItems: NavItem[] = [
   {
-    title: 'Dashboard',
+    titleKey: 'dashboard',
     href: '/',
     icon: Home,
   },
   {
-    title: 'Nutrition',
+    titleKey: 'nutrition',
     href: '/nutrition',
     icon: Utensils,
   },
   {
-    title: 'Workouts',
+    titleKey: 'workouts',
     href: '/workouts',
     icon: Dumbbell,
   },
   {
-    title: 'Progress',
+    titleKey: 'progress',
     href: '/progress',
     icon: BarChart3,
   },
   {
-    title: 'Profile',
+    titleKey: 'profile',
     href: '/profile',
     icon: User2,
   },
   {
-    title: 'Settings',
+    titleKey: 'settings',
     href: '/settings',
     icon: Settings,
   },
 ];
 
 export default function Sidebar() {
+  const { t } = useLanguage();
+  
   return (
     <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card/50 backdrop-blur-sm">
       <div className="flex h-16 items-center px-6">
@@ -73,7 +76,7 @@ export default function Sidebar() {
                         isActive && "text-primary"
                       )} 
                     />
-                    <span>{item.title}</span>
+                    <span>{t(item.titleKey)}</span>
                   </>
                 )}
               </NavLink>
