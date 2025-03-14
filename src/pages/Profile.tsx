@@ -79,15 +79,16 @@ const defaultValues: Partial<ProfileFormValues> = {
 const Profile = () => {
   const [profile, setProfile] = useState<ProfileFormValues | null>(null);
   
+  // Load saved profile from localStorage if available
+  const getSavedProfile = () => {
+    const savedProfile = localStorage.getItem("userProfile");
+    return savedProfile ? JSON.parse(savedProfile) : defaultValues;
+  };
+  
   // Initialize form with values from localStorage if available
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: () => {
-      const savedProfile = localStorage.getItem("userProfile");
-      return savedProfile 
-        ? JSON.parse(savedProfile) 
-        : defaultValues;
-    },
+    defaultValues: getSavedProfile(),
   });
 
   // Load profile from localStorage on component mount
