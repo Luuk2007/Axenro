@@ -7,7 +7,6 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import StatsCard from '@/components/dashboard/StatsCard';
 import MacroProgressTracker from '@/components/dashboard/MacroProgressTracker';
-import WorkoutsList from '@/components/dashboard/WorkoutsList';
 import MealsList from '@/components/dashboard/MealsList';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -23,25 +22,6 @@ const weightData = [
   { date: 'Jun 29', value: 76.9 },
   { date: 'Jul 6', value: 76.5 },
   { date: 'Jul 13', value: 76.4 },
-];
-
-const workouts = [
-  {
-    id: '1',
-    name: 'Upper Body Strength',
-    date: 'Today, 9:30 AM',
-    muscleGroups: ['Chest', 'Back', 'Arms'],
-    exerciseCount: 8,
-    completed: true,
-  },
-  {
-    id: '2',
-    name: 'Lower Body Power',
-    date: 'Tomorrow, 10:00 AM',
-    muscleGroups: ['Legs', 'Glutes'],
-    exerciseCount: 6,
-    completed: false,
-  },
 ];
 
 const meals = [
@@ -105,9 +85,6 @@ const Dashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard")}</h1>
-          <p className="text-muted-foreground">
-            {t("trackFitness")}
-          </p>
         </div>
         <div className="flex items-center gap-2">
           <Popover>
@@ -187,15 +164,6 @@ const Dashboard = () => {
       </div>
 
       <MacroProgressTracker />
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <WorkoutsList
-          title={t("upcomingWorkouts")}
-          workouts={workouts}
-          className="col-span-1 lg:col-span-2"
-          onViewAll={navigateToWorkouts}
-        />
-      </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <ProgressChart

@@ -1,10 +1,17 @@
 
-import React from 'react';
-import { Camera, ChevronDown, Filter, Plus, Weight } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Calendar, Camera, Plus, Upload, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
 
+// Sample data for weight progress
 const weightData = [
   { date: 'Jun 1', value: 78.5 },
   { date: 'Jun 8', value: 78.2 },
@@ -15,320 +22,381 @@ const weightData = [
   { date: 'Jul 13', value: 76.4 },
 ];
 
-const bodyMeasurements = [
-  { name: 'Chest', current: '96 cm', previous: '98 cm', change: -2, isPositive: true },
-  { name: 'Waist', current: '83 cm', previous: '85 cm', change: -2, isPositive: true },
-  { name: 'Hips', current: '100 cm', previous: '101 cm', change: -1, isPositive: true },
-  { name: 'Left Arm', current: '35 cm', previous: '34 cm', change: 1, isPositive: true },
-  { name: 'Right Arm', current: '35.5 cm', previous: '34.5 cm', change: 1, isPositive: true },
-  { name: 'Left Thigh', current: '56 cm', previous: '55 cm', change: 1, isPositive: true },
-  { name: 'Right Thigh', current: '56.5 cm', previous: '55.5 cm', change: 1, isPositive: true },
-];
-
+// Sample images for progress photos
 const progressPhotos = [
-  { 
-    id: '1', 
-    date: 'May 1, 2023', 
-    frontImage: 'https://placehold.co/300x400/e9ecef/6c757d?text=Front+View',
-    sideImage: 'https://placehold.co/300x400/e9ecef/6c757d?text=Side+View',
-    backImage: 'https://placehold.co/300x400/e9ecef/6c757d?text=Back+View',
-    weight: '78.5 kg'
-  },
-  { 
-    id: '2', 
-    date: 'June 1, 2023', 
-    frontImage: 'https://placehold.co/300x400/e9ecef/6c757d?text=Front+View',
-    sideImage: 'https://placehold.co/300x400/e9ecef/6c757d?text=Side+View',
-    backImage: 'https://placehold.co/300x400/e9ecef/6c757d?text=Back+View',
-    weight: '77.2 kg'
-  },
-  { 
-    id: '3', 
-    date: 'July 1, 2023', 
-    frontImage: 'https://placehold.co/300x400/e9ecef/6c757d?text=Front+View',
-    sideImage: 'https://placehold.co/300x400/e9ecef/6c757d?text=Side+View',
-    backImage: 'https://placehold.co/300x400/e9ecef/6c757d?text=Back+View',
-    weight: '76.4 kg'
-  },
+  { id: '1', date: 'Jun 1, 2023', url: '/placeholder.svg' },
+  { id: '2', date: 'Jul 1, 2023', url: '/placeholder.svg' },
+  { id: '3', date: 'Aug 1, 2023', url: '/placeholder.svg' },
+  { id: '4', date: 'Sep 1, 2023', url: '/placeholder.svg' },
 ];
 
-const Progress = () => {
+// Measurement types
+const measurementTypes = [
+  { id: 'weight', name: 'Weight', unit: 'kg' },
+  { id: 'chest', name: 'Chest', unit: 'cm' },
+  { id: 'waist', name: 'Waist', unit: 'cm' },
+  { id: 'hips', name: 'Hips', unit: 'cm' },
+  { id: 'biceps', name: 'Biceps', unit: 'cm' },
+  { id: 'thighs', name: 'Thighs', unit: 'cm' },
+  { id: 'calves', name: 'Calves', unit: 'cm' },
+  { id: 'bodyfat', name: 'Body Fat', unit: '%' },
+];
+
+export default function Progress() {
+  const { t } = useLanguage();
+  const [measurementType, setMeasurementType] = useState('weight');
+  const [measurementValue, setMeasurementValue] = useState('');
+  const [showAddPhoto, setShowAddPhoto] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [weightHistory, setWeightHistory] = useState(weightData);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  const handleAddMeasurement = () => {
+    if (!measurementValue) {
+      toast.error('Please enter a value');
+      return;
+    }
+    
+    const value = parseFloat(measurementValue);
+    
+    if (isNaN(value)) {
+      toast.error('Please enter a valid number');
+      return;
+    }
+    
+    const selectedType = measurementTypes.find(type => type.id === measurementType);
+    
+    if (measurementType === 'weight') {
+      // Update weight history
+      const today = format(new Date(), 'MMM d');
+      const newData = [...weightHistory, { date: today, value }];
+      setWeightHistory(newData);
+    }
+    
+    toast.success(`${selectedType?.name} measurement added`);
+    setMeasurementValue('');
+  };
+  
+  const handleCapturePhoto = async () => {
+    setShowCamera(true);
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+      } else {
+        toast.error('Camera not available on this device');
+        setShowCamera(false);
+      }
+    } catch (err) {
+      console.error('Error accessing camera:', err);
+      toast.error('Could not access camera. Please check permissions.');
+      setShowCamera(false);
+    }
+  };
+  
+  const takePicture = () => {
+    if (videoRef.current && canvasRef.current) {
+      const context = canvasRef.current.getContext('2d');
+      if (context) {
+        canvasRef.current.width = videoRef.current.videoWidth;
+        canvasRef.current.height = videoRef.current.videoHeight;
+        context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+        
+        const imageData = canvasRef.current.toDataURL('image/png');
+        setCapturedImage(imageData);
+        
+        // Stop the video stream
+        if (videoRef.current.srcObject) {
+          const stream = videoRef.current.srcObject as MediaStream;
+          const tracks = stream.getTracks();
+          tracks.forEach(track => track.stop());
+          videoRef.current.srcObject = null;
+        }
+        
+        setShowCamera(false);
+      }
+    }
+  };
+  
+  const savePhoto = () => {
+    if (capturedImage) {
+      const today = format(new Date(), 'MMM d, yyyy');
+      // In a real app, you would upload the image to a server here
+      toast.success('Progress photo saved');
+      setCapturedImage(null);
+      setShowAddPhoto(false);
+    }
+  };
+
+  const handleSelectFromGallery = () => {
+    // Simulate selecting from gallery
+    // In a real app, this would open the device's file picker
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = (e) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => {
+          const result = loadEvent.target?.result as string;
+          setCapturedImage(result);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    fileInput.click();
+  };
+  
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Progress Tracking</h1>
-          <p className="text-muted-foreground">
-            Monitor your body measurements and physical changes.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("progress")}</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="hidden md:flex">
-            <Filter className="mr-2 h-4 w-4" />
-            Filter
-          </Button>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Measurement
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                {t("addMeasurement")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("addMeasurement")}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Type</label>
+                  <select 
+                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    value={measurementType}
+                    onChange={(e) => setMeasurementType(e.target.value)}
+                  >
+                    {measurementTypes.map(type => (
+                      <option key={type.id} value={type.id}>{type.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Value ({measurementTypes.find(type => type.id === measurementType)?.unit})
+                  </label>
+                  <Input 
+                    type="number" 
+                    value={measurementValue}
+                    onChange={(e) => setMeasurementValue(e.target.value)}
+                    step="0.1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Date</label>
+                  <Input type="date" defaultValue={format(new Date(), 'yyyy-MM-dd')} />
+                </div>
+                <Button onClick={handleAddMeasurement} className="w-full">
+                  {t("add")}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
+      <Tabs defaultValue="weight" className="w-full">
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="weight">Weight</TabsTrigger>
           <TabsTrigger value="measurements">Measurements</TabsTrigger>
           <TabsTrigger value="photos">Progress Photos</TabsTrigger>
         </TabsList>
-        <TabsContent value="overview" className="mt-6 space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
+        
+        <TabsContent value="weight" className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-1">
             <ProgressChart
               title="Weight Progress"
-              data={weightData}
+              data={weightHistory}
               label="kg"
               color="#4F46E5"
+              onViewAll={() => {}}
             />
-            
-            <div className="glassy-card rounded-xl overflow-hidden card-shadow hover-scale">
-              <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                <h3 className="font-medium tracking-tight">Latest Measurements</h3>
-                <Button variant="ghost" size="sm">View All</Button>
-              </div>
-              <div className="p-4">
-                <div className="space-y-3">
-                  {bodyMeasurements.slice(0, 4).map((measurement, index) => (
-                    <div 
-                      key={index}
-                      className="flex items-center justify-between bg-secondary/30 rounded-lg p-3"
-                    >
-                      <p className="font-medium">{measurement.name}</p>
-                      <div className="flex items-center">
-                        <p className="text-sm font-semibold mr-3">{measurement.current}</p>
-                        <div className={`flex items-center text-xs ${
-                          measurement.isPositive ? "text-green-500" : "text-red-500"
-                        }`}>
-                          <span>{measurement.change > 0 ? "+" : ""}{measurement.change} cm</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="glassy-card rounded-xl overflow-hidden card-shadow hover-scale">
-            <div className="px-5 py-4 border-b border-border">
-              <h3 className="font-medium tracking-tight">Recent Progress Photos</h3>
-            </div>
-            <div className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {progressPhotos.slice(0, 1).map((entry) => (
-                  <React.Fragment key={entry.id}>
-                    <div className="overflow-hidden rounded-lg relative group">
-                      <img
-                        src={entry.frontImage}
-                        alt="Front view"
-                        className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button variant="secondary" size="sm">
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="overflow-hidden rounded-lg relative group">
-                      <img
-                        src={entry.sideImage}
-                        alt="Side view"
-                        className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button variant="secondary" size="sm">
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="overflow-hidden rounded-lg relative group">
-                      <img
-                        src={entry.backImage}
-                        alt="Back view"
-                        className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button variant="secondary" size="sm">
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                  </React.Fragment>
-                ))}
-              </div>
-              <div className="flex justify-center mt-4">
-                <Button variant="outline" size="sm">
-                  View All Photos
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
           </div>
         </TabsContent>
-        <TabsContent value="measurements" className="mt-6">
+        
+        <TabsContent value="measurements" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="glassy-card rounded-xl overflow-hidden card-shadow hover-scale">
-              <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+            <div className="glassy-card rounded-xl overflow-hidden card-shadow">
+              <div className="px-5 py-4 border-b border-border">
                 <h3 className="font-medium tracking-tight">Body Measurements</h3>
-                <Button size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add
-                </Button>
               </div>
-              <div className="divide-y divide-border">
-                {bodyMeasurements.map((measurement, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4"
-                  >
-                    <p className="font-medium">{measurement.name}</p>
-                    <div className="flex items-center">
-                      <p className="text-sm font-semibold mr-4">{measurement.current}</p>
-                      <div className={`flex items-center text-xs ${
-                        measurement.isPositive ? "text-green-500" : "text-red-500"
-                      }`}>
-                        <span>{measurement.change > 0 ? "+" : ""}{measurement.change} cm</span>
-                        <span className="text-muted-foreground ml-1">from {measurement.previous}</span>
-                      </div>
-                    </div>
+              <div className="p-5 space-y-4">
+                {measurementTypes.filter(type => type.id !== 'weight').map(type => (
+                  <div key={type.id} className="flex items-center justify-between">
+                    <span className="text-sm font-medium">{type.name}</span>
+                    <span className="text-sm">
+                      {type.id === 'chest' ? '95 cm' :
+                       type.id === 'waist' ? '80 cm' :
+                       type.id === 'hips' ? '90 cm' :
+                       type.id === 'biceps' ? '35 cm' :
+                       type.id === 'thighs' ? '55 cm' :
+                       type.id === 'calves' ? '38 cm' :
+                       type.id === 'bodyfat' ? '18%' : '—'}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
-            
-            <div className="space-y-6">
-              <ProgressChart
-                title="Weight Progress"
-                data={weightData}
-                label="kg"
-                color="#4F46E5"
-              />
-              
-              <div className="glassy-card rounded-xl overflow-hidden card-shadow hover-scale">
-                <div className="px-5 py-4 border-b border-border">
-                  <h3 className="font-medium tracking-tight">Weight Log</h3>
-                </div>
-                <div className="p-4 flex items-center justify-between space-x-4">
-                  <div className="flex-1">
-                    <label className="text-xs text-muted-foreground mb-1 block">
-                      Current Weight
-                    </label>
-                    <div className="flex items-center">
-                      <input
-                        type="number"
-                        placeholder="Enter weight"
-                        className="border border-input rounded-l-md bg-transparent px-3 py-2 text-sm w-full"
-                      />
-                      <div className="border-t border-r border-b border-input rounded-r-md px-3 py-2 text-sm bg-secondary/30">
-                        kg
-                      </div>
-                    </div>
-                  </div>
-                  <Button className="shrink-0">Save</Button>
-                </div>
+            <div className="glassy-card rounded-xl overflow-hidden card-shadow">
+              <div className="px-5 py-4 border-b border-border">
+                <h3 className="font-medium tracking-tight">Measurement History</h3>
+              </div>
+              <div className="p-5">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left border-b border-border">
+                      <th className="pb-2 font-medium">Date</th>
+                      <th className="pb-2 font-medium">Measurement</th>
+                      <th className="pb-2 font-medium text-right">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-border">
+                      <td className="py-3">Jun 1, 2023</td>
+                      <td className="py-3">Weight</td>
+                      <td className="py-3 text-right">78.5 kg</td>
+                    </tr>
+                    <tr className="border-b border-border">
+                      <td className="py-3">Jun 1, 2023</td>
+                      <td className="py-3">Waist</td>
+                      <td className="py-3 text-right">85 cm</td>
+                    </tr>
+                    <tr className="border-b border-border">
+                      <td className="py-3">Jul 1, 2023</td>
+                      <td className="py-3">Weight</td>
+                      <td className="py-3 text-right">77.2 kg</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3">Jul 1, 2023</td>
+                      <td className="py-3">Waist</td>
+                      <td className="py-3 text-right">82 cm</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </TabsContent>
-        <TabsContent value="photos" className="mt-6">
-          <div className="glassy-card rounded-xl overflow-hidden card-shadow hover-scale mb-6">
-            <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-              <h3 className="font-medium tracking-tight">Progress Photos</h3>
-              <Button>
-                <Camera className="mr-2 h-4 w-4" />
-                Add Photos
-              </Button>
-            </div>
-            <div className="p-6">
-              <div className="flex items-center justify-center mb-6">
-                <div className="flex overflow-hidden rounded-lg border border-input">
-                  <button className="bg-primary text-white px-4 py-2 text-sm">
-                    All Photos
-                  </button>
-                  <button className="bg-transparent hover:bg-secondary px-4 py-2 text-sm">
-                    Front View
-                  </button>
-                  <button className="bg-transparent hover:bg-secondary px-4 py-2 text-sm">
-                    Side View
-                  </button>
-                  <button className="bg-transparent hover:bg-secondary px-4 py-2 text-sm">
-                    Back View
-                  </button>
+        
+        <TabsContent value="photos" className="space-y-6">
+          <Dialog open={showAddPhoto} onOpenChange={setShowAddPhoto}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Progress Photo</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                {capturedImage ? (
+                  <div className="space-y-4">
+                    <div className="aspect-square max-h-96 overflow-hidden rounded-lg">
+                      <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex justify-between">
+                      <Button variant="outline" onClick={() => setCapturedImage(null)}>
+                        Retake
+                      </Button>
+                      <Button onClick={savePhoto}>
+                        Save Photo
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <Button onClick={handleCapturePhoto} className="w-full">
+                      <Camera className="mr-2 h-4 w-4" />
+                      Take a Photo
+                    </Button>
+                    <Button onClick={handleSelectFromGallery} className="w-full">
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload from Gallery
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+          
+          <Dialog open={showCamera} onOpenChange={(open) => {
+            if (!open && videoRef.current && videoRef.current.srcObject) {
+              const stream = videoRef.current.srcObject as MediaStream;
+              const tracks = stream.getTracks();
+              tracks.forEach(track => track.stop());
+              videoRef.current.srcObject = null;
+            }
+            setShowCamera(open);
+          }}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Take a Photo</DialogTitle>
+              </DialogHeader>
+              <div className="py-4">
+                <div className="relative aspect-square max-h-96 overflow-hidden rounded-lg bg-black">
+                  <video 
+                    ref={videoRef} 
+                    className="absolute inset-0 h-full w-full object-cover"
+                    autoPlay
+                    playsInline
+                    muted
+                  />
+                </div>
+                <div className="mt-4 flex justify-center">
+                  <Button onClick={takePicture} size="lg" className="rounded-full h-12 w-12 p-0">
+                    <Camera className="h-6 w-6" />
+                  </Button>
+                </div>
+                <canvas ref={canvasRef} className="hidden" />
+              </div>
+            </DialogContent>
+          </Dialog>
+          
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium">Progress Photos</h3>
+            <Button variant="outline" onClick={() => setShowAddPhoto(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Photo
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {progressPhotos.map((photo) => (
+              <div key={photo.id} className="group relative aspect-square rounded-lg overflow-hidden border border-border">
+                <img 
+                  src={photo.url} 
+                  alt={`Progress from ${photo.date}`} 
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <Calendar className="h-6 w-6 mx-auto mb-2" />
+                    <p className="text-sm">{photo.date}</p>
+                  </div>
                 </div>
               </div>
-              
-              {progressPhotos.map((entry) => (
-                <div key={entry.id} className="mb-8">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium">{entry.date}</h4>
-                    <div className="flex items-center">
-                      <Weight className="h-4 w-4 mr-1 text-muted-foreground" />
-                      <span className="text-sm">{entry.weight}</span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="overflow-hidden rounded-lg relative group">
-                      <img
-                        src={entry.frontImage}
-                        alt="Front view"
-                        className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button variant="secondary" size="sm">
-                          View
-                        </Button>
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-xs py-1 px-3">
-                        Front View
-                      </div>
-                    </div>
-                    <div className="overflow-hidden rounded-lg relative group">
-                      <img
-                        src={entry.sideImage}
-                        alt="Side view"
-                        className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button variant="secondary" size="sm">
-                          View
-                        </Button>
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-xs py-1 px-3">
-                        Side View
-                      </div>
-                    </div>
-                    <div className="overflow-hidden rounded-lg relative group">
-                      <img
-                        src={entry.backImage}
-                        alt="Back view"
-                        className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button variant="secondary" size="sm">
-                          View
-                        </Button>
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-xs py-1 px-3">
-                        Back View
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
         </TabsContent>
       </Tabs>
     </div>
   );
-};
-
-export default Progress;
+}

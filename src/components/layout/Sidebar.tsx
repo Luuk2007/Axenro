@@ -49,45 +49,11 @@ export default function Sidebar() {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
   
-  if (isMobile) {
-    return (
-      <nav className="w-full">
-        <ul className="flex items-center justify-between w-full">
-          {navItems.map((item, index) => (
-            <li key={index} className="flex-1">
-              <NavLink
-                to={item.href}
-                className={({ isActive }) =>
-                  cn(
-                    "flex flex-col items-center gap-1 py-2 px-1 transition-all duration-300 ease-in-out text-muted-foreground hover:text-foreground text-xs",
-                    isActive ? 
-                      "text-primary font-medium" : 
-                      "hover:bg-accent"
-                  )
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <item.icon 
-                      size={18} 
-                      className={cn(
-                        "transition-transform duration-300",
-                        isActive && "text-primary"
-                      )} 
-                    />
-                    <span className="text-[10px]">{t(item.titleKey)}</span>
-                  </>
-                )}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    );
-  }
-  
   return (
-    <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card/50 backdrop-blur-sm">
+    <aside className={cn(
+      "flex flex-col border-border bg-card/50 backdrop-blur-sm",
+      isMobile ? "w-full border-b" : "w-64 border-r hidden md:flex"
+    )}>
       <div className="flex h-16 items-center px-6">
         <h1 className="text-xl font-semibold tracking-tight">Progresa</h1>
       </div>
@@ -123,12 +89,14 @@ export default function Sidebar() {
           ))}
         </ul>
       </nav>
-      <div className="border-t border-border p-4">
-        <div className="glassy-card rounded-lg p-4 subtle-shadow">
-          <p className="text-xs font-medium text-muted-foreground">{t("premium")}</p>
-          <p className="text-sm mt-1">{t("trackFitness")}</p>
+      {!isMobile && (
+        <div className="border-t border-border p-4">
+          <div className="glassy-card rounded-lg p-4 subtle-shadow">
+            <p className="text-xs font-medium text-muted-foreground">{t("premium")}</p>
+            <p className="text-sm mt-1">{t("trackFitness")}</p>
+          </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 }
