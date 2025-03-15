@@ -96,7 +96,6 @@ export const english = {
   "theme": "Theme",
   "lightMode": "Light Mode",
   "darkMode": "Dark Mode",
-  "notifications": "Notifications",
   "workoutReminders": "Workout Reminders",
   "receiveReminders": "Receive reminders for scheduled workouts",
   "mealLoggingReminders": "Meal Logging Reminders",
@@ -129,6 +128,7 @@ export const english = {
   "bmiCalculator": "BMI Calculator",
   "bmiResult": "Your BMI Result",
   "bmiValue": "Your BMI is",
+  "calculateBMI": "Calculate BMI",
   "underweight": "You're underweight. Consider adjusting your nutrition.",
   "healthyWeight": "Great! You have a healthy weight.",
   "overweight": "You're overweight. Adjusting your diet & workout might help.",
@@ -139,6 +139,13 @@ export const english = {
   // Premium
   "premium": "Premium Account",
   "trackFitness": "Track your fitness journey with precision and style.",
+  
+  // Time periods
+  "today": "Today",
+  "week": "Week",
+  "month": "Month",
+  "weeklyNutrition": "Weekly Nutrition",
+  "monthlyNutrition": "Monthly Nutrition",
   
   // Login
   "login": "Log in",

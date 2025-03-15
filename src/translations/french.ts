@@ -27,6 +27,7 @@ export const french = {
   "progress": "Progrès",
   "profile": "Profil",
   "settings": "Paramètres",
+  "notifications": "Notifications",
   
   // Profile
   "profileSettings": "Paramètres du Profil",
@@ -65,7 +66,6 @@ export const french = {
   "theme": "Thème",
   "lightMode": "Mode Clair",
   "darkMode": "Mode Sombre",
-  "notifications": "Notifications",
   "workoutReminders": "Rappels d'Entraînement",
   "receiveReminders": "Recevoir des rappels pour les entraînements programmés",
   "mealLoggingReminders": "Rappels d'Enregistrement de Repas",
@@ -110,6 +110,13 @@ export const french = {
   "premium": "Compte Premium",
   "trackFitness": "Suivez votre parcours de fitness avec précision et style.",
   
+  // Time periods
+  "today": "Aujourd'hui",
+  "week": "Semaine",
+  "month": "Mois",
+  "weeklyNutrition": "Nutrition Hebdomadaire",
+  "monthlyNutrition": "Nutrition Mensuelle",
+  
   // Login
   "login": "Connexion",
   "email": "Email",
@@ -120,4 +127,34 @@ export const french = {
   "signIn": "Se connecter",
   "signInWithGoogle": "Se connecter avec Google",
   "or": "ou",
+  
+  // Additional
+  "viewAll": "Voir Tout",
+  "addItem": "Ajouter un Élément",
+  "addActivity": "Ajouter une Activité",
+  "addWater": "Ajouter de l'Eau",
+  "waterIntake": "Consommation d'Eau",
+  "add100ml": "100ml",
+  "add250ml": "250ml",
+  "add500ml": "500ml",
+  "add750ml": "750ml",
+  "add1l": "1L",
+  "searchFoods": "Rechercher des aliments...",
+  "addFood": "Ajouter un Aliment",
+  "scanBarcode": "Scanner le Code-barres",
+  "createNew": "Créer Nouveau",
+  "newWorkout": "Nouvel Entraînement",
+  "selectExercises": "Sélectionner les Exercices",
+  "addMeasurement": "Ajouter une Mesure",
+  "addPhotos": "Ajouter des Photos",
+  "photoAccess": "Autoriser l'accès à la galerie photo ?",
+  "allow": "Autoriser",
+  "deny": "Refuser",
+  "resetPassword": "Réinitialiser le Mot de passe",
+  "enterEmail": "Entrez votre e-mail pour réinitialiser votre mot de passe",
+  "send": "Envoyer",
+  "selectDate": "Sélectionner la Date",
+  "fullName": "Nom Complet",
+  "confirmPassword": "Confirmer le Mot de passe",
+  "alreadyHaveAccount": "Vous avez déjà un compte ?",
 };

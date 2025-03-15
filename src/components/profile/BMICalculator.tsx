@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface BMICalculatorProps {
@@ -100,12 +99,6 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 70, initi
                 className="w-full"
               />
             </div>
-            <Button 
-              onClick={calculateBMI}
-              className="w-full"
-            >
-              {t("calculateBMI")}
-            </Button>
           </div>
           
           {bmi !== null && (

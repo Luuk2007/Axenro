@@ -41,12 +41,10 @@ export const dutch = {
   "photoAccess": "Toegang tot fotogalerij toestaan?",
   "allow": "Toestaan",
   "deny": "Weigeren",
-  "forgotPassword": "Wachtwoord Vergeten",
   "resetPassword": "Wachtwoord Resetten",
   "enterEmail": "Voer je e-mail in om je wachtwoord te resetten",
   "send": "Versturen",
   "selectDate": "Selecteer Datum",
-  "signUp": "Registreren",
   "fullName": "Volledige Naam",
   "confirmPassword": "Bevestig Wachtwoord",
   "alreadyHaveAccount": "Heb je al een account?",
@@ -96,7 +94,6 @@ export const dutch = {
   "theme": "Thema",
   "lightMode": "Lichte Modus",
   "darkMode": "Donkere Modus",
-  "notifications": "Meldingen",
   "workoutReminders": "Training Herinneringen",
   "receiveReminders": "Ontvang herinneringen voor geplande trainingen",
   "mealLoggingReminders": "Maaltijd Logboek Herinneringen",
@@ -129,6 +126,7 @@ export const dutch = {
   "bmiCalculator": "BMI Calculator",
   "bmiResult": "Jouw BMI Resultaat",
   "bmiValue": "Jouw BMI is",
+  "calculateBMI": "BMI Berekenen",
   "underweight": "Je hebt ondergewicht. Overweeg je voeding aan te passen.",
   "healthyWeight": "Geweldig! Je hebt een gezond gewicht.",
   "overweight": "Je hebt overgewicht. Het aanpassen van je dieet en training kan helpen.",
@@ -139,6 +137,13 @@ export const dutch = {
   // Premium
   "premium": "Premium Account",
   "trackFitness": "Volg je fitnessreis met precisie en stijl.",
+  
+  // Time periods
+  "today": "Vandaag",
+  "week": "Week",
+  "month": "Maand",
+  "weeklyNutrition": "Wekelijkse Voeding",
+  "monthlyNutrition": "Maandelijkse Voeding",
   
   // Login
   "login": "Inloggen",

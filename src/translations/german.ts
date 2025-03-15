@@ -27,6 +27,7 @@ export const german = {
   "progress": "Fortschritt",
   "profile": "Profil",
   "settings": "Einstellungen",
+  "notifications": "Benachrichtigungen",
   
   // Profile
   "profileSettings": "Profileinstellungen",
@@ -65,7 +66,6 @@ export const german = {
   "theme": "Thema",
   "lightMode": "Heller Modus",
   "darkMode": "Dunkler Modus",
-  "notifications": "Benachrichtigungen",
   "workoutReminders": "Trainingserinnerungen",
   "receiveReminders": "Erhalte Erinnerungen für geplante Trainingseinheiten",
   "mealLoggingReminders": "Mahlzeiten-Protokollierungs-Erinnerungen",
@@ -110,6 +110,13 @@ export const german = {
   "premium": "Premium-Konto",
   "trackFitness": "Verfolge deine Fitnessreise mit Präzision und Stil.",
   
+  // Time periods
+  "today": "Heute",
+  "week": "Woche",
+  "month": "Monat",
+  "weeklyNutrition": "Wöchentliche Ernährung",
+  "monthlyNutrition": "Monatliche Ernährung",
+  
   // Login
   "login": "Anmelden",
   "email": "E-Mail",
@@ -120,4 +127,34 @@ export const german = {
   "signIn": "Anmelden",
   "signInWithGoogle": "Mit Google anmelden",
   "or": "oder",
+  
+  // Additional
+  "viewAll": "Alle anzeigen",
+  "addItem": "Element hinzufügen",
+  "addActivity": "Aktivität hinzufügen",
+  "addWater": "Wasser hinzufügen",
+  "waterIntake": "Wasseraufnahme",
+  "add100ml": "100ml",
+  "add250ml": "250ml",
+  "add500ml": "500ml",
+  "add750ml": "750ml",
+  "add1l": "1L",
+  "searchFoods": "Lebensmittel suchen...",
+  "addFood": "Lebensmittel hinzufügen",
+  "scanBarcode": "Barcode scannen",
+  "createNew": "Neu erstellen",
+  "newWorkout": "Neues Training",
+  "selectExercises": "Übungen auswählen",
+  "addMeasurement": "Messung hinzufügen",
+  "addPhotos": "Fotos hinzufügen",
+  "photoAccess": "Zugriff auf Fotogalerie erlauben?",
+  "allow": "Erlauben",
+  "deny": "Verweigern",
+  "resetPassword": "Passwort zurücksetzen",
+  "enterEmail": "Gib deine E-Mail ein, um dein Passwort zurückzusetzen",
+  "send": "Senden",
+  "selectDate": "Datum auswählen",
+  "fullName": "Vollständiger Name",
+  "confirmPassword": "Passwort bestätigen",
+  "alreadyHaveAccount": "Hast du bereits ein Konto?",
 };
