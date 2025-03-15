@@ -17,6 +17,16 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 70, initi
   const [bmi, setBMI] = useState<number | null>(null);
   const [weightDifference, setWeightDifference] = useState<number | null>(null);
 
+  // Update BMI calculator values when the props change (sync with form)
+  useEffect(() => {
+    if (initialWeight && initialWeight > 0) {
+      setWeight(initialWeight);
+    }
+    if (initialHeight && initialHeight > 0) {
+      setHeight(initialHeight);
+    }
+  }, [initialWeight, initialHeight]);
+
   // Calculate BMI when weight or height changes
   useEffect(() => {
     if (weight > 0 && height > 0) {

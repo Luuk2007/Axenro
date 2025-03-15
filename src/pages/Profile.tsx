@@ -190,6 +190,10 @@ const Profile = () => {
     toast.success(t("profileUpdated"));
   };
 
+  // Get current weight and height values for BMI calculator
+  const currentWeight = form.watch("weight");
+  const currentHeight = form.watch("height");
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -235,9 +239,6 @@ const Profile = () => {
                               <SelectItem value="6+">6+ {t("times")} {t("perWeek")}</SelectItem>
                             </SelectContent>
                           </Select>
-                          <FormDescription>
-                            {t("exerciseFrequency")}
-                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -349,9 +350,6 @@ const Profile = () => {
                               <SelectItem value="maintain">{t("maintainWeight")}</SelectItem>
                             </SelectContent>
                           </Select>
-                          <FormDescription>
-                            {t("goal")}
-                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -364,10 +362,10 @@ const Profile = () => {
             </CardContent>
           </Card>
           
-          {/* BMI Calculator */}
+          {/* BMI Calculator - Passing current form values */}
           <BMICalculator 
-            initialWeight={form.getValues().weight} 
-            initialHeight={form.getValues().height} 
+            initialWeight={currentWeight} 
+            initialHeight={currentHeight} 
           />
         </TabsContent>
         
@@ -448,13 +446,7 @@ const Profile = () => {
                         <p className="text-4xl font-bold">
                           {calculateDailyCalories(profile)} {t("calories")}
                         </p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {profile.goal === "gain" 
-                            ? "Includes 500 extra calories for weight gain" 
-                            : profile.goal === "lose" 
-                            ? "Includes 500 calorie deficit for weight loss" 
-                            : "Maintenance calories based on your activity level"}
-                        </p>
+                        {/* Removed the calorie explanation text */}
                       </div>
                       
                       <Separator orientation="vertical" className="h-20 hidden md:block" />
