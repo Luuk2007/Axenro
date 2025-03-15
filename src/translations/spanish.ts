@@ -128,6 +128,9 @@ export const spanish = {
   "signInWithGoogle": "Iniciar sesión con Google",
   "or": "o",
   
+  // Common actions
+  "add": "Añadir",
+  
   // Additional
   "viewAll": "Ver Todo",
   "addItem": "Añadir Elemento",

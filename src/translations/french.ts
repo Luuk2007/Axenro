@@ -128,6 +128,9 @@ export const french = {
   "signInWithGoogle": "Se connecter avec Google",
   "or": "ou",
   
+  // Common actions
+  "add": "Ajouter",
+  
   // Additional
   "viewAll": "Voir Tout",
   "addItem": "Ajouter un Élément",
@@ -150,7 +153,6 @@ export const french = {
   "photoAccess": "Autoriser l'accès à la galerie photo ?",
   "allow": "Autoriser",
   "deny": "Refuser",
-  "resetPassword": "Réinitialiser le Mot de passe",
   "enterEmail": "Entrez votre e-mail pour réinitialiser votre mot de passe",
   "send": "Envoyer",
   "selectDate": "Sélectionner la Date",

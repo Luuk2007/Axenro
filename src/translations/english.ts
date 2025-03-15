@@ -155,4 +155,7 @@ export const english = {
   "signIn": "Sign in",
   "signInWithGoogle": "Sign in with Google",
   "or": "or",
+  
+  // Common actions
+  "add": "Add",
 };

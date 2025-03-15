@@ -155,4 +155,7 @@ export const dutch = {
   "signIn": "Aanmelden",
   "signInWithGoogle": "Aanmelden met Google",
   "or": "of",
+  
+  // Common actions
+  "add": "Toevoegen",
 };

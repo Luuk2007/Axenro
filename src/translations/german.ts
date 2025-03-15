@@ -128,6 +128,9 @@ export const german = {
   "signInWithGoogle": "Mit Google anmelden",
   "or": "oder",
   
+  // Common actions
+  "add": "Hinzufügen",
+  
   // Additional
   "viewAll": "Alle anzeigen",
   "addItem": "Element hinzufügen",
@@ -150,7 +153,6 @@ export const german = {
   "photoAccess": "Zugriff auf Fotogalerie erlauben?",
   "allow": "Erlauben",
   "deny": "Verweigern",
-  "resetPassword": "Passwort zurücksetzen",
   "enterEmail": "Gib deine E-Mail ein, um dein Passwort zurückzusetzen",
   "send": "Senden",
   "selectDate": "Datum auswählen",
