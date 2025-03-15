@@ -119,4 +119,5 @@ export const english = {
   "noAccount": "Don't have an account?",
   "signIn": "Sign in",
   "signInWithGoogle": "Sign in with Google",
+  "or": "or",
 };

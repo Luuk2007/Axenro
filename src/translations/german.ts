@@ -119,4 +119,5 @@ export const german = {
   "noAccount": "Noch kein Konto?",
   "signIn": "Anmelden",
   "signInWithGoogle": "Mit Google anmelden",
+  "or": "oder",
 };

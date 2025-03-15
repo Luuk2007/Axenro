@@ -119,4 +119,5 @@ export const dutch = {
   "noAccount": "Geen account?",
   "signIn": "Aanmelden",
   "signInWithGoogle": "Aanmelden met Google",
+  "or": "of",
 };

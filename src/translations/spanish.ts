@@ -119,4 +119,5 @@ export const spanish = {
   "noAccount": "¿No tienes cuenta?",
   "signIn": "Iniciar sesión",
   "signInWithGoogle": "Iniciar sesión con Google",
+  "or": "o",
 };
