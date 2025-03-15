@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { BellIcon, Menu, Search, LogIn } from 'lucide-react';
+import { BellIcon, Menu, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { 
@@ -23,7 +23,7 @@ export default function TopBar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [fullName, setFullName] = useState('John Doe');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
@@ -63,23 +63,92 @@ export default function TopBar() {
   };
 
   const handleGoogleLogin = () => {
-    // Open a window for Google auth
+    // Open a window for Google account selection
     const width = 500;
     const height = 600;
     const left = window.screenX + (window.outerWidth - width) / 2;
     const top = window.screenY + (window.outerHeight - height) / 2;
     
-    window.open(
-      'https://accounts.google.com', 
+    // Open a simulated Google account selection window
+    const googleWindow = window.open(
+      '', 
       'Google Sign In',
       `width=${width},height=${height},left=${left},top=${top}`
     );
     
-    // For demo purposes, we'll just set logged in after a timeout
-    setTimeout(() => {
-      setIsLoggedIn(true);
-      toast.success('Google login successful');
-    }, 1000);
+    if (googleWindow) {
+      googleWindow.document.write(`
+        <html>
+          <head>
+            <title>Choose an account</title>
+            <style>
+              body { font-family: 'Roboto', Arial, sans-serif; margin: 0; padding: 20px; }
+              .header { text-align: center; margin-bottom: 20px; }
+              .account { 
+                padding: 15px; 
+                border: 1px solid #ddd; 
+                border-radius: 8px; 
+                margin-bottom: 10px; 
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+              }
+              .account:hover { background-color: #f5f5f5; }
+              .avatar { 
+                width: 40px; 
+                height: 40px; 
+                border-radius: 50%; 
+                background-color: #4285F4; 
+                color: white; 
+                display: flex; 
+                justify-content: center; 
+                align-items: center;
+                margin-right: 15px;
+                font-weight: bold;
+              }
+              h3 { margin: 0; }
+              p { margin: 5px 0 0; color: #666; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h2>Choose an account</h2>
+              <p>to continue to Progresa</p>
+            </div>
+            <div class="account" onclick="window.opener.postMessage('selected-john', '*'); window.close();">
+              <div class="avatar">JD</div>
+              <div>
+                <h3>John Doe</h3>
+                <p>johndoe@gmail.com</p>
+              </div>
+            </div>
+            <div class="account" onclick="window.opener.postMessage('selected-jane', '*'); window.close();">
+              <div class="avatar">JS</div>
+              <div>
+                <h3>Jane Smith</h3>
+                <p>janesmith@gmail.com</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+    }
+    
+    // Listen for account selection
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data === 'selected-john') {
+        setFullName('John Doe');
+        setIsLoggedIn(true);
+        toast.success('Signed in as John Doe');
+      } else if (event.data === 'selected-jane') {
+        setFullName('Jane Smith');
+        setIsLoggedIn(true);
+        toast.success('Signed in as Jane Smith');
+      }
+      window.removeEventListener('message', handleMessage);
+    };
+    
+    window.addEventListener('message', handleMessage);
   };
 
   const handleResetPassword = (e: React.FormEvent) => {
@@ -92,6 +161,17 @@ export default function TopBar() {
     
     toast.success('Password reset link sent to your email');
     setShowForgotPassword(false);
+  };
+  
+  // Get user initials from fullName
+  const getUserInitials = () => {
+    if (!fullName) return '';
+    
+    const nameParts = fullName.split(' ');
+    if (nameParts.length >= 2) {
+      return `${nameParts[0][0]}${nameParts[1][0]}`;
+    }
+    return fullName.substring(0, 2).toUpperCase();
   };
 
   return (
@@ -110,14 +190,6 @@ export default function TopBar() {
             </SheetContent>
           </Sheet>
         )}
-        <div className="relative md:w-64 hidden md:flex">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <input
-            type="search"
-            placeholder={t("searchFoods")}
-            className="rounded-md border border-input bg-background/50 pl-8 h-9 w-full text-sm outline-none focus:ring-1 focus:ring-ring"
-          />
-        </div>
       </div>
       <div className="flex items-center gap-4">
         <Dialog>
@@ -172,7 +244,7 @@ export default function TopBar() {
               >
                 <span className="sr-only">User menu</span>
                 <div className="h-full w-full bg-primary/10 text-xs font-medium flex items-center justify-center text-primary">
-                  JD
+                  {getUserInitials()}
                 </div>
               </Button>
             </DropdownMenuTrigger>

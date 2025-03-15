@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils } from 'lucide-react';
 import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type NavItem = {
   titleKey: TranslationKeys;
@@ -46,6 +47,44 @@ const navItems: NavItem[] = [
 
 export default function Sidebar() {
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
+  
+  if (isMobile) {
+    return (
+      <nav className="w-full">
+        <ul className="flex items-center justify-between w-full">
+          {navItems.map((item, index) => (
+            <li key={index} className="flex-1">
+              <NavLink
+                to={item.href}
+                className={({ isActive }) =>
+                  cn(
+                    "flex flex-col items-center gap-1 py-2 px-1 transition-all duration-300 ease-in-out text-muted-foreground hover:text-foreground text-xs",
+                    isActive ? 
+                      "text-primary font-medium" : 
+                      "hover:bg-accent"
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <item.icon 
+                      size={18} 
+                      className={cn(
+                        "transition-transform duration-300",
+                        isActive && "text-primary"
+                      )} 
+                    />
+                    <span className="text-[10px]">{t(item.titleKey)}</span>
+                  </>
+                )}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    );
+  }
   
   return (
     <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card/50 backdrop-blur-sm">

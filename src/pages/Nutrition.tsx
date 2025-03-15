@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Apple, BarChart3, Camera, Filter, Plus, Search, Utensils } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -49,12 +49,28 @@ const meals = [
   },
 ];
 
+// Expanded food database with more options
 const foodDatabase = [
   { id: '1', name: 'Oatmeal', calories: 150, protein: 5, carbs: 27, fat: 3 },
   { id: '2', name: 'Chicken Breast', calories: 165, protein: 31, carbs: 0, fat: 3.6 },
   { id: '3', name: 'Greek Yogurt', calories: 100, protein: 10, carbs: 4, fat: 5 },
   { id: '4', name: 'Banana', calories: 105, protein: 1.3, carbs: 27, fat: 0.4 },
   { id: '5', name: 'Eggs', calories: 70, protein: 6, carbs: 0.6, fat: 5 },
+  { id: '6', name: 'Brown Rice', calories: 112, protein: 2.6, carbs: 23.5, fat: 0.9 },
+  { id: '7', name: 'Salmon', calories: 206, protein: 22, carbs: 0, fat: 13 },
+  { id: '8', name: 'Avocado', calories: 160, protein: 2, carbs: 8.5, fat: 14.7 },
+  { id: '9', name: 'Almonds', calories: 164, protein: 6, carbs: 6, fat: 14 },
+  { id: '10', name: 'Spinach', calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4 },
+  { id: '11', name: 'Sweet Potato', calories: 112, protein: 2, carbs: 26, fat: 0.1 },
+  { id: '12', name: 'Quinoa', calories: 120, protein: 4.4, carbs: 21.3, fat: 1.9 },
+  { id: '13', name: 'Cottage Cheese', calories: 120, protein: 14, carbs: 4, fat: 5 },
+  { id: '14', name: 'Peanut Butter', calories: 188, protein: 8, carbs: 6, fat: 16 },
+  { id: '15', name: 'Broccoli', calories: 31, protein: 2.5, carbs: 6, fat: 0.4 },
+  { id: '16', name: 'Lean Beef', calories: 250, protein: 26, carbs: 0, fat: 17 },
+  { id: '17', name: 'Tofu', calories: 94, protein: 10, carbs: 2, fat: 6 },
+  { id: '18', name: 'Lentils', calories: 116, protein: 9, carbs: 20, fat: 0.4 },
+  { id: '19', name: 'Blueberries', calories: 57, protein: 0.7, carbs: 14, fat: 0.3 },
+  { id: '20', name: 'Protein Bar', calories: 200, protein: 20, carbs: 23, fat: 5 },
 ];
 
 const Nutrition = () => {
@@ -66,6 +82,9 @@ const Nutrition = () => {
   const [searchValue, setSearchValue] = useState('');
   const [filteredFoods, setFilteredFoods] = useState(foodDatabase);
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleAddWater = (amount: number) => {
     const newWater = Math.min(water + amount, waterGoal);
@@ -84,13 +103,59 @@ const Nutrition = () => {
     }
   };
 
-  const handleScanBarcode = () => {
+  const handleScanBarcode = async () => {
     setShowScanBarcode(true);
-    // Simulate scanning after a delay
-    setTimeout(() => {
+    setCameraActive(true);
+    
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // Request camera permissions
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'environment' } 
+        });
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+          
+          // Simulate scanning a barcode after 3 seconds
+          setTimeout(() => {
+            // Simulate finding the product (Protein Bar)
+            const randomProduct = foodDatabase.find(food => food.name === 'Protein Bar');
+            
+            if (randomProduct) {
+              if (canvasRef.current && videoRef.current) {
+                // Take a snapshot from the video
+                const context = canvasRef.current.getContext('2d');
+                if (context) {
+                  canvasRef.current.width = videoRef.current.videoWidth;
+                  canvasRef.current.height = videoRef.current.videoHeight;
+                  context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+                }
+                
+                // Stop all video streams
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                videoRef.current.srcObject = null;
+              }
+              
+              setCameraActive(false);
+              setShowScanBarcode(false);
+              toast.success(`Product scanned: ${randomProduct.name} (${randomProduct.calories} calories, ${randomProduct.protein}g protein)`);
+            }
+          }, 3000);
+        }
+      } else {
+        toast.error('Camera not available on this device');
+        setCameraActive(false);
+        setShowScanBarcode(false);
+      }
+    } catch (err) {
+      console.error('Error accessing camera:', err);
+      toast.error('Could not access camera. Please check permissions.');
+      setCameraActive(false);
       setShowScanBarcode(false);
-      toast.success('Product scanned: Protein Bar (200 calories, 20g protein)');
-    }, 2000);
+    }
   };
 
   const handleAddItem = (mealId: string) => {
@@ -99,7 +164,8 @@ const Nutrition = () => {
   };
 
   const handleAddFood = (foodId: string) => {
-    toast.success('Food added to your meal plan');
+    const selectedFood = foodDatabase.find(food => food.id === foodId);
+    toast.success(`${selectedFood?.name} added to your meal plan`);
     setShowAddFood(false);
   };
 
@@ -108,9 +174,6 @@ const Nutrition = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("nutrition")}</h1>
-          <p className="text-muted-foreground">
-            {t("trackFitness")}
-          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" className="h-9 w-9 hidden md:flex">
@@ -200,7 +263,7 @@ const Nutrition = () => {
               <label className="text-sm font-medium">Food</label>
               <Input placeholder="Search foods..." onChange={(e) => handleSearch(e.target.value)} />
             </div>
-            <div className="max-h-40 overflow-y-auto space-y-2">
+            <div className="max-h-60 overflow-y-auto space-y-2">
               {filteredFoods.map(food => (
                 <div 
                   key={food.id} 
@@ -226,16 +289,42 @@ const Nutrition = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showScanBarcode} onOpenChange={setShowScanBarcode}>
+      <Dialog open={showScanBarcode} onOpenChange={(open) => {
+        if (!open && videoRef.current && videoRef.current.srcObject) {
+          // Stop all video streams when closing the dialog
+          const stream = videoRef.current.srcObject as MediaStream;
+          const tracks = stream.getTracks();
+          tracks.forEach(track => track.stop());
+          videoRef.current.srcObject = null;
+          setCameraActive(false);
+        }
+        setShowScanBarcode(open);
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("scanBarcode")}</DialogTitle>
           </DialogHeader>
-          <div className="py-6 flex items-center justify-center">
-            <div className="w-full aspect-video bg-secondary/30 rounded-lg flex flex-col items-center justify-center">
-              <Camera className="h-8 w-8 mb-4 animate-pulse" />
-              <p className="text-sm text-muted-foreground">Scanning barcode...</p>
-            </div>
+          <div className="py-6 flex flex-col items-center justify-center">
+            {cameraActive ? (
+              <div className="w-full relative">
+                <video 
+                  ref={videoRef} 
+                  className="w-full aspect-video bg-black rounded-lg"
+                  playsInline
+                  muted
+                ></video>
+                <div className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center">
+                  <div className="border-2 border-primary w-2/3 h-20 opacity-50 rounded-lg"></div>
+                </div>
+                <p className="text-sm text-center mt-2">Position barcode within the box</p>
+                <canvas ref={canvasRef} className="hidden"></canvas>
+              </div>
+            ) : (
+              <div className="w-full aspect-video bg-secondary/30 rounded-lg flex flex-col items-center justify-center">
+                <Camera className="h-8 w-8 mb-4 animate-pulse" />
+                <p className="text-sm text-muted-foreground">Initializing camera...</p>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -380,18 +469,12 @@ const Nutrition = () => {
           <div className="flex flex-col items-center justify-center py-12">
             <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">{t("weeklyNutrition")}</h3>
-            <p className="text-muted-foreground text-center max-w-md">
-              {t("trackFitness")}
-            </p>
           </div>
         </TabsContent>
         <TabsContent value="month">
           <div className="flex flex-col items-center justify-center py-12">
             <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">{t("monthlyNutrition")}</h3>
-            <p className="text-muted-foreground text-center max-w-md">
-              {t("trackFitness")}
-            </p>
           </div>
         </TabsContent>
       </Tabs>
