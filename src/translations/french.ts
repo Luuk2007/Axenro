@@ -93,4 +93,30 @@ export const french = {
   "remaining": "Restant",
   "grams": "g",
   "calories": "calories",
+  
+  // BMI Calculator
+  "bmiCalculator": "Calculateur d'IMC",
+  "calculateBMI": "Calculer l'IMC",
+  "bmiResult": "Votre Résultat d'IMC",
+  "bmiValue": "Votre IMC est",
+  "underweight": "Vous êtes en sous-poids. Envisagez d'ajuster votre nutrition.",
+  "healthyWeight": "Excellent ! Vous avez un poids santé.",
+  "overweight": "Vous êtes en surpoids. Ajuster votre alimentation et votre entraînement pourrait aider.",
+  "obesity": "Obésité détectée. Consultez un professionnel pour obtenir des conseils.",
+  "weightToGain": "Pour atteindre un IMC sain, vous devez prendre environ",
+  "weightToLose": "Pour atteindre un IMC sain, vous devez perdre environ",
+  
+  // Premium
+  "premium": "Compte Premium",
+  "trackFitness": "Suivez votre parcours de fitness avec précision et style.",
+  
+  // Login
+  "login": "Connexion",
+  "email": "Email",
+  "password": "Mot de passe",
+  "forgotPassword": "Mot de passe oublié ?",
+  "signUp": "S'inscrire",
+  "noAccount": "Vous n'avez pas de compte ?",
+  "signIn": "Se connecter",
+  "signInWithGoogle": "Se connecter avec Google",
 };

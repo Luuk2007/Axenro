@@ -93,4 +93,30 @@ export const dutch = {
   "remaining": "Resterend",
   "grams": "g",
   "calories": "calorieën",
+  
+  // BMI Calculator
+  "bmiCalculator": "BMI Calculator",
+  "calculateBMI": "Bereken BMI",
+  "bmiResult": "Jouw BMI Resultaat",
+  "bmiValue": "Jouw BMI is",
+  "underweight": "Je hebt ondergewicht. Overweeg je voeding aan te passen.",
+  "healthyWeight": "Geweldig! Je hebt een gezond gewicht.",
+  "overweight": "Je hebt overgewicht. Het aanpassen van je dieet en training kan helpen.",
+  "obesity": "Obesitas gedetecteerd. Raadpleeg een professional voor begeleiding.",
+  "weightToGain": "Om een gezonde BMI te bereiken, moet je ongeveer aankomen met",
+  "weightToLose": "Om een gezonde BMI te bereiken, moet je ongeveer afvallen met",
+  
+  // Premium
+  "premium": "Premium Account",
+  "trackFitness": "Volg je fitnessreis met precisie en stijl.",
+  
+  // Login
+  "login": "Inloggen",
+  "email": "E-mail",
+  "password": "Wachtwoord",
+  "forgotPassword": "Wachtwoord vergeten?",
+  "signUp": "Registreren",
+  "noAccount": "Geen account?",
+  "signIn": "Aanmelden",
+  "signInWithGoogle": "Aanmelden met Google",
 };

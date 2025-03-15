@@ -93,4 +93,30 @@ export const german = {
   "remaining": "Verbleibend",
   "grams": "g",
   "calories": "Kalorien",
+  
+  // BMI Calculator
+  "bmiCalculator": "BMI-Rechner",
+  "calculateBMI": "BMI berechnen",
+  "bmiResult": "Dein BMI-Ergebnis",
+  "bmiValue": "Dein BMI ist",
+  "underweight": "Du bist untergewichtig. Erwäge deine Ernährung anzupassen.",
+  "healthyWeight": "Großartig! Du hast ein gesundes Gewicht.",
+  "overweight": "Du bist übergewichtig. Die Anpassung deiner Ernährung und deines Trainings könnte helfen.",
+  "obesity": "Adipositas erkannt. Konsultiere einen Fachmann für Beratung.",
+  "weightToGain": "Um einen gesunden BMI zu erreichen, musst du etwa zunehmen",
+  "weightToLose": "Um einen gesunden BMI zu erreichen, musst du etwa abnehmen",
+  
+  // Premium
+  "premium": "Premium-Konto",
+  "trackFitness": "Verfolge deine Fitnessreise mit Präzision und Stil.",
+  
+  // Login
+  "login": "Anmelden",
+  "email": "E-Mail",
+  "password": "Passwort",
+  "forgotPassword": "Passwort vergessen?",
+  "signUp": "Registrieren",
+  "noAccount": "Noch kein Konto?",
+  "signIn": "Anmelden",
+  "signInWithGoogle": "Mit Google anmelden",
 };

@@ -3,42 +3,42 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
 
 type NavItem = {
-  titleKey: string;
+  titleKey: TranslationKeys;
   href: string;
   icon: LucideIcon;
 };
 
 const navItems: NavItem[] = [
   {
-    titleKey: 'dashboard',
+    titleKey: "dashboard",
     href: '/',
     icon: Home,
   },
   {
-    titleKey: 'nutrition',
+    titleKey: "nutrition",
     href: '/nutrition',
     icon: Utensils,
   },
   {
-    titleKey: 'workouts',
+    titleKey: "workouts",
     href: '/workouts',
     icon: Dumbbell,
   },
   {
-    titleKey: 'progress',
+    titleKey: "progress",
     href: '/progress',
     icon: BarChart3,
   },
   {
-    titleKey: 'profile',
+    titleKey: "profile",
     href: '/profile',
     icon: User2,
   },
   {
-    titleKey: 'settings',
+    titleKey: "settings",
     href: '/settings',
     icon: Settings,
   },
@@ -86,8 +86,8 @@ export default function Sidebar() {
       </nav>
       <div className="border-t border-border p-4">
         <div className="glassy-card rounded-lg p-4 subtle-shadow">
-          <p className="text-xs font-medium text-muted-foreground">Premium Account</p>
-          <p className="text-sm mt-1">Track your fitness journey with precision and style.</p>
+          <p className="text-xs font-medium text-muted-foreground">{t("premium")}</p>
+          <p className="text-sm mt-1">{t("trackFitness")}</p>
         </div>
       </div>
     </aside>

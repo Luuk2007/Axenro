@@ -44,6 +44,8 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@/components/ui/radio-group";
+import { useLanguage } from "@/contexts/LanguageContext";
+import BMICalculator from "@/components/profile/BMICalculator";
 
 // Form schema
 const profileFormSchema = z.object({
@@ -77,6 +79,7 @@ const defaultValues: Partial<ProfileFormValues> = {
 };
 
 const Profile = () => {
+  const { t } = useLanguage();
   const [profile, setProfile] = useState<ProfileFormValues | null>(null);
   
   // Load saved profile from localStorage if available
@@ -184,25 +187,25 @@ const Profile = () => {
     // Save to localStorage
     localStorage.setItem("userProfile", JSON.stringify(data));
     setProfile(data);
-    toast.success("Profile updated successfully");
+    toast.success(t("profileUpdated"));
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold tracking-tight">Profile</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{t("profile")}</h1>
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="profile">Profile Settings</TabsTrigger>
-          <TabsTrigger value="nutrition">Nutrition Plan</TabsTrigger>
+          <TabsTrigger value="profile">{t("profileSettings")}</TabsTrigger>
+          <TabsTrigger value="nutrition">{t("nutritionPlan")}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
+              <CardTitle>{t("personalDetails")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...form}>
@@ -216,24 +219,24 @@ const Profile = () => {
                       name="exerciseFrequency"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Exercise Frequency</FormLabel>
+                          <FormLabel>{t("exerciseFrequency")}</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select frequency" />
+                                <SelectValue placeholder={t("selectLanguage")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="0-2">0-2 times per week</SelectItem>
-                              <SelectItem value="3-5">3-5 times per week</SelectItem>
-                              <SelectItem value="6+">6+ times per week</SelectItem>
+                              <SelectItem value="0-2">0-2 {t("times")} {t("perWeek")}</SelectItem>
+                              <SelectItem value="3-5">3-5 {t("times")} {t("perWeek")}</SelectItem>
+                              <SelectItem value="6+">6+ {t("times")} {t("perWeek")}</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormDescription>
-                            How often do you exercise each week?
+                            {t("exerciseFrequency")}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -245,7 +248,7 @@ const Profile = () => {
                       name="weight"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Weight (kg)</FormLabel>
+                          <FormLabel>{t("weight")} ({t("kg")})</FormLabel>
                           <FormControl>
                             <Input type="number" {...field} />
                           </FormControl>
@@ -259,7 +262,7 @@ const Profile = () => {
                       name="height"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Height (cm)</FormLabel>
+                          <FormLabel>{t("height")} ({t("cm")})</FormLabel>
                           <FormControl>
                             <Input type="number" {...field} />
                           </FormControl>
@@ -273,7 +276,7 @@ const Profile = () => {
                       name="age"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Age</FormLabel>
+                          <FormLabel>{t("age")}</FormLabel>
                           <FormControl>
                             <Input type="number" {...field} />
                           </FormControl>
@@ -287,7 +290,7 @@ const Profile = () => {
                       name="gender"
                       render={({ field }) => (
                         <FormItem className="space-y-3">
-                          <FormLabel>Gender</FormLabel>
+                          <FormLabel>{t("gender")}</FormLabel>
                           <FormControl>
                             <RadioGroup
                               onValueChange={field.onChange}
@@ -299,7 +302,7 @@ const Profile = () => {
                                   <RadioGroupItem value="male" />
                                 </FormControl>
                                 <FormLabel className="font-normal">
-                                  Male
+                                  {t("male")}
                                 </FormLabel>
                               </FormItem>
                               <FormItem className="flex items-center space-x-3 space-y-0">
@@ -307,7 +310,7 @@ const Profile = () => {
                                   <RadioGroupItem value="female" />
                                 </FormControl>
                                 <FormLabel className="font-normal">
-                                  Female
+                                  {t("female")}
                                 </FormLabel>
                               </FormItem>
                               <FormItem className="flex items-center space-x-3 space-y-0">
@@ -315,7 +318,7 @@ const Profile = () => {
                                   <RadioGroupItem value="other" />
                                 </FormControl>
                                 <FormLabel className="font-normal">
-                                  Other
+                                  {t("other")}
                                 </FormLabel>
                               </FormItem>
                             </RadioGroup>
@@ -330,24 +333,24 @@ const Profile = () => {
                       name="goal"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Goal</FormLabel>
+                          <FormLabel>{t("goal")}</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select goal" />
+                                <SelectValue placeholder={t("selectLanguage")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="gain">Gain Weight</SelectItem>
-                              <SelectItem value="lose">Lose Weight</SelectItem>
-                              <SelectItem value="maintain">Maintain Weight</SelectItem>
+                              <SelectItem value="gain">{t("gainWeight")}</SelectItem>
+                              <SelectItem value="lose">{t("loseWeight")}</SelectItem>
+                              <SelectItem value="maintain">{t("maintainWeight")}</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormDescription>
-                            What is your current fitness goal?
+                            {t("goal")}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -355,11 +358,17 @@ const Profile = () => {
                     />
                   </div>
 
-                  <Button type="submit">Save Profile</Button>
+                  <Button type="submit">{t("saveChanges")}</Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
+          
+          {/* BMI Calculator */}
+          <BMICalculator 
+            initialWeight={form.getValues().weight} 
+            initialHeight={form.getValues().height} 
+          />
         </TabsContent>
         
         <TabsContent value="nutrition" className="space-y-6">
@@ -367,57 +376,57 @@ const Profile = () => {
             <>
               <Card>
                 <CardHeader>
-                  <CardTitle>Profile Summary</CardTitle>
+                  <CardTitle>{t("yourStats")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <Activity className="h-4 w-4 text-muted-foreground" />
-                      <dt className="font-medium">Exercise Frequency:</dt>
+                      <dt className="font-medium">{t("exerciseFrequency")}:</dt>
                       <dd>
                         {profile.exerciseFrequency === "0-2"
-                          ? "0-2 times per week"
+                          ? "0-2 " + t("times") + " " + t("perWeek")
                           : profile.exerciseFrequency === "3-5"
-                          ? "3-5 times per week"
-                          : "6+ times per week"}
+                          ? "3-5 " + t("times") + " " + t("perWeek")
+                          : "6+ " + t("times") + " " + t("perWeek")}
                       </dd>
                     </div>
                     
                     <div className="flex items-center gap-2">
                       <Weight className="h-4 w-4 text-muted-foreground" />
-                      <dt className="font-medium">Weight:</dt>
-                      <dd>{profile.weight} kg</dd>
+                      <dt className="font-medium">{t("weight")}:</dt>
+                      <dd>{profile.weight} {t("kg")}</dd>
                     </div>
                     
                     <div className="flex items-center gap-2">
                       <Ruler className="h-4 w-4 text-muted-foreground" />
-                      <dt className="font-medium">Height:</dt>
-                      <dd>{profile.height} cm</dd>
+                      <dt className="font-medium">{t("height")}:</dt>
+                      <dd>{profile.height} {t("cm")}</dd>
                     </div>
                     
                     <div className="flex items-center gap-2">
                       <Heart className="h-4 w-4 text-muted-foreground" />
-                      <dt className="font-medium">Goal:</dt>
+                      <dt className="font-medium">{t("goal")}:</dt>
                       <dd>
                         {profile.goal === "gain"
-                          ? "Gain Weight"
+                          ? t("gainWeight")
                           : profile.goal === "lose"
-                          ? "Lose Weight"
-                          : "Maintain Weight"}
+                          ? t("loseWeight")
+                          : t("maintainWeight")}
                       </dd>
                     </div>
                     
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <dt className="font-medium">Age:</dt>
-                      <dd>{profile.age} years</dd>
+                      <dt className="font-medium">{t("age")}:</dt>
+                      <dd>{profile.age}</dd>
                     </div>
                     
                     <div className="flex items-center gap-2">
                       <User2 className="h-4 w-4 text-muted-foreground" />
-                      <dt className="font-medium">Gender:</dt>
+                      <dt className="font-medium">{t("gender")}:</dt>
                       <dd>
-                        {profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)}
+                        {t(profile.gender)}
                       </dd>
                     </div>
                   </dl>
@@ -426,7 +435,7 @@ const Profile = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Daily Calorie & Macro Recommendations</CardTitle>
+                  <CardTitle>{t("dailyCalorieNeeds")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
@@ -434,10 +443,10 @@ const Profile = () => {
                       <div className="flex-1 w-full">
                         <div className="flex items-center gap-2 mb-2">
                           <Flame className="h-5 w-5 text-primary" />
-                          <h3 className="text-lg font-medium">Daily Calorie Needs</h3>
+                          <h3 className="text-lg font-medium">{t("dailyCalorieNeeds")}</h3>
                         </div>
                         <p className="text-4xl font-bold">
-                          {calculateDailyCalories(profile)} kcal
+                          {calculateDailyCalories(profile)} {t("calories")}
                         </p>
                         <p className="text-sm text-muted-foreground mt-1">
                           {profile.goal === "gain" 
@@ -451,96 +460,27 @@ const Profile = () => {
                       <Separator orientation="vertical" className="h-20 hidden md:block" />
                       
                       <div className="flex-1 w-full">
-                        <h3 className="text-lg font-medium mb-2">Daily Macro Breakdown</h3>
+                        <h3 className="text-lg font-medium mb-2">{t("macroBreakdown")}</h3>
                         {(() => {
                           const calories = calculateDailyCalories(profile);
                           const macros = calculateMacros(calories, profile.goal);
                           return (
                             <div className="grid grid-cols-3 gap-4">
                               <div>
-                                <p className="text-sm text-muted-foreground">Protein</p>
-                                <p className="text-xl font-bold">{macros.protein}g</p>
+                                <p className="text-sm text-muted-foreground">{t("protein")}</p>
+                                <p className="text-xl font-bold">{macros.protein}{t("grams")}</p>
                               </div>
                               <div>
-                                <p className="text-sm text-muted-foreground">Carbs</p>
-                                <p className="text-xl font-bold">{macros.carbs}g</p>
+                                <p className="text-sm text-muted-foreground">{t("carbs")}</p>
+                                <p className="text-xl font-bold">{macros.carbs}{t("grams")}</p>
                               </div>
                               <div>
-                                <p className="text-sm text-muted-foreground">Fats</p>
-                                <p className="text-xl font-bold">{macros.fats}g</p>
+                                <p className="text-sm text-muted-foreground">{t("fat")}</p>
+                                <p className="text-xl font-bold">{macros.fats}{t("grams")}</p>
                               </div>
                             </div>
                           );
                         })()}
-                      </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <h3 className="text-lg font-medium mb-3">
-                        Suggested Meals Based on Your Profile
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Card className="shadow-sm">
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-base">Breakfast</CardTitle>
-                          </CardHeader>
-                          <CardContent className="text-sm">
-                            {profile.goal === "gain" ? (
-                              <p>Protein-rich breakfast with eggs, oatmeal, nuts, and fruit.</p>
-                            ) : profile.goal === "lose" ? (
-                              <p>Low-carb breakfast with eggs, vegetables, and a small serving of fruit.</p>
-                            ) : (
-                              <p>Balanced breakfast with eggs, whole grain toast, and fruit.</p>
-                            )}
-                          </CardContent>
-                        </Card>
-                        
-                        <Card className="shadow-sm">
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-base">Lunch</CardTitle>
-                          </CardHeader>
-                          <CardContent className="text-sm">
-                            {profile.goal === "gain" ? (
-                              <p>Hearty lunch with lean protein, rice/pasta, vegetables, and healthy fats.</p>
-                            ) : profile.goal === "lose" ? (
-                              <p>Protein-focused lunch with large salad, lean protein, and minimal starchy carbs.</p>
-                            ) : (
-                              <p>Balanced lunch with protein, complex carbs, vegetables, and healthy fats.</p>
-                            )}
-                          </CardContent>
-                        </Card>
-                        
-                        <Card className="shadow-sm">
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-base">Dinner</CardTitle>
-                          </CardHeader>
-                          <CardContent className="text-sm">
-                            {profile.goal === "gain" ? (
-                              <p>Protein-rich dinner with lean meat/fish, starchy vegetables, greens, and healthy fats.</p>
-                            ) : profile.goal === "lose" ? (
-                              <p>Light dinner with lean protein and non-starchy vegetables.</p>
-                            ) : (
-                              <p>Balanced dinner with protein, vegetables, and moderate complex carbs.</p>
-                            )}
-                          </CardContent>
-                        </Card>
-                        
-                        <Card className="shadow-sm">
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-base">Snacks</CardTitle>
-                          </CardHeader>
-                          <CardContent className="text-sm">
-                            {profile.goal === "gain" ? (
-                              <p>Calorie-dense snacks like nuts, protein shakes, Greek yogurt with fruit.</p>
-                            ) : profile.goal === "lose" ? (
-                              <p>Low-calorie, high-protein snacks like Greek yogurt, cottage cheese, or vegetables with hummus.</p>
-                            ) : (
-                              <p>Balanced snacks like fruit with nuts, yogurt, or whole grain crackers with hummus.</p>
-                            )}
-                          </CardContent>
-                        </Card>
                       </div>
                     </div>
                   </div>
@@ -551,14 +491,14 @@ const Profile = () => {
             <Card>
               <CardContent className="py-10 text-center">
                 <p className="text-muted-foreground">
-                  Please complete your profile information first to see personalized recommendations.
+                  {t("profileUpdated")}
                 </p>
                 <Button
                   onClick={() => form.handleSubmit(onSubmit)()}
                   className="mt-4"
                   variant="outline"
                 >
-                  Save Profile
+                  {t("saveChanges")}
                 </Button>
               </CardContent>
             </Card>

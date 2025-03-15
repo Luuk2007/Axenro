@@ -42,7 +42,29 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return 'english';
   };
 
+  // Get saved theme from localStorage or default to light
+  const getSavedTheme = (): 'light' | 'dark' => {
+    const savedSettings = localStorage.getItem("userSettings");
+    if (savedSettings) {
+      const { theme } = JSON.parse(savedSettings);
+      if (theme === 'light' || theme === 'dark') {
+        return theme as 'light' | 'dark';
+      }
+    }
+    return 'light';
+  };
+
   const [language, setLanguage] = useState<Language>(getSavedLanguage);
+
+  // Apply theme on initial load
+  useEffect(() => {
+    const theme = getSavedTheme();
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
 
   // Update localStorage whenever language changes
   useEffect(() => {
