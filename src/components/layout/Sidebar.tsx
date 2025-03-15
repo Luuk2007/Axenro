@@ -50,7 +50,7 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card/50 backdrop-blur-sm">
       <div className="flex h-16 items-center px-6">
-        <h1 className="text-xl font-semibold tracking-tight">Fitness Tracker</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Progresa</h1>
       </div>
       <nav className="flex-1 overflow-auto py-6">
         <ul className="grid gap-1 px-2">

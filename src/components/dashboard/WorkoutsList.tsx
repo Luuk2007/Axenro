@@ -3,6 +3,7 @@ import React from 'react';
 import { Dumbbell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Workout {
   id: string;
@@ -17,13 +18,23 @@ interface WorkoutsListProps {
   workouts: Workout[];
   title: string;
   className?: string;
+  onViewAll?: () => void;
 }
 
-export default function WorkoutsList({ workouts, title, className }: WorkoutsListProps) {
+export default function WorkoutsList({ workouts, title, className, onViewAll }: WorkoutsListProps) {
+  const { t } = useLanguage();
+  
   return (
     <div className={cn("glassy-card rounded-xl card-shadow hover-scale", className)}>
       <div className="px-5 py-4 border-b border-border">
-        <h3 className="font-medium tracking-tight">{title}</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium tracking-tight">{title}</h3>
+          {onViewAll && (
+            <Button variant="ghost" size="sm" onClick={onViewAll}>
+              {t("viewAll")}
+            </Button>
+          )}
+        </div>
       </div>
       <div className="divide-y divide-border">
         {workouts.length > 0 ? (
@@ -62,7 +73,7 @@ export default function WorkoutsList({ workouts, title, className }: WorkoutsLis
                   )}
                 </div>
                 <Button variant="ghost" size="sm" className="h-8 text-xs">
-                  View
+                  {t("viewWorkout")}
                 </Button>
               </div>
             </div>
@@ -72,11 +83,11 @@ export default function WorkoutsList({ workouts, title, className }: WorkoutsLis
             <div className="rounded-full bg-secondary p-3 mb-3">
               <Dumbbell className="h-6 w-6 text-secondary-foreground" />
             </div>
-            <h4 className="text-sm font-medium mb-1">No workouts found</h4>
+            <h4 className="text-sm font-medium mb-1">{t("noWorkoutsFound")}</h4>
             <p className="text-xs text-muted-foreground mb-4">
-              Start tracking your fitness journey by adding a workout.
+              {t("startTracking")}
             </p>
-            <Button size="sm">Create Workout</Button>
+            <Button size="sm">{t("createWorkout")}</Button>
           </div>
         )}
       </div>

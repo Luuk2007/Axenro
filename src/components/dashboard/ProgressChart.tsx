@@ -2,6 +2,8 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProgressData {
   date: string;
@@ -14,9 +16,11 @@ interface ProgressChartProps {
   label: string;
   color: string;
   className?: string;
+  onViewAll?: () => void;
 }
 
-export default function ProgressChart({ data, title, label, color, className }: ProgressChartProps) {
+export default function ProgressChart({ data, title, label, color, className, onViewAll }: ProgressChartProps) {
+  const { t } = useLanguage();
   const latestValue = data.length > 0 ? data[data.length - 1].value : 0;
   const previousValue = data.length > 1 ? data[data.length - 2].value : 0;
   const difference = latestValue - previousValue;
@@ -25,7 +29,14 @@ export default function ProgressChart({ data, title, label, color, className }: 
   return (
     <div className={cn("glassy-card rounded-xl overflow-hidden card-shadow hover-scale", className)}>
       <div className="px-5 py-4 border-b border-border">
-        <h3 className="font-medium tracking-tight">{title}</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium tracking-tight">{title}</h3>
+          {onViewAll && (
+            <Button variant="ghost" size="sm" onClick={onViewAll}>
+              {t("viewAll")}
+            </Button>
+          )}
+        </div>
       </div>
       <div className="p-4">
         <div className="flex items-baseline">

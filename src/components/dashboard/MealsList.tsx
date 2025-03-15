@@ -3,6 +3,7 @@ import React from 'react';
 import { Plus, Utensils } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Meal {
   id: string;
@@ -16,17 +17,27 @@ interface MealsListProps {
   meals: Meal[];
   title: string;
   className?: string;
+  onViewAll?: () => void;
 }
 
-export default function MealsList({ meals, title, className }: MealsListProps) {
+export default function MealsList({ meals, title, className, onViewAll }: MealsListProps) {
+  const { t } = useLanguage();
+  
   return (
     <div className={cn("glassy-card rounded-xl card-shadow hover-scale", className)}>
       <div className="px-5 py-4 border-b border-border flex items-center justify-between">
         <h3 className="font-medium tracking-tight">{title}</h3>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Plus className="h-4 w-4" />
-          <span className="sr-only">Add meal</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          {onViewAll && (
+            <Button variant="ghost" size="sm" onClick={onViewAll}>
+              {t("viewAll")}
+            </Button>
+          )}
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Plus className="h-4 w-4" />
+            <span className="sr-only">{t("addMeal")}</span>
+          </Button>
+        </div>
       </div>
       <div className="divide-y divide-border">
         {meals.length > 0 ? (
@@ -46,7 +57,7 @@ export default function MealsList({ meals, title, className }: MealsListProps) {
               </div>
               <div className="flex flex-col items-end">
                 <p className="font-medium">{meal.calories} cal</p>
-                <p className="text-xs text-muted-foreground">{meal.protein}g protein</p>
+                <p className="text-xs text-muted-foreground">{meal.protein}g {t("protein")}</p>
               </div>
             </div>
           ))
@@ -55,11 +66,11 @@ export default function MealsList({ meals, title, className }: MealsListProps) {
             <div className="rounded-full bg-secondary p-3 mb-3">
               <Utensils className="h-6 w-6 text-secondary-foreground" />
             </div>
-            <h4 className="text-sm font-medium mb-1">No meals tracked yet</h4>
+            <h4 className="text-sm font-medium mb-1">{t("noMealsTracked")}</h4>
             <p className="text-xs text-muted-foreground mb-4">
-              Start tracking your nutrition by adding a meal.
+              {t("startTracking")}
             </p>
-            <Button size="sm">Add Meal</Button>
+            <Button size="sm">{t("addMeal")}</Button>
           </div>
         )}
       </div>

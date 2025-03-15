@@ -1,19 +1,19 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Activity, Calendar, Dumbbell, Flame, Plus, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import StatsCard from '@/components/dashboard/StatsCard';
-import MacroChart from '@/components/dashboard/MacroChart';
+import MacroProgressTracker from '@/components/dashboard/MacroProgressTracker';
 import WorkoutsList from '@/components/dashboard/WorkoutsList';
 import MealsList from '@/components/dashboard/MealsList';
 import ProgressChart from '@/components/dashboard/ProgressChart';
-import MacroProgressTracker from '@/components/dashboard/MacroProgressTracker';
-
-const macroData = [
-  { name: 'Protein', value: 130, color: '#4F46E5' },
-  { name: 'Carbs', value: 240, color: '#10B981' },
-  { name: 'Fat', value: 65, color: '#F59E0B' },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const weightData = [
   { date: 'Jun 1', value: 78.5 },
@@ -68,88 +68,148 @@ const meals = [
   },
 ];
 
+const activityOptions = [
+  { id: '1', name: 'Running', icon: Activity },
+  { id: '2', name: 'Strength Training', icon: Dumbbell },
+  { id: '3', name: 'Cycling', icon: Activity },
+  { id: '4', name: 'Swimming', icon: Activity },
+  { id: '5', name: 'Yoga', icon: Activity },
+  { id: '6', name: 'Walking', icon: Activity },
+];
+
 const Dashboard = () => {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+  const [date, setDate] = useState<Date>(new Date());
+  const [showAddActivity, setShowAddActivity] = useState(false);
+
+  const navigateToNutrition = () => {
+    navigate('/nutrition');
+  };
+
+  const navigateToProgress = () => {
+    navigate('/progress');
+  };
+
+  const navigateToWorkouts = () => {
+    navigate('/workouts');
+  };
+
+  const handleAddActivity = (activityId: string) => {
+    toast.success(`Activity added to your plan`);
+    setShowAddActivity(false);
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard")}</h1>
           <p className="text-muted-foreground">
-            Track your fitness progress with precision.
+            {t("trackFitness")}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="hidden md:flex">
-            <Calendar className="mr-2 h-4 w-4" />
-            July 15, 2023
-          </Button>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Activity
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="hidden md:flex">
+                <Calendar className="mr-2 h-4 w-4" />
+                {format(date, 'PPP')}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <CalendarComponent
+                mode="single"
+                selected={date}
+                onSelect={(date) => date && setDate(date)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          
+          <Dialog open={showAddActivity} onOpenChange={setShowAddActivity}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                {t("addActivity")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>{t("addActivity")}</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-4 py-4">
+                {activityOptions.map((activity) => (
+                  <Button
+                    key={activity.id}
+                    variant="outline"
+                    className="h-24 flex flex-col items-center justify-center gap-2"
+                    onClick={() => handleAddActivity(activity.id)}
+                  >
+                    <activity.icon className="h-8 w-8" />
+                    <span>{activity.name}</span>
+                  </Button>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title="Daily Calories"
+          title={`${t("dailyCalorieNeeds")}`}
           value="1,840"
           icon={Flame}
           trend={{ value: 5, isPositive: true }}
-          description="Goal: 2,200"
+          description={`${t("target")}: 2,200`}
         />
         <StatsCard
-          title="Daily Steps"
+          title={`${t("dailyNutrients")}`}
           value="8,546"
           icon={Activity}
           trend={{ value: 3, isPositive: true }}
-          description="Goal: 10,000"
+          description={`${t("target")}: 10,000`}
         />
         <StatsCard
-          title="Weekly Workouts"
+          title={`${t("workouts")}`}
           value="4/5"
           icon={Dumbbell}
-          description="80% completion"
+          description={`80% ${t("completed")}`}
         />
         <StatsCard
-          title="Current Weight"
+          title={`${t("weight")}`}
           value="76.4 kg"
           icon={Weight}
           trend={{ value: 1.3, isPositive: true }}
-          description="Goal: 75 kg"
+          description={`${t("target")}: 75 kg`}
         />
       </div>
 
       <MacroProgressTracker />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <div className="glassy-card rounded-xl overflow-hidden card-shadow hover-scale col-span-1">
-          <div className="px-5 py-4 border-b border-border">
-            <h3 className="font-medium tracking-tight">Today's Nutrition</h3>
-          </div>
-          <div className="p-5">
-            <MacroChart data={macroData} total={1840} />
-          </div>
-        </div>
-        
         <WorkoutsList
-          title="Upcoming Workouts"
+          title={t("upcomingWorkouts")}
           workouts={workouts}
           className="col-span-1 lg:col-span-2"
+          onViewAll={navigateToWorkouts}
         />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <ProgressChart
-          title="Weight Progress"
+          title={t("weight")}
           data={weightData}
           label="kg"
           color="#4F46E5"
+          onViewAll={navigateToProgress}
         />
         
         <MealsList
-          title="Today's Meals"
+          title={t("todayMeals")}
           meals={meals}
+          onViewAll={navigateToNutrition}
         />
       </div>
     </div>
