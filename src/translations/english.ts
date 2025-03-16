@@ -158,4 +158,18 @@ export const english = {
   
   // Common actions
   "add": "Add",
+  
+  // Authentication messages
+  "loginSuccess": "Successfully logged in",
+  "signupSuccess": "Sign up successful",
+  "checkEmailConfirmation": "Please check your email for confirmation",
+  "resetEmailSent": "Password reset email sent",
+  "fillAllFields": "Please fill all fields",
+  "passwordsDoNotMatch": "Passwords do not match",
+  
+  // Profile settings
+  "profileNameDescription": "Your full name as it will appear on your profile",
+  "emailAddress": "Email Address",
+  "updating": "Updating...",
+  "updateProfile": "Update Profile"
 };

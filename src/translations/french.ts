@@ -159,4 +159,18 @@ export const french = {
   "fullName": "Nom Complet",
   "confirmPassword": "Confirmer le Mot de passe",
   "alreadyHaveAccount": "Vous avez déjà un compte ?",
+  
+  // Authentication messages
+  "loginSuccess": "Connecté avec succès",
+  "signupSuccess": "Inscription réussie",
+  "checkEmailConfirmation": "Veuillez vérifier votre email pour confirmation",
+  "resetEmailSent": "Email de réinitialisation du mot de passe envoyé",
+  "fillAllFields": "Veuillez remplir tous les champs",
+  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+  
+  // Profile settings
+  "profileNameDescription": "Votre nom complet tel qu'il apparaîtra sur votre profil",
+  "emailAddress": "Adresse Email",
+  "updating": "Mise à jour...",
+  "updateProfile": "Mettre à jour le profil"
 };

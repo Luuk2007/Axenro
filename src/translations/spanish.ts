@@ -160,4 +160,18 @@ export const spanish = {
   "fullName": "Nombre Completo",
   "confirmPassword": "Confirmar Contraseña",
   "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+  
+  // Authentication messages
+  "loginSuccess": "Sesión iniciada con éxito",
+  "signupSuccess": "Registro exitoso",
+  "checkEmailConfirmation": "Por favor, verifica tu correo electrónico para confirmación",
+  "resetEmailSent": "Correo de restablecimiento de contraseña enviado",
+  "fillAllFields": "Por favor, completa todos los campos",
+  "passwordsDoNotMatch": "Las contraseñas no coinciden",
+  
+  // Profile settings
+  "profileNameDescription": "Tu nombre completo como aparecerá en tu perfil",
+  "emailAddress": "Dirección de Correo Electrónico",
+  "updating": "Actualizando...",
+  "updateProfile": "Actualizar Perfil"
 };

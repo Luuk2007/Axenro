@@ -158,4 +158,18 @@ export const dutch = {
   
   // Common actions
   "add": "Toevoegen",
+  
+  // Authentication messages
+  "loginSuccess": "Succesvol ingelogd",
+  "signupSuccess": "Registratie succesvol",
+  "checkEmailConfirmation": "Controleer je e-mail voor bevestiging",
+  "resetEmailSent": "Wachtwoord reset e-mail verzonden",
+  "fillAllFields": "Vul alle velden in",
+  "passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
+  
+  // Profile settings
+  "profileNameDescription": "Je volledige naam zoals die op je profiel verschijnt",
+  "emailAddress": "E-mailadres",
+  "updating": "Bijwerken...",
+  "updateProfile": "Profiel bijwerken"
 };

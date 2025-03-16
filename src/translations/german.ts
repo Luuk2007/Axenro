@@ -159,4 +159,18 @@ export const german = {
   "fullName": "Vollständiger Name",
   "confirmPassword": "Passwort bestätigen",
   "alreadyHaveAccount": "Hast du bereits ein Konto?",
+  
+  // Authentication messages
+  "loginSuccess": "Erfolgreich angemeldet",
+  "signupSuccess": "Registrierung erfolgreich",
+  "checkEmailConfirmation": "Bitte überprüfe deine E-Mail zur Bestätigung",
+  "resetEmailSent": "E-Mail zum Zurücksetzen des Passworts gesendet",
+  "fillAllFields": "Bitte fülle alle Felder aus",
+  "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
+  
+  // Profile settings
+  "profileNameDescription": "Dein vollständiger Name, wie er auf deinem Profil erscheinen wird",
+  "emailAddress": "E-Mail-Adresse",
+  "updating": "Aktualisieren...",
+  "updateProfile": "Profil aktualisieren"
 };
