@@ -69,11 +69,25 @@ const setAppIcons = () => {
   }
 };
 
+// Initialize first-time user data
+const initializeUserData = () => {
+  // Check if this is a first-time user
+  if (!localStorage.getItem("userDataInitialized")) {
+    // Initialize empty measurements and progress data
+    localStorage.setItem("measurements", JSON.stringify([]));
+    localStorage.setItem("weightEntries", JSON.stringify([]));
+    
+    // Mark that initialization has been done
+    localStorage.setItem("userDataInitialized", "true");
+  }
+};
+
 const App = () => {
-  // Apply theme and set app icons on initial load
+  // Apply theme, set app icons and initialize user data on initial load
   useEffect(() => {
     applyThemeFromStorage();
     setAppIcons();
+    initializeUserData();
     
     // Add event listener for storage changes (for cross-tab syncing)
     const handleStorageChange = () => {

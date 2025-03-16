@@ -16,10 +16,12 @@ import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNavigate } from 'react-router-dom';
 
 export default function TopBar() {
   const isMobile = useIsMobile();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -72,53 +74,77 @@ export default function TopBar() {
     );
     
     if (googleAuthWindow) {
-      // Updated to match the exact UI in the screenshots
+      // Updated to exactly match the UI in the screenshots
       googleAuthWindow.document.write(`
         <html>
           <head>
-            <title>Inloggen met Google</title>
+            <title>Sign in with Google</title>
             <style>
               body {
                 font-family: 'Roboto', Arial, sans-serif;
                 margin: 0;
                 padding: 0;
                 color: #202124;
+                background-color: #ffffff;
               }
               .container {
                 max-width: 450px;
                 margin: 0 auto;
-                padding: 40px 20px;
+                padding: 48px 40px 36px;
+                border: 1px solid #dadce0;
+                border-radius: 8px;
+                box-sizing: border-box;
               }
-              .google-icon {
+              .header {
                 display: flex;
+                flex-direction: column;
                 align-items: center;
+                margin-bottom: 32px;
+              }
+              .google-logo {
+                height: 24px;
                 margin-bottom: 24px;
               }
-              .google-icon img {
-                width: 24px;
-                height: 24px;
-                margin-right: 8px;
+              .peace-sign {
+                width: 48px;
+                height: 48px;
+                background-color: #FEF7E0;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+                margin-bottom: 24px;
               }
               h1 {
                 font-size: 24px;
                 font-weight: 400;
                 margin-top: 0;
-                margin-bottom: 32px;
+                margin-bottom: 12px;
+                text-align: center;
               }
-              .website {
+              .subtitle {
+                font-size: 16px;
+                color: #202124;
                 margin-bottom: 32px;
-                font-size: 14px;
+                text-align: center;
+              }
+              .company-name {
+                color: #1a73e8;
+                font-weight: normal;
               }
               .accounts {
                 display: flex;
                 flex-direction: column;
-                gap: 0;
+                width: 100%;
               }
               .account {
                 display: flex;
                 align-items: center;
-                padding: 14px 16px;
-                border-top: 1px solid #dadce0;
+                padding: 16px;
+                border: 1px solid #dadce0;
+                border-radius: 4px;
+                margin-bottom: 16px;
                 cursor: pointer;
                 transition: background-color 0.2s;
               }
@@ -126,9 +152,10 @@ export default function TopBar() {
                 background-color: #f7f8f9;
               }
               .avatar {
-                width: 30px;
-                height: 30px;
+                width: 36px;
+                height: 36px;
                 border-radius: 50%;
+                background-color: #673ab7;
                 margin-right: 16px;
                 display: flex;
                 align-items: center;
@@ -137,10 +164,6 @@ export default function TopBar() {
                 font-size: 14px;
                 text-transform: uppercase;
               }
-              .blue-bg { background-color: #4285F4; }
-              .red-bg { background-color: #DB4437; }
-              .green-bg { background-color: #0F9D58; }
-              .purple-bg { background-color: #8e24aa; }
               .user-info {
                 flex: 1;
               }
@@ -148,53 +171,73 @@ export default function TopBar() {
                 font-size: 14px;
                 font-weight: 500;
                 margin: 0;
+                margin-bottom: 4px;
               }
               .user-email {
-                font-size: 13px;
+                font-size: 14px;
                 color: #5f6368;
                 margin: 0;
               }
-              .divider {
-                border-top: 1px solid #dadce0;
-              }
-              .other-option {
+              .use-another {
                 display: flex;
                 align-items: center;
-                padding: 14px 16px;
+                padding: 16px;
+                border: 1px solid #dadce0;
+                border-radius: 4px;
                 cursor: pointer;
-                color: #5f6368;
-                border-top: 1px solid #dadce0;
+                margin-bottom: 48px;
               }
-              .other-option svg {
+              .use-another:hover {
+                background-color: #f7f8f9;
+              }
+              .another-icon {
+                width: 36px;
+                height: 36px;
                 margin-right: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+              .privacy-text {
+                font-size: 14px;
+                color: #5f6368;
+                text-align: center;
+                margin-bottom: 32px;
+                line-height: 1.4;
+              }
+              .privacy-link, .terms-link {
+                color: #1a73e8;
+                text-decoration: none;
+              }
+              .privacy-link:hover, .terms-link:hover {
+                text-decoration: underline;
               }
               
               /* Second screen styles */
-              .google-logo {
-                margin-bottom: 24px;
-              }
-              .form-container {
+              .signin-form {
                 max-width: 450px;
                 margin: 0 auto;
-                padding: 40px 20px;
+                padding: 48px 40px 36px;
+                border: 1px solid #dadce0;
+                border-radius: 8px;
               }
-              .signin-form {
+              .form-header {
                 display: flex;
                 flex-direction: column;
+                align-items: flex-start;
+                margin-bottom: 32px;
               }
               .form-title {
                 font-size: 24px;
                 font-weight: 400;
                 margin-bottom: 12px;
+                text-align: left;
               }
               .form-subtitle {
                 font-size: 16px;
                 margin-bottom: 32px;
                 color: #202124;
-              }
-              .form-input {
-                position: relative;
-                margin-bottom: 24px;
+                text-align: left;
               }
               .email-input {
                 width: 100%;
@@ -202,20 +245,30 @@ export default function TopBar() {
                 font-size: 16px;
                 border: 1px solid #dadce0;
                 border-radius: 4px;
+                margin-bottom: 32px;
               }
-              .forgot-link {
+              .forgot-email {
                 color: #1a73e8;
                 font-weight: 500;
                 text-decoration: none;
                 font-size: 14px;
+                margin-bottom: 32px;
                 display: inline-block;
-                margin-top: 8px;
               }
-              .form-footer {
+              .guest-mode {
+                font-size: 14px;
+                color: #5f6368;
+                margin-bottom: 32px;
+              }
+              .learn-more {
+                color: #1a73e8;
+                text-decoration: none;
+                font-weight: 500;
+              }
+              .footer {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-top: 48px;
               }
               .create-account {
                 color: #1a73e8;
@@ -236,19 +289,29 @@ export default function TopBar() {
               .next-button:hover {
                 background-color: #1765cc;
               }
-              .bottom-logo {
-                margin-top: 24px;
-                border-top: 1px solid #dadce0;
-                padding-top: 24px;
+              .language-selector {
+                position: absolute;
+                bottom: 24px;
+                left: 24px;
+              }
+              .footer-links {
+                position: absolute;
+                bottom: 24px;
+                right: 24px;
+                display: flex;
+                gap: 24px;
+              }
+              .footer-link {
                 color: #5f6368;
+                text-decoration: none;
                 font-size: 12px;
               }
             </style>
           </head>
           <body>
             <div id="account-selection" class="container">
-              <div class="google-icon">
-                <svg viewBox="0 0 75 24" width="75" height="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <div class="header">
+                <svg class="google-logo" viewBox="0 0 75 24" width="75" height="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <g id="qaEJec">
                     <path fill="#ea4335" d="M67.954 16.303c-1.33 0-2.278-.608-2.886-1.804l7.967-3.3-.27-.68c-.495-1.33-2.008-3.79-5.102-3.79-3.068 0-5.622 2.41-5.622 5.96 0 3.34 2.53 5.96 5.92 5.96 2.73 0 4.31-1.67 4.97-2.64l-2.03-1.35c-.673.98-1.6 1.64-2.93 1.64zm-.203-7.27c1.04 0 1.92.52 2.21 1.264l-5.32 2.21c-.06-2.3 1.79-3.474 3.12-3.474z"></path>
                   </g>
@@ -266,58 +329,53 @@ export default function TopBar() {
                     <path fill="#4285f4" d="M14.11 14.182c.722-.723 1.205-1.78 1.387-3.334H9.423V8.373h8.518c.09.452.16 1.07.16 1.664 0 1.903-.52 4.26-2.19 5.934-1.63 1.7-3.71 2.61-6.48 2.61-5.12 0-9.42-4.17-9.42-9.29C0 4.17 4.31 0 9.43 0c2.83 0 4.843 1.108 6.362 2.56L14 4.347c-1.087-1.02-2.56-1.81-4.577-1.81-3.74 0-6.662 3.01-6.662 6.75s2.93 6.75 6.67 6.75c2.43 0 3.81-.972 4.69-1.856z"></path>
                   </g>
                 </svg>
+                
+                <div class="peace-sign">
+                  ✌️
+                </div>
+                
+                <h1>Choose an account</h1>
+                <div class="subtitle">to continue to <span class="company-name">Company</span></div>
               </div>
-              <h1>Een account selecteren</h1>
-              <div class="website">om door te gaan naar Progresa</div>
               
               <div class="accounts">
-                <div class="account" onclick="window.opener.postMessage('selected:Luuk Appers:luukappers@gmail.com:LA', '*'); window.close();">
-                  <div class="avatar blue-bg">la</div>
+                <div class="account" onclick="window.opener.postMessage('selected:Account Name:email@gmail.com:A', '*'); window.close();">
+                  <div class="avatar">A</div>
                   <div class="user-info">
-                    <p class="user-name">Luuk Appers</p>
-                    <p class="user-email">luukappers@gmail.com</p>
+                    <p class="user-name">Account Name</p>
+                    <p class="user-email">email@gmail.com</p>
                   </div>
                 </div>
                 
-                <div class="account" onclick="window.opener.postMessage('selected:Luuk:bfgdtrends@gmail.com:LU', '*'); window.close();">
-                  <div class="avatar green-bg">lu</div>
+                <div class="account" onclick="window.opener.postMessage('selected:Account Name:email@gmail.com:A', '*'); window.close();">
+                  <div class="avatar">A</div>
                   <div class="user-info">
-                    <p class="user-name">Luuk</p>
-                    <p class="user-email">bfgdtrends@gmail.com</p>
+                    <p class="user-name">Account Name</p>
+                    <p class="user-email">email@gmail.com</p>
                   </div>
                 </div>
                 
-                <div class="account" onclick="window.opener.postMessage('selected:Luuk Appers:luuk.lucens@gmail.com:LA', '*'); window.close();">
-                  <div class="avatar red-bg">la</div>
-                  <div class="user-info">
-                    <p class="user-name">Luuk Appers</p>
-                    <p class="user-email">luuk.lucens@gmail.com</p>
+                <div class="use-another" onclick="showSignInForm()">
+                  <div class="another-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="10" stroke="#5F6368" stroke-width="1.5"/>
+                      <circle cx="9" cy="9" r="1.5" fill="#5F6368"/>
+                      <circle cx="15" cy="9" r="1.5" fill="#5F6368"/>
+                      <path d="M8 14L16 14" stroke="#5F6368" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
                   </div>
+                  <div>Use another account</div>
                 </div>
-                
-                <div class="account" onclick="window.opener.postMessage('selected:Luuk Appers:spotlightingstars@gmail.com:LA', '*'); window.close();">
-                  <div class="avatar purple-bg">la</div>
-                  <div class="user-info">
-                    <p class="user-name">Luuk Appers</p>
-                    <p class="user-email">spotlightingstars@gmail.com</p>
-                  </div>
-                </div>
-                
-                <div class="other-option" onclick="showSignInForm()">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="#5F6368" stroke-width="1.5"/>
-                    <path d="M7.5 14.5C8.5 16.5 11 16.5 12 16.5C13 16.5 15.5 16.5 16.5 14.5" stroke="#5F6368" stroke-width="1.5" stroke-linecap="round"/>
-                    <circle cx="9" cy="9" r="1" fill="#5F6368"/>
-                    <circle cx="15" cy="9" r="1" fill="#5F6368"/>
-                  </svg>
-                  <span>Een ander account gebruiken</span>
-                </div>
+              </div>
+              
+              <div class="privacy-text">
+                To continue, Google will share your name, email address, language preference, and profile picture with Company. Before using this app, you can review Company's <a href="#" class="privacy-link">privacy policy</a> and <a href="#" class="terms-link">terms of service</a>.
               </div>
             </div>
             
-            <div id="signin-form" class="form-container" style="display: none;">
-              <div class="google-logo">
-                <svg viewBox="0 0 75 24" width="75" height="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <div id="signin-form" class="signin-form" style="display: none;">
+              <div class="form-header">
+                <svg class="google-logo" viewBox="0 0 75 24" width="75" height="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <g id="qaEJec">
                     <path fill="#ea4335" d="M67.954 16.303c-1.33 0-2.278-.608-2.886-1.804l7.967-3.3-.27-.68c-.495-1.33-2.008-3.79-5.102-3.79-3.068 0-5.622 2.41-5.622 5.96 0 3.34 2.53 5.96 5.92 5.96 2.73 0 4.31-1.67 4.97-2.64l-2.03-1.35c-.673.98-1.6 1.64-2.93 1.64zm-.203-7.27c1.04 0 1.92.52 2.21 1.264l-5.32 2.21c-.06-2.3 1.79-3.474 3.12-3.474z"></path>
                   </g>
@@ -335,23 +393,34 @@ export default function TopBar() {
                     <path fill="#4285f4" d="M14.11 14.182c.722-.723 1.205-1.78 1.387-3.334H9.423V8.373h8.518c.09.452.16 1.07.16 1.664 0 1.903-.52 4.26-2.19 5.934-1.63 1.7-3.71 2.61-6.48 2.61-5.12 0-9.42-4.17-9.42-9.29C0 4.17 4.31 0 9.43 0c2.83 0 4.843 1.108 6.362 2.56L14 4.347c-1.087-1.02-2.56-1.81-4.577-1.81-3.74 0-6.662 3.01-6.662 6.75s2.93 6.75 6.67 6.75c2.43 0 3.81-.972 4.69-1.856z"></path>
                   </g>
                 </svg>
+                
+                <div class="form-title">Sign in</div>
+                <div class="form-subtitle">Use your Google Account</div>
               </div>
               
-              <div class="signin-form">
-                <h1 class="form-title">Sign in</h1>
-                <p class="form-subtitle">to continue to AutoScout24</p>
-                
-                <div class="form-input">
-                  <input type="email" class="email-input" placeholder="Email or phone" />
-                </div>
-                
-                <a href="#" class="forgot-link">Forgot email?</a>
-                
-                <div class="form-footer">
-                  <a href="#" class="create-account">Create account</a>
-                  <button class="next-button" onclick="window.close()">Next</button>
-                </div>
+              <input type="email" class="email-input" placeholder="Email or phone" />
+              
+              <a href="#" class="forgot-email">Forgot email?</a>
+              
+              <div class="guest-mode">
+                Not your computer? Use Guest mode to sign in privately.
+                <a href="#" class="learn-more">Learn more</a>
               </div>
+              
+              <div class="footer">
+                <a href="#" class="create-account">Create account</a>
+                <button class="next-button" onclick="window.close()">Next</button>
+              </div>
+            </div>
+            
+            <div class="language-selector">
+              <span>English (United States)</span>
+            </div>
+            
+            <div class="footer-links">
+              <a href="#" class="footer-link">Help</a>
+              <a href="#" class="footer-link">Privacy</a>
+              <a href="#" class="footer-link">Terms</a>
             </div>
             
             <script>
@@ -411,6 +480,19 @@ export default function TopBar() {
     setHasUnreadNotifications(false);
   };
 
+  // Close mobile menu when navigating to a new page
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    // Close any open mobile sheets if needed
+    const sheetElement = document.querySelector('[data-state="open"]');
+    if (sheetElement) {
+      const closeButton = sheetElement.querySelector('button[data-state]');
+      if (closeButton) {
+        (closeButton as HTMLButtonElement).click();
+      }
+    }
+  };
+
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 md:px-6">
       <div className="flex items-center gap-4">
@@ -423,13 +505,13 @@ export default function TopBar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0">
-              <Sidebar />
+              <Sidebar onNavigate={handleNavigate} />
             </SheetContent>
           </Sheet>
         )}
       </div>
       <div className="flex items-center gap-4">
-        <Dialog>
+        <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
           <DialogTrigger asChild>
             <Button 
               variant="ghost" 
@@ -488,10 +570,10 @@ export default function TopBar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => window.location.href = '/profile'}>
+              <DropdownMenuItem onSelect={() => handleNavigate('/profile')}>
                 {t("profile")}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => window.location.href = '/settings'}>
+              <DropdownMenuItem onSelect={() => handleNavigate('/settings')}>
                 {t("settings")}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setIsLoggedIn(false)}>

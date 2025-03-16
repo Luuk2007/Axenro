@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { Apple, BarChart3, Camera, Filter, Plus, Search, Utensils } from 'lucide-react';
+import { Apple, ArrowLeft, BarChart3, Camera, Check, Filter, Plus, Search, Utensils, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -136,6 +136,8 @@ const Nutrition = () => {
   const [filteredFoods, setFilteredFoods] = useState(foodDatabase);
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
+  const [scannedProduct, setScannedProduct] = useState<any | null>(null);
+  const [scanStep, setScanStep] = useState<'scanning' | 'result'>('scanning');
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -159,6 +161,8 @@ const Nutrition = () => {
   const handleScanBarcode = async () => {
     setShowScanBarcode(true);
     setCameraActive(true);
+    setScanStep('scanning');
+    setScannedProduct(null);
     
     try {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -177,30 +181,34 @@ const Nutrition = () => {
           
           // Simulate scanning a barcode after 3 seconds
           setTimeout(() => {
-            // Simulate finding the product
-            const randomProductIndex = Math.floor(Math.random() * foodDatabase.length);
-            const randomProduct = foodDatabase[randomProductIndex];
-            
-            if (randomProduct) {
-              if (canvasRef.current && videoRef.current) {
-                // Take a snapshot from the video
-                const context = canvasRef.current.getContext('2d');
-                if (context) {
-                  canvasRef.current.width = videoRef.current.videoWidth;
-                  canvasRef.current.height = videoRef.current.videoHeight;
-                  context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-                }
-                
-                // Stop all video streams
-                const tracks = stream.getTracks();
-                tracks.forEach(track => track.stop());
-                videoRef.current.srcObject = null;
+            // Simulate finding the product (Dutch yogurt)
+            const product = {
+              code: 'AH',
+              name: 'Biologische Volle Kwark Lekker',
+              description: 'Organic full-fat quark',
+              servingSize: '100 gram',
+              servings: 1,
+              calories: 100,
+              macros: {
+                carbs: { value: 3.5, unit: 'g', percentage: 14 },
+                fat: { value: 6.5, unit: 'g', percentage: 58 },
+                protein: { value: 7, unit: 'g', percentage: 28 }
               }
-              
-              setCameraActive(false);
-              setShowScanBarcode(false);
-              toast.success(`Product scanned: ${randomProduct.name} (${randomProduct.calories} calories, ${randomProduct.protein}g protein)`);
+            };
+            
+            if (canvasRef.current && videoRef.current) {
+              // Take a snapshot from the video
+              const context = canvasRef.current.getContext('2d');
+              if (context) {
+                canvasRef.current.width = videoRef.current.videoWidth;
+                canvasRef.current.height = videoRef.current.videoHeight;
+                context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+              }
             }
+            
+            // Change to result view
+            setScannedProduct(product);
+            setScanStep('result');
           }, 3000);
         }
       } else {
@@ -213,6 +221,25 @@ const Nutrition = () => {
       toast.error('Could not access camera. Please check permissions.');
       setCameraActive(false);
       setShowScanBarcode(false);
+    }
+  };
+
+  const handleCloseScan = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      // Stop all video streams when closing the dialog
+      const stream = videoRef.current.srcObject as MediaStream;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setCameraActive(false);
+    setShowScanBarcode(false);
+  };
+
+  const handleAddScannedProduct = () => {
+    if (scannedProduct) {
+      toast.success(`Added ${scannedProduct.name} to your meal plan`);
+      handleCloseScan();
     }
   };
 
@@ -350,43 +377,148 @@ const Nutrition = () => {
       </Dialog>
 
       <Dialog open={showScanBarcode} onOpenChange={(open) => {
-        if (!open && videoRef.current && videoRef.current.srcObject) {
-          // Stop all video streams when closing the dialog
-          const stream = videoRef.current.srcObject as MediaStream;
-          const tracks = stream.getTracks();
-          tracks.forEach(track => track.stop());
-          videoRef.current.srcObject = null;
-          setCameraActive(false);
+        if (!open) {
+          handleCloseScan();
         }
-        setShowScanBarcode(open);
       }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("scanBarcode")}</DialogTitle>
-          </DialogHeader>
-          <div className="py-6 flex flex-col items-center justify-center">
-            {cameraActive ? (
-              <div className="w-full relative">
-                <video 
-                  ref={videoRef} 
-                  className="w-full aspect-video bg-black rounded-lg"
-                  playsInline
-                  muted
-                  autoPlay
-                ></video>
-                <div className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center">
-                  <div className="border-2 border-primary w-2/3 h-20 opacity-50 rounded-lg animate-pulse"></div>
-                </div>
-                <p className="text-sm text-center mt-2">Position barcode within the box</p>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+          {scanStep === 'scanning' ? (
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <button className="p-2" onClick={handleCloseScan}>
+                  <X className="h-5 w-5" />
+                </button>
+                <h3 className="font-medium text-lg">Streepjescode scannen</h3>
+                <div className="w-9"></div>
+              </div>
+              
+              <div className="relative flex-1 aspect-[9/16] bg-black">
+                {cameraActive ? (
+                  <>
+                    <video 
+                      ref={videoRef} 
+                      className="absolute inset-0 w-full h-full object-cover"
+                      playsInline
+                      muted
+                      autoPlay
+                    ></video>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-2/3 h-32 relative">
+                        <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-blue-400"></div>
+                        <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-blue-400"></div>
+                        <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-blue-400"></div>
+                        <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-blue-400"></div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <Camera className="h-8 w-8 text-white mb-4 animate-pulse" />
+                    <p className="text-sm text-white">Initializing camera...</p>
+                  </div>
+                )}
                 <canvas ref={canvasRef} className="hidden"></canvas>
               </div>
-            ) : (
-              <div className="w-full aspect-video bg-secondary/30 rounded-lg flex flex-col items-center justify-center">
-                <Camera className="h-8 w-8 mb-4 animate-pulse" />
-                <p className="text-sm text-muted-foreground">Initializing camera...</p>
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              <div className="flex items-center px-4 py-3 border-b border-border">
+                <button className="p-2 mr-2" onClick={() => setScanStep('scanning')}>
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <h3 className="font-medium text-lg">Voedingsmiddel toevoegen</h3>
               </div>
-            )}
-          </div>
+              
+              {scannedProduct && (
+                <div className="p-4 space-y-6">
+                  <div className="bg-blue-50 p-3 rounded-md mb-4">
+                    <div className="flex items-center">
+                      <p className="text-gray-600 text-sm flex-1">
+                        Deze streepjescode komt overeen met: "{scannedProduct.code}"
+                      </p>
+                      <a href="#" className="text-blue-500 text-sm whitespace-nowrap">
+                        Vind een betere overeenkomst
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h2 className="text-3xl font-bold">{scannedProduct.code}</h2>
+                    <p className="text-gray-600 text-lg">{scannedProduct.name}</p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <p className="font-medium">Portiegrootte</p>
+                      <div className="bg-gray-100 rounded-md px-4 py-2 text-right w-1/2">
+                        <span>{scannedProduct.servingSize}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <p className="font-medium">Aantal porties</p>
+                      <div className="bg-gray-100 rounded-md px-4 py-2 text-right w-1/2">
+                        <span>{scannedProduct.servings}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <p className="font-medium">Tijd</p>
+                      <div className="bg-gray-100 rounded-md px-4 py-2 text-right w-1/2">
+                        <span className="text-yellow-500">👑</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <p className="font-medium">Maaltijd</p>
+                      <div className="bg-gray-100 rounded-md px-4 py-2 text-right w-1/2">
+                        <span className="text-red-500">Selecteer een...</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-stretch space-x-4">
+                    <div className="bg-white rounded-full w-24 h-24 flex-shrink-0 flex flex-col items-center justify-center shadow-sm border border-gray-200">
+                      <span className="text-2xl font-bold">{scannedProduct.calories}</span>
+                      <span className="text-xs text-gray-500">cal</span>
+                    </div>
+                    
+                    <div className="flex-1 flex flex-col justify-around">
+                      <div className="flex justify-between">
+                        <span className="text-green-500">{scannedProduct.macros.carbs.percentage}%</span>
+                        <span className="text-blue-500">{scannedProduct.macros.fat.percentage}%</span>
+                        <span className="text-purple-500">{scannedProduct.macros.protein.percentage}%</span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <div className="text-center">
+                          <div className="text-xl font-semibold">{scannedProduct.macros.carbs.value}{scannedProduct.macros.carbs.unit}</div>
+                          <div className="text-xs text-gray-500">Koolhydr</div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-xl font-semibold">{scannedProduct.macros.fat.value}{scannedProduct.macros.fat.unit}</div>
+                          <div className="text-xs text-gray-500">Vetten</div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-xl font-semibold">{scannedProduct.macros.protein.value}{scannedProduct.macros.protein.unit}</div>
+                          <div className="text-xs text-gray-500">Eiwitten</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 flex justify-center">
+                    <Button className="w-full" onClick={handleAddScannedProduct}>
+                      <Check className="mr-2 h-4 w-4" />
+                      Toevoegen
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
