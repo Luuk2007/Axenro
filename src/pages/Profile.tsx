@@ -12,6 +12,7 @@ import {
   Calendar,
   User2,
   Flame,
+  Target,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,6 +65,11 @@ const profileFormSchema = z.object({
     .min(16, "Age must be at least 16")
     .max(100, "Age must be less than 100"),
   gender: z.enum(["male", "female", "other"]),
+  targetWeight: z.coerce
+    .number()
+    .min(30, "Target weight must be at least 30kg")
+    .max(300, "Target weight must be less than 300kg")
+    .optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -76,6 +82,7 @@ const defaultValues: Partial<ProfileFormValues> = {
   goal: "maintain",
   age: 30,
   gender: "male",
+  targetWeight: 70,
 };
 
 const Profile = () => {
@@ -184,15 +191,35 @@ const Profile = () => {
   };
 
   const onSubmit = (data: ProfileFormValues) => {
+    // If targetWeight is not set, set it equal to current weight
+    if (!data.targetWeight) {
+      data.targetWeight = data.weight;
+    }
+    
     // Save to localStorage
     localStorage.setItem("userProfile", JSON.stringify(data));
     setProfile(data);
     toast.success(t("profileUpdated"));
+    
+    // Save initial weight to weightData array if it doesn't exist yet
+    const savedWeightData = localStorage.getItem("weightData");
+    if (!savedWeightData || JSON.parse(savedWeightData).length === 0) {
+      const today = new Date();
+      const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+      const initialWeightData = [
+        {
+          date: formattedDate,
+          value: data.weight
+        }
+      ];
+      localStorage.setItem("weightData", JSON.stringify(initialWeightData));
+    }
   };
 
   // Get current weight and height values for BMI calculator
   const currentWeight = form.watch("weight");
   const currentHeight = form.watch("height");
+  const targetWeight = form.watch("targetWeight");
 
   return (
     <div className="space-y-6">
@@ -354,6 +381,24 @@ const Profile = () => {
                         </FormItem>
                       )}
                     />
+                    
+                    {/* New field for target weight */}
+                    <FormField
+                      control={form.control}
+                      name="targetWeight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Target Weight ({t("kg")})</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} value={field.value || ''} />
+                          </FormControl>
+                          <FormDescription className="text-xs">
+                            The weight you aim to achieve
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   <Button type="submit">{t("saveChanges")}</Button>
@@ -426,6 +471,13 @@ const Profile = () => {
                       <dd>
                         {t(profile.gender)}
                       </dd>
+                    </div>
+                    
+                    {/* New field for target weight */}
+                    <div className="flex items-center gap-2">
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                      <dt className="font-medium">Target Weight:</dt>
+                      <dd>{profile.targetWeight || profile.weight} {t("kg")}</dd>
                     </div>
                   </dl>
                 </CardContent>

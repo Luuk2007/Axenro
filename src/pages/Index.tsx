@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Activity, Calendar, Dumbbell, Flame, Plus, Weight } from 'lucide-react';
+import { Activity, Calendar, Dumbbell, Flame, Footprints, Plus, Target, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -54,7 +54,9 @@ const Dashboard = () => {
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [weightData, setWeightData] = useState<Array<{date: string, value: number}>>([]);
   const [userWeight, setUserWeight] = useState<number | null>(null);
+  const [userTargetWeight, setUserTargetWeight] = useState<number | null>(null);
   const [userCalories, setUserCalories] = useState<number>(2200);
+  const [dailySteps, setDailySteps] = useState<number>(8546);
 
   useEffect(() => {
     // Get weight data from localStorage if available
@@ -77,6 +79,7 @@ const Dashboard = () => {
       try {
         const profileData = JSON.parse(savedProfile);
         setUserWeight(profileData.weight);
+        setUserTargetWeight(profileData.targetWeight || profileData.weight);
         
         // Calculate calories
         const bmr = calculateBMR(profileData);
@@ -177,6 +180,14 @@ const Dashboard = () => {
             </PopoverContent>
           </Popover>
           
+          {/* Display target weight in right upper corner */}
+          {userTargetWeight && (
+            <div className="hidden md:flex items-center gap-2 bg-secondary/30 px-3 py-2 rounded-md">
+              <Target className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Target: {userTargetWeight} kg</span>
+            </div>
+          )}
+          
           <Dialog open={showAddActivity} onOpenChange={setShowAddActivity}>
             <DialogTrigger asChild>
               <Button>
@@ -215,9 +226,9 @@ const Dashboard = () => {
           description={`${t("target")}: ${userCalories ? userCalories : 2200}`}
         />
         <StatsCard
-          title={`${t("dailyNutrients")}`}
-          value="8,546"
-          icon={Activity}
+          title={`${t("dailySteps")}`}
+          value={dailySteps.toLocaleString()}
+          icon={Footprints}
           trend={{ value: 3, isPositive: true }}
           description={`${t("target")}: 10,000`}
         />
@@ -232,7 +243,7 @@ const Dashboard = () => {
           value={userWeight ? `${userWeight} kg` : "76.4 kg"}
           icon={Weight}
           trend={{ value: 1.3, isPositive: true }}
-          description={`${t("target")}: 75 kg`}
+          description={`${t("target")}: ${userTargetWeight || '75'} kg`}
         />
       </div>
 

@@ -1,6 +1,5 @@
-
 import React, { useState, useRef } from 'react';
-import { Apple, ArrowLeft, BarChart3, Camera, Check, Filter, Plus, Search, Utensils, X } from 'lucide-react';
+import { Apple, ArrowLeft, BarChart3, Camera, Check, Filter, GlassWater, Plus, Search, Utensils, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -138,6 +137,7 @@ const Nutrition = () => {
   const [cameraActive, setCameraActive] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<any | null>(null);
   const [scanStep, setScanStep] = useState<'scanning' | 'result'>('scanning');
+  const [activeTab, setActiveTab] = useState<'meals' | 'water'>('meals');
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -318,6 +318,32 @@ const Nutrition = () => {
               )}
             </DialogContent>
           </Dialog>
+        </div>
+      </div>
+
+      {/* Updated layout: Put Daily Summary next to tabs */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="w-full md:w-auto">
+          <Tabs defaultValue="today" className="w-full">
+            <TabsList className="inline-flex">
+              <TabsTrigger value="today">Today</TabsTrigger>
+              <TabsTrigger value="week">Week</TabsTrigger>
+              <TabsTrigger value="month">Month</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        
+        <div className="w-full md:w-auto bg-background/60 rounded-lg p-3 border border-border flex items-center gap-4">
+          <div className="h-10 w-10">
+            <MacroChart data={macroData} total={1840} simplified />
+          </div>
+          <div>
+            <div className="text-sm font-medium">Daily Summary</div>
+            <div className="flex items-center gap-2">
+              <span className="text-base font-semibold">1,840</span>
+              <span className="text-xs text-muted-foreground">of 2,200 cal</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -522,157 +548,89 @@ const Nutrition = () => {
         </DialogContent>
       </Dialog>
 
-      <Tabs defaultValue="today" className="w-full">
-        <TabsList>
-          <TabsTrigger value="today">Today</TabsTrigger>
-          <TabsTrigger value="week">Week</TabsTrigger>
-          <TabsTrigger value="month">Month</TabsTrigger>
-        </TabsList>
-        <TabsContent value="today" className="mt-6 space-y-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <div className="glassy-card rounded-xl overflow-hidden card-shadow hover-scale">
-              <div className="px-5 py-4 border-b border-border">
-                <h3 className="font-medium tracking-tight">Daily Summary</h3>
-              </div>
-              <div className="p-5">
-                <MacroChart data={macroData} total={1840} />
-                <div className="mt-6 grid grid-cols-2 gap-4">
-                  <div className="rounded-lg bg-secondary/40 p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Calories</p>
-                    <p className="mt-1 text-lg font-semibold">1,840</p>
-                    <p className="text-xs text-muted-foreground">of 2,200 goal</p>
-                  </div>
-                  <div className="rounded-lg bg-secondary/40 p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Water Intake</p>
-                    <p className="mt-1 text-lg font-semibold">{water}L</p>
-                    <p className="text-xs text-muted-foreground">of {waterGoal}L goal</p>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <p className="text-sm font-medium mb-2">Add Water</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleAddWater(0.1)}
-                    >
-                      Add 100ml
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleAddWater(0.25)}
-                    >
-                      Add 250ml
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleAddWater(0.5)}
-                    >
-                      Add 500ml
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleAddWater(0.75)}
-                    >
-                      Add 750ml
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleAddWater(1.0)}
-                    >
-                      Add 1L
-                    </Button>
-                  </div>
-                </div>
-              </div>
+      <div className="mt-4">
+        <div className="glassy-card rounded-xl overflow-hidden card-shadow">
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+            <h3 className="font-medium tracking-tight">Today's Meals</h3>
+            <div className="flex gap-2">
+              <Button 
+                variant={activeTab === 'meals' ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setActiveTab('meals')}
+              >
+                <Utensils className="mr-2 h-4 w-4" />
+                Meals
+              </Button>
+              <Button 
+                variant={activeTab === 'water' ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setActiveTab('water')}
+              >
+                <GlassWater className="mr-2 h-4 w-4" />
+                Water
+              </Button>
             </div>
-
-            <div className="lg:col-span-2">
-              <div className="glassy-card rounded-xl overflow-hidden card-shadow hover-scale">
-                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                  <h3 className="font-medium tracking-tight">Today's Meals</h3>
-                  <Button variant="ghost" size="sm">View All</Button>
-                </div>
-                <div className="divide-y divide-border">
-                  {meals.map((meal) => (
-                    <div key={meal.id} className="p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center">
-                          <Utensils className="mr-2 h-4 w-4 text-primary" />
-                          <h4 className="font-medium">{meal.name}</h4>
+          </div>
+          
+          {activeTab === 'meals' && (
+            <div className="divide-y divide-border">
+              {meals.map((meal) => (
+                <div key={meal.id} className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <Utensils className="mr-2 h-4 w-4 text-primary" />
+                      <h4 className="font-medium">{meal.name}</h4>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-8 text-xs"
+                      onClick={() => handleAddItem(meal.id)}
+                    >
+                      <Plus className="mr-1 h-3 w-3" />
+                      Add Item
+                    </Button>
+                  </div>
+                  <div className="space-y-3">
+                    {meal.items.map((item) => (
+                      <div 
+                        key={item.id} 
+                        className="flex items-center justify-between bg-secondary/30 rounded-lg p-3"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{item.name}</p>
+                          <div className="flex text-xs text-muted-foreground space-x-2 mt-1">
+                            <span>{item.calories} cal</span>
+                            <span>{item.protein}g protein</span>
+                            <span>{item.carbs}g carbs</span>
+                            <span>{item.fat}g fat</span>
+                          </div>
                         </div>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="h-8 text-xs"
-                          onClick={() => handleAddItem(meal.id)}
-                        >
-                          <Plus className="mr-1 h-3 w-3" />
-                          Add Item
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="text-muted-foreground"
+                          >
+                            <circle cx="12" cy="12" r="1" />
+                            <circle cx="19" cy="12" r="1" />
+                            <circle cx="5" cy="12" r="1" />
+                          </svg>
                         </Button>
                       </div>
-                      <div className="space-y-3">
-                        {meal.items.map((item) => (
-                          <div 
-                            key={item.id} 
-                            className="flex items-center justify-between bg-secondary/30 rounded-lg p-3"
-                          >
-                            <div>
-                              <p className="text-sm font-medium">{item.name}</p>
-                              <div className="flex text-xs text-muted-foreground space-x-2 mt-1">
-                                <span>{item.calories} cal</span>
-                                <span>{item.protein}g protein</span>
-                                <span>{item.carbs}g carbs</span>
-                                <span>{item.fat}g fat</span>
-                              </div>
-                            </div>
-                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="15"
-                                height="15"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="text-muted-foreground"
-                              >
-                                <circle cx="12" cy="12" r="1" />
-                                <circle cx="19" cy="12" r="1" />
-                                <circle cx="5" cy="12" r="1" />
-                              </svg>
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          </div>
-        </TabsContent>
-        <TabsContent value="week">
-          <div className="flex flex-col items-center justify-center py-12">
-            <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Weekly Nutrition</h3>
-          </div>
-        </TabsContent>
-        <TabsContent value="month">
-          <div className="flex flex-col items-center justify-center py-12">
-            <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Monthly Nutrition</h3>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-};
-
-export default Nutrition;
+          )}
+          
+          {activeTab === 'water' && (
+            <div className="p-5">

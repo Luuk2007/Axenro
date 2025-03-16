@@ -1,72 +1,82 @@
 
 import React from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
-interface MacroData {
+interface MacroChartItem {
   name: string;
   value: number;
   color: string;
 }
 
 interface MacroChartProps {
-  data: MacroData[];
+  data: MacroChartItem[];
   total: number;
+  simplified?: boolean;
 }
 
-export default function MacroChart({ data, total }: MacroChartProps) {
-  const radius = 40;
-  const circumference = 2 * Math.PI * radius;
-  let offset = 0;
-
+export default function MacroChart({ data, total, simplified = false }: MacroChartProps) {
+  const totalValue = data.reduce((sum, item) => sum + item.value, 0);
+  
+  if (simplified) {
+    // Simplified version for the nutrition page header
+    return (
+      <div className="h-full w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={15}
+              outerRadius={25}
+              paddingAngle={2}
+              dataKey="value"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+  
   return (
-    <div className="flex flex-col items-center justify-center w-full">
-      <div className="relative w-28 h-28">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-          {data.map((item, index) => {
-            const percent = item.value / total;
-            const strokeDasharray = circumference;
-            const strokeDashoffset = circumference - (percent * circumference);
-            const currentOffset = offset;
-            offset += percent * circumference;
-
-            return (
-              <circle
-                key={index}
-                cx="50"
-                cy="50"
-                r={radius}
-                strokeWidth="12"
-                fill="transparent"
-                stroke={item.color}
-                strokeDasharray={strokeDasharray}
-                strokeDashoffset={strokeDashoffset}
-                style={{ strokeDashoffset: currentOffset }}
-                className="transition-all duration-500 ease-in-out"
-              />
-            );
-          })}
-          <circle
-            cx="50"
-            cy="50"
-            r="32"
-            fill="white"
-            className="dark:fill-card"
-          />
-        </svg>
+    <div className="flex items-center justify-center">
+      <div className="relative h-[180px] w-[180px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={50}
+              outerRadius={70}
+              paddingAngle={2}
+              dataKey="value"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-semibold tracking-tight">{total}</span>
-          <span className="text-xs text-muted-foreground">calories</span>
+          <p className="text-xs text-muted-foreground">Total</p>
+          <p className="text-xl font-bold">{total}</p>
+          <p className="text-xs text-muted-foreground">calories</p>
         </div>
       </div>
-      <div className="mt-5 flex w-full justify-center gap-4">
+      <div className="ml-4 space-y-2">
         {data.map((item, index) => (
-          <div key={index} className="flex items-center">
-            <span
-              className="block h-3 w-3 mr-1.5 rounded-sm"
+          <div key={index} className="flex items-center gap-2">
+            <div 
+              className="h-3 w-3 rounded-full" 
               style={{ backgroundColor: item.color }}
-            />
-            <div className="flex flex-col">
-              <span className="text-xs font-medium">{item.name}</span>
-              <span className="text-xs text-muted-foreground">{item.value}g</span>
+            ></div>
+            <div className="text-sm">
+              <span className="font-medium">{item.name}:</span> {Math.round((item.value / totalValue) * 100)}%
             </div>
           </div>
         ))}
