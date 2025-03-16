@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -12,9 +11,11 @@ import {
   Lock,
   LogOut,
   Trash,
+  User,
 } from 'lucide-react';
 
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,6 +47,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { supabase } from '@/integrations/supabase/client';
 
 // Form schema
 const settingsFormSchema = z.object({
@@ -57,9 +60,20 @@ const settingsFormSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsFormSchema>;
 
+// Profile form schema
+const profileFormSchema = z.object({
+  fullName: z.string().min(2, {
+    message: "Full name must be at least 2 characters."
+  }),
+});
+
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
+
 const Settings = () => {
   const [theme, setTheme] = useState<string>('light');
   const { language, setLanguage, t } = useLanguage();
+  const { user, signOut } = useAuth();
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   
   // Load saved settings from localStorage if available
   const getSavedSettings = () => {
@@ -78,6 +92,21 @@ const Settings = () => {
     resolver: zodResolver(settingsFormSchema),
     defaultValues: getSavedSettings(),
   });
+
+  // Profile form
+  const profileForm = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      fullName: user?.user_metadata?.full_name || "",
+    },
+  });
+
+  // Update profile form values when user data changes
+  useEffect(() => {
+    if (user?.user_metadata?.full_name) {
+      profileForm.setValue('fullName', user.user_metadata.full_name);
+    }
+  }, [user, profileForm]);
 
   // Update theme when the form value changes
   useEffect(() => {
@@ -117,16 +146,50 @@ const Settings = () => {
     toast.success(t("settingsUpdated"));
   };
 
-  const handleLogout = () => {
-    // For now, just show a success toast
-    toast.success(t("loggedOut"));
+  const onProfileSubmit = async (data: ProfileFormValues) => {
+    try {
+      setIsUpdatingProfile(true);
+      
+      // Update user metadata in Supabase
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: data.fullName }
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.success(t("profileUpdated"));
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsUpdatingProfile(false);
+    }
   };
 
-  const handleDeleteAccount = () => {
-    // Clear all localStorage data
-    localStorage.removeItem("userProfile");
-    localStorage.removeItem("userSettings");
-    toast.success(t("accountDeleted"));
+  const handleLogout = async () => {
+    await signOut();
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      // In a real application, you would implement a secure way to handle account deletion
+      // This is a simplified version for demonstration purposes
+      
+      // Clear all localStorage data
+      localStorage.removeItem("userProfile");
+      localStorage.removeItem("userSettings");
+      localStorage.removeItem("measurements");
+      localStorage.removeItem("weightEntries");
+      
+      // Sign out the user
+      await signOut();
+      
+      toast.success(t("accountDeleted"));
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -134,6 +197,46 @@ const Settings = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-semibold tracking-tight">{t("settings")}</h1>
       </div>
+      
+      {user && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("profileSettings")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form {...profileForm}>
+              <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <User className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex-1 space-y-2">
+                    <FormField
+                      control={profileForm.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("fullName")}</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormDescription>{t("profileNameDescription")}</FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <p className="text-sm text-muted-foreground flex-1">{t("emailAddress")}: {user.email}</p>
+                </div>
+
+                <Button type="submit" disabled={isUpdatingProfile}>
+                  {isUpdatingProfile ? t("updating") : t("updateProfile")}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      )}
       
       <Card>
         <CardHeader>

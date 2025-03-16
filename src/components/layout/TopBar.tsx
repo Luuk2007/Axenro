@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BellIcon, Menu, LogIn, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -17,16 +17,18 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function TopBar() {
   const isMobile = useIsMobile();
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, signIn, signUp, signOut, resetPassword } = useAuth();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [fullName, setFullName] = useState('John Doe');
+  const [fullName, setFullName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -34,56 +36,74 @@ export default function TopBar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
   const [activeTab, setActiveTab] = useState("signin");
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
     if (!email || !password) {
-      toast.error('Please fill in all fields');
+      toast.error(t("fillAllFields"));
       return;
     }
     
-    // Mock login - in a real app this would call an auth API
-    setIsLoggedIn(true);
-    toast.success('Login successful');
+    const { error } = await signIn(email, password);
+    if (!error) {
+      setAuthDialogOpen(false);
+      resetForm();
+    }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
     if (!email || !password || !fullName || !confirmPassword) {
-      toast.error('Please fill in all fields');
+      toast.error(t("fillAllFields"));
       return;
     }
     
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t("passwordsDoNotMatch"));
       return;
     }
     
-    // Mock signup - in a real app this would call an auth API
-    setIsLoggedIn(true);
-    toast.success('Account created successfully');
+    const { error } = await signUp(email, password, fullName);
+    if (!error) {
+      setAuthDialogOpen(false);
+      resetForm();
+    }
   };
 
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!resetEmail) {
-      toast.error('Please enter your email');
+      toast.error(t("enterEmail"));
       return;
     }
     
-    toast.success('Password reset link sent to your email');
-    setShowForgotPassword(false);
+    const { error } = await resetPassword(resetEmail);
+    if (!error) {
+      setShowForgotPassword(false);
+      setResetEmail('');
+    }
+  };
+
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+    setFullName('');
+    setConfirmPassword('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   };
   
   // Get user initials from fullName
   const getUserInitials = () => {
-    if (!fullName) return '';
+    if (!user?.user_metadata?.full_name) return '';
     
+    const fullName = user.user_metadata.full_name;
     const nameParts = fullName.split(' ');
     if (nameParts.length >= 2) {
       return `${nameParts[0][0]}${nameParts[1][0]}`;
@@ -113,6 +133,10 @@ export default function TopBar() {
   // Switch to sign in tab
   const switchToSignIn = () => {
     setActiveTab("signin");
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
@@ -177,7 +201,7 @@ export default function TopBar() {
           </DialogContent>
         </Dialog>
         
-        {isLoggedIn ? (
+        {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -198,13 +222,13 @@ export default function TopBar() {
               <DropdownMenuItem onSelect={() => handleNavigate('/settings')}>
                 {t("settings")}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setIsLoggedIn(false)}>
+              <DropdownMenuItem onSelect={handleSignOut}>
                 {t("logOut")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Dialog>
+          <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="gap-2">
                 <LogIn className="h-4 w-4" />
