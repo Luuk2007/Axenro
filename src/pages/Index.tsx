@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Activity, Calendar, Dumbbell, Flame, Plus, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -13,16 +13,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-
-const weightData = [
-  { date: 'Jun 1', value: 78.5 },
-  { date: 'Jun 8', value: 78.2 },
-  { date: 'Jun 15', value: 77.8 },
-  { date: 'Jun 22', value: 77.3 },
-  { date: 'Jun 29', value: 76.9 },
-  { date: 'Jul 6', value: 76.5 },
-  { date: 'Jul 13', value: 76.4 },
-];
 
 const meals = [
   {
@@ -62,6 +52,89 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [date, setDate] = useState<Date>(new Date());
   const [showAddActivity, setShowAddActivity] = useState(false);
+  const [weightData, setWeightData] = useState<Array<{date: string, value: number}>>([]);
+  const [userWeight, setUserWeight] = useState<number | null>(null);
+  const [userCalories, setUserCalories] = useState<number>(2200);
+
+  useEffect(() => {
+    // Get weight data from localStorage if available
+    const savedWeightData = localStorage.getItem("weightData");
+    if (savedWeightData) {
+      try {
+        setWeightData(JSON.parse(savedWeightData));
+      } catch (error) {
+        console.error("Error parsing weight data:", error);
+        setWeightData([]);
+      }
+    } else {
+      // Initialize with empty array if no data
+      setWeightData([]);
+    }
+
+    // Get user profile from localStorage
+    const savedProfile = localStorage.getItem("userProfile");
+    if (savedProfile) {
+      try {
+        const profileData = JSON.parse(savedProfile);
+        setUserWeight(profileData.weight);
+        
+        // Calculate calories
+        const bmr = calculateBMR(profileData);
+        const calories = calculateDailyCalories(profileData, bmr);
+        setUserCalories(calories);
+      } catch (error) {
+        console.error("Error parsing profile data:", error);
+      }
+    }
+  }, []);
+
+  // Calculate BMR using Mifflin-St Jeor formula (same as in Profile.tsx)
+  const calculateBMR = (data: any) => {
+    const { weight, height, age, gender } = data;
+    
+    if (gender === "male") {
+      return 10 * weight + 6.25 * height - 5 * age + 5;
+    } else if (gender === "female") {
+      return 10 * weight + 6.25 * height - 5 * age - 161;
+    } else {
+      // For "other" gender, use an average of male and female formulas
+      return 10 * weight + 6.25 * height - 5 * age - 78;
+    }
+  };
+
+  // Calculate daily calorie needs (same as in Profile.tsx)
+  const calculateDailyCalories = (data: any, bmr: number) => {
+    // Apply activity multiplier
+    let activityMultiplier = 1.2; // Sedentary
+    switch (data.exerciseFrequency) {
+      case "0-2":
+        activityMultiplier = 1.375; // Light activity
+        break;
+      case "3-5":
+        activityMultiplier = 1.55; // Moderate activity
+        break;
+      case "6+":
+        activityMultiplier = 1.725; // Very active
+        break;
+    }
+    
+    let calories = Math.round(bmr * activityMultiplier);
+    
+    // Adjust based on goal
+    switch (data.goal) {
+      case "gain":
+        calories += 500;
+        break;
+      case "lose":
+        calories -= 500;
+        break;
+      case "maintain":
+        // No adjustment needed
+        break;
+    }
+    
+    return calories;
+  };
 
   const navigateToNutrition = () => {
     navigate('/nutrition');
@@ -136,10 +209,10 @@ const Dashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title={`${t("dailyCalorieNeeds")}`}
-          value="1,840"
+          value={userCalories ? userCalories.toString() : "1,840"}
           icon={Flame}
           trend={{ value: 5, isPositive: true }}
-          description={`${t("target")}: 2,200`}
+          description={`${t("target")}: ${userCalories ? userCalories : 2200}`}
         />
         <StatsCard
           title={`${t("dailyNutrients")}`}
@@ -156,7 +229,7 @@ const Dashboard = () => {
         />
         <StatsCard
           title={`${t("weight")}`}
-          value="76.4 kg"
+          value={userWeight ? `${userWeight} kg` : "76.4 kg"}
           icon={Weight}
           trend={{ value: 1.3, isPositive: true }}
           description={`${t("target")}: 75 kg`}

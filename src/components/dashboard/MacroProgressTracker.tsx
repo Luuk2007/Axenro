@@ -1,9 +1,16 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
 
-const macroTargets = {
+type MacroData = {
+  calories: { consumed: number; goal: number; unit: string };
+  protein: { consumed: number; goal: number; unit: string };
+  carbs: { consumed: number; goal: number; unit: string };
+  fat: { consumed: number; goal: number; unit: string };
+};
+
+const defaultMacroTargets: MacroData = {
   calories: { consumed: 0, goal: 2200, unit: '' },
   protein: { consumed: 0, goal: 165, unit: 'g' },
   carbs: { consumed: 0, goal: 220, unit: 'g' },
@@ -12,6 +19,111 @@ const macroTargets = {
 
 export default function MacroProgressTracker() {
   const { t } = useLanguage();
+  const [macroTargets, setMacroTargets] = useState<MacroData>(defaultMacroTargets);
+  
+  useEffect(() => {
+    // Get profile data from localStorage
+    const savedProfile = localStorage.getItem("userProfile");
+    
+    if (savedProfile) {
+      try {
+        const profileData = JSON.parse(savedProfile);
+        
+        // Calculate macros using the same formula as in Profile.tsx
+        const bmr = calculateBMR(profileData);
+        const calories = calculateDailyCalories(profileData, bmr);
+        const macros = calculateMacros(calories, profileData.goal);
+        
+        // Update the macro targets
+        setMacroTargets({
+          calories: { consumed: 0, goal: calories, unit: '' },
+          protein: { consumed: 0, goal: macros.protein, unit: 'g' },
+          carbs: { consumed: 0, goal: macros.carbs, unit: 'g' },
+          fat: { consumed: 0, goal: macros.fats, unit: 'g' },
+        });
+      } catch (error) {
+        console.error("Error parsing profile data:", error);
+      }
+    }
+  }, []);
+  
+  // Calculate BMR using Mifflin-St Jeor formula (same as in Profile.tsx)
+  const calculateBMR = (data: any) => {
+    const { weight, height, age, gender } = data;
+    
+    if (gender === "male") {
+      return 10 * weight + 6.25 * height - 5 * age + 5;
+    } else if (gender === "female") {
+      return 10 * weight + 6.25 * height - 5 * age - 161;
+    } else {
+      // For "other" gender, use an average of male and female formulas
+      return 10 * weight + 6.25 * height - 5 * age - 78;
+    }
+  };
+
+  // Calculate daily calorie needs (same as in Profile.tsx)
+  const calculateDailyCalories = (data: any, bmr: number) => {
+    // Apply activity multiplier
+    let activityMultiplier = 1.2; // Sedentary
+    switch (data.exerciseFrequency) {
+      case "0-2":
+        activityMultiplier = 1.375; // Light activity
+        break;
+      case "3-5":
+        activityMultiplier = 1.55; // Moderate activity
+        break;
+      case "6+":
+        activityMultiplier = 1.725; // Very active
+        break;
+    }
+    
+    let calories = Math.round(bmr * activityMultiplier);
+    
+    // Adjust based on goal
+    switch (data.goal) {
+      case "gain":
+        calories += 500;
+        break;
+      case "lose":
+        calories -= 500;
+        break;
+      case "maintain":
+        // No adjustment needed
+        break;
+    }
+    
+    return calories;
+  };
+
+  // Calculate macro breakdown (same as in Profile.tsx)
+  const calculateMacros = (calories: number, goal: string) => {
+    let protein = 0;
+    let fats = 0;
+    let carbs = 0;
+    
+    switch (goal) {
+      case "gain":
+        // Higher carbs for weight gain
+        protein = Math.round((calories * 0.3) / 4); // 30% of calories from protein
+        fats = Math.round((calories * 0.25) / 9); // 25% of calories from fat
+        carbs = Math.round((calories * 0.45) / 4); // 45% of calories from carbs
+        break;
+      case "lose":
+        // Higher protein for weight loss
+        protein = Math.round((calories * 0.4) / 4); // 40% of calories from protein
+        fats = Math.round((calories * 0.3) / 9); // 30% of calories from fat
+        carbs = Math.round((calories * 0.3) / 4); // 30% of calories from carbs
+        break;
+      case "maintain":
+        // Balanced macros for maintenance
+        protein = Math.round((calories * 0.35) / 4); // 35% of calories from protein
+        fats = Math.round((calories * 0.3) / 9); // 30% of calories from fat
+        carbs = Math.round((calories * 0.35) / 4); // 35% of calories from carbs
+        break;
+    }
+    
+    return { protein, fats, carbs };
+  };
   
   return (
     <div className="glassy-card rounded-xl overflow-hidden card-shadow">
@@ -22,44 +134,44 @@ export default function MacroProgressTracker() {
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium">Calories</span>
-            <span className="text-sm font-medium">0 / 2200 kcal</span>
+            <span className="text-sm font-medium">0 / {macroTargets.calories.goal} kcal</span>
           </div>
           <Progress value={0} className="h-2" />
           <div className="text-xs text-muted-foreground">
-            2200 kcal remaining today
+            {macroTargets.calories.goal} kcal remaining today
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium">Protein</span>
-            <span className="text-sm font-medium">0 / 165g</span>
+            <span className="text-sm font-medium">0 / {macroTargets.protein.goal}g</span>
           </div>
           <Progress value={0} className="h-2 bg-blue-100 [&>div]:bg-blue-500" />
           <div className="text-xs text-muted-foreground">
-            165g remaining today
+            {macroTargets.protein.goal}g remaining today
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium">Carbs</span>
-            <span className="text-sm font-medium">0 / 220g</span>
+            <span className="text-sm font-medium">0 / {macroTargets.carbs.goal}g</span>
           </div>
           <Progress value={0} className="h-2 bg-green-100 [&>div]:bg-green-500" />
           <div className="text-xs text-muted-foreground">
-            220g remaining today
+            {macroTargets.carbs.goal}g remaining today
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium">Fats</span>
-            <span className="text-sm font-medium">0 / 73g</span>
+            <span className="text-sm font-medium">0 / {macroTargets.fat.goal}g</span>
           </div>
           <Progress value={0} className="h-2 bg-yellow-100 [&>div]:bg-yellow-500" />
           <div className="text-xs text-muted-foreground">
-            73g remaining today
+            {macroTargets.fat.goal}g remaining today
           </div>
         </div>
         
@@ -68,15 +180,15 @@ export default function MacroProgressTracker() {
           <div className="flex justify-between gap-2 text-sm">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-              Protein: 165g (30%)
+              Protein: {macroTargets.protein.goal}g (30%)
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-              Carbs: 220g (40%)
+              Carbs: {macroTargets.carbs.goal}g (40%)
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
-              Fats: 73g (30%)
+              Fats: {macroTargets.fat.goal}g (30%)
             </div>
           </div>
         </div>
