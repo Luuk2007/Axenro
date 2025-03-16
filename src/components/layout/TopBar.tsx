@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { BellIcon, Menu, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -505,7 +504,7 @@ export default function TopBar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0">
-              <Sidebar onNavigate={handleNavigate} />
+              <Sidebar />
             </SheetContent>
           </Sheet>
         )}
