@@ -25,23 +25,23 @@ export default function DailySummary({ className }: DailySummaryProps) {
   const [macroTargets] = React.useState<MacroData>(defaultMacroTargets);
 
   return (
-    <div className={`flex flex-nowrap gap-6 overflow-x-auto pb-2 ${className}`}>
-      <div className="flex-shrink-0 border rounded-lg p-2 min-w-[160px]">
+    <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 ${className}`}>
+      <div className="border rounded-lg p-3 shadow-sm">
         <div className="text-xs text-muted-foreground">{t("calories")}</div>
         <div className="text-lg font-semibold">{macroTargets.calories.consumed} / {macroTargets.calories.goal}</div>
       </div>
       
-      <div className="flex-shrink-0 border rounded-lg p-2 min-w-[120px]">
+      <div className="border rounded-lg p-3 shadow-sm">
         <div className="text-xs text-muted-foreground">{t("protein")}</div>
         <div className="text-lg font-semibold">{macroTargets.protein.consumed}g / {macroTargets.protein.goal}g</div>
       </div>
       
-      <div className="flex-shrink-0 border rounded-lg p-2 min-w-[120px]">
+      <div className="border rounded-lg p-3 shadow-sm">
         <div className="text-xs text-muted-foreground">{t("carbs")}</div>
         <div className="text-lg font-semibold">{macroTargets.carbs.consumed}g / {macroTargets.carbs.goal}g</div>
       </div>
       
-      <div className="flex-shrink-0 border rounded-lg p-2 min-w-[120px]">
+      <div className="border rounded-lg p-3 shadow-sm">
         <div className="text-xs text-muted-foreground">{t("fat")}</div>
         <div className="text-lg font-semibold">{macroTargets.fat.consumed}g / {macroTargets.fat.goal}g</div>
       </div>
