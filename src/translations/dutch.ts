@@ -116,6 +116,7 @@ export const dutch = {
   
   // Macros
   "dailyNutrients": "Dagelijkse Voedingsstoffen",
+  "dailySteps": "Dagelijkse Stappen",
   "target": "Doel",
   "consumed": "Verbruikt",
   "remaining": "Resterend",

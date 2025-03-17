@@ -118,6 +118,7 @@ export const english = {
   
   // Macros
   "dailyNutrients": "Daily Nutrients",
+  "dailySteps": "Daily Steps",
   "target": "Target",
   "consumed": "Consumed",
   "remaining": "Remaining",

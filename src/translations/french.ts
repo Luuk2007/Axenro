@@ -88,6 +88,7 @@ export const french = {
   
   // Macros
   "dailyNutrients": "Nutriments Quotidiens",
+  "dailySteps": "Pas Quotidiens",
   "target": "Objectif",
   "consumed": "Consommé",
   "remaining": "Restant",
