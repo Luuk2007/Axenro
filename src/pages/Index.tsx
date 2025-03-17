@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Activity, Calendar, Dumbbell, Flame, Footprints, Plus, Target, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -180,14 +179,6 @@ const Dashboard = () => {
             </PopoverContent>
           </Popover>
           
-          {/* Display target weight in right upper corner */}
-          {userTargetWeight && (
-            <div className="hidden md:flex items-center gap-2 bg-secondary/30 px-3 py-2 rounded-md">
-              <Target className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Target: {userTargetWeight} kg</span>
-            </div>
-          )}
-          
           <Dialog open={showAddActivity} onOpenChange={setShowAddActivity}>
             <DialogTrigger asChild>
               <Button>
@@ -222,14 +213,12 @@ const Dashboard = () => {
           title={`${t("dailyCalorieNeeds")}`}
           value={userCalories ? userCalories.toString() : "1,840"}
           icon={Flame}
-          trend={{ value: 5, isPositive: true }}
           description={`${t("target")}: ${userCalories ? userCalories : 2200}`}
         />
         <StatsCard
           title={`${t("dailySteps")}`}
           value={dailySteps.toLocaleString()}
           icon={Footprints}
-          trend={{ value: 3, isPositive: true }}
           description={`${t("target")}: 10,000`}
         />
         <StatsCard
@@ -242,7 +231,6 @@ const Dashboard = () => {
           title={`${t("weight")}`}
           value={userWeight ? `${userWeight} kg` : "76.4 kg"}
           icon={Weight}
-          trend={{ value: 1.3, isPositive: true }}
           description={`${t("target")}: ${userTargetWeight || '75'} kg`}
         />
       </div>

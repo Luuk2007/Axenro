@@ -60,6 +60,11 @@ const profileFormSchema = z.object({
     .min(100, "Height must be at least 100cm")
     .max(250, "Height must be less than 250cm"),
   goal: z.enum(["gain", "lose", "maintain"]),
+  weightChangeAmount: z.coerce
+    .number()
+    .min(0, "Amount must be positive")
+    .max(50, "Amount must be less than 50kg")
+    .optional(),
   age: z.coerce
     .number()
     .min(16, "Age must be at least 16")
@@ -80,6 +85,7 @@ const defaultValues: Partial<ProfileFormValues> = {
   weight: 70,
   height: 175,
   goal: "maintain",
+  weightChangeAmount: 0,
   age: 30,
   gender: "male",
   targetWeight: 70,
@@ -101,6 +107,10 @@ const Profile = () => {
     defaultValues: getSavedProfile(),
   });
 
+  // Watch for goal changes to show/hide weight change amount
+  const currentGoal = form.watch("goal");
+  const showWeightChangeAmount = currentGoal === "gain" || currentGoal === "lose";
+
   // Load profile from localStorage on component mount
   useEffect(() => {
     const savedProfile = localStorage.getItem("userProfile");
@@ -109,6 +119,20 @@ const Profile = () => {
       setProfile(parsedProfile);
     }
   }, []);
+
+  // Automatically update target weight when weight change amount changes
+  useEffect(() => {
+    if (showWeightChangeAmount) {
+      const currentWeight = form.getValues("weight");
+      const weightChangeAmount = form.getValues("weightChangeAmount") || 0;
+      
+      if (currentGoal === "gain") {
+        form.setValue("targetWeight", currentWeight + weightChangeAmount);
+      } else if (currentGoal === "lose") {
+        form.setValue("targetWeight", currentWeight - weightChangeAmount);
+      }
+    }
+  }, [form.watch("weightChangeAmount"), form.watch("goal"), form.watch("weight"), showWeightChangeAmount, currentGoal, form]);
 
   // Calculate BMR using Mifflin-St Jeor formula
   const calculateBMR = (data: ProfileFormValues) => {
@@ -191,9 +215,17 @@ const Profile = () => {
   };
 
   const onSubmit = (data: ProfileFormValues) => {
-    // If targetWeight is not set, set it equal to current weight
-    if (!data.targetWeight) {
-      data.targetWeight = data.weight;
+    // Set target weight based on goal if not explicitly set
+    if (!data.targetWeight || data.targetWeight === 0) {
+      if (data.goal === "maintain") {
+        data.targetWeight = data.weight;
+      } else if (data.goal === "gain" && data.weightChangeAmount) {
+        data.targetWeight = data.weight + data.weightChangeAmount;
+      } else if (data.goal === "lose" && data.weightChangeAmount) {
+        data.targetWeight = data.weight - data.weightChangeAmount;
+      } else {
+        data.targetWeight = data.weight;
+      }
     }
     
     // Save to localStorage
@@ -382,7 +414,29 @@ const Profile = () => {
                       )}
                     />
                     
-                    {/* New field for target weight */}
+                    {/* Weight change amount field - only visible when goal is gain or lose */}
+                    {showWeightChangeAmount && (
+                      <FormField
+                        control={form.control}
+                        name="weightChangeAmount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              {currentGoal === "gain" ? "Amount to Gain" : "Amount to Lose"} ({t("kg")})
+                            </FormLabel>
+                            <FormControl>
+                              <Input type="number" {...field} value={field.value || ''} />
+                            </FormControl>
+                            <FormDescription className="text-xs">
+                              How much weight you want to {currentGoal === "gain" ? "gain" : "lose"}
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                    
+                    {/* Target weight field */}
                     <FormField
                       control={form.control}
                       name="targetWeight"
@@ -390,10 +444,18 @@ const Profile = () => {
                         <FormItem>
                           <FormLabel>Target Weight ({t("kg")})</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} value={field.value || ''} />
+                            <Input 
+                              type="number" 
+                              {...field} 
+                              value={field.value || ''} 
+                              readOnly={showWeightChangeAmount}
+                              className={showWeightChangeAmount ? "bg-gray-100" : ""}
+                            />
                           </FormControl>
                           <FormDescription className="text-xs">
-                            The weight you aim to achieve
+                            {showWeightChangeAmount 
+                              ? "Automatically calculated based on your weight goal" 
+                              : "The weight you aim to achieve"}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>

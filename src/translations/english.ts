@@ -88,6 +88,12 @@ export const english = {
   "carbs": "Carbs",
   "fat": "Fat",
   "profileUpdated": "Profile updated successfully",
+  "amountToGain": "Amount to Gain",
+  "amountToLose": "Amount to Lose",
+  "targetWeight": "Target Weight",
+  "waterLog": "Water Log",
+  "noWaterEntries": "No water entries yet",
+  "dailyWaterGoal": "Daily Water Goal",
   
   // Settings
   "appSettings": "App Settings",

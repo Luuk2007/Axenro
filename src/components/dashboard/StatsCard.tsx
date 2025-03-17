@@ -8,10 +8,6 @@ interface StatsCardProps {
   value: string | number;
   icon: LucideIcon;
   description?: string;
-  trend?: {
-    value: number;
-    isPositive: boolean;
-  };
   className?: string;
 }
 
@@ -20,7 +16,6 @@ export default function StatsCard({
   value,
   icon: Icon,
   description,
-  trend,
   className,
 }: StatsCardProps) {
   return (
@@ -34,19 +29,6 @@ export default function StatsCard({
           <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
           {description && (
             <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-          )}
-          {trend && (
-            <div className="mt-2 flex items-center text-xs">
-              <span
-                className={cn(
-                  "mr-1 font-medium",
-                  trend.isPositive ? "text-green-500" : "text-red-500"
-                )}
-              >
-                {trend.isPositive ? "+" : "-"}{Math.abs(trend.value)}%
-              </span>
-              <span className="text-muted-foreground">vs last week</span>
-            </div>
           )}
         </div>
         <div className="rounded-full bg-primary/10 p-2.5">
