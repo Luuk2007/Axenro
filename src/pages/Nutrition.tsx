@@ -21,14 +21,14 @@ const Nutrition = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>{t("nutrition")}</CardTitle>
+            <CardTitle>{t("nutritionOverview")}</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="today" className="w-full" onValueChange={(value) => setTimeframe(value as 'today' | 'week' | 'month')}>
               <TabsList>
-                <TabsTrigger value="today">{t("today")}</TabsTrigger>
-                <TabsTrigger value="week">{t("week")}</TabsTrigger>
-                <TabsTrigger value="month">{t("month")}</TabsTrigger>
+                <TabsTrigger value="today">Today</TabsTrigger>
+                <TabsTrigger value="week">Week</TabsTrigger>
+                <TabsTrigger value="month">Month</TabsTrigger>
               </TabsList>
               <TabsContent value="today">
                 <DailySummary timeframe="today" />
