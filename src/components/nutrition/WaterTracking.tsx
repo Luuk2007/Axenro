@@ -20,7 +20,9 @@ export default function WaterTracking() {
 
   // Load water data on component mount
   useEffect(() => {
-    const savedWaterData = localStorage.getItem("todayWaterLog");
+    const today = new Date().toLocaleDateString('en-US');
+    const savedWaterData = localStorage.getItem(`waterLog_${today}`);
+    
     if (savedWaterData) {
       try {
         const parsedData = JSON.parse(savedWaterData);
@@ -32,12 +34,17 @@ export default function WaterTracking() {
       } catch (error) {
         console.error("Error parsing water data:", error);
       }
+    } else {
+      // Reset for new day
+      setWaterLog([]);
+      setTotalWater(0);
     }
   }, []);
 
   // Save water data to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem("todayWaterLog", JSON.stringify(waterLog));
+    const today = new Date().toLocaleDateString('en-US');
+    localStorage.setItem(`waterLog_${today}`, JSON.stringify(waterLog));
   }, [waterLog]);
 
   const addWater = (amount: number) => {
@@ -47,7 +54,8 @@ export default function WaterTracking() {
       timestamp: Date.now(),
     };
     
-    setWaterLog([...waterLog, newEntry]);
+    const updatedLog = [...waterLog, newEntry];
+    setWaterLog(updatedLog);
     setTotalWater(prevTotal => prevTotal + amount);
     toast.success(`Added ${amount}ml of water`);
   };
@@ -61,7 +69,8 @@ export default function WaterTracking() {
       setTotalWater(prevTotal => prevTotal - amountToRemove);
       
       // Remove from log
-      setWaterLog(prevLog => prevLog.filter(entry => entry.id !== id));
+      const updatedLog = waterLog.filter(entry => entry.id !== id);
+      setWaterLog(updatedLog);
       
       toast.success(`Removed ${amountToRemove}ml of water`);
     }
@@ -94,9 +103,9 @@ export default function WaterTracking() {
       </div>
       
       <div className="mt-6">
-        <h4 className="text-sm font-medium mb-2">Water Log</h4>
+        <h4 className="text-sm font-medium mb-2">{t("waterLog")}</h4>
         {waterLog.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No water entries yet.</p>
+          <p className="text-sm text-muted-foreground">{t("noWaterEntries")}</p>
         ) : (
           <div className="space-y-2 max-h-[250px] overflow-y-auto pr-2">
             {waterLog.map((entry) => (

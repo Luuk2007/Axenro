@@ -14,6 +14,7 @@ import BMICalculator from "@/components/profile/BMICalculator";
 import ProfileForm, { ProfileFormValues, defaultValues } from "@/components/profile/ProfileForm";
 import UserStatsDisplay from "@/components/profile/UserStatsDisplay";
 import NutritionCalculator from "@/components/profile/NutritionCalculator";
+import OneRepMaxCalculator from "@/components/workouts/OneRepMaxCalculator";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -23,8 +24,12 @@ const Profile = () => {
   useEffect(() => {
     const savedProfile = localStorage.getItem("userProfile");
     if (savedProfile) {
-      const parsedProfile = JSON.parse(savedProfile);
-      setProfile(parsedProfile);
+      try {
+        const parsedProfile = JSON.parse(savedProfile);
+        setProfile(parsedProfile);
+      } catch (error) {
+        console.error("Error parsing profile:", error);
+      }
     }
   }, []);
   
@@ -35,18 +40,7 @@ const Profile = () => {
   };
 
   const handleSubmit = (data: ProfileFormValues) => {
-    // Set target weight based on goal if not explicitly set
-    if (!data.targetWeight || data.targetWeight === 0) {
-      if (data.goal === "maintain") {
-        data.targetWeight = data.weight;
-      } else if (data.goal === "gain" && data.weightChangeAmount) {
-        data.targetWeight = data.weight + data.weightChangeAmount;
-      } else if (data.goal === "lose" && data.weightChangeAmount) {
-        data.targetWeight = data.weight - data.weightChangeAmount;
-      } else {
-        data.targetWeight = data.weight;
-      }
-    }
+    // The target weight calculation logic has been moved to ProfileForm component
     
     // Save to localStorage
     localStorage.setItem("userProfile", JSON.stringify(data));
@@ -83,6 +77,7 @@ const Profile = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="profile">{t("profileSettings")}</TabsTrigger>
           <TabsTrigger value="nutrition">{t("nutritionPlan")}</TabsTrigger>
+          <TabsTrigger value="statistics">{t("statistics")}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile" className="space-y-6">
@@ -115,7 +110,7 @@ const Profile = () => {
             <Card>
               <CardContent className="py-10 text-center">
                 <p className="text-muted-foreground">
-                  {t("profileUpdated")}
+                  {t("completeYourProfile")}
                 </p>
                 <Button
                   onClick={() => handleSubmit(getSavedProfile())}
@@ -127,6 +122,10 @@ const Profile = () => {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+        
+        <TabsContent value="statistics" className="space-y-6">
+          <OneRepMaxCalculator />
         </TabsContent>
       </Tabs>
     </div>

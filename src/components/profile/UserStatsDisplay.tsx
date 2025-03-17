@@ -11,6 +11,7 @@ interface UserStatsDisplayProps {
 
 const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
   const { t } = useLanguage();
+  const showTargetWeight = profile.goal !== "maintain";
 
   return (
     <Card>
@@ -69,11 +70,13 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
             </dd>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-muted-foreground" />
-            <dt className="font-medium">Target Weight:</dt>
-            <dd>{profile.targetWeight || profile.weight} {t("kg")}</dd>
-          </div>
+          {showTargetWeight && (
+            <div className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-muted-foreground" />
+              <dt className="font-medium">{t("targetWeight")}:</dt>
+              <dd>{profile.targetWeight} {t("kg")}</dd>
+            </div>
+          )}
         </dl>
       </CardContent>
     </Card>

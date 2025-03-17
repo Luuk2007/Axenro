@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "sonner";
-import { Activity, Weight, Ruler, Heart, Calendar, User2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -91,24 +90,47 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
   const currentGoal = form.watch("goal");
   const showWeightChangeAmount = currentGoal === "gain" || currentGoal === "lose";
 
-  // Automatically update target weight when weight change amount changes
+  // Automatically update target weight when relevant values change
   useEffect(() => {
     if (showWeightChangeAmount) {
       const currentWeight = form.getValues("weight");
       const weightChangeAmount = form.getValues("weightChangeAmount") || 0;
+      let targetWeight = currentWeight;
       
       if (currentGoal === "gain") {
-        form.setValue("targetWeight", currentWeight + weightChangeAmount);
+        targetWeight = currentWeight + weightChangeAmount;
       } else if (currentGoal === "lose") {
-        form.setValue("targetWeight", currentWeight - weightChangeAmount);
+        targetWeight = currentWeight - weightChangeAmount;
+      }
+      
+      // Only update if the target weight would be valid
+      if (targetWeight >= 30 && targetWeight <= 300) {
+        form.setValue("targetWeight", targetWeight);
       }
     }
   }, [form.watch("weightChangeAmount"), form.watch("goal"), form.watch("weight"), showWeightChangeAmount, currentGoal, form]);
 
+  // Handle form submission
+  const handleSubmit = (data: ProfileFormValues) => {
+    // If maintaining weight, set target weight to current weight
+    if (data.goal === "maintain") {
+      data.targetWeight = data.weight;
+    } 
+    // Make sure the target weight is properly calculated based on weight goals
+    else if (data.goal === "gain" && data.weightChangeAmount) {
+      data.targetWeight = data.weight + data.weightChangeAmount;
+    } 
+    else if (data.goal === "lose" && data.weightChangeAmount) {
+      data.targetWeight = data.weight - data.weightChangeAmount;
+    }
+    
+    onSubmit(data);
+  };
+
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -257,13 +279,13 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    {currentGoal === "gain" ? "Amount to Gain" : "Amount to Lose"} ({t("kg")})
+                    {currentGoal === "gain" ? t("amountToGain") : t("amountToLose")} ({t("kg")})
                   </FormLabel>
                   <FormControl>
                     <Input type="number" {...field} value={field.value || ''} />
                   </FormControl>
                   <FormDescription className="text-xs">
-                    How much weight you want to {currentGoal === "gain" ? "gain" : "lose"}
+                    {t("howMuchWeight")} {currentGoal === "gain" ? t("gain") : t("lose")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -271,31 +293,31 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
             />
           )}
           
-          {/* Target weight field */}
-          <FormField
-            control={form.control}
-            name="targetWeight"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Target Weight ({t("kg")})</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    {...field} 
-                    value={field.value || ''} 
-                    readOnly={showWeightChangeAmount}
-                    className={showWeightChangeAmount ? "bg-gray-100" : ""}
-                  />
-                </FormControl>
-                <FormDescription className="text-xs">
-                  {showWeightChangeAmount 
-                    ? "Automatically calculated based on your weight goal" 
-                    : "The weight you aim to achieve"}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Target weight field - only visible when goal is not maintain */}
+          {showWeightChangeAmount && (
+            <FormField
+              control={form.control}
+              name="targetWeight"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("targetWeight")} ({t("kg")})</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field} 
+                      value={field.value || ''} 
+                      readOnly
+                      className="bg-gray-100"
+                    />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    {t("automaticallyCalculated")}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </div>
 
         <Button type="submit">{t("saveChanges")}</Button>

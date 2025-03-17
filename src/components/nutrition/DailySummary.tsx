@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 type MacroData = {
@@ -22,7 +22,71 @@ interface DailySummaryProps {
 
 export default function DailySummary({ className }: DailySummaryProps) {
   const { t } = useLanguage();
-  const [macroTargets] = React.useState<MacroData>(defaultMacroTargets);
+  const [macroTargets, setMacroTargets] = useState<MacroData>(defaultMacroTargets);
+  
+  // Load from local storage if available
+  useEffect(() => {
+    // Try to load nutrition goals from user profile
+    const savedProfile = localStorage.getItem("userProfile");
+    if (savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile);
+        // If the profile contains nutrition data, use it
+        if (profile && profile.nutritionGoals) {
+          setMacroTargets(prevState => ({
+            ...prevState,
+            calories: { 
+              ...prevState.calories, 
+              goal: profile.nutritionGoals.calories || 2200 
+            },
+            protein: { 
+              ...prevState.protein, 
+              goal: profile.nutritionGoals.protein || 165 
+            },
+            carbs: { 
+              ...prevState.carbs, 
+              goal: profile.nutritionGoals.carbs || 220 
+            },
+            fat: { 
+              ...prevState.fat, 
+              goal: profile.nutritionGoals.fat || 73 
+            },
+          }));
+        }
+      } catch (error) {
+        console.error("Error loading nutrition goals:", error);
+      }
+    }
+    
+    // Load logged food data for the day
+    const today = new Date().toLocaleDateString('en-US');
+    const savedFoodLog = localStorage.getItem(`foodLog_${today}`);
+    if (savedFoodLog) {
+      try {
+        const foodLog = JSON.parse(savedFoodLog);
+        
+        // Calculate consumed macros from food log
+        const consumed = foodLog.reduce((total: any, item: any) => {
+          return {
+            calories: total.calories + (item.calories || 0),
+            protein: total.protein + (item.protein || 0),
+            carbs: total.carbs + (item.carbs || 0),
+            fat: total.fat + (item.fat || 0),
+          };
+        }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+        
+        // Update state with consumed values
+        setMacroTargets(prevState => ({
+          calories: { ...prevState.calories, consumed: consumed.calories },
+          protein: { ...prevState.protein, consumed: consumed.protein },
+          carbs: { ...prevState.carbs, consumed: consumed.carbs },
+          fat: { ...prevState.fat, consumed: consumed.fat },
+        }));
+      } catch (error) {
+        console.error("Error loading food log:", error);
+      }
+    }
+  }, []);
 
   return (
     <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 ${className}`}>
