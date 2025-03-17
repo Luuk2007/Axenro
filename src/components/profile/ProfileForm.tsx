@@ -100,11 +100,8 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
       if (currentGoal === "gain") {
         form.setValue("targetWeight", currentWeight + weightChangeAmount);
       } else if (currentGoal === "lose") {
-        form.setValue("targetWeight", Math.max(30, currentWeight - weightChangeAmount));
+        form.setValue("targetWeight", currentWeight - weightChangeAmount);
       }
-    } else {
-      // For maintain goal, set target weight equal to current weight
-      form.setValue("targetWeight", form.getValues("weight"));
     }
   }, [form.watch("weightChangeAmount"), form.watch("goal"), form.watch("weight"), showWeightChangeAmount, currentGoal, form]);
 
@@ -274,31 +271,31 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
             />
           )}
           
-          {/* Target weight field - only visible when goal is not maintain */}
-          {showWeightChangeAmount && (
-            <FormField
-              control={form.control}
-              name="targetWeight"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Target Weight ({t("kg")})</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      {...field} 
-                      value={field.value || ''} 
-                      readOnly={true}
-                      className="bg-gray-100"
-                    />
-                  </FormControl>
-                  <FormDescription className="text-xs">
-                    Automatically calculated based on your weight {currentGoal}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+          {/* Target weight field */}
+          <FormField
+            control={form.control}
+            name="targetWeight"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Target Weight ({t("kg")})</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    {...field} 
+                    value={field.value || ''} 
+                    readOnly={showWeightChangeAmount}
+                    className={showWeightChangeAmount ? "bg-gray-100" : ""}
+                  />
+                </FormControl>
+                <FormDescription className="text-xs">
+                  {showWeightChangeAmount 
+                    ? "Automatically calculated based on your weight goal" 
+                    : "The weight you aim to achieve"}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <Button type="submit">{t("saveChanges")}</Button>

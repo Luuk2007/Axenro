@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Trash } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 type WaterEntry = {
@@ -47,27 +47,23 @@ export default function WaterTracking() {
       timestamp: Date.now(),
     };
     
-    const updatedLog = [...waterLog, newEntry];
-    setWaterLog(updatedLog);
-    
-    // Recalculate total water
-    const newTotal = updatedLog.reduce((sum, entry) => sum + entry.amount, 0);
-    setTotalWater(newTotal);
-    
+    setWaterLog([...waterLog, newEntry]);
+    setTotalWater(prevTotal => prevTotal + amount);
     toast.success(`Added ${amount}ml of water`);
   };
 
   const deleteWaterEntry = (id: string) => {
     const entryToDelete = waterLog.find(entry => entry.id === id);
     if (entryToDelete) {
-      const updatedLog = waterLog.filter(entry => entry.id !== id);
-      setWaterLog(updatedLog);
+      const amountToRemove = entryToDelete.amount;
       
-      // Recalculate total water after deletion
-      const newTotal = updatedLog.reduce((sum, entry) => sum + entry.amount, 0);
-      setTotalWater(newTotal);
+      // Update total water
+      setTotalWater(prevTotal => prevTotal - amountToRemove);
       
-      toast.success(`Removed ${entryToDelete.amount}ml of water`);
+      // Remove from log
+      setWaterLog(prevLog => prevLog.filter(entry => entry.id !== id));
+      
+      toast.success(`Removed ${amountToRemove}ml of water`);
     }
   };
 
@@ -115,7 +111,7 @@ export default function WaterTracking() {
                   className="h-6 w-6" 
                   onClick={() => deleteWaterEntry(entry.id)}
                 >
-                  <Trash className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             ))}
