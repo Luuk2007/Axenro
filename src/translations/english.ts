@@ -94,6 +94,20 @@ export const english = {
   "waterLog": "Water Log",
   "noWaterEntries": "No water entries yet",
   "dailyWaterGoal": "Daily Water Goal",
+  "howMuchWeight": "How much weight do you want to",
+  "gain": "gain",
+  "lose": "lose",
+  "automaticallyCalculated": "Automatically calculated",
+  "statistics": "Statistics",
+  "completeYourProfile": "Complete your profile to see your nutrition plan",
+
+  // One Rep Max Calculator
+  "oneRepMaxCalculator": "One Rep Max Calculator",
+  "reps": "Reps",
+  "formula": "Formula",
+  "calculate": "Calculate",
+  "estimatedOneRepMax": "Estimated One Rep Max",
+  "oneRepMaxDisclaimer": "This is an estimate based on the selected formula. Actual one rep max may vary.",
   
   // Settings
   "appSettings": "App Settings",

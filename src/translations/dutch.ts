@@ -86,6 +86,23 @@ export const dutch = {
   "carbs": "Koolhydraten",
   "fat": "Vet",
   "profileUpdated": "Profiel succesvol bijgewerkt",
+  "amountToGain": "Hoeveelheid om aan te komen",
+  "amountToLose": "Hoeveelheid om te verliezen",
+  "targetWeight": "Streefgewicht",
+  "howMuchWeight": "Hoeveel gewicht wil je",
+  "gain": "aankomen",
+  "lose": "afvallen",
+  "automaticallyCalculated": "Automatisch berekend",
+  "statistics": "Statistieken",
+  "completeYourProfile": "Voltooi je profiel om je voedingsplan te zien",
+  
+  // One Rep Max Calculator
+  "oneRepMaxCalculator": "Eén Herhaling Maximum Calculator",
+  "reps": "Herhalingen",
+  "formula": "Formule",
+  "calculate": "Berekenen",
+  "estimatedOneRepMax": "Geschat Eén Herhaling Maximum",
+  "oneRepMaxDisclaimer": "Dit is een schatting op basis van de geselecteerde formule. Het werkelijke één herhaling maximum kan variëren.",
   
   // Settings
   "appSettings": "App Instellingen",
