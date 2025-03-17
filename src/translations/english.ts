@@ -94,7 +94,7 @@ export const english = {
   "waterLog": "Water Log",
   "noWaterEntries": "No water entries yet",
   "dailyWaterGoal": "Daily Water Goal",
-  "howMuchWeight": "How much weight do you want to",
+  "howMuchWeight": "How much weight",
   "gain": "gain",
   "lose": "lose",
   "automaticallyCalculated": "Automatically calculated",
@@ -103,11 +103,20 @@ export const english = {
 
   // One Rep Max Calculator
   "oneRepMaxCalculator": "One Rep Max Calculator",
+  "personalRecords": "Personal Records", 
   "reps": "Reps",
   "formula": "Formula",
   "calculate": "Calculate",
   "estimatedOneRepMax": "Estimated One Rep Max",
   "oneRepMaxDisclaimer": "This is an estimate based on the selected formula. Actual one rep max may vary.",
+  "saveRecord": "Save Record",
+  "exerciseName": "Exercise Name",
+  "personalRecord": "Personal Record",
+  "noPersonalRecords": "No personal records yet",
+  "addPersonalRecord": "Add Personal Record",
+  "deleteRecord": "Delete Record",
+  "recordSaved": "Record saved successfully",
+  "recordDeleted": "Record deleted successfully",
   
   // Settings
   "appSettings": "App Settings",

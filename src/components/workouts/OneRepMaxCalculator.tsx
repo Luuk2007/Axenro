@@ -14,7 +14,11 @@ import {
 } from "@/components/ui/select";
 import { Calculator, Dumbbell } from 'lucide-react';
 
-const OneRepMaxCalculator = () => {
+interface OneRepMaxCalculatorProps {
+  onCalculate?: (weight: number) => void;
+}
+
+const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
   const { t } = useLanguage();
   const [weight, setWeight] = useState<number | ''>('');
   const [reps, setReps] = useState<number | ''>('');
@@ -44,7 +48,13 @@ const OneRepMaxCalculator = () => {
         oneRM = weight * (36 / (37 - Math.min(reps, 36)));
     }
     
-    setResult(Math.round(oneRM * 10) / 10);
+    const roundedResult = Math.round(oneRM * 10) / 10;
+    setResult(roundedResult);
+    
+    // Call the callback if provided
+    if (onCalculate) {
+      onCalculate(roundedResult);
+    }
   };
   
   return (

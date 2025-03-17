@@ -14,7 +14,6 @@ import BMICalculator from "@/components/profile/BMICalculator";
 import ProfileForm, { ProfileFormValues, defaultValues } from "@/components/profile/ProfileForm";
 import UserStatsDisplay from "@/components/profile/UserStatsDisplay";
 import NutritionCalculator from "@/components/profile/NutritionCalculator";
-import OneRepMaxCalculator from "@/components/workouts/OneRepMaxCalculator";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -77,7 +76,6 @@ const Profile = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="profile">{t("profileSettings")}</TabsTrigger>
           <TabsTrigger value="nutrition">{t("nutritionPlan")}</TabsTrigger>
-          <TabsTrigger value="statistics">{t("statistics")}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile" className="space-y-6">
@@ -122,10 +120,6 @@ const Profile = () => {
               </CardContent>
             </Card>
           )}
-        </TabsContent>
-        
-        <TabsContent value="statistics" className="space-y-6">
-          <OneRepMaxCalculator />
         </TabsContent>
       </Tabs>
     </div>
