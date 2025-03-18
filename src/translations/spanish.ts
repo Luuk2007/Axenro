@@ -246,4 +246,5 @@ export const spanish = {
   "noExercisesYet": "Aún no se han añadido ejercicios",
   "deleteWorkout": "Eliminar Entrenamiento",
   "confirmDeleteWorkout": "¿Estás seguro de que quieres eliminar este entrenamiento?",
+  "areYouSure": "¿Estás seguro?",
 };

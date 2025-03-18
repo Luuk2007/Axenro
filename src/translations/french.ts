@@ -1,3 +1,4 @@
+
 export const french = {
   // Dashboard
   "dashboard": "Tableau de Bord",
@@ -241,7 +242,10 @@ export const french = {
   "exerciseList": "Liste d'Exercices",
   "filterExercises": "Filtrer les Exercices",
   "personalRecords": "Records Personnels",
-  // Adding new translations for the strings causing errors
   "createWorkoutDescription": "Créer une nouvelle routine d'entraînement",
   "noExercisesYet": "Aucun exercice ajouté pour l'instant",
+  "deleteWorkout": "Supprimer l'Entraînement",
+  "confirmDeleteWorkout": "Êtes-vous sûr de vouloir supprimer cet entraînement ?",
+  "areYouSure": "Êtes-vous sûr ?",
+  "resetPassword": "Réinitialiser le Mot de Passe",
 };
