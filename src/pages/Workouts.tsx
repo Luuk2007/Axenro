@@ -342,7 +342,7 @@ const Workouts = () => {
           <DialogHeader>
             <DialogTitle>{t("createWorkout")}</DialogTitle>
             <DialogDescription>
-              Create a new workout routine
+              {t("createWorkoutDescription")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -370,7 +370,7 @@ const Workouts = () => {
               
               {selectedExercises.length === 0 ? (
                 <div className="border rounded-md p-8 text-center text-muted-foreground">
-                  No exercises added yet
+                  {t("noExercisesYet")}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -558,7 +558,7 @@ const Workouts = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this workout and all of its data.
+              {t("confirmDeleteWorkout")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
