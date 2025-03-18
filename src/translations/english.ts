@@ -257,6 +257,11 @@ export const english = {
   "filterExercises": "Filter Exercises",
   "createWorkoutDescription": "Create a new workout routine",
   "noExercisesYet": "No exercises added yet",
-  "deleteWorkout": "Delete Workout", 
+  "deleteWorkout": "Delete Workout",
   "confirmDeleteWorkout": "Are you sure you want to delete this workout?",
+  "workoutDeleted": "Workout deleted successfully",
+  "workoutCompleted": "Workout completed!",
+  "selectExercise": "Select Exercise",
+  "noExercisesError": "Please add at least one exercise",
+  "completeOneSetError": "Please complete at least one set",
 };
