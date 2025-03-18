@@ -1,3 +1,4 @@
+
 export const german = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -101,6 +102,7 @@ export const german = {
   "calculate": "Berechnen",
   "estimatedOneRepMax": "Geschätztes Ein-Wiederholungs-Maximum",
   "oneRepMaxDisclaimer": "Dies ist eine Schätzung basierend auf der ausgewählten Formel. Das tatsächliche Ein-Wiederholungs-Maximum kann variieren.",
+  "personalRecords": "Persönliche Rekorde",
   
   // Settings
   "appSettings": "App-Einstellungen",
@@ -200,7 +202,6 @@ export const german = {
   "waterLog": "Wasserprotokoll",
   "dailyWaterGoal": "Tägliches Wasserziel",
   "noWaterEntries": "Noch keine Wassereinträge",
-  "personalRecords": "Persönliche Rekorde",
   "resetPassword": "Passwort zurücksetzen",
   
   // Workouts
@@ -246,5 +247,5 @@ export const german = {
   "muscleGroups": "Muskelgruppen",
   "exerciseList": "Übungsliste",
   "filterExercises": "Übungen filtern",
-  "personalRecords": "Persönliche Rekorde",
+  // Note: Removed duplicate "personalRecords" since it was already defined above
 };

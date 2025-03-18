@@ -1,3 +1,4 @@
+
 export const dutch = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -103,6 +104,7 @@ export const dutch = {
   "calculate": "Berekenen",
   "estimatedOneRepMax": "Geschat Eén Herhaling Maximum",
   "oneRepMaxDisclaimer": "Dit is een schatting op basis van de geselecteerde formule. Het werkelijke één herhaling maximum kan variëren.",
+  "personalRecords": "Persoonlijke Records",
   
   // Settings
   "appSettings": "App Instellingen",
@@ -201,7 +203,6 @@ export const dutch = {
   "waterLog": "Water Logboek",
   "dailyWaterGoal": "Dagelijks Waterdoel",
   "noWaterEntries": "Nog geen water invoer",
-  "personalRecords": "Persoonlijke Records",
   
   // Workouts
   "sets": "Sets",
@@ -246,5 +247,5 @@ export const dutch = {
   "muscleGroups": "Spiergroepen",
   "exerciseList": "Oefening Lijst",
   "filterExercises": "Filter Oefeningen",
-  "personalRecords": "Persoonlijke Records",
+  // Note: Removed duplicate "personalRecords" since it was already defined above
 };
