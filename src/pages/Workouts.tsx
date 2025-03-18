@@ -135,7 +135,7 @@ const Workouts = () => {
     }
 
     if (selectedExercises.length === 0) {
-      toast.error("Please add at least one exercise");
+      toast.error(t("noExercisesError"));
       return;
     }
 
@@ -230,7 +230,7 @@ const Workouts = () => {
     );
 
     if (!anyCompletedSets) {
-      toast.error("Please complete at least one set");
+      toast.error(t("completeOneSetError"));
       return;
     }
 
@@ -245,7 +245,7 @@ const Workouts = () => {
     }
 
     saveWorkouts(updatedWorkouts);
-    toast.success("Workout completed!");
+    toast.success(t("workoutCompleted"));
     setShowTrackWorkout(false);
     setCurrentWorkout(null);
   };
@@ -259,7 +259,7 @@ const Workouts = () => {
     if (deleteWorkoutId) {
       const updatedWorkouts = workouts.filter(w => w.id !== deleteWorkoutId);
       saveWorkouts(updatedWorkouts);
-      toast.success("Workout deleted");
+      toast.success(t("workoutDeleted"));
       setShowDeleteDialog(false);
       setDeleteWorkoutId(null);
     }
@@ -475,7 +475,7 @@ const Workouts = () => {
               <label className="text-sm font-medium">{t("exercise")}</label>
               <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Exercise" />
+                  <SelectValue placeholder={t("selectExercise")} />
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px]">
                   {filteredExercises.map((exercise) => (
