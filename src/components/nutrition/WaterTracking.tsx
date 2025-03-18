@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Trash2 } from 'lucide-react';
+import { Trash2, GlassWater } from 'lucide-react';
 import { toast } from 'sonner';
 
 type WaterEntry = {
@@ -111,13 +111,16 @@ export default function WaterTracking() {
             {waterLog.map((entry) => (
               <div key={entry.id} className="flex items-center justify-between p-2 border rounded">
                 <div className="flex items-center">
-                  <span className="text-sm font-medium">{entry.amount}ml</span>
-                  <span className="ml-2 text-xs text-muted-foreground">{formatTime(entry.timestamp)}</span>
+                  <GlassWater className="h-4 w-4 text-blue-500 mr-2" />
+                  <div>
+                    <p className="text-sm font-medium">{entry.amount}ml</p>
+                    <p className="text-xs text-muted-foreground">{formatTime(entry.timestamp)}</p>
+                  </div>
                 </div>
                 <Button 
                   variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6" 
+                  size="sm" 
+                  className="h-8 w-8 p-0" 
                   onClick={() => deleteWaterEntry(entry.id)}
                 >
                   <Trash2 className="h-4 w-4" />

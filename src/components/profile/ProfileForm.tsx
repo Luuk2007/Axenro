@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -88,13 +87,13 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
 
   // Watch for goal changes to show/hide weight change amount
   const currentGoal = form.watch("goal");
+  const currentWeight = form.watch("weight");
+  const weightChangeAmount = form.watch("weightChangeAmount");
   const showWeightChangeAmount = currentGoal === "gain" || currentGoal === "lose";
 
-  // Automatically update target weight when relevant values change
+  // Update target weight when relevant values change
   useEffect(() => {
-    if (showWeightChangeAmount) {
-      const currentWeight = form.getValues("weight");
-      const weightChangeAmount = form.getValues("weightChangeAmount") || 0;
+    if (showWeightChangeAmount && currentWeight && weightChangeAmount) {
       let targetWeight = currentWeight;
       
       if (currentGoal === "gain") {
@@ -107,8 +106,10 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
       if (targetWeight >= 30 && targetWeight <= 300) {
         form.setValue("targetWeight", targetWeight);
       }
+    } else if (currentGoal === "maintain" && currentWeight) {
+      form.setValue("targetWeight", currentWeight);
     }
-  }, [form.watch("weightChangeAmount"), form.watch("goal"), form.watch("weight"), showWeightChangeAmount, currentGoal, form]);
+  }, [currentWeight, weightChangeAmount, currentGoal, showWeightChangeAmount, form]);
 
   // Handle form submission
   const handleSubmit = (data: ProfileFormValues) => {
@@ -284,9 +285,6 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
                   <FormControl>
                     <Input type="number" {...field} value={field.value || ''} />
                   </FormControl>
-                  <FormDescription className="text-xs">
-                    {t("howMuchWeight")} {currentGoal === "gain" ? t("gain") : t("lose")}
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -310,9 +308,6 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
                       className="bg-gray-100"
                     />
                   </FormControl>
-                  <FormDescription className="text-xs">
-                    {t("automaticallyCalculated")}
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

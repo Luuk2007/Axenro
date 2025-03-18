@@ -1,6 +1,5 @@
-
 import React, { useState, useRef } from 'react';
-import { Apple, ArrowLeft, BarChart3, Camera, Check, Filter, GlassWater, Plus, Search, Utensils, X } from 'lucide-react';
+import { Apple, ArrowLeft, Camera, Check, Filter, GlassWater, Plus, Search, Utensils, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -10,6 +9,7 @@ import MacroChart from '@/components/dashboard/MacroChart';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import WaterTracking from '@/components/nutrition/WaterTracking';
 
 const macroData = [
   { name: 'Protein', value: 130, color: '#4F46E5' },
@@ -129,8 +129,6 @@ const foodDatabase = [
 
 const Nutrition = () => {
   const { t } = useLanguage();
-  const [water, setWater] = useState(1.8);
-  const [waterGoal] = useState(3.0);
   const [showAddFood, setShowAddFood] = useState(false);
   const [showScanBarcode, setShowScanBarcode] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -142,12 +140,6 @@ const Nutrition = () => {
   const [activeTab, setActiveTab] = useState<'meals' | 'water'>('meals');
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const handleAddWater = (amount: number) => {
-    const newWater = Math.min(water + amount, waterGoal);
-    setWater(parseFloat(newWater.toFixed(1)));
-    toast.success(`Added ${amount}L of water`);
-  };
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
@@ -349,6 +341,7 @@ const Nutrition = () => {
         </div>
       </div>
 
+      {/* Add food dialog */}
       <Dialog open={showAddFood} onOpenChange={setShowAddFood}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
@@ -404,6 +397,7 @@ const Nutrition = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Barcode scanning dialog */}
       <Dialog open={showScanBarcode} onOpenChange={(open) => {
         if (!open) {
           handleCloseScan();
@@ -636,90 +630,7 @@ const Nutrition = () => {
           
           {activeTab === 'water' && (
             <div className="p-5">
-              <div className="flex flex-col space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Daily Water Intake</h4>
-                    <p className="text-sm text-muted-foreground">Track your hydration</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold">{water}L</p>
-                    <p className="text-sm text-muted-foreground">of {waterGoal}L goal</p>
-                  </div>
-                </div>
-                
-                <div className="w-full h-4 bg-secondary rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all duration-500 ease-out"
-                    style={{ width: `${(water / waterGoal) * 100}%` }}
-                  ></div>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-3">
-                  <button
-                    className="flex flex-col items-center justify-center p-3 bg-secondary/30 rounded-lg hover:bg-secondary/50 transition-colors"
-                    onClick={() => handleAddWater(0.1)}
-                  >
-                    <GlassWater className="h-6 w-6 text-blue-500 mb-1" />
-                    <span className="text-sm">100ml</span>
-                  </button>
-                  <button
-                    className="flex flex-col items-center justify-center p-3 bg-secondary/30 rounded-lg hover:bg-secondary/50 transition-colors"
-                    onClick={() => handleAddWater(0.25)}
-                  >
-                    <GlassWater className="h-6 w-6 text-blue-500 mb-1" />
-                    <span className="text-sm">250ml</span>
-                  </button>
-                  <button
-                    className="flex flex-col items-center justify-center p-3 bg-secondary/30 rounded-lg hover:bg-secondary/50 transition-colors"
-                    onClick={() => handleAddWater(0.5)}
-                  >
-                    <GlassWater className="h-6 w-6 text-blue-500 mb-1" />
-                    <span className="text-sm">500ml</span>
-                  </button>
-                </div>
-                
-                <h4 className="font-medium pt-2">Water Log</h4>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {/* Placeholder for water log entries */}
-                  <div className="flex items-center justify-between bg-secondary/30 p-2 rounded-md">
-                    <div className="flex items-center">
-                      <GlassWater className="h-4 w-4 text-blue-500 mr-2" />
-                      <div>
-                        <p className="text-sm font-medium">500ml</p>
-                        <p className="text-xs text-muted-foreground">08:30 AM</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between bg-secondary/30 p-2 rounded-md">
-                    <div className="flex items-center">
-                      <GlassWater className="h-4 w-4 text-blue-500 mr-2" />
-                      <div>
-                        <p className="text-sm font-medium">250ml</p>
-                        <p className="text-xs text-muted-foreground">10:15 AM</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between bg-secondary/30 p-2 rounded-md">
-                    <div className="flex items-center">
-                      <GlassWater className="h-4 w-4 text-blue-500 mr-2" />
-                      <div>
-                        <p className="text-sm font-medium">500ml</p>
-                        <p className="text-xs text-muted-foreground">12:45 PM</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <WaterTracking />
             </div>
           )}
         </div>
