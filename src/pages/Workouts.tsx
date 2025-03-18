@@ -3,7 +3,7 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import PersonalRecords from "@/components/workouts/PersonalRecords";
-import { Dumbbell } from "lucide-react";
+import { Dumbbell, Trophy } from "lucide-react";
 
 const Workouts = () => {
   const { t } = useLanguage();

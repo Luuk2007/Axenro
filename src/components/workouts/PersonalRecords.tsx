@@ -32,6 +32,7 @@ const PersonalRecords = () => {
   const [calculatedWeight, setCalculatedWeight] = useState<number | null>(null);
   const [exerciseName, setExerciseName] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('calculator');
 
   // Load personal records from localStorage
   useEffect(() => {
@@ -72,6 +73,9 @@ const PersonalRecords = () => {
     setExerciseName('');
     setDialogOpen(false);
     toast.success(t('recordSaved'));
+    
+    // Switch to the records tab after saving
+    setActiveTab('records');
   };
 
   // Delete record handler
@@ -82,7 +86,7 @@ const PersonalRecords = () => {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="calculator" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="calculator">{t('oneRepMaxCalculator')}</TabsTrigger>
           <TabsTrigger value="records">{t('personalRecords')}</TabsTrigger>
@@ -149,7 +153,7 @@ const PersonalRecords = () => {
                   <p>{t('noPersonalRecords')}</p>
                   <Button 
                     variant="outline"
-                    onClick={() => document.querySelector('button[value="calculator"]')?.click()}
+                    onClick={() => setActiveTab('calculator')}
                     className="mt-2"
                   >
                     {t('addPersonalRecord')}
