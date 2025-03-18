@@ -1,4 +1,3 @@
-
 export const german = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -132,6 +131,7 @@ export const german = {
   
   // Macros
   "dailyNutrients": "Tägliche Nährstoffe",
+  "dailySteps": "Tägliche Schritte",
   "target": "Ziel",
   "consumed": "Verbraucht",
   "remaining": "Verbleibend",
@@ -187,5 +187,19 @@ export const german = {
   "profileNameDescription": "Dein vollständiger Name, wie er auf deinem Profil erscheinen wird",
   "emailAddress": "E-Mail-Adresse",
   "updating": "Aktualisieren...",
-  "updateProfile": "Profil aktualisieren"
+  "updateProfile": "Profil aktualisieren",
+
+  // Water tracking
+  "waterTracking": "Wasserverfolgung",
+  "waterCalculator": "Wasserrechner",
+  "waterCalculatorDescription": "Berechne deine empfohlene tägliche Wasseraufnahme basierend auf deinem Körpergewicht.",
+  "bodyWeight": "Körpergewicht",
+  "recommendedWaterIntake": "Empfohlene Wasseraufnahme",
+  "basedOnFormula": "Basierend auf der Formel",
+  "amountChange": "Menge zu ändern",
+  "waterLog": "Wasserprotokoll",
+  "dailyWaterGoal": "Tägliches Wasserziel",
+  "noWaterEntries": "Noch keine Wassereinträge",
+  "personalRecords": "Persönliche Rekorde",
+  "resetPassword": "Passwort zurücksetzen",
 };

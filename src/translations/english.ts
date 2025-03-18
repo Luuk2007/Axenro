@@ -1,4 +1,3 @@
-
 export const english = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -201,5 +200,14 @@ export const english = {
   "profileNameDescription": "Your full name as it will appear on your profile",
   "emailAddress": "Email Address",
   "updating": "Updating...",
-  "updateProfile": "Update Profile"
+  "updateProfile": "Update Profile",
+
+  // Water tracking
+  "waterTracking": "Water Tracking",
+  "waterCalculator": "Water Calculator",
+  "waterCalculatorDescription": "Calculate your recommended daily water intake based on your body weight.",
+  "bodyWeight": "Body Weight",
+  "recommendedWaterIntake": "Recommended Water Intake",
+  "basedOnFormula": "Based on formula",
+  "amountChange": "Amount to change",
 };

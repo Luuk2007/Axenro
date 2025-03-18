@@ -1,4 +1,3 @@
-
 export const dutch = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -189,5 +188,18 @@ export const dutch = {
   "profileNameDescription": "Je volledige naam zoals die op je profiel verschijnt",
   "emailAddress": "E-mailadres",
   "updating": "Bijwerken...",
-  "updateProfile": "Profiel bijwerken"
+  "updateProfile": "Profiel bijwerken",
+  
+  // Water tracking
+  "waterTracking": "Water Bijhouden",
+  "waterCalculator": "Water Calculator",
+  "waterCalculatorDescription": "Bereken je aanbevolen dagelijkse waterinname op basis van je lichaamsgewicht.",
+  "bodyWeight": "Lichaamsgewicht",
+  "recommendedWaterIntake": "Aanbevolen Waterinname",
+  "basedOnFormula": "Gebaseerd op formule",
+  "amountChange": "Hoeveelheid te wijzigen",
+  "waterLog": "Water Logboek",
+  "dailyWaterGoal": "Dagelijks Waterdoel",
+  "noWaterEntries": "Nog geen water invoer",
+  "personalRecords": "Persoonlijke Records",
 };

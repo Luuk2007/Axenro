@@ -1,4 +1,3 @@
-
 export const spanish = {
   // Dashboard
   "dashboard": "Tablero",
@@ -188,5 +187,18 @@ export const spanish = {
   "profileNameDescription": "Tu nombre completo como aparecerá en tu perfil",
   "emailAddress": "Dirección de Correo Electrónico",
   "updating": "Actualizando...",
-  "updateProfile": "Actualizar Perfil"
+  "updateProfile": "Actualizar Perfil",
+  
+  // Water tracking
+  "waterTracking": "Seguimiento de Agua",
+  "waterCalculator": "Calculadora de Agua",
+  "waterCalculatorDescription": "Calcula tu ingesta diaria recomendada de agua basada en tu peso corporal.",
+  "bodyWeight": "Peso Corporal",
+  "recommendedWaterIntake": "Ingesta de Agua Recomendada",
+  "basedOnFormula": "Basado en la fórmula",
+  "amountChange": "Cantidad a cambiar",
+  "waterLog": "Registro de Agua",
+  "dailyWaterGoal": "Meta Diaria de Agua",
+  "noWaterEntries": "Aún no hay entradas de agua",
+  "personalRecords": "Records Personales",
 };
