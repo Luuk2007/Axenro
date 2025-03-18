@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -280,7 +279,7 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    {currentGoal === "gain" ? t("amountToGain") : t("amountToLose")} ({t("kg")})
+                    {t("amountChange")} ({t("kg")})
                   </FormLabel>
                   <FormControl>
                     <Input type="number" {...field} value={field.value || ''} />
