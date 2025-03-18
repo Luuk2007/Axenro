@@ -556,7 +556,7 @@ const Workouts = () => {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
             <AlertDialogDescription>
               {t("confirmDeleteWorkout")}
             </AlertDialogDescription>

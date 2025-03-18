@@ -123,7 +123,7 @@ export const spanish = {
   "signOut": "Salir de tu cuenta",
   "deleteAccount": "Eliminar Cuenta",
   "permanentlyDelete": "Eliminar permanentemente tu cuenta y todos tus datos",
-  "areYouSure": "¿Estás absolutamente seguro?",
+  "areYouSure": "¿Estás seguro?",
   "cannotBeUndone": "Esta acción no se puede deshacer. Esto eliminará permanentemente tu cuenta y todos tus datos de nuestros servidores.",
   "cancel": "Cancelar",
   "yesDelete": "Sí, eliminar mi cuenta",
@@ -245,6 +245,5 @@ export const spanish = {
   "createWorkoutDescription": "Crear una nueva rutina de entrenamiento",
   "noExercisesYet": "Aún no se han añadido ejercicios",
   "deleteWorkout": "Eliminar Entrenamiento",
-  "confirmDeleteWorkout": "¿Estás seguro de que quieres eliminar este entrenamiento?",
-  "areYouSure": "¿Estás seguro?",
+  "confirmDeleteWorkout": "¿Estás seguro de que quieres eliminar este entrenamiento?"
 };

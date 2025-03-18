@@ -41,6 +41,7 @@ export const french = {
   "photoAccess": "Autoriser l'accès à la galerie photo ?",
   "allow": "Autoriser",
   "deny": "Refuser",
+  "resetPassword": "Réinitialiser le Mot de Passe",
   "enterEmail": "Entrez votre e-mail pour réinitialiser votre mot de passe",
   "send": "Envoyer",
   "selectDate": "Sélectionner la Date",
@@ -245,7 +246,5 @@ export const french = {
   "createWorkoutDescription": "Créer une nouvelle routine d'entraînement",
   "noExercisesYet": "Aucun exercice ajouté pour l'instant",
   "deleteWorkout": "Supprimer l'Entraînement",
-  "confirmDeleteWorkout": "Êtes-vous sûr de vouloir supprimer cet entraînement ?",
-  "areYouSure": "Êtes-vous sûr ?",
-  "resetPassword": "Réinitialiser le Mot de Passe",
+  "confirmDeleteWorkout": "Êtes-vous sûr de vouloir supprimer cet entraînement ?"
 };
