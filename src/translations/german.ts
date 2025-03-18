@@ -1,3 +1,4 @@
+
 export const german = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -27,7 +28,6 @@ export const german = {
   "add100ml": "100ml",
   "add250ml": "250ml",
   "add500ml": "500ml",
-  "add750ml": "750ml",
   "add750ml": "750ml",
   "add1l": "1L",
   "searchFoods": "Lebensmittel suchen...",
@@ -244,8 +244,8 @@ export const german = {
   "muscleGroups": "Muskelgruppen",
   "exerciseList": "Übungsliste",
   "filterExercises": "Übungen filtern",
-
-  // Adding new translations for the strings causing errors
   "createWorkoutDescription": "Erstelle eine neue Trainingroutine",
   "noExercisesYet": "Noch keine Übungen hinzugefügt",
+  "deleteWorkout": "Training löschen",
+  "confirmDeleteWorkout": "Bist du sicher, dass du dieses Training löschen möchtest?",
 };

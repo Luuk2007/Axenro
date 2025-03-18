@@ -1,3 +1,4 @@
+
 export const english = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -254,8 +255,8 @@ export const english = {
   "muscleGroups": "Muscle Groups",
   "exerciseList": "Exercise List",
   "filterExercises": "Filter Exercises",
-
-  // Adding new translations for the strings causing errors
   "createWorkoutDescription": "Create a new workout routine",
   "noExercisesYet": "No exercises added yet",
+  "deleteWorkout": "Delete Workout", 
+  "confirmDeleteWorkout": "Are you sure you want to delete this workout?",
 };
