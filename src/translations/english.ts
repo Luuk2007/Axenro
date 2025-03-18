@@ -1,4 +1,3 @@
-
 export const english = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -252,4 +251,7 @@ export const english = {
   "totalSets": "Total Sets",
   "totalWeight": "Total Weight",
   "workoutSaved": "Workout saved successfully",
+  "muscleGroups": "Muscle Groups",
+  "exerciseList": "Exercise List",
+  "filterExercises": "Filter Exercises",
 };

@@ -1,4 +1,3 @@
-
 export const dutch = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -244,4 +243,8 @@ export const dutch = {
   "totalSets": "Totale Sets",
   "totalWeight": "Totaal Gewicht",
   "workoutSaved": "Training succesvol opgeslagen",
+  "muscleGroups": "Spiergroepen",
+  "exerciseList": "Oefening Lijst",
+  "filterExercises": "Filter Oefeningen",
+  "personalRecords": "Persoonlijke Records",
 };
