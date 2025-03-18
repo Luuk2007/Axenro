@@ -222,6 +222,7 @@ export const english = {
   "removeSet": "Remove Set",
   "saveWorkout": "Save Workout",
   "exercise": "Exercise",
+  "exercises": "Exercises",
   "duration": "Duration",
   "date": "Date",
   "notes": "Notes",
@@ -251,25 +252,4 @@ export const english = {
   "totalSets": "Total Sets",
   "totalWeight": "Total Weight",
   "workoutSaved": "Workout saved successfully",
-  
-  // Nutrition summary
-  "nutritionSummary": "Nutrition Summary",
-  "dailySummary": "Daily Summary",
-  "mealsToday": "Meals Today",
-  "totalProtein": "Total Protein",
-  "totalCarbs": "Total Carbs",
-  "totalFat": "Total Fat",
-  
-  // Progress
-  "weightTracking": "Weight Tracking",
-  "bodyMeasurements": "Body Measurements",
-  "progressPhotos": "Progress Photos",
-  "measurementHistory": "Measurement History",
-  "addPhoto": "Add Photo",
-  "takePhoto": "Take a Photo",
-  "uploadFromGallery": "Upload from Gallery",
-  "retake": "Retake",
-  "savePhoto": "Save Photo",
-  "value": "Value",
-  "type": "Type",
 };
