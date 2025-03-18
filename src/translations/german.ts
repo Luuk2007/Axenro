@@ -1,4 +1,3 @@
-
 export const german = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -29,6 +28,7 @@ export const german = {
   "add250ml": "250ml",
   "add500ml": "500ml",
   "add750ml": "750ml",
+  "add750ml": "750ml",
   "add1l": "1L",
   "searchFoods": "Lebensmittel suchen...",
   "addFood": "Lebensmittel hinzufügen",
@@ -41,6 +41,7 @@ export const german = {
   "photoAccess": "Zugriff auf Fotogalerie erlauben?",
   "allow": "Erlauben",
   "deny": "Verweigern",
+  "resetPassword": "Passwort zurücksetzen",
   "enterEmail": "Gib deine E-Mail ein, um dein Passwort zurückzusetzen",
   "send": "Senden",
   "selectDate": "Datum auswählen",
@@ -88,12 +89,13 @@ export const german = {
   "amountToGain": "Menge zum Zunehmen",
   "amountToLose": "Menge zum Abnehmen",
   "targetWeight": "Zielgewicht",
-  "howMuchWeight": "Wie viel Gewicht möchtest du",
+   "howMuchWeight": "Wie viel Gewicht möchtest du",
   "gain": "zunehmen",
   "lose": "abnehmen",
   "automaticallyCalculated": "Automatisch berechnet",
   "statistics": "Statistiken",
   "completeYourProfile": "Vervollständige dein Profil, um deinen Ernährungsplan zu sehen",
+  "amountChange": "Menge zu ändern",
   
   // One Rep Max Calculator
   "oneRepMaxCalculator": "Ein-Wiederholungs-Maximum Rechner",
@@ -142,9 +144,9 @@ export const german = {
   
   // BMI Calculator
   "bmiCalculator": "BMI-Rechner",
-  "calculateBMI": "BMI berechnen",
   "bmiResult": "Dein BMI-Ergebnis",
   "bmiValue": "Dein BMI ist",
+  "calculateBMI": "BMI berechnen",
   "underweight": "Du bist untergewichtig. Erwäge deine Ernährung anzupassen.",
   "healthyWeight": "Großartig! Du hast ein gesundes Gewicht.",
   "overweight": "Du bist übergewichtig. Die Anpassung deiner Ernährung und deines Trainings könnte helfen.",
@@ -190,7 +192,7 @@ export const german = {
   "emailAddress": "E-Mail-Adresse",
   "updating": "Aktualisieren...",
   "updateProfile": "Profil aktualisieren",
-  
+
   // Water tracking
   "waterTracking": "Wasserverfolgung",
   "waterCalculator": "Wasserrechner",
@@ -198,11 +200,6 @@ export const german = {
   "bodyWeight": "Körpergewicht",
   "recommendedWaterIntake": "Empfohlene Wasseraufnahme",
   "basedOnFormula": "Basierend auf der Formel",
-  "amountChange": "Menge zu ändern",
-  "waterLog": "Wasserprotokoll",
-  "dailyWaterGoal": "Tägliches Wasserziel",
-  "noWaterEntries": "Noch keine Wassereinträge",
-  "resetPassword": "Passwort zurücksetzen",
   
   // Workouts
   "sets": "Sätze",
@@ -247,5 +244,8 @@ export const german = {
   "muscleGroups": "Muskelgruppen",
   "exerciseList": "Übungsliste",
   "filterExercises": "Übungen filtern",
-  // Note: Removed duplicate "personalRecords" since it was already defined above
+
+  // Adding new translations for the strings causing errors
+  "createWorkoutDescription": "Erstelle eine neue Trainingroutine",
+  "noExercisesYet": "Noch keine Übungen hinzugefügt",
 };

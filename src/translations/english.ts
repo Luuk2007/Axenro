@@ -254,4 +254,8 @@ export const english = {
   "muscleGroups": "Muscle Groups",
   "exerciseList": "Exercise List",
   "filterExercises": "Filter Exercises",
+
+  // Adding new translations for the strings causing errors
+  "createWorkoutDescription": "Create a new workout routine",
+  "noExercisesYet": "No exercises added yet",
 };

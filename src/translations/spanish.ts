@@ -241,4 +241,8 @@ export const spanish = {
   "exerciseList": "Lista de Ejercicios",
   "filterExercises": "Filtrar Ejercicios",
   "personalRecords": "Records Personales",
+
+  // Adding new translations for the strings causing errors
+  "createWorkoutDescription": "Crear una nueva rutina de entrenamiento",
+  "noExercisesYet": "Aún no se han añadido ejercicios",
 };

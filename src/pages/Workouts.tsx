@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -380,7 +379,7 @@ const Workouts = () => {
                       <div className="flex justify-between">
                         <h4 className="font-medium mb-2">{exercise.name}</h4>
                         <div className="text-xs text-muted-foreground">
-                          {t(exercise.muscleGroup || 'fullBody')}
+                          {exercise.muscleGroup ? t(exercise.muscleGroup) : t("fullBody")}
                         </div>
                       </div>
                       

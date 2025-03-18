@@ -1,4 +1,3 @@
-
 export const dutch = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -247,5 +246,6 @@ export const dutch = {
   "muscleGroups": "Spiergroepen",
   "exerciseList": "Oefening Lijst",
   "filterExercises": "Filter Oefeningen",
-  // Note: Removed duplicate "personalRecords" since it was already defined above
+  "createWorkoutDescription": "Maak een nieuwe trainingsroutine",
+  "noExercisesYet": "Nog geen oefeningen toegevoegd",
 };

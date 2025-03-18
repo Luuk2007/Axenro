@@ -241,4 +241,7 @@ export const french = {
   "exerciseList": "Liste d'Exercices",
   "filterExercises": "Filtrer les Exercices",
   "personalRecords": "Records Personnels",
+  // Adding new translations for the strings causing errors
+  "createWorkoutDescription": "Créer une nouvelle routine d'entraînement",
+  "noExercisesYet": "Aucun exercice ajouté pour l'instant",
 };
