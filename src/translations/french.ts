@@ -246,5 +246,10 @@ export const french = {
   "createWorkoutDescription": "Créer une nouvelle routine d'entraînement",
   "noExercisesYet": "Aucun exercice ajouté pour l'instant",
   "deleteWorkout": "Supprimer l'Entraînement",
-  "confirmDeleteWorkout": "Êtes-vous sûr de vouloir supprimer cet entraînement ?"
+  "confirmDeleteWorkout": "Êtes-vous sûr de vouloir supprimer cet entraînement ?",
+  "workoutDeleted": "Entraînement supprimé avec succès",
+  "workoutCompleted": "Entraînement terminé !",
+  "selectExercise": "Sélectionner un Exercice",
+  "noExercisesError": "Veuillez ajouter au moins un exercice",
+  "completeOneSetError": "Veuillez compléter au moins une série"
 };

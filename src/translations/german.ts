@@ -248,4 +248,9 @@ export const german = {
   "noExercisesYet": "Noch keine Übungen hinzugefügt",
   "deleteWorkout": "Training löschen",
   "confirmDeleteWorkout": "Bist du sicher, dass du dieses Training löschen möchtest?",
+  "workoutDeleted": "Training erfolgreich gelöscht",
+  "workoutCompleted": "Training abgeschlossen!",
+  "selectExercise": "Übung auswählen",
+  "noExercisesError": "Bitte füge mindestens eine Übung hinzu",
+  "completeOneSetError": "Bitte schließe mindestens einen Satz ab"
 };
