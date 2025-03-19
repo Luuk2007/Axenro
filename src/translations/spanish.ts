@@ -1,3 +1,4 @@
+
 export const spanish = {
   // Dashboard
   "dashboard": "Tablero",
@@ -201,4 +202,20 @@ export const spanish = {
   "dailyWaterGoal": "Meta Diaria de Agua",
   "noWaterEntries": "Aún no hay entradas de agua",
   "personalRecords": "Records Personales",
+  
+  // Workout specific translations
+  "exercise": "Ejercicio",
+  "exercises": "Ejercicios",
+  "addExercise": "Añadir Ejercicio",
+  "addSet": "Añadir Serie",
+  "saveWorkout": "Guardar Entrenamiento",
+  "workoutName": "Nombre del Entrenamiento",
+  "trackWorkout": "Registrar Entrenamiento",
+  "deleteWorkout": "Eliminar Entrenamiento",
+  "confirmDeleteWorkout": "¿Estás seguro de que quieres eliminar este entrenamiento?",
+  "workoutDeleted": "Entrenamiento eliminado con éxito",
+  "workoutCompleted": "¡Entrenamiento completado!",
+  "selectExercise": "Seleccionar Ejercicio",
+  "noExercisesError": "Por favor, añade al menos un ejercicio",
+  "completeOneSetError": "Por favor, completa al menos una serie"
 };
