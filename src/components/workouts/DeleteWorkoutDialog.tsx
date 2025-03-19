@@ -1,0 +1,51 @@
+
+import React from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+interface DeleteWorkoutDialogProps {
+  workoutId: string | null;
+  onOpenChange: (open: boolean) => void;
+  onConfirmDelete: () => void;
+}
+
+const DeleteWorkoutDialog: React.FC<DeleteWorkoutDialogProps> = ({
+  workoutId,
+  onOpenChange,
+  onConfirmDelete
+}) => {
+  const { t } = useLanguage();
+
+  return (
+    <AlertDialog 
+      open={!!workoutId} 
+      onOpenChange={(open) => !open && onOpenChange(false)}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t("deleteWorkout")}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t("confirmDeleteWorkout")}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirmDelete} className="bg-destructive text-destructive-foreground">
+            {t("deleteWorkout")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
+
+export default DeleteWorkoutDialog;
