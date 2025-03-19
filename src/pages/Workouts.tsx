@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -9,8 +10,7 @@ import {
   Save, 
   X, 
   Clock, 
-  Calendar,
-  Trash2
+  Calendar 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,16 +31,6 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 type ExerciseSet = {
   id: number;
@@ -53,7 +43,6 @@ type Exercise = {
   id: string;
   name: string;
   sets: ExerciseSet[];
-  muscleGroup?: string;
 };
 
 type Workout = {
@@ -78,23 +67,7 @@ const defaultExercises = [
   { id: "pull-up", name: "Pull Up", muscleGroup: "back" },
   { id: "push-up", name: "Push Up", muscleGroup: "chest" },
   { id: "plank", name: "Plank", muscleGroup: "core" },
-  { id: "running", name: "Running", muscleGroup: "cardio" },
-  { id: "leg-press", name: "Leg Press", muscleGroup: "legs" },
-  { id: "lat-pulldown", name: "Lat Pulldown", muscleGroup: "back" },
-  { id: "chest-fly", name: "Chest Fly", muscleGroup: "chest" },
-  { id: "dumbbell-row", name: "Dumbbell Row", muscleGroup: "back" },
-  { id: "leg-extension", name: "Leg Extension", muscleGroup: "legs" },
-  { id: "calf-raise", name: "Calf Raise", muscleGroup: "legs" },
-  { id: "lateral-raise", name: "Lateral Raise", muscleGroup: "shoulders" },
-  { id: "face-pull", name: "Face Pull", muscleGroup: "shoulders" },
-  { id: "hammer-curl", name: "Hammer Curl", muscleGroup: "arms" },
-  { id: "skull-crusher", name: "Skull Crusher", muscleGroup: "arms" },
-  { id: "ab-crunch", name: "Ab Crunch", muscleGroup: "core" },
-  { id: "russian-twist", name: "Russian Twist", muscleGroup: "core" },
-  { id: "cycling", name: "Cycling", muscleGroup: "cardio" },
-  { id: "jumping-jacks", name: "Jumping Jacks", muscleGroup: "cardio" },
-  { id: "burpees", name: "Burpees", muscleGroup: "fullBody" },
-  { id: "kettlebell-swing", name: "Kettlebell Swing", muscleGroup: "fullBody" }
+  { id: "running", name: "Running", muscleGroup: "cardio" }
 ];
 
 const Workouts = () => {
@@ -107,9 +80,6 @@ const Workouts = () => {
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
   const [showTrackWorkout, setShowTrackWorkout] = useState(false);
-  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("");
-  const [deleteWorkoutId, setDeleteWorkoutId] = useState<string | null>(null);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     // Load workouts from localStorage
@@ -135,7 +105,7 @@ const Workouts = () => {
     }
 
     if (selectedExercises.length === 0) {
-      toast.error(t("noExercisesError"));
+      toast.error("Please add at least one exercise");
       return;
     }
 
@@ -164,7 +134,6 @@ const Workouts = () => {
     const newExercise: Exercise = {
       id: exercise.id,
       name: exercise.name,
-      muscleGroup: exercise.muscleGroup,
       sets: [{ id: 1, reps: 12, weight: 20, completed: false }]
     };
     
@@ -230,7 +199,7 @@ const Workouts = () => {
     );
 
     if (!anyCompletedSets) {
-      toast.error(t("completeOneSetError"));
+      toast.error("Please complete at least one set");
       return;
     }
 
@@ -245,29 +214,10 @@ const Workouts = () => {
     }
 
     saveWorkouts(updatedWorkouts);
-    toast.success(t("workoutCompleted"));
+    toast.success("Workout completed!");
     setShowTrackWorkout(false);
     setCurrentWorkout(null);
   };
-  
-  const handleDeleteWorkout = (workoutId: string) => {
-    setDeleteWorkoutId(workoutId);
-    setShowDeleteDialog(true);
-  };
-  
-  const confirmDeleteWorkout = () => {
-    if (deleteWorkoutId) {
-      const updatedWorkouts = workouts.filter(w => w.id !== deleteWorkoutId);
-      saveWorkouts(updatedWorkouts);
-      toast.success(t("workoutDeleted"));
-      setShowDeleteDialog(false);
-      setDeleteWorkoutId(null);
-    }
-  };
-  
-  const filteredExercises = selectedMuscleGroup 
-    ? defaultExercises.filter(exercise => exercise.muscleGroup === selectedMuscleGroup)
-    : defaultExercises;
 
   return (
     <div className="space-y-6">
@@ -301,7 +251,7 @@ const Workouts = () => {
                     <span className="text-sm text-muted-foreground">{workout.date}</span>
                   </div>
                   <div className="text-sm text-muted-foreground mb-4">
-                    {workout.exercises.length} {t("exercises")}, {workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)} {t("sets")}
+                    {workout.exercises.length} exercises, {workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)} sets
                   </div>
                   <div className="flex space-x-2">
                     <Button 
@@ -309,13 +259,6 @@ const Workouts = () => {
                       variant={workout.completed ? "outline" : "default"}
                     >
                       {workout.completed ? t("viewWorkout") : t("trackWorkout")}
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      size="icon"
-                      onClick={() => handleDeleteWorkout(workout.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -342,7 +285,7 @@ const Workouts = () => {
           <DialogHeader>
             <DialogTitle>{t("createWorkout")}</DialogTitle>
             <DialogDescription>
-              {t("createWorkoutDescription")}
+              Create a new workout routine
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -370,18 +313,13 @@ const Workouts = () => {
               
               {selectedExercises.length === 0 ? (
                 <div className="border rounded-md p-8 text-center text-muted-foreground">
-                  {t("noExercisesYet")}
+                  No exercises added yet
                 </div>
               ) : (
                 <div className="space-y-4">
                   {selectedExercises.map((exercise, exerciseIndex) => (
                     <div key={`${exercise.id}-${exerciseIndex}`} className="border rounded-md p-4">
-                      <div className="flex justify-between">
-                        <h4 className="font-medium mb-2">{exercise.name}</h4>
-                        <div className="text-xs text-muted-foreground">
-                          {exercise.muscleGroup ? t(exercise.muscleGroup) : t("fullBody")}
-                        </div>
-                      </div>
+                      <h4 className="font-medium mb-2">{exercise.name}</h4>
                       
                       <div className="grid grid-cols-12 gap-2 mb-2">
                         <div className="col-span-1 text-xs text-muted-foreground">#</div>
@@ -457,28 +395,13 @@ const Workouts = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t("muscleGroup")}</label>
-              <Select value={selectedMuscleGroup} onValueChange={setSelectedMuscleGroup}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t("selectMuscleGroup")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All</SelectItem>
-                  {muscleGroups.map((group) => (
-                    <SelectItem key={group} value={group}>{t(group)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
               <label className="text-sm font-medium">{t("exercise")}</label>
               <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t("selectExercise")} />
+                  <SelectValue placeholder="Select Exercise" />
                 </SelectTrigger>
-                <SelectContent className="max-h-[300px]">
-                  {filteredExercises.map((exercise) => (
+                <SelectContent>
+                  {defaultExercises.map((exercise) => (
                     <SelectItem key={exercise.id} value={exercise.id}>
                       {exercise.name}
                     </SelectItem>
@@ -518,7 +441,7 @@ const Workouts = () => {
                       <div 
                         key={set.id} 
                         className={`flex items-center justify-between p-2 mb-2 rounded ${
-                          set.completed ? "bg-green-50 border border-green-100 dark:bg-green-950 dark:border-green-900" : "bg-gray-50 border border-gray-100 dark:bg-gray-900 dark:border-gray-800"
+                          set.completed ? "bg-green-50 border border-green-100" : "bg-gray-50 border border-gray-100"
                         }`}
                       >
                         <div className="flex items-center gap-4">
@@ -551,26 +474,6 @@ const Workouts = () => {
           )}
         </DialogContent>
       </Dialog>
-      
-      {/* Delete Workout Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("confirmDeleteWorkout")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteWorkoutId(null)}>
-              {t("cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteWorkout} className="bg-destructive text-destructive-foreground">
-              {t("yesDelete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

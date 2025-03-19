@@ -104,7 +104,6 @@ export const dutch = {
   "calculate": "Berekenen",
   "estimatedOneRepMax": "Geschat Eén Herhaling Maximum",
   "oneRepMaxDisclaimer": "Dit is een schatting op basis van de geselecteerde formule. Het werkelijke één herhaling maximum kan variëren.",
-  "personalRecords": "Persoonlijke Records",
   
   // Settings
   "appSettings": "App Instellingen",
@@ -203,6 +202,7 @@ export const dutch = {
   "waterLog": "Water Logboek",
   "dailyWaterGoal": "Dagelijks Waterdoel",
   "noWaterEntries": "Nog geen water invoer",
+  "personalRecords": "Persoonlijke Records",
   
   // Workouts
   "sets": "Sets",
@@ -244,16 +244,4 @@ export const dutch = {
   "totalSets": "Totale Sets",
   "totalWeight": "Totaal Gewicht",
   "workoutSaved": "Training succesvol opgeslagen",
-  "muscleGroups": "Spiergroepen",
-  "exerciseList": "Oefening Lijst",
-  "filterExercises": "Filter Oefeningen",
-  "createWorkoutDescription": "Maak een nieuwe trainingsroutine",
-  "noExercisesYet": "Nog geen oefeningen toegevoegd",
-  "deleteWorkout": "Training Verwijderen",
-  "confirmDeleteWorkout": "Weet je zeker dat je deze training wilt verwijderen?",
-  "workoutDeleted": "Training succesvol verwijderd",
-  "workoutCompleted": "Training voltooid!",
-  "selectExercise": "Selecteer Oefening",
-  "noExercisesError": "Voeg ten minste één oefening toe",
-  "completeOneSetError": "Voltooi ten minste één set"
 };
