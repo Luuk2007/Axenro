@@ -202,4 +202,13 @@ export const german = {
   "noWaterEntries": "Noch keine Wassereinträge",
   "personalRecords": "Persönliche Rekorde",
   "resetPassword": "Passwort zurücksetzen",
+
+  // Additional workout translations
+  "noExercisesError": "Bitte füge mindestens eine Übung hinzu",
+  "completeOneSetError": "Bitte schließe mindestens einen Satz ab",
+  "workoutCompleted": "Training abgeschlossen!",
+  "workoutDeleted": "Training erfolgreich gelöscht",
+  "deleteWorkout": "Training Löschen",
+  "confirmDeleteWorkout": "Bist du sicher, dass du dieses Training löschen möchtest?",
+  "selectExercise": "Übung Auswählen",
 };

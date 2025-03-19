@@ -1,4 +1,3 @@
-
 export const english = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -252,4 +251,13 @@ export const english = {
   "totalSets": "Total Sets",
   "totalWeight": "Total Weight",
   "workoutSaved": "Workout saved successfully",
+  
+  // Additional workout translations
+  "noExercisesError": "Please add at least one exercise",
+  "completeOneSetError": "Please complete at least one set",
+  "workoutCompleted": "Workout completed!",
+  "workoutDeleted": "Workout deleted successfully",
+  "deleteWorkout": "Delete Workout",
+  "confirmDeleteWorkout": "Are you sure you want to delete this workout?",
+  "selectExercise": "Select Exercise",
 };

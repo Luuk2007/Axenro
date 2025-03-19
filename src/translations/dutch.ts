@@ -1,4 +1,3 @@
-
 export const dutch = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -244,4 +243,13 @@ export const dutch = {
   "totalSets": "Totale Sets",
   "totalWeight": "Totaal Gewicht",
   "workoutSaved": "Training succesvol opgeslagen",
+
+  // Additional workout translations
+  "noExercisesError": "Voeg ten minste één oefening toe",
+  "completeOneSetError": "Voltooi ten minste één set",
+  "workoutCompleted": "Training voltooid!",
+  "workoutDeleted": "Training succesvol verwijderd",
+  "deleteWorkout": "Training Verwijderen",
+  "confirmDeleteWorkout": "Weet je zeker dat je deze training wilt verwijderen?",
+  "selectExercise": "Selecteer Oefening",
 };

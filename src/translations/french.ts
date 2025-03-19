@@ -202,4 +202,13 @@ export const french = {
   "noWaterEntries": "Pas encore d'entrées d'eau",
   "personalRecords": "Records Personnels",
   "resetPassword": "Réinitialiser le mot de passe",
+
+  // Additional workout translations
+  "noExercisesError": "Veuillez ajouter au moins un exercice",
+  "completeOneSetError": "Veuillez compléter au moins une série",
+  "workoutCompleted": "Entraînement terminé !",
+  "workoutDeleted": "Entraînement supprimé avec succès",
+  "deleteWorkout": "Supprimer l'Entraînement",
+  "confirmDeleteWorkout": "Êtes-vous sûr de vouloir supprimer cet entraînement ?",
+  "selectExercise": "Sélectionner un Exercice",
 };
