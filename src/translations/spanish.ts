@@ -245,5 +245,10 @@ export const spanish = {
   "createWorkoutDescription": "Crear una nueva rutina de entrenamiento",
   "noExercisesYet": "Aún no se han añadido ejercicios",
   "deleteWorkout": "Eliminar Entrenamiento",
-  "confirmDeleteWorkout": "¿Estás seguro de que quieres eliminar este entrenamiento?"
+  "confirmDeleteWorkout": "¿Estás seguro de que quieres eliminar este entrenamiento?",
+  "workoutDeleted": "Entrenamiento eliminado con éxito",
+  "workoutCompleted": "¡Entrenamiento completado!",
+  "selectExercise": "Seleccionar Ejercicio",
+  "noExercisesError": "Por favor añade al menos un ejercicio",
+  "completeOneSetError": "Por favor completa al menos una serie"
 };

@@ -1,3 +1,4 @@
+
 export const dutch = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -248,4 +249,11 @@ export const dutch = {
   "filterExercises": "Filter Oefeningen",
   "createWorkoutDescription": "Maak een nieuwe trainingsroutine",
   "noExercisesYet": "Nog geen oefeningen toegevoegd",
+  "deleteWorkout": "Training Verwijderen",
+  "confirmDeleteWorkout": "Weet je zeker dat je deze training wilt verwijderen?",
+  "workoutDeleted": "Training succesvol verwijderd",
+  "workoutCompleted": "Training voltooid!",
+  "selectExercise": "Selecteer Oefening",
+  "noExercisesError": "Voeg ten minste één oefening toe",
+  "completeOneSetError": "Voltooi ten minste één set"
 };
