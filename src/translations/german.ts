@@ -1,4 +1,3 @@
-
 export const german = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -41,10 +40,12 @@ export const german = {
   "photoAccess": "Zugriff auf Fotogalerie erlauben?",
   "allow": "Erlauben",
   "deny": "Verweigern",
+  "forgotPassword": "Passwort vergessen?",
   "resetPassword": "Passwort zurücksetzen",
   "enterEmail": "Gib deine E-Mail ein, um dein Passwort zurückzusetzen",
   "send": "Senden",
   "selectDate": "Datum auswählen",
+  "signUp": "Registrieren",
   "fullName": "Vollständiger Name",
   "confirmPassword": "Passwort bestätigen",
   "alreadyHaveAccount": "Hast du bereits ein Konto?",
@@ -99,12 +100,20 @@ export const german = {
   
   // One Rep Max Calculator
   "oneRepMaxCalculator": "Ein-Wiederholungs-Maximum Rechner",
+  "personalRecords": "Persönliche Rekorde",
   "reps": "Wiederholungen",
   "formula": "Formel",
   "calculate": "Berechnen",
   "estimatedOneRepMax": "Geschätztes Ein-Wiederholungs-Maximum",
   "oneRepMaxDisclaimer": "Dies ist eine Schätzung basierend auf der ausgewählten Formel. Das tatsächliche Ein-Wiederholungs-Maximum kann variieren.",
-  "personalRecords": "Persönliche Rekorde",
+  "saveRecord": "Rekord speichern",
+  "exerciseName": "Übungsname",
+  "personalRecord": "Persönlicher Rekord",
+  "noPersonalRecords": "Noch keine persönlichen Rekorde",
+  "addPersonalRecord": "Persönlichen Rekord hinzufügen",
+  "deleteRecord": "Rekord löschen",
+  "recordSaved": "Rekord erfolgreich gespeichert",
+  "recordDeleted": "Rekord erfolgreich gelöscht",
   
   // Settings
   "appSettings": "App-Einstellungen",
@@ -200,6 +209,9 @@ export const german = {
   "bodyWeight": "Körpergewicht",
   "recommendedWaterIntake": "Empfohlene Wasseraufnahme",
   "basedOnFormula": "Basierend auf der Formel",
+  "waterLog": "Wasser Logbuch",
+  "dailyWaterGoal": "Tägliches Wasserziel",
+  "noWaterEntries": "Noch keine Wassereinträge",
   
   // Workouts
   "sets": "Sätze",

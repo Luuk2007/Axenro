@@ -1,4 +1,3 @@
-
 export const french = {
   // Dashboard
   "dashboard": "Tableau de Bord",
@@ -95,14 +94,24 @@ export const french = {
   "automaticallyCalculated": "Calculé automatiquement",
   "statistics": "Statistiques",
   "completeYourProfile": "Complétez votre profil pour voir votre plan nutritionnel",
+  "amountChange": "Montant à modifier",
   
   // One Rep Max Calculator
   "oneRepMaxCalculator": "Calculateur de Maximum Une Répétition",
+  "personalRecords": "Records Personnels",
   "reps": "Répétitions",
   "formula": "Formule",
   "calculate": "Calculer",
   "estimatedOneRepMax": "Maximum Une Répétition Estimé",
   "oneRepMaxDisclaimer": "Il s'agit d'une estimation basée sur la formule sélectionnée. Le maximum réel d'une répétition peut varier.",
+  "saveRecord": "Enregistrer l'enregistrement",
+  "exerciseName": "Nom de l'exercice",
+  "personalRecord": "Record personnel",
+  "noPersonalRecords": "Pas encore de records personnels",
+  "addPersonalRecord": "Ajouter un record personnel",
+  "deleteRecord": "Supprimer l'enregistrement",
+  "recordSaved": "Enregistrement sauvegardé avec succès",
+  "recordDeleted": "Enregistrement supprimé avec succès",
   
   // Settings
   "appSettings": "Paramètres de l'Application",
@@ -142,9 +151,9 @@ export const french = {
   
   // BMI Calculator
   "bmiCalculator": "Calculateur d'IMC",
-  "calculateBMI": "Calculer l'IMC",
   "bmiResult": "Votre Résultat d'IMC",
   "bmiValue": "Votre IMC est",
+  "calculateBMI": "Calculer l'IMC",
   "underweight": "Vous êtes en sous-poids. Envisagez d'ajuster votre nutrition.",
   "healthyWeight": "Excellent ! Vous avez un poids santé.",
   "overweight": "Vous êtes en surpoids. Ajuster votre alimentation et votre entraînement pourrait aider.",
@@ -190,7 +199,7 @@ export const french = {
   "emailAddress": "Adresse Email",
   "updating": "Mise à jour...",
   "updateProfile": "Mettre à jour le profil",
-  
+
   // Water tracking
   "waterTracking": "Suivi d'Eau",
   "waterCalculator": "Calculateur d'Eau",
@@ -198,6 +207,9 @@ export const french = {
   "bodyWeight": "Poids Corporel",
   "recommendedWaterIntake": "Apport d'Eau Recommandé",
   "basedOnFormula": "Basé sur la formule",
+  "waterLog": "Journal d'eau",
+  "dailyWaterGoal": "Objectif d'eau quotidien",
+  "noWaterEntries": "Pas encore d'entrées d'eau",
   
   // Workouts
   "sets": "Séries",
@@ -251,5 +263,6 @@ export const french = {
   "workoutCompleted": "Entraînement terminé !",
   "selectExercise": "Sélectionner un Exercice",
   "noExercisesError": "Veuillez ajouter au moins un exercice",
-  "completeOneSetError": "Veuillez compléter au moins une série"
+  "completeOneSetError": "Veuillez compléter au moins une série",
+  "amountChange": "Montant à modifier"
 };
