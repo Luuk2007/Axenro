@@ -10,7 +10,8 @@ import {
   Save, 
   X, 
   Clock, 
-  Calendar 
+  Calendar,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,10 +26,22 @@ import {
 import { 
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -43,6 +56,7 @@ type Exercise = {
   id: string;
   name: string;
   sets: ExerciseSet[];
+  muscleGroup?: string;
 };
 
 type Workout = {
@@ -53,21 +67,104 @@ type Workout = {
   completed: boolean;
 };
 
-const muscleGroups = [
-  "chest", "back", "shoulders", "arms", "legs", "core", "fullBody", "cardio"
-];
+// Exercise database organized by muscle groups
+const exerciseDatabase = {
+  chest: [
+    { id: "bench-press", name: "Bench Press" },
+    { id: "incline-bench-press", name: "Incline Bench Press" },
+    { id: "decline-bench-press", name: "Decline Bench Press" },
+    { id: "dumbbell-press", name: "Dumbbell Press" },
+    { id: "cable-fly", name: "Cable Fly" },
+    { id: "chest-dip", name: "Chest Dip" },
+    { id: "push-up", name: "Push Up" },
+    { id: "pec-deck-fly", name: "Pec Deck Fly" }
+  ],
+  back: [
+    { id: "deadlift", name: "Deadlift" },
+    { id: "pull-up", name: "Pull Up" },
+    { id: "chin-up", name: "Chin Up" },
+    { id: "bent-over-row", name: "Bent Over Row" },
+    { id: "t-bar-row", name: "T-Bar Row" },
+    { id: "seated-cable-row", name: "Seated Cable Row" },
+    { id: "lat-pulldown", name: "Lat Pulldown" },
+    { id: "single-arm-dumbbell-row", name: "Single-Arm Dumbbell Row" }
+  ],
+  shoulders: [
+    { id: "overhead-press", name: "Overhead Press" },
+    { id: "shoulder-press", name: "Shoulder Press" },
+    { id: "lateral-raise", name: "Lateral Raise" },
+    { id: "front-raise", name: "Front Raise" },
+    { id: "reverse-fly", name: "Reverse Fly" },
+    { id: "face-pull", name: "Face Pull" },
+    { id: "upright-row", name: "Upright Row" },
+    { id: "shrug", name: "Shrug" }
+  ],
+  arms: [
+    { id: "bicep-curl", name: "Bicep Curl" },
+    { id: "hammer-curl", name: "Hammer Curl" },
+    { id: "preacher-curl", name: "Preacher Curl" },
+    { id: "tricep-extension", name: "Tricep Extension" },
+    { id: "tricep-pushdown", name: "Tricep Pushdown" },
+    { id: "skull-crusher", name: "Skull Crusher" },
+    { id: "overhead-tricep-extension", name: "Overhead Tricep Extension" },
+    { id: "dip", name: "Dip" }
+  ],
+  legs: [
+    { id: "squat", name: "Squat" },
+    { id: "leg-press", name: "Leg Press" },
+    { id: "lunge", name: "Lunge" },
+    { id: "leg-extension", name: "Leg Extension" },
+    { id: "leg-curl", name: "Leg Curl" },
+    { id: "calf-raise", name: "Calf Raise" },
+    { id: "romanian-deadlift", name: "Romanian Deadlift" },
+    { id: "hack-squat", name: "Hack Squat" }
+  ],
+  core: [
+    { id: "crunch", name: "Crunch" },
+    { id: "plank", name: "Plank" },
+    { id: "russian-twist", name: "Russian Twist" },
+    { id: "leg-raise", name: "Leg Raise" },
+    { id: "mountain-climber", name: "Mountain Climber" },
+    { id: "sit-up", name: "Sit-Up" },
+    { id: "hanging-knee-raise", name: "Hanging Knee Raise" },
+    { id: "ab-wheel-rollout", name: "Ab Wheel Rollout" }
+  ],
+  cardio: [
+    { id: "running", name: "Running" },
+    { id: "cycling", name: "Cycling" },
+    { id: "rowing", name: "Rowing" },
+    { id: "stair-climbing", name: "Stair Climbing" },
+    { id: "elliptical", name: "Elliptical" },
+    { id: "jump-rope", name: "Jump Rope" },
+    { id: "swimming", name: "Swimming" },
+    { id: "battle-ropes", name: "Battle Ropes" }
+  ],
+  fullBody: [
+    { id: "clean-and-jerk", name: "Clean and Jerk" },
+    { id: "snatch", name: "Snatch" },
+    { id: "thruster", name: "Thruster" },
+    { id: "burpee", name: "Burpee" },
+    { id: "kettlebell-swing", name: "Kettlebell Swing" },
+    { id: "turkish-get-up", name: "Turkish Get-Up" },
+    { id: "medicine-ball-slam", name: "Medicine Ball Slam" },
+    { id: "bear-crawl", name: "Bear Crawl" }
+  ]
+};
 
-const defaultExercises = [
-  { id: "bench-press", name: "Bench Press", muscleGroup: "chest" },
-  { id: "squat", name: "Squat", muscleGroup: "legs" },
-  { id: "deadlift", name: "Deadlift", muscleGroup: "back" },
-  { id: "shoulder-press", name: "Shoulder Press", muscleGroup: "shoulders" },
-  { id: "bicep-curl", name: "Bicep Curl", muscleGroup: "arms" },
-  { id: "tricep-extension", name: "Tricep Extension", muscleGroup: "arms" },
-  { id: "pull-up", name: "Pull Up", muscleGroup: "back" },
-  { id: "push-up", name: "Push Up", muscleGroup: "chest" },
-  { id: "plank", name: "Plank", muscleGroup: "core" },
-  { id: "running", name: "Running", muscleGroup: "cardio" }
+// Flatten the exercise database for easier selection
+const allExercises = Object.entries(exerciseDatabase).flatMap(
+  ([group, exercises]) => exercises.map(ex => ({ ...ex, muscleGroup: group }))
+);
+
+const muscleGroups = [
+  { value: "chest", label: "Chest" },
+  { value: "back", label: "Back" },
+  { value: "shoulders", label: "Shoulders" },
+  { value: "arms", label: "Arms" },
+  { value: "legs", label: "Legs" },
+  { value: "core", label: "Core" },
+  { value: "cardio", label: "Cardio" },
+  { value: "fullBody", label: "Full Body" }
 ];
 
 const Workouts = () => {
@@ -80,6 +177,20 @@ const Workouts = () => {
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
   const [showTrackWorkout, setShowTrackWorkout] = useState(false);
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("all");
+  const [filteredExercises, setFilteredExercises] = useState(allExercises);
+  const [workoutToDelete, setWorkoutToDelete] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Filter exercises based on selected muscle group
+    if (selectedMuscleGroup === "all") {
+      setFilteredExercises(allExercises);
+    } else {
+      setFilteredExercises(
+        allExercises.filter(ex => ex.muscleGroup === selectedMuscleGroup)
+      );
+    }
+  }, [selectedMuscleGroup]);
 
   useEffect(() => {
     // Load workouts from localStorage
@@ -105,7 +216,7 @@ const Workouts = () => {
     }
 
     if (selectedExercises.length === 0) {
-      toast.error("Please add at least one exercise");
+      toast.error(t("noExercisesError"));
       return;
     }
 
@@ -128,12 +239,13 @@ const Workouts = () => {
   const handleAddExercise = () => {
     if (!selectedExerciseId) return;
     
-    const exercise = defaultExercises.find(ex => ex.id === selectedExerciseId);
+    const exercise = allExercises.find(ex => ex.id === selectedExerciseId);
     if (!exercise) return;
     
     const newExercise: Exercise = {
       id: exercise.id,
       name: exercise.name,
+      muscleGroup: exercise.muscleGroup,
       sets: [{ id: 1, reps: 12, weight: 20, completed: false }]
     };
     
@@ -199,7 +311,7 @@ const Workouts = () => {
     );
 
     if (!anyCompletedSets) {
-      toast.error("Please complete at least one set");
+      toast.error(t("completeOneSetError"));
       return;
     }
 
@@ -214,9 +326,22 @@ const Workouts = () => {
     }
 
     saveWorkouts(updatedWorkouts);
-    toast.success("Workout completed!");
+    toast.success(t("workoutCompleted"));
     setShowTrackWorkout(false);
     setCurrentWorkout(null);
+  };
+  
+  const handleDeleteWorkout = (workoutId: string) => {
+    setWorkoutToDelete(workoutId);
+  };
+  
+  const confirmDeleteWorkout = () => {
+    if (!workoutToDelete) return;
+    
+    const updatedWorkouts = workouts.filter(workout => workout.id !== workoutToDelete);
+    saveWorkouts(updatedWorkouts);
+    toast.success(t("workoutDeleted"));
+    setWorkoutToDelete(null);
   };
 
   return (
@@ -259,6 +384,13 @@ const Workouts = () => {
                       variant={workout.completed ? "outline" : "default"}
                     >
                       {workout.completed ? t("viewWorkout") : t("trackWorkout")}
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="icon"
+                      onClick={() => handleDeleteWorkout(workout.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -395,17 +527,50 @@ const Workouts = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
+              <label className="text-sm font-medium">Muscle Group</label>
+              <Select value={selectedMuscleGroup} onValueChange={setSelectedMuscleGroup}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select muscle group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Exercises</SelectItem>
+                  {muscleGroups.map((group) => (
+                    <SelectItem key={group.value} value={group.value}>
+                      {group.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <label className="text-sm font-medium">{t("exercise")}</label>
               <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Exercise" />
+                  <SelectValue placeholder={t("selectExercise")} />
                 </SelectTrigger>
-                <SelectContent>
-                  {defaultExercises.map((exercise) => (
-                    <SelectItem key={exercise.id} value={exercise.id}>
-                      {exercise.name}
-                    </SelectItem>
-                  ))}
+                <SelectContent className="max-h-80">
+                  {selectedMuscleGroup !== "all" ? (
+                    filteredExercises.map((exercise) => (
+                      <SelectItem key={exercise.id} value={exercise.id}>
+                        {exercise.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    muscleGroups.map((group) => (
+                      <SelectGroup key={group.value}>
+                        <SelectLabel>{group.label}</SelectLabel>
+                        {allExercises
+                          .filter(ex => ex.muscleGroup === group.value)
+                          .map(exercise => (
+                            <SelectItem key={exercise.id} value={exercise.id}>
+                              {exercise.name}
+                            </SelectItem>
+                          ))
+                        }
+                      </SelectGroup>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -474,6 +639,24 @@ const Workouts = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Workout Confirmation */}
+      <AlertDialog open={!!workoutToDelete} onOpenChange={(open) => !open && setWorkoutToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("deleteWorkout")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("confirmDeleteWorkout")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteWorkout} className="bg-destructive text-destructive-foreground">
+              {t("deleteWorkout")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
