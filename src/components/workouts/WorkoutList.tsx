@@ -22,9 +22,6 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed rounded-xl border-muted-foreground/20">
         <p className="text-muted-foreground mb-4">{t("noWorkoutsFound")}</p>
-        <Button onClick={() => {/* This will be handled by the parent */}}>
-          {t("createWorkout")}
-        </Button>
       </div>
     );
   }
@@ -42,6 +39,11 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
           </div>
           <div className="text-sm text-muted-foreground mb-4">
             {workout.exercises.length} exercises, {workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)} sets
+            {workout.completed && 
+              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                {t("completed")}
+              </span>
+            }
           </div>
           <div className="flex space-x-2">
             <Button 

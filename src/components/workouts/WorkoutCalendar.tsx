@@ -3,7 +3,7 @@ import React from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Workout } from "@/types/workout";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface WorkoutCalendarProps {
@@ -18,9 +18,10 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   const workoutDates = workouts
     .filter(workout => workout.completed)
     .map(workout => {
-      const [year, month, day] = workout.date.split('-').map(Number);
-      return new Date(year, month - 1, day);
-    });
+      // Parse the date from the format "yyyy-MM-dd"
+      return parse(workout.date, "yyyy-MM-dd", new Date());
+    })
+    .filter(date => isValid(date)); // Filter out invalid dates
   
   // Count workouts within current month
   const currentMonthStart = startOfMonth(currentDate);
@@ -38,20 +39,30 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     date >= oneWeekAgo && date <= currentDate
   ).length;
   
-  // Helper function to check if a date has workouts
-  const hasWorkoutOnDate = (date: Date) => {
-    return workoutDates.some(workoutDate => 
-      date.getDate() === workoutDate.getDate() &&
-      date.getMonth() === workoutDate.getMonth() &&
-      date.getFullYear() === workoutDate.getFullYear()
-    );
-  };
-  
   // Get all days in current month for activity heatmap
   const daysInMonth = eachDayOfInterval({
     start: currentMonthStart,
     end: currentMonthEnd
   });
+
+  // Function to determine if a date has workouts
+  const dateHasWorkout = (date: Date) => {
+    return workoutDates.some(workoutDate => 
+      date.getDate() === workoutDate.getDate() && 
+      date.getMonth() === workoutDate.getMonth() && 
+      date.getFullYear() === workoutDate.getFullYear()
+    );
+  };
+
+  // Create a modifiers object for the calendar
+  const modifiersClassNames = {
+    workout: "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-800/30 dark:text-green-400"
+  };
+
+  // Create a modifiers object for the calendar
+  const modifiers = {
+    workout: workoutDates
+  };
   
   return (
     <Card>
@@ -73,14 +84,10 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
           
           <Calendar 
             mode="single"
-            selected={new Date()}
+            selected={undefined}
             className="p-0 pointer-events-none"
-            modifiers={{
-              workout: workoutDates,
-            }}
-            modifiersClassNames={{
-              workout: "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-800/30 dark:text-green-400",
-            }}
+            modifiers={modifiers}
+            modifiersClassNames={modifiersClassNames}
           />
         </div>
       </CardContent>

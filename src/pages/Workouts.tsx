@@ -81,14 +81,20 @@ const Workouts = () => {
       return;
     }
 
+    // Mark the workout as completed
+    const updatedWorkout = {
+      ...currentWorkout,
+      completed: true
+    };
+
+    // Update the workout in the list
     const updatedWorkouts = workouts.map(workout => 
-      workout.id === currentWorkout.id 
-        ? { ...currentWorkout, completed: true } 
-        : workout
+      workout.id === updatedWorkout.id ? updatedWorkout : workout
     );
 
-    if (!updatedWorkouts.find(w => w.id === currentWorkout.id)) {
-      updatedWorkouts.push({ ...currentWorkout, completed: true });
+    // If the workout isn't in the list yet, add it
+    if (!updatedWorkouts.find(w => w.id === updatedWorkout.id)) {
+      updatedWorkouts.push(updatedWorkout);
     }
 
     saveWorkouts(updatedWorkouts);
@@ -173,7 +179,6 @@ const Workouts = () => {
       <DeleteWorkoutDialog 
         workoutId={workoutToDelete}
         onOpenChange={(open) => {
-          // If dialog is closing and open is false, set workoutToDelete to null
           if (!open) setWorkoutToDelete(null);
         }}
         onConfirmDelete={confirmDeleteWorkout}

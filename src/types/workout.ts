@@ -4,6 +4,7 @@ export type ExerciseSet = {
   reps: number;
   weight: number;
   completed: boolean;
+  isCardio?: boolean;
 };
 
 export type Exercise = {
@@ -92,16 +93,6 @@ export const exerciseDatabase = {
     { id: "jump-rope", name: "Jump Rope" },
     { id: "swimming", name: "Swimming" },
     { id: "battle-ropes", name: "Battle Ropes" }
-  ],
-  fullBody: [
-    { id: "clean-and-jerk", name: "Clean and Jerk" },
-    { id: "snatch", name: "Snatch" },
-    { id: "thruster", name: "Thruster" },
-    { id: "burpee", name: "Burpee" },
-    { id: "kettlebell-swing", name: "Kettlebell Swing" },
-    { id: "turkish-get-up", name: "Turkish Get-Up" },
-    { id: "medicine-ball-slam", name: "Medicine Ball Slam" },
-    { id: "bear-crawl", name: "Bear Crawl" }
   ]
 };
 
@@ -117,6 +108,5 @@ export const muscleGroups = [
   { value: "arms", label: "Arms" },
   { value: "legs", label: "Legs" },
   { value: "core", label: "Core" },
-  { value: "cardio", label: "Cardio" },
-  { value: "fullBody", label: "Full Body" }
+  { value: "cardio", label: "Cardio" }
 ];

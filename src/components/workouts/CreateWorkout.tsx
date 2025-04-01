@@ -47,11 +47,13 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
     const exercise = allExercises.find(ex => ex.id === exerciseId);
     if (!exercise) return;
     
+    const isCardio = exercise.muscleGroup === "cardio";
+    
     const newExercise: Exercise = {
       id: exercise.id,
       name: exercise.name,
       muscleGroup: exercise.muscleGroup,
-      sets: [{ id: 1, reps: 12, weight: 20, completed: false }]
+      sets: [{ id: 1, reps: isCardio ? 1 : 12, weight: isCardio ? 30 : 20, completed: false, isCardio }]
     };
     
     setSelectedExercises([...selectedExercises, newExercise]);
@@ -64,11 +66,14 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
       ? Math.max(...exercise.sets.map(set => set.id)) + 1 
       : 1;
     
+    const isCardio = exercise.muscleGroup === "cardio";
+    
     exercise.sets.push({
       id: newSetId,
-      reps: exercise.sets.length > 0 ? exercise.sets[exercise.sets.length - 1].reps : 12,
-      weight: exercise.sets.length > 0 ? exercise.sets[exercise.sets.length - 1].weight : 20,
-      completed: false
+      reps: exercise.sets.length > 0 ? exercise.sets[exercise.sets.length - 1].reps : (isCardio ? 1 : 12),
+      weight: exercise.sets.length > 0 ? exercise.sets[exercise.sets.length - 1].weight : (isCardio ? 30 : 20),
+      completed: false,
+      isCardio
     });
     
     setSelectedExercises(updatedExercises);
@@ -102,6 +107,10 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
       return;
     }
 
+    // Convert the date to string format YYYY-MM-DD
+    const formattedDate = format(date, "yyyy-MM-dd");
+    
+    // Pass the formatted date along with the workout name and exercises
     onSaveWorkout(workoutName, selectedExercises);
     setWorkoutName("");
     setSelectedExercises([]);
@@ -174,61 +183,69 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {selectedExercises.map((exercise, exerciseIndex) => (
-                    <div key={`${exercise.id}-${exerciseIndex}`} className="border rounded-md p-4">
-                      <h4 className="font-medium mb-2">{exercise.name}</h4>
-                      
-                      <div className="grid grid-cols-12 gap-2 mb-2">
-                        <div className="col-span-1 text-xs text-muted-foreground">#</div>
-                        <div className="col-span-5 text-xs text-muted-foreground">{t("reps")}</div>
-                        <div className="col-span-5 text-xs text-muted-foreground">{t("weight")} ({t("kg")})</div>
-                        <div className="col-span-1"></div>
-                      </div>
-                      
-                      {exercise.sets.map((set, setIndex) => (
-                        <div key={set.id} className="grid grid-cols-12 gap-2 mb-2">
-                          <div className="col-span-1 flex items-center">{setIndex + 1}</div>
-                          <div className="col-span-5">
-                            <Input 
-                              type="number" 
-                              min="1"
-                              value={set.reps}
-                              onChange={(e) => handleUpdateSet(exerciseIndex, setIndex, 'reps', e.target.value)}
-                            />
+                  {selectedExercises.map((exercise, exerciseIndex) => {
+                    const isCardio = exercise.muscleGroup === "cardio";
+                    
+                    return (
+                      <div key={`${exercise.id}-${exerciseIndex}`} className="border rounded-md p-4">
+                        <h4 className="font-medium mb-2">{exercise.name}</h4>
+                        
+                        <div className="grid grid-cols-12 gap-2 mb-2">
+                          <div className="col-span-1 text-xs text-muted-foreground">#</div>
+                          <div className="col-span-5 text-xs text-muted-foreground">
+                            {isCardio ? t("minutes") : t("reps")}
                           </div>
-                          <div className="col-span-5">
-                            <Input 
-                              type="number" 
-                              min="0" 
-                              step="0.5"
-                              value={set.weight}
-                              onChange={(e) => handleUpdateSet(exerciseIndex, setIndex, 'weight', e.target.value)}
-                            />
+                          <div className="col-span-5 text-xs text-muted-foreground">
+                            {isCardio ? t("intensity") : `${t("weight")} (${t("kg")})`}
                           </div>
-                          <div className="col-span-1 flex items-center">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0"
-                              onClick={() => handleRemoveSet(exerciseIndex, setIndex)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          <div className="col-span-1"></div>
                         </div>
-                      ))}
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="mt-2"
-                        onClick={() => handleAddSet(exerciseIndex)}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        {t("addSet")}
-                      </Button>
-                    </div>
-                  ))}
+                        
+                        {exercise.sets.map((set, setIndex) => (
+                          <div key={set.id} className="grid grid-cols-12 gap-2 mb-2">
+                            <div className="col-span-1 flex items-center">{setIndex + 1}</div>
+                            <div className="col-span-5">
+                              <Input 
+                                type="number" 
+                                min="1"
+                                value={set.reps}
+                                onChange={(e) => handleUpdateSet(exerciseIndex, setIndex, 'reps', e.target.value)}
+                              />
+                            </div>
+                            <div className="col-span-5">
+                              <Input 
+                                type="number" 
+                                min="0" 
+                                step="0.5"
+                                value={set.weight}
+                                onChange={(e) => handleUpdateSet(exerciseIndex, setIndex, 'weight', e.target.value)}
+                              />
+                            </div>
+                            <div className="col-span-1 flex items-center">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8 p-0"
+                                onClick={() => handleRemoveSet(exerciseIndex, setIndex)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2"
+                          onClick={() => handleAddSet(exerciseIndex)}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          {t("addSet")}
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
