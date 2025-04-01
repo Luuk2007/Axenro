@@ -21,10 +21,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
-// We need to install uuid if not already installed
-<lov-add-dependency>uuid@latest</lov-add-dependency>
-<lov-add-dependency>@types/uuid@latest</lov-add-dependency>
-
 interface CreateWorkoutProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
