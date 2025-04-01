@@ -31,13 +31,13 @@ const DeleteWorkoutDialog: React.FC<DeleteWorkoutDialogProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle>{t("deleteWorkout")}</AlertDialogTitle>
           <AlertDialogDescription>
-            {t("deleteWorkoutConfirmation")}
+            {t("confirmDeleteWorkout")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction 
-            variant="destructive"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             onClick={onConfirm}
           >
             {t("delete")}
