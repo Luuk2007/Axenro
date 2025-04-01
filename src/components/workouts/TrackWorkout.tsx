@@ -12,6 +12,7 @@ import {
 import { Calendar, Save } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
+import { format } from "date-fns";
 
 interface TrackWorkoutProps {
   open: boolean;
@@ -32,13 +33,16 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
 
   if (!workout) return null;
 
+  // Format the date for display
+  const displayDate = workout.date ? format(new Date(workout.date), "PPP") : "";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-screen overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{workout.name}</DialogTitle>
           <DialogDescription className="flex items-center gap-2 mt-2">
-            <Calendar className="h-4 w-4" /> {workout.date}
+            <Calendar className="h-4 w-4" /> {displayDate}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-4">

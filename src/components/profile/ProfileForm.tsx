@@ -82,6 +82,7 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: initialValues,
+    mode: "onChange",
   });
 
   // Watch for goal changes to show/hide weight change amount
@@ -92,12 +93,12 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
 
   // Update target weight when relevant values change
   useEffect(() => {
-    if (showWeightChangeAmount && currentWeight && weightChangeAmount) {
+    if (currentWeight) {
       let targetWeight = currentWeight;
       
-      if (currentGoal === "gain") {
+      if (currentGoal === "gain" && weightChangeAmount) {
         targetWeight = currentWeight + weightChangeAmount;
-      } else if (currentGoal === "lose") {
+      } else if (currentGoal === "lose" && weightChangeAmount) {
         targetWeight = currentWeight - weightChangeAmount;
       }
       
@@ -105,10 +106,8 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
       if (targetWeight >= 30 && targetWeight <= 300) {
         form.setValue("targetWeight", targetWeight);
       }
-    } else if (currentGoal === "maintain" && currentWeight) {
-      form.setValue("targetWeight", currentWeight);
     }
-  }, [currentWeight, weightChangeAmount, currentGoal, showWeightChangeAmount, form]);
+  }, [currentWeight, weightChangeAmount, currentGoal, form]);
 
   // Handle form submission
   const handleSubmit = (data: ProfileFormValues) => {
@@ -282,7 +281,23 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
                     {t("amountChange")} ({t("kg")})
                   </FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} value={field.value || ''} />
+                    <Input 
+                      type="number" 
+                      {...field} 
+                      value={field.value || ''} 
+                      onChange={(e) => {
+                        field.onChange(e);
+                        // Immediate target weight calculation for better UX
+                        const newAmount = parseFloat(e.target.value);
+                        if (!isNaN(newAmount)) {
+                          if (currentGoal === "gain") {
+                            form.setValue("targetWeight", currentWeight + newAmount);
+                          } else if (currentGoal === "lose") {
+                            form.setValue("targetWeight", currentWeight - newAmount);
+                          }
+                        }
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -290,7 +305,7 @@ const ProfileForm = ({ onSubmit, initialValues = defaultValues }: ProfileFormPro
             />
           )}
           
-          {/* Target weight field - only visible when goal is not maintain */}
+          {/* Target weight field - always visible when goal is gain or lose */}
           {showWeightChangeAmount && (
             <FormField
               control={form.control}
