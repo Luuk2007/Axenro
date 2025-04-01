@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { english } from '../translations/english';
+import english from '../translations/english';
 import { dutch } from '../translations/dutch';
 import { french } from '../translations/french';
 import { german } from '../translations/german';
