@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Calendar } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
 
@@ -35,7 +35,10 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
         <div key={workout.id} className="border rounded-lg p-4 shadow-sm">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-lg font-medium">{workout.name}</h3>
-            <span className="text-sm text-muted-foreground">{workout.date}</span>
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4 mr-1" />
+              <span>{workout.date}</span>
+            </div>
           </div>
           <div className="text-sm text-muted-foreground mb-4">
             {workout.exercises.length} exercises, {workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)} sets

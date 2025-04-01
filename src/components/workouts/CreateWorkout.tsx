@@ -10,11 +10,19 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Calendar as CalendarIcon } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Exercise, allExercises } from "@/types/workout";
 import AddExerciseDialog from "./AddExerciseDialog";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface CreateWorkoutProps {
   open: boolean;
@@ -31,6 +39,7 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
   const [workoutName, setWorkoutName] = useState("");
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [showExerciseForm, setShowExerciseForm] = useState(false);
+  const [date, setDate] = useState<Date>(new Date());
 
   const handleAddExercise = (exerciseId: string) => {
     if (!exerciseId) return;
@@ -96,6 +105,7 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
     onSaveWorkout(workoutName, selectedExercises);
     setWorkoutName("");
     setSelectedExercises([]);
+    setDate(new Date());
   };
 
   return (
@@ -116,6 +126,33 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
                 onChange={(e) => setWorkoutName(e.target.value)}
                 placeholder="My Workout"
               />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("date")}</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>{t("pickDate")}</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(selectedDate) => selectedDate && setDate(selectedDate)}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             
             <div className="space-y-2">
