@@ -1,6 +1,7 @@
+
 import { Translations } from "./types";
 
-const englishTranslations: Translations = {
+export const english: Translations = {
   name: "Name",
   email: "Email",
   password: "Password",
@@ -45,8 +46,6 @@ const englishTranslations: Translations = {
   
   // Exercise metrics
   reps: "Reps",
-  weight: "Weight",
-  kg: "kg",
   minutes: "minutes",
   intensity: "Intensity",
   
@@ -84,6 +83,26 @@ const englishTranslations: Translations = {
   
   // Profile name
   profileNameDescription: "Your full name as it will appear on your profile",
+  
+  // Dashboard
+  dashboard: "Dashboard",
+  todayOverview: "Today's Overview",
+  recentWorkouts: "Recent Workouts",
+  upcomingWorkouts: "Upcoming Workouts",
+  todayMeals: "Today's Meals",
+  caloriesConsumed: "Calories Consumed",
+  totalCalories: "Total Calories",
+  remainingCalories: "Remaining Calories",
+  selectLanguage: "Select language",
+  
+  // Common terms
+  add: "Add",
+  startTracking: "Start tracking your nutrition by adding a meal.",
+  
+  // Workout specific
+  selectExercise: "Select Exercise",
+  deleteWorkout: "Delete Workout",
+  confirmDeleteWorkout: "Are you sure you want to delete this workout?"
 };
 
-export default englishTranslations;
+export default english;
