@@ -18,7 +18,7 @@ const Workouts = () => {
   const { t } = useLanguage();
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
-  const [showTrackWorkout, setShowTrackWorkout] = useState(false);
+  const [showWorkoutDetails, setShowWorkoutDetails] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
   const [workoutToDelete, setWorkoutToDelete] = useState<string | null>(null);
 
@@ -40,12 +40,18 @@ const Workouts = () => {
   };
 
   const handleCreateWorkout = (name: string, exercises: any[]) => {
+    // Mark all sets as completed automatically
+    const completedExercises = exercises.map(exercise => ({
+      ...exercise,
+      sets: exercise.sets.map(set => ({ ...set, completed: true }))
+    }));
+
     const newWorkout: Workout = {
       id: Date.now().toString(),
       name: name,
       date: format(new Date(), "yyyy-MM-dd"),
-      exercises: exercises,
-      completed: false
+      exercises: completedExercises,
+      completed: true // Mark workout as completed automatically
     };
 
     const updatedWorkouts = [...workouts, newWorkout];
@@ -54,55 +60,11 @@ const Workouts = () => {
     setShowWorkoutForm(false);
   };
 
-  const handleTrackWorkout = (workout: Workout) => {
-    // Clone the workout for tracking
+  const handleViewWorkout = (workout: Workout) => {
     setCurrentWorkout(JSON.parse(JSON.stringify(workout)));
-    setShowTrackWorkout(true);
+    setShowWorkoutDetails(true);
   };
 
-  const handleTrackSet = (exerciseIndex: number, setIndex: number, completed: boolean) => {
-    if (!currentWorkout) return;
-    
-    const updatedWorkout = {...currentWorkout};
-    updatedWorkout.exercises[exerciseIndex].sets[setIndex].completed = completed;
-    setCurrentWorkout(updatedWorkout);
-  };
-
-  const handleCompleteWorkout = () => {
-    if (!currentWorkout) return;
-
-    // Check if any sets were completed
-    const anyCompletedSets = currentWorkout.exercises.some(exercise => 
-      exercise.sets.some(set => set.completed)
-    );
-
-    if (!anyCompletedSets) {
-      toast.error(t("completeOneSetError"));
-      return;
-    }
-
-    // Mark the workout as completed
-    const updatedWorkout = {
-      ...currentWorkout,
-      completed: true
-    };
-
-    // Update the workout in the list
-    const updatedWorkouts = workouts.map(workout => 
-      workout.id === updatedWorkout.id ? updatedWorkout : workout
-    );
-
-    // If the workout isn't in the list yet, add it
-    if (!updatedWorkouts.find(w => w.id === updatedWorkout.id)) {
-      updatedWorkouts.push(updatedWorkout);
-    }
-
-    saveWorkouts(updatedWorkouts);
-    toast.success(t("workoutCompleted"));
-    setShowTrackWorkout(false);
-    setCurrentWorkout(null);
-  };
-  
   const handleDeleteWorkout = (workoutId: string) => {
     setWorkoutToDelete(workoutId);
   };
@@ -145,7 +107,7 @@ const Workouts = () => {
         <TabsContent value="workouts" className="mt-6">
           <WorkoutList 
             workouts={workouts}
-            onStartWorkout={handleTrackWorkout}
+            onViewWorkout={handleViewWorkout}
             onDeleteWorkout={handleDeleteWorkout}
           />
         </TabsContent>
@@ -168,11 +130,9 @@ const Workouts = () => {
 
       {currentWorkout && (
         <TrackWorkout 
-          open={showTrackWorkout}
-          onOpenChange={setShowTrackWorkout}
+          open={showWorkoutDetails}
+          onOpenChange={setShowWorkoutDetails}
           workout={currentWorkout}
-          onTrackSet={handleTrackSet}
-          onCompleteWorkout={handleCompleteWorkout}
         />
       )}
 

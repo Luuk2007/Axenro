@@ -7,13 +7,13 @@ import { Workout } from "@/types/workout";
 
 interface WorkoutListProps {
   workouts: Workout[];
-  onStartWorkout: (workout: Workout) => void;
+  onViewWorkout: (workout: Workout) => void;
   onDeleteWorkout: (workoutId: string) => void;
 }
 
 const WorkoutList: React.FC<WorkoutListProps> = ({ 
   workouts, 
-  onStartWorkout, 
+  onViewWorkout, 
   onDeleteWorkout 
 }) => {
   const { t } = useLanguage();
@@ -39,18 +39,16 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
           </div>
           <div className="text-sm text-muted-foreground mb-4">
             {workout.exercises.length} exercises, {workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)} sets
-            {workout.completed && 
-              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                {t("completed")}
-              </span>
-            }
+            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+              {t("completed")}
+            </span>
           </div>
           <div className="flex space-x-2">
             <Button 
-              onClick={() => onStartWorkout(workout)} 
-              variant={workout.completed ? "outline" : "default"}
+              onClick={() => onViewWorkout(workout)} 
+              variant="outline"
             >
-              {workout.completed ? t("viewWorkout") : t("trackWorkout")}
+              {t("viewWorkout")}
             </Button>
             <Button 
               variant="destructive" 

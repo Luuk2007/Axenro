@@ -9,7 +9,7 @@ import {
   DialogDescription, 
   DialogFooter 
 } from "@/components/ui/dialog";
-import { Calendar, Save, Check } from "lucide-react";
+import { Calendar, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
 
@@ -17,16 +17,12 @@ interface TrackWorkoutProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workout: Workout | null;
-  onTrackSet: (exerciseIndex: number, setIndex: number, completed: boolean) => void;
-  onCompleteWorkout: () => void;
 }
 
 const TrackWorkout: React.FC<TrackWorkoutProps> = ({
   open,
   onOpenChange,
-  workout,
-  onTrackSet,
-  onCompleteWorkout
+  workout
 }) => {
   const { t } = useLanguage();
 
@@ -52,9 +48,7 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
                 {exercise.sets.map((set, setIndex) => (
                   <div 
                     key={set.id} 
-                    className={`flex items-center justify-between p-2 mb-2 rounded ${
-                      set.completed ? "bg-green-50 border border-green-100" : "bg-gray-50 border border-gray-100"
-                    }`}
+                    className="flex items-center justify-between p-2 mb-2 rounded bg-green-50 border border-green-100"
                   >
                     <div className="flex items-center gap-4">
                       <div className="font-medium">Set {setIndex + 1}</div>
@@ -70,22 +64,10 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
                       )}
                     </div>
                     
-                    {!workout.completed && (
-                      <Button 
-                        variant={set.completed ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => onTrackSet(exerciseIndex, setIndex, !set.completed)}
-                      >
-                        {set.completed ? t("completed") : t("trackWorkout")}
-                      </Button>
-                    )}
-                    
-                    {workout.completed && set.completed && (
-                      <div className="text-green-600 flex items-center">
-                        <Check className="h-4 w-4 mr-1" />
-                        {t("completed")}
-                      </div>
-                    )}
+                    <div className="text-green-600 flex items-center">
+                      <Check className="h-4 w-4 mr-1" />
+                      {t("completed")}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -96,13 +78,6 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("close")}
           </Button>
-          
-          {!workout.completed && (
-            <Button onClick={onCompleteWorkout}>
-              <Save className="h-4 w-4 mr-2" />
-              {t("saveWorkout")}
-            </Button>
-          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

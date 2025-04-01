@@ -39,15 +39,14 @@ export const english: Translations = {
   yourStats: "Your Stats",
   
   // Workout tracking
-  trackWorkout: "Track",
   completed: "Completed",
   saveWorkout: "Save Workout",
   close: "Close",
+  viewWorkout: "View Workout",
   
   // Exercise metrics
   reps: "Reps",
   minutes: "minutes",
-  intensity: "Intensity",
   
   // Calendar
   workoutsThisWeek: "Workouts This Week",
@@ -78,7 +77,6 @@ export const english: Translations = {
   date: "Date",
   pickDate: "Pick a date",
   cancel: "Cancel",
-  viewWorkout: "View Workout",
   noWorkoutsFound: "No workouts found",
   
   // Profile name
