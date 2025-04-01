@@ -1,3 +1,4 @@
+
 export const english = {
   // Navigation
   dashboard: 'Dashboard',
@@ -55,6 +56,9 @@ export const english = {
   completed: 'Completed',
   date: 'Date',
   pickDate: 'Pick a date',
+  exercise: 'Exercise',
+  selectExercise: 'Select Exercise',
+  add: 'Add',
   
   // Workout Calendar
   calendar: 'Calendar',
@@ -78,6 +82,7 @@ export const english = {
   cm: 'cm',
   grams: 'g',
   times: 'times',
+  perWeek: 'per week',
   
   // Form Actions
   save: 'Save',
@@ -91,6 +96,7 @@ export const english = {
   spanish: 'Spanish',
   create: 'Create',
   viewAll: 'View All',
+  selectLanguage: 'Select language',
   
   // Dashboard
   dailyCalorieNeeds: 'Daily Calorie Needs',
@@ -98,6 +104,7 @@ export const english = {
   target: 'Target',
   todayMeals: "Today's Meals",
   addActivity: 'Add Activity',
+  startTracking: 'Start tracking your progress',
   
   // Profile
   profileSettings: 'Profile Settings',
@@ -107,6 +114,15 @@ export const english = {
   profileUpdated: 'Profile updated successfully',
   saveChanges: 'Save Changes',
   yourStats: 'Your Stats',
+  exerciseFrequency: 'Exercise Frequency',
+  goal: 'Goal',
+  gainWeight: 'Gain Weight',
+  loseWeight: 'Lose Weight',
+  maintainWeight: 'Maintain Weight',
+  age: 'Age',
+  gender: 'Gender',
+  targetWeight: 'Target Weight',
+  height: 'Height',
   
   // BMI Calculator
   bmiCalculator: 'BMI Calculator',
@@ -159,8 +175,7 @@ export const english = {
   settingsUpdated: 'Settings updated successfully',
   accountDeleted: 'Account deleted successfully',
   appSettings: 'App Settings',
-  fullName: 'Full Name',
-  profileNameDescription: 'This is the name displayed on your profile',
+  accountSettings: 'Account Settings',
   emailAddress: 'Email Address',
   updating: 'Updating',
   updateProfile: 'Update Profile',
@@ -169,7 +184,6 @@ export const english = {
   lightMode: 'Light',
   darkMode: 'Dark',
   
-  notifications: 'Notifications',
   workoutReminders: 'Workout Reminders',
   receiveReminders: 'Receive workout reminders',
   mealLoggingReminders: 'Meal Logging Reminders',

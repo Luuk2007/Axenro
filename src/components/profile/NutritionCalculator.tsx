@@ -31,9 +31,11 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
   const calculateDailyCalories = (data: ProfileFormValues) => {
     let bmr = calculateBMR(data);
     
-    // Apply activity multiplier
-    let activityMultiplier = 1.2; // Sedentary
-    switch (data.exerciseFrequency) {
+    // Apply activity multiplier - safely access properties
+    let activityMultiplier = 1.2; // Sedentary default
+    const exerciseFreq = data?.exerciseFrequency || "0-2";
+    
+    switch (exerciseFreq) {
       case "0-2":
         activityMultiplier = 1.375; // Light activity
         break;
@@ -47,8 +49,10 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     
     let calories = Math.round(bmr * activityMultiplier);
     
-    // Adjust based on goal
-    switch (data.goal) {
+    // Adjust based on goal - safely access goal property
+    const goal = data?.goal || "maintain";
+    
+    switch (goal) {
       case "gain":
         calories += 500;
         break;
@@ -64,7 +68,7 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
   };
 
   // Calculate macro breakdown based on calorie needs and goal
-  const calculateMacros = (calories: number, goal: string) => {
+  const calculateMacros = (calories: number, goal: string = "maintain") => {
     let protein = 0;
     let fats = 0;
     let carbs = 0;
@@ -94,7 +98,7 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
   };
 
   const calories = calculateDailyCalories(profile);
-  const macros = calculateMacros(calories, profile.goal);
+  const macros = calculateMacros(calories, profile?.goal);
 
   return (
     <Card>

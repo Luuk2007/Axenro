@@ -172,7 +172,10 @@ const Workouts = () => {
 
       <DeleteWorkoutDialog 
         workoutId={workoutToDelete}
-        onOpenChange={setWorkoutToDelete}
+        onOpenChange={(open) => {
+          // If dialog is closing and open is false, set workoutToDelete to null
+          if (!open) setWorkoutToDelete(null);
+        }}
         onConfirmDelete={confirmDeleteWorkout}
       />
     </div>
