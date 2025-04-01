@@ -102,7 +102,23 @@ export const english: Translations = {
   // Workout specific
   selectExercise: "Select Exercise",
   deleteWorkout: "Delete Workout",
-  confirmDeleteWorkout: "Are you sure you want to delete this workout?"
+  confirmDeleteWorkout: "Are you sure you want to delete this workout?",
+  
+  // Authentication
+  signIn: "Sign In",
+  signUp: "Sign Up",
+  forgotPassword: "Forgot Password?",
+  alreadyHaveAccount: "Already have an account?",
+  enterEmail: "Enter your email address",
+  send: "Send",
+  resetPassword: "Reset Password",
+  loginSuccess: "Logged in successfully!",
+  signupSuccess: "Signed up successfully!",
+  checkEmailConfirmation: "Please check your email for confirmation.",
+  loggedOut: "Logged out successfully!",
+  resetEmailSent: "Password reset email sent!",
+  passwordsDoNotMatch: "Passwords do not match!",
+  or: "Or"
 };
 
 export default english;

@@ -63,11 +63,11 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
                           `${set.reps} ${t("minutes")}` : 
                           `${set.reps} ${t("reps")}`}
                       </div>
-                      <div>
-                        {isCardio ? 
-                          `${t("intensity")}: ${set.weight}` : 
-                          `${set.weight} ${t("kg")}`}
-                      </div>
+                      {!isCardio && (
+                        <div>
+                          {`${set.weight} ${t("kg")}`}
+                        </div>
+                      )}
                     </div>
                     
                     {!workout.completed && (

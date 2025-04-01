@@ -53,7 +53,7 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
       id: exercise.id,
       name: exercise.name,
       muscleGroup: exercise.muscleGroup,
-      sets: [{ id: 1, reps: isCardio ? 1 : 12, weight: isCardio ? 30 : 20, completed: false, isCardio }]
+      sets: [{ id: 1, reps: isCardio ? 30 : 12, weight: isCardio ? 0 : 20, completed: false, isCardio }]
     };
     
     setSelectedExercises([...selectedExercises, newExercise]);
@@ -70,8 +70,8 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
     
     exercise.sets.push({
       id: newSetId,
-      reps: exercise.sets.length > 0 ? exercise.sets[exercise.sets.length - 1].reps : (isCardio ? 1 : 12),
-      weight: exercise.sets.length > 0 ? exercise.sets[exercise.sets.length - 1].weight : (isCardio ? 30 : 20),
+      reps: exercise.sets.length > 0 ? exercise.sets[exercise.sets.length - 1].reps : (isCardio ? 30 : 12),
+      weight: exercise.sets.length > 0 ? exercise.sets[exercise.sets.length - 1].weight : (isCardio ? 0 : 20),
       completed: false,
       isCardio
     });
@@ -195,16 +195,18 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
                           <div className="col-span-5 text-xs text-muted-foreground">
                             {isCardio ? t("minutes") : t("reps")}
                           </div>
-                          <div className="col-span-5 text-xs text-muted-foreground">
-                            {isCardio ? t("intensity") : `${t("weight")} (${t("kg")})`}
-                          </div>
+                          {!isCardio && (
+                            <div className="col-span-5 text-xs text-muted-foreground">
+                              {`${t("weight")} (${t("kg")})`}
+                            </div>
+                          )}
                           <div className="col-span-1"></div>
                         </div>
                         
                         {exercise.sets.map((set, setIndex) => (
                           <div key={set.id} className="grid grid-cols-12 gap-2 mb-2">
                             <div className="col-span-1 flex items-center">{setIndex + 1}</div>
-                            <div className="col-span-5">
+                            <div className={isCardio ? "col-span-10" : "col-span-5"}>
                               <Input 
                                 type="number" 
                                 min="1"
@@ -212,15 +214,17 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
                                 onChange={(e) => handleUpdateSet(exerciseIndex, setIndex, 'reps', e.target.value)}
                               />
                             </div>
-                            <div className="col-span-5">
-                              <Input 
-                                type="number" 
-                                min="0" 
-                                step="0.5"
-                                value={set.weight}
-                                onChange={(e) => handleUpdateSet(exerciseIndex, setIndex, 'weight', e.target.value)}
-                              />
-                            </div>
+                            {!isCardio && (
+                              <div className="col-span-5">
+                                <Input 
+                                  type="number" 
+                                  min="0" 
+                                  step="0.5"
+                                  value={set.weight}
+                                  onChange={(e) => handleUpdateSet(exerciseIndex, setIndex, 'weight', e.target.value)}
+                                />
+                              </div>
+                            )}
                             <div className="col-span-1 flex items-center">
                               <Button 
                                 variant="ghost" 
