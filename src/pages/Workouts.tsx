@@ -1,212 +1,164 @@
-
-import React, { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useLanguage } from "@/contexts/LanguageContext";
-import PersonalRecords from "@/components/workouts/PersonalRecords";
-import { Dumbbell, Trophy, Plus, Trash2 } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { Workout } from "@/types/workout";
-import CreateWorkout from "@/components/workouts/CreateWorkout";
-import TrackWorkout from "@/components/workouts/TrackWorkout";
-import DeleteWorkoutDialog from "@/components/workouts/DeleteWorkoutDialog";
+import { Plus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import WorkoutList from "@/components/workouts/WorkoutList";
 import WorkoutCalendar from "@/components/workouts/WorkoutCalendar";
+import OneRepMaxCalculator from "@/components/workouts/OneRepMaxCalculator";
+import TrackWorkout from "@/components/workouts/TrackWorkout";
+import PersonalRecords from "@/components/workouts/PersonalRecords";
+import CreateWorkout from "@/components/workouts/CreateWorkout";
+import DeleteWorkoutDialog from "@/components/workouts/DeleteWorkoutDialog";
+import { toast } from "sonner";
+import { Workout } from "@/types/workout";
 
 const Workouts = () => {
   const { t } = useLanguage();
+  const [activeTab, setActiveTab] = useState("all");
   const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [showWorkoutForm, setShowWorkoutForm] = useState(false);
-  const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
-  const [showTrackWorkout, setShowTrackWorkout] = useState(false);
+  const [createWorkoutOpen, setCreateWorkoutOpen] = useState(false);
+  const [trackWorkoutOpen, setTrackWorkoutOpen] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [workoutToDelete, setWorkoutToDelete] = useState<string | null>(null);
 
+  // Load workouts from local storage
   useEffect(() => {
-    // Load workouts from localStorage
-    const storedWorkouts = localStorage.getItem("workouts");
-    if (storedWorkouts) {
+    const savedWorkouts = localStorage.getItem("workouts");
+    if (savedWorkouts) {
       try {
-        setWorkouts(JSON.parse(storedWorkouts));
-      } catch (error) {
-        console.error("Error loading workouts:", error);
+        setWorkouts(JSON.parse(savedWorkouts));
+      } catch (e) {
+        console.error("Failed to parse workouts:", e);
       }
     }
   }, []);
 
-  const saveWorkouts = (updatedWorkouts: Workout[]) => {
-    localStorage.setItem("workouts", JSON.stringify(updatedWorkouts));
-    setWorkouts(updatedWorkouts);
+  // Save workouts to local storage
+  useEffect(() => {
+    if (workouts.length > 0) {
+      localStorage.setItem("workouts", JSON.stringify(workouts));
+    }
+  }, [workouts]);
+
+  const handleSaveWorkout = (workout: Workout) => {
+    setWorkouts((prev) => [...prev, workout]);
+    toast.success(t("workoutSaved"));
   };
 
-  const handleCreateWorkout = (name: string, exercises: any[], date: string) => {
-    const newWorkout: Workout = {
-      id: Date.now().toString(),
-      name: name,
-      date: date,
-      exercises: exercises,
-      completed: false
+  const handleDeleteWorkout = (workoutId: string) => {
+    setWorkouts((prev) => prev.filter((w) => w.id !== workoutId));
+    setWorkoutToDelete(null);
+    setDeleteDialogOpen(false);
+    toast.success(t("workoutDeleted"));
+  };
+
+  const handleTrackWorkout = (workout: Workout) => {
+    setSelectedWorkout(workout);
+    setTrackWorkoutOpen(true);
+  };
+
+  const handleDeleteClick = (workoutId: string) => {
+    setWorkoutToDelete(workoutId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCompleteWorkout = (workout: Workout) => {
+    setWorkouts((prev) =>
+      prev.map((w) => (w.id === workout.id ? { ...workout, completed: true } : w))
+    );
+    setTrackWorkoutOpen(false);
+    setSelectedWorkout(null);
+
+    // Convert completed sets to numeric values
+    const completedSets = workout.exercises.reduce(
+      (count, exercise) =>
+        count + exercise.sets.filter((set) => set.completed).length,
+      0
+    );
+
+    // Update total completed workouts in localStorage
+    const savedStats = localStorage.getItem("workoutStats");
+    const stats = savedStats ? JSON.parse(savedStats) : { 
+      totalWorkouts: 0, 
+      totalSets: 0,
+      weeklyWorkouts: Array(7).fill(0),
+      monthlyWorkouts: Array(31).fill(0)
     };
 
-    const updatedWorkouts = [...workouts, newWorkout];
-    saveWorkouts(updatedWorkouts);
-    toast.success(t("workoutSaved"));
-    setShowWorkoutForm(false);
-  };
+    // Update daily stats
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0-6, 0 is Sunday
+    const dayOfMonth = today.getDate() - 1; // 0-30
 
-  const handleStartWorkout = (workout: Workout) => {
-    // Clone the workout for tracking
-    setCurrentWorkout(JSON.parse(JSON.stringify(workout)));
-    setShowTrackWorkout(true);
-  };
+    stats.totalWorkouts += 1;
+    stats.totalSets += completedSets;
+    stats.weeklyWorkouts[dayOfWeek] += 1;
+    stats.monthlyWorkouts[dayOfMonth] += 1;
 
-  const handleTrackSet = (exerciseIndex: number, setIndex: number, completed: boolean) => {
-    if (!currentWorkout) return;
-    
-    const updatedWorkout = {...currentWorkout};
-    updatedWorkout.exercises[exerciseIndex].sets[setIndex].completed = completed;
-    setCurrentWorkout(updatedWorkout);
-  };
-
-  const handleCompleteWorkout = () => {
-    if (!currentWorkout) return;
-
-    // Check if any sets were completed
-    const anyCompletedSets = currentWorkout.exercises.some(exercise => 
-      exercise.sets.some(set => set.completed)
-    );
-
-    if (!anyCompletedSets) {
-      toast.error(t("completeOneSetError"));
-      return;
-    }
-
-    const updatedWorkouts = workouts.map(workout => 
-      workout.id === currentWorkout.id 
-        ? { ...currentWorkout, completed: true } 
-        : workout
-    );
-
-    if (!updatedWorkouts.find(w => w.id === currentWorkout.id)) {
-      updatedWorkouts.push({ ...currentWorkout, completed: true });
-    }
-
-    saveWorkouts(updatedWorkouts);
-    toast.success(t("workoutCompleted"));
-    setShowTrackWorkout(false);
-    setCurrentWorkout(null);
-  };
-  
-  const handleDeleteWorkout = (workoutId: string) => {
-    setWorkoutToDelete(workoutId);
-  };
-  
-  const confirmDeleteWorkout = () => {
-    if (!workoutToDelete) return;
-    
-    const updatedWorkouts = workouts.filter(workout => workout.id !== workoutToDelete);
-    saveWorkouts(updatedWorkouts);
-    toast.success(t("workoutDeleted"));
-    setWorkoutToDelete(null);
+    localStorage.setItem("workoutStats", JSON.stringify(stats));
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold tracking-tight">{t("workouts")}</h1>
-        <Button onClick={() => setShowWorkoutForm(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          {t("createWorkout")}
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">{t("workouts")}</h1>
+        
+        <Button onClick={() => setCreateWorkoutOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          {t("newWorkout")}
         </Button>
       </div>
 
-      <Tabs defaultValue="workouts">
-        <TabsList>
-          <TabsTrigger value="workouts">
-            <Dumbbell className="h-4 w-4 mr-2" />
-            {t("workouts")}
-          </TabsTrigger>
-          <TabsTrigger value="calendar">
-            <Trophy className="h-4 w-4 mr-2" />
-            {t("calendar")}
-          </TabsTrigger>
-          <TabsTrigger value="personal-records">
-            <Trophy className="h-4 w-4 mr-2" />
-            {t("personalRecords")}
-          </TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-4 mb-4">
+          <TabsTrigger value="all">{t("workouts")}</TabsTrigger>
+          <TabsTrigger value="calendar">{t("calendar")}</TabsTrigger>
+          <TabsTrigger value="records">{t("personalRecords")}</TabsTrigger>
+          <TabsTrigger value="calculator">{t("oneRepMaxCalculator")}</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="workouts" className="mt-6">
-          {workouts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {workouts.map(workout => (
-                <div key={workout.id} className="border rounded-lg p-4 shadow-sm">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-lg font-medium">{workout.name}</h3>
-                    <span className="text-sm text-muted-foreground">
-                      {format(new Date(workout.date), 'PPP')}
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-4">
-                    {workout.exercises.length} exercises, {workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)} sets
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button 
-                      onClick={() => handleStartWorkout(workout)} 
-                      variant={workout.completed ? "outline" : "default"}
-                    >
-                      {workout.completed ? t("viewWorkout") : t("trackWorkout")}
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      size="icon"
-                      onClick={() => handleDeleteWorkout(workout.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed rounded-xl border-muted-foreground/20">
-              <p className="text-muted-foreground mb-4">{t("noWorkoutsFound")}</p>
-              <Button onClick={() => setShowWorkoutForm(true)}>
-                {t("createWorkout")}
-              </Button>
-            </div>
-          )}
+        <TabsContent value="all" className="space-y-4">
+          <WorkoutList 
+            workouts={workouts}
+            onTrack={handleTrackWorkout}
+            onDelete={handleDeleteClick}
+          />
         </TabsContent>
         
-        <TabsContent value="calendar" className="mt-6">
+        <TabsContent value="calendar">
           <WorkoutCalendar workouts={workouts} />
         </TabsContent>
         
-        <TabsContent value="personal-records" className="mt-6">
+        <TabsContent value="records">
           <PersonalRecords />
+        </TabsContent>
+        
+        <TabsContent value="calculator">
+          <OneRepMaxCalculator />
         </TabsContent>
       </Tabs>
 
-      {/* Create Workout Dialog */}
       <CreateWorkout
-        open={showWorkoutForm}
-        onOpenChange={setShowWorkoutForm}
-        onSaveWorkout={handleCreateWorkout}
+        open={createWorkoutOpen}
+        onOpenChange={setCreateWorkoutOpen}
+        onSave={handleSaveWorkout}
       />
 
-      {/* Track Workout Dialog */}
-      <TrackWorkout
-        open={showTrackWorkout}
-        onOpenChange={setShowTrackWorkout}
-        workout={currentWorkout}
-        onTrackSet={handleTrackSet}
-        onCompleteWorkout={handleCompleteWorkout}
-      />
+      {selectedWorkout && (
+        <TrackWorkout
+          open={trackWorkoutOpen}
+          onOpenChange={setTrackWorkoutOpen}
+          workout={selectedWorkout}
+          onComplete={handleCompleteWorkout}
+        />
+      )}
 
-      {/* Delete Workout Confirmation */}
       <DeleteWorkoutDialog
-        workoutId={workoutToDelete}
-        onOpenChange={(open) => !open && setWorkoutToDelete(null)}
-        onConfirmDelete={confirmDeleteWorkout}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={() => workoutToDelete && handleDeleteWorkout(workoutToDelete)}
       />
     </div>
   );

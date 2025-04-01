@@ -6,8 +6,8 @@ import { french } from '../translations/french';
 import { german } from '../translations/german';
 import { spanish } from '../translations/spanish';
 
-// Define the type for translations
-export type TranslationKeys = keyof typeof english;
+// Define the type for translations using the imported english object
+export type TranslationKeys = keyof typeof english | keyof typeof dutch | keyof typeof french | keyof typeof german | keyof typeof spanish;
 
 // Define languages available
 export type Language = 'english' | 'dutch' | 'french' | 'german' | 'spanish';
@@ -79,7 +79,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   // Translation function
   const t = (key: TranslationKeys): string => {
     const translation = translations[language];
-    return translation[key] || english[key] || key;
+    return (translation as any)[key] || (english as any)[key] || String(key);
   };
 
   return (

@@ -15,7 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Plus, Save } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Workout } from "@/types/workout";
+import { Workout, Exercise, ExerciseSet } from "@/types/workout";
 import AddExerciseDialog from "./AddExerciseDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -34,27 +34,18 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
 }) => {
   const { t } = useLanguage();
   const [workoutName, setWorkoutName] = useState("");
-  const [exercises, setExercises] = useState<Array<{
-    id: string;
-    name: string;
-    sets: Array<{
-      id: string;
-      reps: number;
-      weight: number;
-      completed: boolean;
-    }>;
-  }>>([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [addExerciseOpen, setAddExerciseOpen] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
   const [calendarOpen, setCalendarOpen] = useState(false);
 
   const handleAddExercise = (exerciseName: string) => {
-    const newExercise = {
+    const newExercise: Exercise = {
       id: uuidv4(),
       name: exerciseName,
       sets: [
         {
-          id: uuidv4(),
+          id: parseInt(uuidv4().replace(/-/g, "").substring(0, 8), 16),
           reps: 10,
           weight: 20,
           completed: false
@@ -66,12 +57,13 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
 
   const handleAddSet = (exerciseIndex: number) => {
     const updatedExercises = [...exercises];
-    updatedExercises[exerciseIndex].sets.push({
-      id: uuidv4(),
+    const newSet: ExerciseSet = {
+      id: parseInt(uuidv4().replace(/-/g, "").substring(0, 8), 16),
       reps: 10,
       weight: 20,
       completed: false
-    });
+    };
+    updatedExercises[exerciseIndex].sets.push(newSet);
     setExercises(updatedExercises);
   };
 

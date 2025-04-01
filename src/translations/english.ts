@@ -1,3 +1,4 @@
+
 export default {
   // General
   save: "Save",
@@ -30,7 +31,6 @@ export default {
   perWeek: "per week",
   weight: "Weight",
   kg: "kg",
-  height: "Height",
   cm: "cm",
   age: "Age",
   gender: "Gender",
@@ -70,5 +70,168 @@ export default {
   workoutDeleted: "Workout deleted successfully",
   confirmDeleteWorkout: "Are you sure you want to delete this workout?",
   deleteWorkout: "Delete Workout",
-  selectExercise: "Select Exercise"
+  selectExercise: "Select Exercise",
+  
+  // Authentication
+  login: "Login",
+  logOut: "Log Out",
+  signIn: "Sign In",
+  signUp: "Sign Up",
+  email: "Email",
+  password: "Password",
+  confirmPassword: "Confirm Password",
+  forgotPassword: "Forgot Password?",
+  resetPassword: "Reset Password",
+  enterEmail: "Enter your email to reset password",
+  send: "Send",
+  fullName: "Full Name",
+  alreadyHaveAccount: "Already have an account?",
+  loginSuccess: "Login successful",
+  signupSuccess: "Signup successful",
+  checkEmailConfirmation: "Please check your email for confirmation",
+  resetEmailSent: "Reset email sent",
+  passwordsDoNotMatch: "Passwords do not match",
+  loggedOut: "Logged out successfully",
+  signOut: "Sign out",
+  
+  // Navigation
+  dashboard: "Dashboard",
+  nutrition: "Nutrition",
+  progress: "Progress",
+  settings: "Settings",
+  notifications: "Notifications",
+  
+  // Dashboard
+  todayOverview: "Today's Overview",
+  recentWorkouts: "Recent Workouts",
+  upcomingWorkouts: "Upcoming Workouts",
+  todayMeals: "Today's Meals",
+  caloriesConsumed: "Calories Consumed",
+  totalCalories: "Total Calories",
+  remainingCalories: "Remaining Calories",
+  youNeed: "You need",
+  caloriesRemaining: "calories remaining",
+  calorieBreakdown: "Calorie Breakdown",
+  noMealsTracked: "No meals tracked yet",
+  addMeal: "Add Meal",
+  todaysProgress: "Today's Progress",
+  addItem: "Add Item",
+  addActivity: "Add Activity",
+  
+  // Water tracking
+  addWater: "Add Water",
+  waterIntake: "Water Intake",
+  add100ml: "100ml",
+  add250ml: "250ml",
+  add500ml: "500ml",
+  add750ml: "750ml",
+  add1l: "1L",
+  waterTracking: "Water Tracking",
+  waterCalculator: "Water Calculator",
+  waterCalculatorDescription: "Calculate your recommended daily water intake based on your body weight.",
+  bodyWeight: "Body Weight",
+  recommendedWaterIntake: "Recommended Water Intake",
+  basedOnFormula: "Based on the formula",
+  waterLog: "Water Log",
+  dailyWaterGoal: "Daily Water Goal",
+  noWaterEntries: "No water entries yet",
+  
+  // Nutrition
+  searchFoods: "Search foods...",
+  addFood: "Add Food",
+  scanBarcode: "Scan Barcode",
+  createNew: "Create New",
+  newWorkout: "New Workout",
+  selectExercises: "Select Exercises",
+  addMeasurement: "Add Measurement",
+  addPhotos: "Add Photos",
+  photoAccess: "Allow access to photo gallery?",
+  allow: "Allow",
+  deny: "Deny",
+  selectDate: "Select Date",
+  
+  // Macros
+  dailyNutrients: "Daily Nutrients",
+  dailySteps: "Daily Steps",
+  target: "Target",
+  consumed: "Consumed",
+  remaining: "Remaining",
+  grams: "g",
+  calories: "calories",
+  dailyCalorieNeeds: "Daily Calorie Needs",
+  caloriesPerDay: "calories per day",
+  macroBreakdown: "Macro Breakdown",
+  protein: "Protein",
+  carbs: "Carbs",
+  fat: "Fat",
+  
+  // Profile settings
+  profileNameDescription: "Your full name as it will appear on your profile",
+  emailAddress: "Email Address",
+  updating: "Updating...",
+  updateProfile: "Update Profile",
+  yourStats: "Your Stats",
+  
+  // App settings
+  appSettings: "App Settings",
+  theme: "Theme",
+  lightMode: "Light Mode",
+  darkMode: "Dark Mode",
+  workoutReminders: "Workout Reminders",
+  receiveReminders: "Receive reminders for scheduled workouts",
+  mealLoggingReminders: "Meal Logging Reminders",
+  getReminders: "Get reminders to log your meals throughout the day",
+  privacy: "Privacy",
+  saveProfileData: "Save Profile Data",
+  storeProfileData: "Store your profile data for future sessions",
+  accountActions: "Account Actions",
+  deleteAccount: "Delete Account",
+  permanentlyDelete: "Permanently delete your account and all your data",
+  areYouSure: "Are you absolutely sure?",
+  cannotBeUndone: "This action cannot be undone. It will permanently delete your account and all your data from our servers.",
+  yesDelete: "Yes, delete my account",
+  settingsUpdated: "Settings updated successfully",
+  accountDeleted: "Account deleted successfully",
+  
+  // BMI Calculator
+  bmiCalculator: "BMI Calculator",
+  calculateBMI: "Calculate BMI",
+  bmiResult: "Your BMI Result",
+  bmiValue: "Your BMI is",
+  underweight: "You are underweight. Consider adjusting your nutrition.",
+  healthyWeight: "Great! You have a healthy weight.",
+  overweight: "You are overweight. Adjusting your diet and training might help.",
+  obesity: "Obesity detected. Consult a professional for guidance.",
+  weightToGain: "To achieve a healthy BMI, you need to gain about",
+  weightToLose: "To achieve a healthy BMI, you need to lose about",
+  
+  // One Rep Max Calculator
+  oneRepMaxCalculator: "One Rep Max Calculator",
+  formula: "Formula",
+  calculate: "Calculate",
+  estimatedOneRepMax: "Estimated One Rep Max",
+  oneRepMaxDisclaimer: "This is an estimation based on the selected formula. Actual one rep max may vary.",
+  
+  // Premium
+  premium: "Premium Account",
+  trackFitness: "Track your fitness journey with precision and style.",
+  
+  // Time periods
+  today: "Today",
+  week: "Week",
+  month: "Month",
+  weeklyNutrition: "Weekly Nutrition",
+  monthlyNutrition: "Monthly Nutrition",
+  
+  // Common actions
+  or: "or",
+  
+  // Additional workout translations
+  workoutSaved: "Workout saved successfully",
+  recordSaved: "Record saved successfully",
+  recordDeleted: "Record deleted successfully",
+  saveRecord: "Save Record",
+  exerciseName: "Exercise Name",
+  noPersonalRecords: "No personal records yet",
+  addPersonalRecord: "Add Personal Record"
 };
