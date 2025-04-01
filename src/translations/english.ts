@@ -123,6 +123,7 @@ export const english = {
   gender: 'Gender',
   targetWeight: 'Target Weight',
   height: 'Height',
+  profileNameDescription: 'Your full name as it will appear on your profile',
   
   // BMI Calculator
   bmiCalculator: 'BMI Calculator',

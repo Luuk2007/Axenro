@@ -11,6 +11,7 @@ interface UserStatsDisplayProps {
 
 const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
   const { t } = useLanguage();
+  
   // Safely access property with optional chaining to prevent errors
   const showTargetWeight = profile?.goal !== "maintain";
 

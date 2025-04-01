@@ -98,7 +98,7 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
   };
 
   const calories = calculateDailyCalories(profile);
-  const macros = calculateMacros(calories, profile?.goal);
+  const macros = calculateMacros(calories, profile?.goal || "maintain");
 
   return (
     <Card>

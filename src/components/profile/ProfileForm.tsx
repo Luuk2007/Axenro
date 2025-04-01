@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,6 +30,9 @@ export interface ProfileFormValues {
   activityLevel: string;
   fitnessGoal: string;
   targetWeight?: number;
+  // Add the missing properties that are being used in other components
+  exerciseFrequency?: string;
+  goal?: string;
 }
 
 export const defaultValues: ProfileFormValues = {
@@ -40,7 +42,9 @@ export const defaultValues: ProfileFormValues = {
   height: 175,
   weight: 75,
   activityLevel: "moderate",
-  fitnessGoal: "maintain"
+  fitnessGoal: "maintain",
+  exerciseFrequency: "3-5", // Default exercise frequency
+  goal: "maintain" // Default goal
 };
 
 interface ProfileFormProps {
