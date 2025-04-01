@@ -8,25 +8,28 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DeleteWorkoutDialogProps {
-  open: boolean;
+  workoutId: string | null;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
+  onConfirmDelete: () => void;
 }
 
 const DeleteWorkoutDialog: React.FC<DeleteWorkoutDialogProps> = ({
-  open,
+  workoutId,
   onOpenChange,
-  onConfirm
+  onConfirmDelete
 }) => {
   const { t } = useLanguage();
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog 
+      open={!!workoutId} 
+      onOpenChange={(open) => !open && onOpenChange(false)}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{t("deleteWorkout")}</AlertDialogTitle>
@@ -36,11 +39,8 @@ const DeleteWorkoutDialog: React.FC<DeleteWorkoutDialogProps> = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-          <AlertDialogAction 
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            onClick={onConfirm}
-          >
-            {t("delete")}
+          <AlertDialogAction onClick={onConfirmDelete} className="bg-destructive text-destructive-foreground">
+            {t("deleteWorkout")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

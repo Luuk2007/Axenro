@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Dialog, 
@@ -12,59 +12,37 @@ import {
 import { Calendar, Save } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
-import { format } from "date-fns";
 
 interface TrackWorkoutProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workout: Workout | null;
-  onComplete: (workout: Workout) => void;
+  onTrackSet: (exerciseIndex: number, setIndex: number, completed: boolean) => void;
+  onCompleteWorkout: () => void;
 }
 
 const TrackWorkout: React.FC<TrackWorkoutProps> = ({
   open,
   onOpenChange,
   workout,
-  onComplete
+  onTrackSet,
+  onCompleteWorkout
 }) => {
   const { t } = useLanguage();
-  const [workoutState, setWorkoutState] = useState<Workout | null>(workout);
 
-  // Update the internal workout state when the prop changes
-  React.useEffect(() => {
-    setWorkoutState(workout);
-  }, [workout]);
-
-  if (!workoutState) return null;
-
-  // Format the date for display
-  const displayDate = workoutState.date ? format(new Date(workoutState.date), "PPP") : "";
-
-  const handleTrackSet = (exerciseIndex: number, setIndex: number, completed: boolean) => {
-    if (!workoutState) return;
-    
-    const updatedWorkout = { ...workoutState };
-    updatedWorkout.exercises[exerciseIndex].sets[setIndex].completed = completed;
-    setWorkoutState(updatedWorkout);
-  };
-
-  const handleCompleteWorkout = () => {
-    if (workoutState) {
-      onComplete(workoutState);
-    }
-  };
+  if (!workout) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-screen overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{workoutState.name}</DialogTitle>
+          <DialogTitle>{workout.name}</DialogTitle>
           <DialogDescription className="flex items-center gap-2 mt-2">
-            <Calendar className="h-4 w-4" /> {displayDate}
+            <Calendar className="h-4 w-4" /> {workout.date}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-4">
-          {workoutState.exercises.map((exercise, exerciseIndex) => (
+          {workout.exercises.map((exercise, exerciseIndex) => (
             <div key={`${exercise.id}-${exerciseIndex}`} className="border rounded-md p-4">
               <h4 className="font-medium mb-4">{exercise.name}</h4>
               
@@ -72,7 +50,7 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
                 <div 
                   key={set.id} 
                   className={`flex items-center justify-between p-2 mb-2 rounded ${
-                    set.completed ? "bg-green-50 border border-green-100 dark:bg-green-900/20 dark:border-green-900/30" : "bg-gray-50 border border-gray-100 dark:bg-gray-900/20 dark:border-gray-900/30"
+                    set.completed ? "bg-green-50 border border-green-100" : "bg-gray-50 border border-gray-100"
                   }`}
                 >
                   <div className="flex items-center gap-4">
@@ -83,7 +61,7 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
                   <Button 
                     variant={set.completed ? "default" : "outline"}
                     size="sm"
-                    onClick={() => handleTrackSet(exerciseIndex, setIndex, !set.completed)}
+                    onClick={() => onTrackSet(exerciseIndex, setIndex, !set.completed)}
                   >
                     {set.completed ? t("completed") : t("trackWorkout")}
                   </Button>
@@ -96,7 +74,7 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("cancel")}
           </Button>
-          <Button onClick={handleCompleteWorkout}>
+          <Button onClick={onCompleteWorkout}>
             <Save className="h-4 w-4 mr-2" />
             {t("saveWorkout")}
           </Button>
