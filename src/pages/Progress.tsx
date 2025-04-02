@@ -1,6 +1,6 @@
 
-import React, { useState, useRef } from 'react';
-import { Calendar, Camera, Plus, Upload, Weight } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -8,19 +8,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { format } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { toast } from 'sonner';
-
-// Sample data for weight progress
-const weightData = [
-  { date: 'Jun 1', value: 78.5 },
-  { date: 'Jun 8', value: 78.2 },
-  { date: 'Jun 15', value: 77.8 },
-  { date: 'Jun 22', value: 77.3 },
-  { date: 'Jun 29', value: 76.9 },
-  { date: 'Jul 6', value: 76.5 },
-  { date: 'Jul 13', value: 76.4 },
-];
+import { Progress } from '@/components/ui/progress';
+import { WeightTracker } from '@/components/progress/WeightTracker';
 
 // Sample images for progress photos
 const progressPhotos = [
@@ -49,7 +40,6 @@ export default function Progress() {
   const [showAddPhoto, setShowAddPhoto] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [weightHistory, setWeightHistory] = useState(weightData);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
@@ -69,13 +59,12 @@ export default function Progress() {
     const selectedType = measurementTypes.find(type => type.id === measurementType);
     
     if (measurementType === 'weight') {
-      // Update weight history
-      const today = format(new Date(), 'MMM d');
-      const newData = [...weightHistory, { date: today, value }];
-      setWeightHistory(newData);
+      // The weight is now handled by the WeightTracker component
+      toast.success(`${selectedType?.name} measurement added`);
+    } else {
+      toast.success(`${selectedType?.name} measurement added`);
     }
     
-    toast.success(`${selectedType?.name} measurement added`);
     setMeasurementValue('');
   };
   
@@ -226,13 +215,7 @@ export default function Progress() {
         
         <TabsContent value="weight" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-1">
-            <ProgressChart
-              title="Weight Progress"
-              data={weightHistory}
-              label="kg"
-              color="#4F46E5"
-              onViewAll={() => {}}
-            />
+            <WeightTracker />
           </div>
         </TabsContent>
         
