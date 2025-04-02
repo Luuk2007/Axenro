@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 // Rename the Progress component import to ProgressBar to avoid conflict
-import { Progress as ProgressBar } from '@/components/ui/progress';
+import { Progress } from '@/components/ui/progress';
 import { WeightTracker } from '@/components/progress/WeightTracker';
 
 // Sample images for progress photos
@@ -171,7 +171,7 @@ export default function Progress() {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Type</label>
+                  <label className="text-sm font-medium">{t("type")}</label>
                   <select 
                     className="w-full rounded-md border border-input bg-background px-3 py-2"
                     value={measurementType}
@@ -184,7 +184,7 @@ export default function Progress() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    Value ({measurementTypes.find(type => type.id === measurementType)?.unit})
+                    {t("value")} ({measurementTypes.find(type => type.id === measurementType)?.unit})
                   </label>
                   <Input 
                     type="number" 
@@ -194,7 +194,7 @@ export default function Progress() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Date</label>
+                  <label className="text-sm font-medium">{t("date")}</label>
                   <Input type="date" defaultValue={format(new Date(), 'yyyy-MM-dd')} />
                 </div>
                 <Button onClick={handleAddMeasurement} className="w-full">
@@ -208,9 +208,9 @@ export default function Progress() {
 
       <Tabs defaultValue="weight" className="w-full">
         <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="weight">Weight</TabsTrigger>
-          <TabsTrigger value="measurements">Measurements</TabsTrigger>
-          <TabsTrigger value="photos">Progress Photos</TabsTrigger>
+          <TabsTrigger value="weight">{t("weight")}</TabsTrigger>
+          <TabsTrigger value="measurements">{t("measurements")}</TabsTrigger>
+          <TabsTrigger value="photos">{t("photos")}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="weight" className="space-y-6">

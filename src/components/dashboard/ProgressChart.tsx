@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -17,14 +17,34 @@ interface ProgressChartProps {
   color: string;
   className?: string;
   onViewAll?: () => void;
+  targetValue?: number;
 }
 
-export default function ProgressChart({ data, title, label, color, className, onViewAll }: ProgressChartProps) {
+export default function ProgressChart({ 
+  data, 
+  title, 
+  label, 
+  color, 
+  className, 
+  onViewAll,
+  targetValue 
+}: ProgressChartProps) {
   const { t } = useLanguage();
   const latestValue = data.length > 0 ? data[data.length - 1].value : 0;
   const previousValue = data.length > 1 ? data[data.length - 2].value : 0;
   const difference = latestValue - previousValue;
   const isPositive = difference >= 0;
+
+  // Calculate min and max for better scaling
+  const values = data.map(item => item.value);
+  const minValue = Math.min(...values) - 1; // Add some padding
+  const maxValue = Math.max(...values) + 1; // Add some padding
+
+  // Ensure min and max have a reasonable distance between them
+  const yDomain = [
+    Math.min(minValue, targetValue ? targetValue - 2 : minValue),
+    Math.max(maxValue, targetValue ? targetValue + 2 : maxValue)
+  ];
 
   return (
     <div className={cn("glassy-card rounded-xl overflow-hidden card-shadow hover-scale", className)}>
@@ -71,7 +91,7 @@ export default function ProgressChart({ data, title, label, color, className, on
                 padding={{ left: 10, right: 10 }}
               />
               <YAxis 
-                domain={['dataMin - 2', 'dataMax + 2']} 
+                domain={yDomain}
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 10 }}
@@ -83,7 +103,22 @@ export default function ProgressChart({ data, title, label, color, className, on
                   border: '1px solid rgba(0,0,0,0.05)', 
                   boxShadow: '0 2px 8px rgba(0,0,0,0.08)' 
                 }} 
+                formatter={(value) => [`${value} ${label}`, '']}
               />
+              {targetValue && (
+                <ReferenceLine 
+                  y={targetValue}
+                  stroke="#FF6B6B"
+                  strokeDasharray="3 3"
+                  strokeWidth={1.5}
+                  label={{
+                    position: 'right',
+                    value: `${t("targetWeight")}: ${targetValue}${label}`,
+                    fill: '#FF6B6B',
+                    fontSize: 10
+                  }}
+                />
+              )}
               <Area 
                 type="monotone" 
                 dataKey="value" 

@@ -1,14 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { format, subDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ProgressChart from '@/components/dashboard/ProgressChart';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { ArrowUp, ArrowDown, Plus, Weight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
-// Rename the Progress component import to ProgressBar to avoid conflict
-import { Progress as ProgressBar } from '@/components/ui/progress';
+import { Progress } from '@/components/ui/progress';
 
 interface WeightEntry {
   date: string;
@@ -22,6 +22,9 @@ export function WeightTracker() {
   const [startingWeight, setStartingWeight] = useState<number | null>(null);
   const [targetWeight, setTargetWeight] = useState<number | null>(null);
   const [showAddWeightDialog, setShowAddWeightDialog] = useState(false);
+  const [showTargetDialog, setShowTargetDialog] = useState(false);
+  const [newTargetWeight, setNewTargetWeight] = useState('');
+  const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   // On first load, check if we have weight data in localStorage
   useEffect(() => {
@@ -98,7 +101,8 @@ export function WeightTracker() {
       return;
     }
 
-    const today = format(new Date(), 'MMM d');
+    // Format the date from the selected date input
+    const formattedDate = format(new Date(selectedDate), 'MMM d');
     
     // Check if this is the first weight entry
     if (weightHistory.length === 0 && startingWeight === null) {
@@ -106,10 +110,10 @@ export function WeightTracker() {
     }
     
     // Add the new weight entry
-    const newEntry = { date: today, value: weightValue };
+    const newEntry = { date: formattedDate, value: weightValue };
     const updatedHistory = [...weightHistory, newEntry];
     
-    // Sort by date (assuming the date format allows for string comparison)
+    // Sort by date
     updatedHistory.sort((a, b) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
@@ -125,11 +129,21 @@ export function WeightTracker() {
   // Update target weight
   const handleUpdateTarget = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!targetWeight) {
+    
+    if (!newTargetWeight) {
       toast.error(t("pleaseEnterTargetWeight"));
       return;
     }
-    toast.success(t("targetWeightUpdated"));
+    
+    const parsedTarget = parseFloat(newTargetWeight);
+    if (isNaN(parsedTarget)) {
+      toast.error(t("pleaseEnterValidNumber"));
+      return;
+    }
+    
+    setTargetWeight(parsedTarget);
+    setShowTargetDialog(false);
+    toast.success(t("targetUpdated"));
   };
 
   // Calculate weight change indicators
@@ -177,7 +191,11 @@ export function WeightTracker() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">{t("date")}</label>
-                  <Input type="date" defaultValue={format(new Date(), 'yyyy-MM-dd')} />
+                  <Input 
+                    type="date" 
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)} 
+                  />
                 </div>
                 <Button onClick={handleAddWeight} className="w-full">
                   {t("add")}
@@ -240,8 +258,7 @@ export function WeightTracker() {
                   </span>
                   <span className="text-sm font-medium">{progressPercentage.toFixed(1)}%</span>
                 </div>
-                {/* Update the Progress component usage to ProgressBar */}
-                <ProgressBar value={progressPercentage} className="h-2 mb-4" />
+                <Progress value={progressPercentage} className="h-2 mb-4" />
                 
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <div>{t("startingWeight")}: <span className="font-medium">{startingWeight} kg</span></div>
@@ -249,23 +266,36 @@ export function WeightTracker() {
                 </div>
                 
                 <div className="mt-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => {
-                      // Show dialog to update target weight
-                      const newTarget = prompt(t("enterNewTargetWeight"), targetWeight.toString());
-                      if (newTarget) {
-                        const parsed = parseFloat(newTarget);
-                        if (!isNaN(parsed)) {
-                          setTargetWeight(parsed);
-                          toast.success(t("targetUpdated"));
-                        }
-                      }
-                    }}
-                  >
-                    {t("updateTarget")}
-                  </Button>
+                  <Dialog open={showTargetDialog} onOpenChange={setShowTargetDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        {t("updateTarget")}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t("updateTarget")}</DialogTitle>
+                        <DialogDescription>
+                          {t("enterNewTargetWeight")}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handleUpdateTarget} className="space-y-4 py-2">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">{t("targetWeight")} (kg)</label>
+                          <Input 
+                            type="number"
+                            value={newTargetWeight}
+                            onChange={(e) => setNewTargetWeight(e.target.value)}
+                            step="0.1"
+                            placeholder={targetWeight?.toString() || ''}
+                          />
+                        </div>
+                        <DialogFooter>
+                          <Button type="submit">{t("saveTarget")}</Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </>
             ) : (
@@ -276,8 +306,8 @@ export function WeightTracker() {
                     <label className="text-sm font-medium">{t("targetWeight")} (kg)</label>
                     <Input 
                       type="number"
-                      value={targetWeight || ''}
-                      onChange={(e) => setTargetWeight(parseFloat(e.target.value) || null)}
+                      value={newTargetWeight}
+                      onChange={(e) => setNewTargetWeight(e.target.value)}
                       step="0.1"
                       placeholder="65.0"
                       className="mt-1"
