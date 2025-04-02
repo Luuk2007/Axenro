@@ -78,6 +78,9 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       ...settings,
       language
     }));
+    
+    // Force a re-render of the entire application
+    document.documentElement.setAttribute('lang', language);
   }, [language]);
 
   // Translation function

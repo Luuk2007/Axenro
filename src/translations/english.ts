@@ -89,6 +89,27 @@ const english: Translations = {
   weightUpdated: "Weight updated successfully",
   pleaseEnterTargetWeight: "Please enter a target weight",
 
+  // Water tracking related translations
+  waterTracking: "Water Tracking",
+  waterCalculator: "Water Calculator",
+  waterCalculatorDescription: "Calculate your recommended daily water intake based on your body weight",
+  waterIntake: "Water Intake",
+  add100ml: "Add 100ml",
+  add250ml: "Add 250ml",
+  add500ml: "Add 500ml",
+  add750ml: "Add 750ml",
+  add1l: "Add 1L",
+  waterLog: "Water Log",
+  noWaterEntries: "No Water Entries",
+  bodyWeight: "Body Weight",
+  calculate: "Calculate",
+  recommendedWaterIntake: "Recommended Water Intake",
+  basedOnFormula: "Based on formula",
+  protein: "Protein",
+  addMeal: "Add Meal",
+  noMealsTracked: "No Meals Tracked",
+  startTracking: "Start tracking your nutrition",
+  
   // From screenshots - fixing missing/incorrect translations
   notifications: "Notifications",
   workoutReminders: "Workout Reminders",
@@ -138,6 +159,13 @@ const english: Translations = {
   trackFitness: "Track your fitness journey seamlessly",
   completeYourProfile: "Complete your profile to see nutrition recommendations",
   login: "Login",
+  
+  // Additional water tracking translations from screenshot
+  todaysMeals: "Today's Meals",
+  meals: "Meals",
+  water: "Water",
+  addFood: "Add Food",
+  selectExercises: "Select Exercises",
 };
 
 export default english;
