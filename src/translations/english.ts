@@ -1,7 +1,7 @@
 
 import { Translations } from "./types";
 
-export const english: Translations = {
+const english: Translations = {
   name: "Name",
   email: "Email",
   password: "Password",
@@ -28,7 +28,7 @@ export const english: Translations = {
   weight: "Weight",
   height: "Height",
   exerciseFrequency: "Exercise Frequency",
-  timesPerWeek: "times per week",
+  timesPerWeek: "Times per week",
   goal: "Goal",
   loseWeight: "Lose Weight",
   gainWeight: "Gain Weight",
@@ -46,7 +46,7 @@ export const english: Translations = {
   
   // Exercise metrics
   reps: "Reps",
-  minutes: "minutes",
+  minutes: "Minutes",
   
   // Calendar
   workoutsThisWeek: "Workouts This Week",
@@ -67,6 +67,7 @@ export const english: Translations = {
   addExercise: "Add Exercise",
   selectExercises: "Select exercise",
   addSet: "Add Set",
+  sets: "Sets",
   
   // Workout management
   workouts: "Workouts",
@@ -116,7 +117,34 @@ export const english: Translations = {
   loggedOut: "Logged out successfully!",
   resetEmailSent: "Password reset email sent!",
   passwordsDoNotMatch: "Passwords do not match!",
-  or: "Or"
+  or: "Or",
+  
+  // BMI and Health Stats
+  bmiCalculator: "BMI Calculator",
+  bmiResult: "Your BMI Result",
+  bmiValue: "Your BMI is",
+  calculateBMI: "Calculate BMI",
+  underweight: "You are underweight. Consider adjusting your nutrition.",
+  healthyWeight: "Great! You have a healthy weight.",
+  overweight: "You are overweight. Adjusting your diet and exercise could help.",
+  obesity: "Obesity detected. Consult a professional for guidance.",
+  weightToGain: "To achieve a healthy BMI, you need to gain approximately",
+  weightToLose: "To achieve a healthy BMI, you need to lose approximately",
+  
+  // Nutrition
+  dailyCalorieNeeds: "Daily Calorie Needs",
+  caloriesPerDay: "Calories per day",
+  macroBreakdown: "Macro Breakdown",
+  protein: "Protein",
+  carbs: "Carbs",
+  fat: "Fat",
+  dailyNutrients: "Daily Nutrients",
+  dailySteps: "Daily Steps",
+  target: "Target",
+  consumed: "Consumed",
+  remaining: "Remaining",
+  grams: "g",
+  calories: "calories"
 };
 
 export default english;

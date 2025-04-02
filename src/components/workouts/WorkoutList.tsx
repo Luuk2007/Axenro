@@ -38,7 +38,7 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
             </div>
           </div>
           <div className="text-sm text-muted-foreground mb-4">
-            {workout.exercises.length} exercises, {workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)} sets
+            {workout.exercises.length} {t("exercises")}, {workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)} {t("sets")}
             <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
               {t("completed")}
             </span>
