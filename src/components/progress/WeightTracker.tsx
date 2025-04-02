@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format, subDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ArrowUp, ArrowDown, Plus, Weight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
-import { Progress } from '@/components/ui/progress';
+// Rename the Progress component import to ProgressBar to avoid conflict
+import { Progress as ProgressBar } from '@/components/ui/progress';
 
 interface WeightEntry {
   date: string;
@@ -240,7 +240,8 @@ export function WeightTracker() {
                   </span>
                   <span className="text-sm font-medium">{progressPercentage.toFixed(1)}%</span>
                 </div>
-                <Progress value={progressPercentage} className="h-2 mb-4" />
+                {/* Update the Progress component usage to ProgressBar */}
+                <ProgressBar value={progressPercentage} className="h-2 mb-4" />
                 
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <div>{t("startingWeight")}: <span className="font-medium">{startingWeight} kg</span></div>

@@ -3,14 +3,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { Progress } from '@/components/ui/progress';
+// Rename the Progress component import to ProgressBar to avoid conflict
+import { Progress as ProgressBar } from '@/components/ui/progress';
 import { WeightTracker } from '@/components/progress/WeightTracker';
 
 // Sample images for progress photos
