@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 // Rename the Progress component import to ProgressBar to avoid conflict
-import { Progress } from '@/components/ui/progress';
+import { Progress as ProgressBar } from '@/components/ui/progress';
 import { WeightTracker } from '@/components/progress/WeightTracker';
 
 // Sample images for progress photos
