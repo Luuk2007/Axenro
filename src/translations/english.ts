@@ -127,7 +127,6 @@ const english: Translations = {
   bmiCalculator: "BMI Calculator",
   bmiResult: "BMI Result",
   bmiValue: "BMI Value",
-  healthyWeight: "Healthy Weight",
   height: "Height",
   appSettings: "App Settings",
   language: "Language",
