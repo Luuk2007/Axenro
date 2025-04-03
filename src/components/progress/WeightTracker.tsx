@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { format, subDays } from 'date-fns';
+import { format, parse, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ProgressChart from '@/components/dashboard/ProgressChart';
@@ -13,6 +13,7 @@ import { Progress as ProgressBar } from '@/components/ui/progress';
 interface WeightEntry {
   date: string;
   value: number;
+  originalDate?: string; // Store the full date for sorting
 }
 
 export function WeightTracker() {
@@ -101,22 +102,30 @@ export function WeightTracker() {
       return;
     }
 
-    // Format the date from the selected date input
-    const formattedDate = format(new Date(selectedDate), 'MMM d');
+    // Store the full date for sorting and use a formatted date for display
+    const dateObj = parseISO(selectedDate);
+    const originalDate = selectedDate;  // Store full ISO date for sorting
+    const formattedDate = format(dateObj, 'MMM d'); // Format for display
     
     // Check if this is the first weight entry
     if (weightHistory.length === 0 && startingWeight === null) {
       setStartingWeight(weightValue);
     }
     
-    // Add the new weight entry
-    const newEntry = { date: formattedDate, value: weightValue };
+    // Add the new weight entry with both dates
+    const newEntry = { 
+      date: formattedDate, 
+      value: weightValue,
+      originalDate 
+    };
+    
+    // Create a new array with the new entry
     const updatedHistory = [...weightHistory, newEntry];
     
-    // Sort by date
+    // Sort by date using the original date string
     updatedHistory.sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
+      const dateA = new Date(a.originalDate || a.date);
+      const dateB = new Date(b.originalDate || b.date);
       return dateA.getTime() - dateB.getTime();
     });
     
@@ -150,8 +159,15 @@ export function WeightTracker() {
   const getWeightChange = () => {
     if (weightHistory.length < 2) return null;
     
-    const latest = weightHistory[weightHistory.length - 1].value;
-    const previous = weightHistory[weightHistory.length - 2].value;
+    // Get the sorted history to ensure we're comparing latest entries
+    const sortedHistory = [...weightHistory].sort((a, b) => {
+      const dateA = new Date(a.originalDate || a.date);
+      const dateB = new Date(b.originalDate || b.date);
+      return dateA.getTime() - dateB.getTime();
+    });
+    
+    const latest = sortedHistory[sortedHistory.length - 1].value;
+    const previous = sortedHistory[sortedHistory.length - 2].value;
     const change = latest - previous;
     
     return {
@@ -210,7 +226,15 @@ export function WeightTracker() {
             <>
               <div className="flex items-baseline">
                 <span className="text-2xl font-semibold tracking-tight mr-2">
-                  {weightHistory[weightHistory.length - 1].value} kg
+                  {(() => {
+                    // Find the most recent entry
+                    const sortedEntries = [...weightHistory].sort((a, b) => {
+                      const dateA = new Date(a.originalDate || a.date);
+                      const dateB = new Date(b.originalDate || b.date);
+                      return dateB.getTime() - dateA.getTime(); // Sort in descending order
+                    });
+                    return sortedEntries[0].value;
+                  })()} kg
                 </span>
                 {weightChange && (
                   <span className={`text-xs font-medium ${weightChange.isGain ? 'text-red-500' : 'text-green-500'}`}>
@@ -225,6 +249,7 @@ export function WeightTracker() {
                   title=""
                   label="kg"
                   color="#4F46E5"
+                  targetValue={targetWeight || undefined}
                 />
               </div>
             </>

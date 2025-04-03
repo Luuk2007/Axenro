@@ -8,6 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 interface ProgressData {
   date: string;
   value: number;
+  originalDate?: string; // For sorting and tooltip display purposes
 }
 
 interface ProgressChartProps {
@@ -30,15 +31,30 @@ export default function ProgressChart({
   targetValue 
 }: ProgressChartProps) {
   const { t } = useLanguage();
-  const latestValue = data.length > 0 ? data[data.length - 1].value : 0;
-  const previousValue = data.length > 1 ? data[data.length - 2].value : 0;
+  
+  // Ensure data is sorted by date
+  const sortedData = React.useMemo(() => {
+    if (!data.length) return [];
+    
+    // Create a copy to avoid mutating original data
+    return [...data].sort((a, b) => {
+      // Use originalDate if available, otherwise use date
+      const dateA = a.originalDate ? new Date(a.originalDate) : new Date(a.date);
+      const dateB = b.originalDate ? new Date(b.originalDate) : new Date(b.date);
+      return dateA.getTime() - dateB.getTime();
+    });
+  }, [data]);
+
+  const latestValue = sortedData.length > 0 ? sortedData[sortedData.length - 1].value : 0;
+  const previousValue = sortedData.length > 1 ? sortedData[sortedData.length - 2].value : 0;
   const difference = latestValue - previousValue;
   const isPositive = difference >= 0;
 
   // Calculate min and max for better scaling
-  const values = data.map(item => item.value);
-  const minValue = Math.min(...values) - 1; // Add some padding
-  const maxValue = Math.max(...values) + 1; // Add some padding
+  const values = sortedData.map(item => item.value);
+  // Add some padding to min and max values to avoid points touching edges
+  const minValue = Math.min(...values) - Math.max(1, Math.abs(Math.min(...values) * 0.05));
+  const maxValue = Math.max(...values) + Math.max(1, Math.abs(Math.max(...values) * 0.05));
 
   // Ensure min and max have a reasonable distance between them
   const yDomain = [
@@ -63,17 +79,19 @@ export default function ProgressChart({
           <span className="text-2xl font-semibold tracking-tight mr-2">
             {latestValue} {label}
           </span>
-          <span className={cn(
-            "text-xs font-medium",
-            isPositive ? "text-green-500" : "text-red-500"
-          )}>
-            {isPositive ? "+" : ""}{difference.toFixed(1)} {label}
-          </span>
+          {sortedData.length > 1 && (
+            <span className={cn(
+              "text-xs font-medium",
+              isPositive ? "text-green-500" : "text-red-500"
+            )}>
+              {isPositive ? "+" : ""}{Math.abs(difference).toFixed(1)} {label}
+            </span>
+          )}
         </div>
         <div className="h-[180px] mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
-              data={data}
+              data={sortedData}
               margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             >
               <defs>
@@ -89,6 +107,7 @@ export default function ProgressChart({
                 tickLine={false}
                 tick={{ fontSize: 10 }}
                 padding={{ left: 10, right: 10 }}
+                interval="preserveStartEnd"
               />
               <YAxis 
                 domain={yDomain}
@@ -96,6 +115,8 @@ export default function ProgressChart({
                 tickLine={false}
                 tick={{ fontSize: 10 }}
                 width={30}
+                allowDecimals={true}
+                tickCount={5}
               />
               <Tooltip 
                 contentStyle={{ 
@@ -104,6 +125,11 @@ export default function ProgressChart({
                   boxShadow: '0 2px 8px rgba(0,0,0,0.08)' 
                 }} 
                 formatter={(value) => [`${value} ${label}`, '']}
+                labelFormatter={(label, items) => {
+                  // If we have originalDate in our payload, use it for the tooltip
+                  const item = items[0]?.payload;
+                  return item?.originalDate || label;
+                }}
               />
               {targetValue && (
                 <ReferenceLine 
@@ -126,7 +152,10 @@ export default function ProgressChart({
                 fillOpacity={1}
                 fill={`url(#color${color})`} 
                 strokeWidth={2}
-                activeDot={{ r: 4, strokeWidth: 1 }}
+                activeDot={{ r: 5, strokeWidth: 1 }}
+                dot={{ r: 3, strokeWidth: 1, fill: "white" }}
+                isAnimationActive={true}
+                animationDuration={1000}
               />
             </AreaChart>
           </ResponsiveContainer>
