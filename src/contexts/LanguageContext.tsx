@@ -81,6 +81,9 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     
     // Force a re-render of the entire application
     document.documentElement.setAttribute('lang', language);
+    
+    // Trigger a custom event to notify components of language change
+    window.dispatchEvent(new CustomEvent('languagechange', { detail: { language } }));
   }, [language]);
 
   // Translation function

@@ -166,6 +166,36 @@ const english: Translations = {
   water: "Water",
   addFood: "Add Food",
   selectExercises: "Select Exercises",
+  
+  // Additional translations from screenshots
+  workoutCalendar: "Workout Calendar",
+  workoutsThisWeek: "Workouts This Week",
+  workoutsThisMonth: "Workouts This Month",
+  yourStats: "Your Stats",
+  exerciseFrequency: "Exercise Frequency",
+  times: "times",
+  perWeek: "per week",
+  kg: "kg",
+  cm: "cm",
+  goal: "Goal",
+  gainWeight: "Gain Weight",
+  loseWeight: "Lose Weight",
+  maintainWeight: "Maintain Weight",
+  age: "Age",
+  gender: "Gender",
+  macroBreakdown: "Macro Breakdown",
+  carbs: "Carbs",
+  fat: "Fat",
+  calories: "calories",
+  grams: "g",
+  underweight: "Underweight",
+  healthyWeight: "Healthy Weight",
+  overweight: "Overweight",
+  obesity: "Obesity",
+  weightToGain: "Weight to gain:",
+  weightToLose: "Weight to lose:",
+  bmi: "BMI",
+  calendar: "Calendar"
 };
 
 export default english;
