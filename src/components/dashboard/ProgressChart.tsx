@@ -50,14 +50,13 @@ export default function ProgressChart({
   const difference = latestValue - previousValue;
   const isPositive = difference >= 0;
 
-  // Calculate domain for Y axis with padding to ensure all points are visible
+  // Calculate min and max for better scaling
   const values = sortedData.map(item => item.value);
-  
-  // Set min and max values with padding to ensure chart doesn't cut off data points
-  const minValue = Math.min(...values) - Math.max(1, Math.abs(Math.min(...values) * 0.1));
-  const maxValue = Math.max(...values) + Math.max(1, Math.abs(Math.max(...values) * 0.1));
+  // Add some padding to min and max values to avoid points touching edges
+  const minValue = Math.min(...values) - Math.max(1, Math.abs(Math.min(...values) * 0.05));
+  const maxValue = Math.max(...values) + Math.max(1, Math.abs(Math.max(...values) * 0.05));
 
-  // Ensure target value is included in the visible area if provided
+  // Ensure min and max have a reasonable distance between them
   const yDomain = [
     Math.min(minValue, targetValue ? targetValue - 2 : minValue),
     Math.max(maxValue, targetValue ? targetValue + 2 : maxValue)
@@ -90,86 +89,76 @@ export default function ProgressChart({
           )}
         </div>
         <div className="h-[180px] mt-4">
-          {sortedData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={sortedData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
-              >
-                <defs>
-                  <linearGradient id={`color${color}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-                    <stop offset="95%" stopColor={color} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                <XAxis 
-                  dataKey="date" 
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10 }}
-                  padding={{ left: 10, right: 10 }}
-                  interval="preserveStartEnd"
-                  minTickGap={5}
-                />
-                <YAxis 
-                  domain={yDomain}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10 }}
-                  width={30}
-                  allowDecimals={true}
-                  tickCount={5}
-                  padding={{ top: 10, bottom: 10 }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    borderRadius: '8px', 
-                    border: '1px solid rgba(0,0,0,0.05)', 
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)' 
-                  }} 
-                  formatter={(value) => [`${value} ${label}`, '']}
-                  labelFormatter={(label, items) => {
-                    // If we have originalDate in our payload, use it for the tooltip
-                    const item = items[0]?.payload;
-                    return item?.originalDate || label;
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={sortedData}
+              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id={`color${color}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={color} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+              <XAxis 
+                dataKey="date" 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 10 }}
+                padding={{ left: 10, right: 10 }}
+                interval="preserveStartEnd"
+              />
+              <YAxis 
+                domain={yDomain}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 10 }}
+                width={30}
+                allowDecimals={true}
+                tickCount={5}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  borderRadius: '8px', 
+                  border: '1px solid rgba(0,0,0,0.05)', 
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)' 
+                }} 
+                formatter={(value) => [`${value} ${label}`, '']}
+                labelFormatter={(label, items) => {
+                  // If we have originalDate in our payload, use it for the tooltip
+                  const item = items[0]?.payload;
+                  return item?.originalDate || label;
+                }}
+              />
+              {targetValue && (
+                <ReferenceLine 
+                  y={targetValue}
+                  stroke="#FF6B6B"
+                  strokeDasharray="3 3"
+                  strokeWidth={1.5}
+                  label={{
+                    position: 'right',
+                    value: `${t("targetWeight")}: ${targetValue}${label}`,
+                    fill: '#FF6B6B',
+                    fontSize: 10
                   }}
-                  isAnimationActive={true}
                 />
-                {targetValue && (
-                  <ReferenceLine 
-                    y={targetValue}
-                    stroke="#FF6B6B"
-                    strokeDasharray="3 3"
-                    strokeWidth={1.5}
-                    label={{
-                      position: 'right',
-                      value: `${t("targetWeight")}: ${targetValue}${label}`,
-                      fill: '#FF6B6B',
-                      fontSize: 10
-                    }}
-                  />
-                )}
-                <Area 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke={color} 
-                  fillOpacity={1}
-                  fill={`url(#color${color})`} 
-                  strokeWidth={2}
-                  activeDot={{ r: 6, strokeWidth: 1 }}
-                  dot={{ r: 4, strokeWidth: 1, fill: "white" }}
-                  isAnimationActive={true}
-                  animationDuration={1000}
-                  connectNulls={true}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-full flex items-center justify-center text-muted-foreground">
-              {t("noData")}
-            </div>
-          )}
+              )}
+              <Area 
+                type="monotone" 
+                dataKey="value" 
+                stroke={color} 
+                fillOpacity={1}
+                fill={`url(#color${color})`} 
+                strokeWidth={2}
+                activeDot={{ r: 5, strokeWidth: 1 }}
+                dot={{ r: 3, strokeWidth: 1, fill: "white" }}
+                isAnimationActive={true}
+                animationDuration={1000}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>

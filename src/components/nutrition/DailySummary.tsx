@@ -1,9 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 type MacroData = {
   calories: { consumed: number; goal: number; unit: string };
@@ -26,7 +23,6 @@ interface DailySummaryProps {
 export default function DailySummary({ className }: DailySummaryProps) {
   const { t } = useLanguage();
   const [macroTargets, setMacroTargets] = useState<MacroData>(defaultMacroTargets);
-  const [timeFrame, setTimeFrame] = useState<string>("today");
   
   // Load from local storage if available
   useEffect(() => {
@@ -92,82 +88,27 @@ export default function DailySummary({ className }: DailySummaryProps) {
     }
   }, []);
 
-  // Calculate percentages for progress bars
-  const getPercentage = (consumed: number, goal: number) => {
-    if (goal <= 0) return 0;
-    return Math.min(Math.round((consumed / goal) * 100), 100);
-  };
-
-  const caloriePercentage = getPercentage(macroTargets.calories.consumed, macroTargets.calories.goal);
-  const proteinPercentage = getPercentage(macroTargets.protein.consumed, macroTargets.protein.goal);
-  const carbsPercentage = getPercentage(macroTargets.carbs.consumed, macroTargets.carbs.goal);
-  const fatPercentage = getPercentage(macroTargets.fat.consumed, macroTargets.fat.goal);
-
   return (
-    <Card className={`${className}`}>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">{t("dailySummary")}</CardTitle>
-          <ToggleGroup type="single" value={timeFrame} onValueChange={(value) => value && setTimeFrame(value)}>
-            <ToggleGroupItem value="today" size="sm">{t("today")}</ToggleGroupItem>
-            <ToggleGroupItem value="week" size="sm">{t("week")}</ToggleGroupItem>
-            <ToggleGroupItem value="month" size="sm">{t("month")}</ToggleGroupItem>
-          </ToggleGroup>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <div className="space-y-0.5">
-              <div className="text-sm font-medium">{t("calories")}</div>
-              <div className="text-xs text-muted-foreground">
-                {macroTargets.calories.consumed} / {macroTargets.calories.goal}
-              </div>
-            </div>
-            <span className="text-sm font-medium">{caloriePercentage}%</span>
-          </div>
-          <Progress value={caloriePercentage} className="h-2" />
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <div className="space-y-0.5">
-              <div className="text-sm font-medium">{t("protein")}</div>
-              <div className="text-xs text-muted-foreground">
-                {macroTargets.protein.consumed}g / {macroTargets.protein.goal}g
-              </div>
-            </div>
-            <span className="text-sm font-medium">{proteinPercentage}%</span>
-          </div>
-          <Progress value={proteinPercentage} className="h-2 bg-secondary [&>div]:bg-blue-500" />
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <div className="space-y-0.5">
-              <div className="text-sm font-medium">{t("carbs")}</div>
-              <div className="text-xs text-muted-foreground">
-                {macroTargets.carbs.consumed}g / {macroTargets.carbs.goal}g
-              </div>
-            </div>
-            <span className="text-sm font-medium">{carbsPercentage}%</span>
-          </div>
-          <Progress value={carbsPercentage} className="h-2 bg-secondary [&>div]:bg-green-500" />
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <div className="space-y-0.5">
-              <div className="text-sm font-medium">{t("fat")}</div>
-              <div className="text-xs text-muted-foreground">
-                {macroTargets.fat.consumed}g / {macroTargets.fat.goal}g
-              </div>
-            </div>
-            <span className="text-sm font-medium">{fatPercentage}%</span>
-          </div>
-          <Progress value={fatPercentage} className="h-2 bg-secondary [&>div]:bg-yellow-500" />
-        </div>
-      </CardContent>
-    </Card>
+    <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 ${className}`}>
+      <div className="border rounded-lg p-3 shadow-sm">
+        <div className="text-xs text-muted-foreground">{t("calories")}</div>
+        <div className="text-lg font-semibold">{macroTargets.calories.consumed} / {macroTargets.calories.goal}</div>
+      </div>
+      
+      <div className="border rounded-lg p-3 shadow-sm">
+        <div className="text-xs text-muted-foreground">{t("protein")}</div>
+        <div className="text-lg font-semibold">{macroTargets.protein.consumed}g / {macroTargets.protein.goal}g</div>
+      </div>
+      
+      <div className="border rounded-lg p-3 shadow-sm">
+        <div className="text-xs text-muted-foreground">{t("carbs")}</div>
+        <div className="text-lg font-semibold">{macroTargets.carbs.consumed}g / {macroTargets.carbs.goal}g</div>
+      </div>
+      
+      <div className="border rounded-lg p-3 shadow-sm">
+        <div className="text-xs text-muted-foreground">{t("fat")}</div>
+        <div className="text-lg font-semibold">{macroTargets.fat.consumed}g / {macroTargets.fat.goal}g</div>
+      </div>
+    </div>
   );
 }
