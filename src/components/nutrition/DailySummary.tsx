@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Progress } from '@/components/ui/progress';
 
 type MacroData = {
   calories: { consumed: number; goal: number; unit: string };
@@ -88,26 +89,52 @@ export default function DailySummary({ className }: DailySummaryProps) {
     }
   }, []);
 
+  const calculatePercentage = (consumed: number, goal: number) => {
+    return Math.min(Math.round((consumed / goal) * 100), 100);
+  };
+
   return (
-    <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 ${className}`}>
-      <div className="border rounded-lg p-3 shadow-sm">
-        <div className="text-xs text-muted-foreground">{t("calories")}</div>
-        <div className="text-lg font-semibold">{macroTargets.calories.consumed} / {macroTargets.calories.goal}</div>
+    <div className={`grid grid-cols-1 gap-3 ${className}`}>
+      <div className="border rounded-lg p-4 shadow-sm">
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-sm font-medium">{t("calories")}</div>
+          <div className="text-sm text-muted-foreground">
+            {macroTargets.calories.consumed} / {macroTargets.calories.goal}
+          </div>
+        </div>
+        <Progress 
+          value={calculatePercentage(macroTargets.calories.consumed, macroTargets.calories.goal)} 
+          className="h-2" 
+        />
       </div>
       
-      <div className="border rounded-lg p-3 shadow-sm">
-        <div className="text-xs text-muted-foreground">{t("protein")}</div>
-        <div className="text-lg font-semibold">{macroTargets.protein.consumed}g / {macroTargets.protein.goal}g</div>
-      </div>
-      
-      <div className="border rounded-lg p-3 shadow-sm">
-        <div className="text-xs text-muted-foreground">{t("carbs")}</div>
-        <div className="text-lg font-semibold">{macroTargets.carbs.consumed}g / {macroTargets.carbs.goal}g</div>
-      </div>
-      
-      <div className="border rounded-lg p-3 shadow-sm">
-        <div className="text-xs text-muted-foreground">{t("fat")}</div>
-        <div className="text-lg font-semibold">{macroTargets.fat.consumed}g / {macroTargets.fat.goal}g</div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="border rounded-lg p-3 shadow-sm">
+          <div className="text-xs text-muted-foreground">{t("protein")}</div>
+          <div className="text-sm font-medium">{macroTargets.protein.consumed}g / {macroTargets.protein.goal}g</div>
+          <Progress 
+            value={calculatePercentage(macroTargets.protein.consumed, macroTargets.protein.goal)} 
+            className="h-1.5 mt-1" 
+          />
+        </div>
+        
+        <div className="border rounded-lg p-3 shadow-sm">
+          <div className="text-xs text-muted-foreground">{t("carbs")}</div>
+          <div className="text-sm font-medium">{macroTargets.carbs.consumed}g / {macroTargets.carbs.goal}g</div>
+          <Progress 
+            value={calculatePercentage(macroTargets.carbs.consumed, macroTargets.carbs.goal)} 
+            className="h-1.5 mt-1" 
+          />
+        </div>
+        
+        <div className="border rounded-lg p-3 shadow-sm">
+          <div className="text-xs text-muted-foreground">{t("fat")}</div>
+          <div className="text-sm font-medium">{macroTargets.fat.consumed}g / {macroTargets.fat.goal}g</div>
+          <Progress 
+            value={calculatePercentage(macroTargets.fat.consumed, macroTargets.fat.goal)} 
+            className="h-1.5 mt-1" 
+          />
+        </div>
       </div>
     </div>
   );

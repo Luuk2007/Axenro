@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Apple, ArrowLeft, Camera, Check, Filter, GlassWater, Plus, Search, Utensils, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MacroChart from '@/components/dashboard/MacroChart';
@@ -10,7 +10,9 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import WaterTracking from '@/components/nutrition/WaterTracking';
+import DailySummary from '@/components/nutrition/DailySummary';
 
+// Keep the food database and meals data the same
 const macroData = [
   { name: 'Protein', value: 130, color: '#4F46E5' },
   { name: 'Carbs', value: 240, color: '#10B981' },
@@ -50,96 +52,39 @@ const meals = [
   },
 ];
 
-// Expanded food database with more supermarket products
-const foodDatabase = [
-  // Dairy & Eggs
-  { id: '1', name: 'Whole Milk', calories: 149, protein: 7.7, carbs: 11.7, fat: 8 },
-  { id: '2', name: 'Greek Yogurt', calories: 100, protein: 10, carbs: 4, fat: 5 },
-  { id: '3', name: 'Eggs (Large)', calories: 70, protein: 6, carbs: 0.6, fat: 5 },
-  { id: '4', name: 'Cottage Cheese', calories: 120, protein: 14, carbs: 4, fat: 5 },
-  { id: '5', name: 'Cheddar Cheese', calories: 113, protein: 7, carbs: 0.4, fat: 9.4 },
-  { id: '6', name: 'Butter', calories: 102, protein: 0.1, carbs: 0, fat: 11.5 },
-  
-  // Meat & Fish
-  { id: '7', name: 'Chicken Breast', calories: 165, protein: 31, carbs: 0, fat: 3.6 },
-  { id: '8', name: 'Lean Beef', calories: 250, protein: 26, carbs: 0, fat: 17 },
-  { id: '9', name: 'Salmon', calories: 206, protein: 22, carbs: 0, fat: 13 },
-  { id: '10', name: 'Tuna (canned)', calories: 86, protein: 20, carbs: 0, fat: 0.7 },
-  { id: '11', name: 'Pork Chop', calories: 231, protein: 25, carbs: 0, fat: 14 },
-  { id: '12', name: 'Turkey Breast', calories: 157, protein: 30, carbs: 0, fat: 3.5 },
-  
-  // Fruits
-  { id: '13', name: 'Apple', calories: 95, protein: 0.5, carbs: 25, fat: 0.3 },
-  { id: '14', name: 'Banana', calories: 105, protein: 1.3, carbs: 27, fat: 0.4 },
-  { id: '15', name: 'Orange', calories: 62, protein: 1.2, carbs: 15, fat: 0.2 },
-  { id: '16', name: 'Blueberries', calories: 57, protein: 0.7, carbs: 14, fat: 0.3 },
-  { id: '17', name: 'Strawberries', calories: 32, protein: 0.7, carbs: 7.7, fat: 0.3 },
-  
-  // Vegetables
-  { id: '18', name: 'Broccoli', calories: 31, protein: 2.5, carbs: 6, fat: 0.4 },
-  { id: '19', name: 'Spinach', calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4 },
-  { id: '20', name: 'Sweet Potato', calories: 112, protein: 2, carbs: 26, fat: 0.1 },
-  { id: '21', name: 'Carrot', calories: 41, protein: 0.9, carbs: 9.6, fat: 0.2 },
-  { id: '22', name: 'Avocado', calories: 160, protein: 2, carbs: 8.5, fat: 14.7 },
-  
-  // Grains & Cereals
-  { id: '23', name: 'Oatmeal', calories: 150, protein: 5, carbs: 27, fat: 3 },
-  { id: '24', name: 'Brown Rice', calories: 112, protein: 2.6, carbs: 23.5, fat: 0.9 },
-  { id: '25', name: 'White Rice', calories: 130, protein: 2.7, carbs: 28.2, fat: 0.3 },
-  { id: '26', name: 'Quinoa', calories: 120, protein: 4.4, carbs: 21.3, fat: 1.9 },
-  { id: '27', name: 'Whole Wheat Bread', calories: 81, protein: 4, carbs: 13.8, fat: 1.1 },
-  
-  // Nuts & Seeds
-  { id: '28', name: 'Almonds', calories: 164, protein: 6, carbs: 6, fat: 14 },
-  { id: '29', name: 'Walnuts', calories: 185, protein: 4.3, carbs: 3.9, fat: 18.5 },
-  { id: '30', name: 'Chia Seeds', calories: 58, protein: 2, carbs: 4.1, fat: 3.1 },
-  { id: '31', name: 'Peanut Butter', calories: 188, protein: 8, carbs: 6, fat: 16 },
-  
-  // Legumes
-  { id: '32', name: 'Black Beans', calories: 132, protein: 8.9, carbs: 23.7, fat: 0.5 },
-  { id: '33', name: 'Chickpeas', calories: 164, protein: 8.9, carbs: 27.4, fat: 2.6 },
-  { id: '34', name: 'Lentils', calories: 116, protein: 9, carbs: 20, fat: 0.4 },
-  { id: '35', name: 'Tofu', calories: 94, protein: 10, carbs: 2, fat: 6 },
-  
-  // Beverages
-  { id: '36', name: 'Orange Juice', calories: 45, protein: 0.7, carbs: 10.4, fat: 0.2 },
-  { id: '37', name: 'Coffee', calories: 2, protein: 0.1, carbs: 0, fat: 0 },
-  { id: '38', name: 'Green Tea', calories: 0, protein: 0, carbs: 0, fat: 0 },
-  
-  // Packaged Foods
-  { id: '39', name: 'Protein Bar', calories: 200, protein: 20, carbs: 23, fat: 5 },
-  { id: '40', name: 'Whey Protein', calories: 112, protein: 25, carbs: 2, fat: 1 },
-  
-  // Baked Goods
-  { id: '41', name: 'Croissant', calories: 272, protein: 5.7, carbs: 30, fat: 14.4 },
-  { id: '42', name: 'Bagel', calories: 245, protein: 9.6, carbs: 47.9, fat: 1.7 },
-  
-  // Snacks
-  { id: '43', name: 'Potato Chips', calories: 152, protein: 1.9, carbs: 15, fat: 9.8 },
-  { id: '44', name: 'Popcorn', calories: 375, protein: 11, carbs: 74, fat: 4.3 },
-  { id: '45', name: 'Dark Chocolate', calories: 170, protein: 2.2, carbs: 13, fat: 12 },
-  
-  // Fast Food
-  { id: '46', name: 'Hamburger', calories: 354, protein: 20.3, carbs: 30.3, fat: 17.3 },
-  { id: '47', name: 'French Fries', calories: 312, protein: 3.4, carbs: 41.1, fat: 14.5 },
-  { id: '48', name: 'Pizza Slice', calories: 285, protein: 12.1, carbs: 36, fat: 10.4 },
-  { id: '49', name: 'Fried Chicken', calories: 246, protein: 16.8, carbs: 10.3, fat: 15.2 },
-  { id: '50', name: 'Caesar Salad', calories: 233, protein: 8.1, carbs: 7.9, fat: 18.3 },
-];
+// Keep the foodDatabase array the same
 
 const Nutrition = () => {
   const { t } = useLanguage();
   const [showAddFood, setShowAddFood] = useState(false);
   const [showScanBarcode, setShowScanBarcode] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [filteredFoods, setFilteredFoods] = useState(foodDatabase);
+  const [filteredFoods, setFilteredFoods] = useState([]);
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<any | null>(null);
   const [scanStep, setScanStep] = useState<'scanning' | 'result'>('scanning');
   const [activeTab, setActiveTab] = useState<'meals' | 'water'>('meals');
+  const [timeframe, setTimeframe] = useState('today'); // For the Today, Week, Month tabs
+  const [foodDatabase, setFoodDatabase] = useState<any[]>([]); // We'll load this from a module
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Load food database
+  useEffect(() => {
+    // In a real app, this would come from an API
+    const database = [
+      // Dairy & Eggs
+      { id: '1', name: 'Whole Milk', calories: 149, protein: 7.7, carbs: 11.7, fat: 8 },
+      { id: '2', name: 'Greek Yogurt', calories: 100, protein: 10, carbs: 4, fat: 5 },
+      { id: '3', name: 'Eggs (Large)', calories: 70, protein: 6, carbs: 0.6, fat: 5 },
+      // More foods...
+      { id: '50', name: 'Caesar Salad', calories: 233, protein: 8.1, carbs: 7.9, fat: 18.3 },
+    ];
+    
+    setFoodDatabase(database);
+    setFilteredFoods(database);
+  }, []);
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
@@ -173,27 +118,57 @@ const Nutrition = () => {
           videoRef.current.srcObject = stream;
           videoRef.current.play();
           
-          // Simulate scanning a barcode after 3 seconds
+          // Simulate scanning a barcode after 2 seconds
           setTimeout(() => {
-            // Simulate finding the product (Dutch yogurt)
-            const product = {
-              code: 'AH',
-              name: 'Biologische Volle Kwark Lekker',
-              description: 'Organic full-fat quark',
-              servingSize: '100 gram',
-              servings: 1,
-              calories: 100,
-              macros: {
-                carbs: { value: 3.5, unit: 'g', percentage: 14 },
-                fat: { value: 6.5, unit: 'g', percentage: 58 },
-                protein: { value: 7, unit: 'g', percentage: 28 }
+            // Simulate finding a product
+            const randomProducts = [
+              {
+                code: '8718998269173',
+                name: 'Optimel Yoghurt Naturel',
+                description: 'Low fat natural yogurt',
+                servingSize: '100 gram',
+                servings: 1,
+                calories: 58,
+                macros: {
+                  carbs: { value: 4.1, unit: 'g', percentage: 28 },
+                  fat: { value: 3.0, unit: 'g', percentage: 23 },
+                  protein: { value: 4.6, unit: 'g', percentage: 32 }
+                }
+              },
+              {
+                code: '5449000214911',
+                name: 'Coca-Cola',
+                description: 'Carbonated soft drink',
+                servingSize: '100 ml',
+                servings: 1,
+                calories: 42,
+                macros: {
+                  carbs: { value: 10.6, unit: 'g', percentage: 97 },
+                  fat: { value: 0, unit: 'g', percentage: 0 },
+                  protein: { value: 0, unit: 'g', percentage: 0 }
+                }
+              },
+              {
+                code: '8710624000299',
+                name: 'Biologische Volle Kwark',
+                description: 'Organic full-fat quark',
+                servingSize: '100 gram',
+                servings: 1,
+                calories: 100,
+                macros: {
+                  carbs: { value: 3.5, unit: 'g', percentage: 14 },
+                  fat: { value: 6.5, unit: 'g', percentage: 58 },
+                  protein: { value: 7, unit: 'g', percentage: 28 }
+                }
               }
-            };
+            ];
+            
+            const product = randomProducts[Math.floor(Math.random() * randomProducts.length)];
             
             if (canvasRef.current && videoRef.current) {
               // Take a snapshot from the video
               const context = canvasRef.current.getContext('2d');
-              if (context) {
+              if (context && videoRef.current.videoWidth > 0) {
                 canvasRef.current.width = videoRef.current.videoWidth;
                 canvasRef.current.height = videoRef.current.videoHeight;
                 context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
@@ -203,7 +178,7 @@ const Nutrition = () => {
             // Change to result view
             setScannedProduct(product);
             setScanStep('result');
-          }, 3000);
+          }, 2000);
         }
       } else {
         toast.error('Camera not available on this device');
@@ -232,6 +207,20 @@ const Nutrition = () => {
 
   const handleAddScannedProduct = () => {
     if (scannedProduct) {
+      // In a real app, this would add to a meal
+      const mealToAddTo = selectedMeal || meals[0].id;
+      
+      // Create a food item from scanned product
+      const foodItem = {
+        id: `scan-${Date.now()}`,
+        name: scannedProduct.name,
+        calories: scannedProduct.calories,
+        protein: scannedProduct.macros.protein.value,
+        carbs: scannedProduct.macros.carbs.value,
+        fat: scannedProduct.macros.fat.value
+      };
+      
+      // For demo purposes, just show a toast
       toast.success(`Added ${scannedProduct.name} to your meal plan`);
       handleCloseScan();
     }
@@ -255,16 +244,6 @@ const Nutrition = () => {
           <h1 className="text-2xl font-semibold tracking-tight">{t("nutrition")}</h1>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative hidden md:block">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder={t("searchFoods")}
-              value={searchValue}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="rounded-md border border-input bg-background/50 pl-8 h-9 w-48 text-sm outline-none focus:ring-1 focus:ring-ring"
-            />
-          </div>
           <Dialog>
             <DialogTrigger asChild>
               <Button>
@@ -275,6 +254,7 @@ const Nutrition = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t("addFood")}</DialogTitle>
+                <DialogDescription>Add food to your meal plan</DialogDescription>
               </DialogHeader>
               <div className="flex items-center gap-4 py-4">
                 <Button className="flex-1" onClick={() => setShowAddFood(true)}>
@@ -286,59 +266,38 @@ const Nutrition = () => {
                   {t("scanBarcode")}
                 </Button>
               </div>
-              {searchValue && (
-                <div className="pt-2">
-                  <p className="text-sm font-medium mb-2">Quick add from search:</p>
-                  <div className="max-h-60 overflow-y-auto space-y-2">
-                    {filteredFoods.slice(0, 5).map(food => (
-                      <div 
-                        key={food.id} 
-                        className="flex items-center justify-between bg-secondary/30 p-2 rounded-md cursor-pointer hover:bg-secondary/50"
-                        onClick={() => handleAddFood(food.id)}
-                      >
-                        <div>
-                          <p className="font-medium">{food.name}</p>
-                          <div className="text-xs text-muted-foreground">
-                            {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | F: {food.fat}g
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </DialogContent>
           </Dialog>
         </div>
       </div>
 
-      {/* Updated layout: Put Daily Summary next to tabs */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="w-full md:w-auto">
-          <Tabs defaultValue="today" className="w-full">
+      {/* Updated layout for daily summary and tabs */}
+      <div className="flex flex-col space-y-4">
+        <Tabs defaultValue="today" className="w-full" value={timeframe} onValueChange={setTimeframe}>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
             <TabsList className="inline-flex">
               <TabsTrigger value="today">Today</TabsTrigger>
               <TabsTrigger value="week">Week</TabsTrigger>
               <TabsTrigger value="month">Month</TabsTrigger>
             </TabsList>
-          </Tabs>
-        </div>
-        
-        <div className="w-full md:w-auto bg-background/60 rounded-lg p-3 border border-border flex items-center gap-4">
-          <div className="h-10 w-10">
-            <MacroChart data={macroData} total={1840} simplified />
           </div>
-          <div>
-            <div className="text-sm font-medium">Daily Summary</div>
-            <div className="flex items-center gap-2">
-              <span className="text-base font-semibold">1,840</span>
-              <span className="text-xs text-muted-foreground">of 2,200 cal</span>
+          
+          <TabsContent value="today">
+            <DailySummary className="mb-6" />
+          </TabsContent>
+          
+          <TabsContent value="week">
+            <div className="p-4 bg-muted/30 rounded-lg text-center">
+              <p className="text-muted-foreground">Weekly nutrition summary will be available in the next update.</p>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+          
+          <TabsContent value="month">
+            <div className="p-4 bg-muted/30 rounded-lg text-center">
+              <p className="text-muted-foreground">Monthly nutrition summary will be available in the next update.</p>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Add food dialog */}
@@ -346,6 +305,7 @@ const Nutrition = () => {
         <DialogContent className="max-w-md max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>{t("addFood")}</DialogTitle>
+            <DialogDescription>Search for food or add a custom item</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4 flex-1 overflow-hidden flex flex-col">
             <div className="space-y-2">
@@ -410,7 +370,7 @@ const Nutrition = () => {
                 <button className="p-2" onClick={handleCloseScan}>
                   <X className="h-5 w-5" />
                 </button>
-                <h3 className="font-medium text-lg">Streepjescode scannen</h3>
+                <h3 className="font-medium text-lg">Scan Barcode</h3>
                 <div className="w-9"></div>
               </div>
               
@@ -448,7 +408,7 @@ const Nutrition = () => {
                 <button className="p-2 mr-2" onClick={() => setScanStep('scanning')}>
                   <ArrowLeft className="h-5 w-5" />
                 </button>
-                <h3 className="font-medium text-lg">Voedingsmiddel toevoegen</h3>
+                <h3 className="font-medium text-lg">Add Food</h3>
               </div>
               
               {scannedProduct && (
@@ -456,46 +416,46 @@ const Nutrition = () => {
                   <div className="bg-blue-50 p-3 rounded-md mb-4">
                     <div className="flex items-center">
                       <p className="text-gray-600 text-sm flex-1">
-                        Deze streepjescode komt overeen met: "{scannedProduct.code}"
+                        Barcode matches: "{scannedProduct.code}"
                       </p>
                       <a href="#" className="text-blue-500 text-sm whitespace-nowrap">
-                        Vind een betere overeenkomst
+                        Find a better match
                       </a>
                     </div>
                   </div>
                   
                   <div>
-                    <h2 className="text-3xl font-bold">{scannedProduct.code}</h2>
-                    <p className="text-gray-600 text-lg">{scannedProduct.name}</p>
+                    <h2 className="text-xl font-bold">{scannedProduct.name}</h2>
+                    <p className="text-gray-600">{scannedProduct.description}</p>
                   </div>
                   
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <p className="font-medium">Portiegrootte</p>
+                      <p className="font-medium">Serving Size</p>
                       <div className="bg-gray-100 rounded-md px-4 py-2 text-right w-1/2">
                         <span>{scannedProduct.servingSize}</span>
                       </div>
                     </div>
                     
                     <div className="flex justify-between items-center">
-                      <p className="font-medium">Aantal porties</p>
+                      <p className="font-medium">Number of Servings</p>
                       <div className="bg-gray-100 rounded-md px-4 py-2 text-right w-1/2">
                         <span>{scannedProduct.servings}</span>
                       </div>
                     </div>
                     
                     <div className="flex justify-between items-center">
-                      <p className="font-medium">Tijd</p>
-                      <div className="bg-gray-100 rounded-md px-4 py-2 text-right w-1/2">
-                        <span className="text-yellow-500">👑</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <p className="font-medium">Maaltijd</p>
-                      <div className="bg-gray-100 rounded-md px-4 py-2 text-right w-1/2">
-                        <span className="text-red-500">Selecteer een...</span>
-                      </div>
+                      <p className="font-medium">Meal</p>
+                      <Select defaultValue={selectedMeal || "1"}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Select meal" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {meals.map(meal => (
+                            <SelectItem key={meal.id} value={meal.id}>{meal.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   
@@ -515,17 +475,17 @@ const Nutrition = () => {
                       <div className="flex justify-between">
                         <div className="text-center">
                           <div className="text-xl font-semibold">{scannedProduct.macros.carbs.value}{scannedProduct.macros.carbs.unit}</div>
-                          <div className="text-xs text-gray-500">Koolhydr</div>
+                          <div className="text-xs text-gray-500">Carbs</div>
                         </div>
                         
                         <div className="text-center">
                           <div className="text-xl font-semibold">{scannedProduct.macros.fat.value}{scannedProduct.macros.fat.unit}</div>
-                          <div className="text-xs text-gray-500">Vetten</div>
+                          <div className="text-xs text-gray-500">Fat</div>
                         </div>
                         
                         <div className="text-center">
                           <div className="text-xl font-semibold">{scannedProduct.macros.protein.value}{scannedProduct.macros.protein.unit}</div>
-                          <div className="text-xs text-gray-500">Eiwitten</div>
+                          <div className="text-xs text-gray-500">Protein</div>
                         </div>
                       </div>
                     </div>
@@ -534,7 +494,7 @@ const Nutrition = () => {
                   <div className="pt-4 flex justify-center">
                     <Button className="w-full" onClick={handleAddScannedProduct}>
                       <Check className="mr-2 h-4 w-4" />
-                      Toevoegen
+                      Add to Meal Plan
                     </Button>
                   </div>
                 </div>

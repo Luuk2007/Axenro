@@ -50,17 +50,31 @@ export default function ProgressChart({
   const difference = latestValue - previousValue;
   const isPositive = difference >= 0;
 
-  // Calculate min and max for better scaling
+  // Calculate min and max for better scaling with expanded range
   const values = sortedData.map(item => item.value);
-  // Add some padding to min and max values to avoid points touching edges
-  const minValue = Math.min(...values) - Math.max(1, Math.abs(Math.min(...values) * 0.05));
-  const maxValue = Math.max(...values) + Math.max(1, Math.abs(Math.max(...values) * 0.05));
-
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  
+  // Add more padding for Y axis to show a wider range
+  const yPaddingPercentage = 0.15; // 15% padding
+  const range = max - min;
+  
+  // Calculate Y axis domain with padding
+  const yMin = Math.max(0, min - (range * yPaddingPercentage));
+  const yMax = max + (range * yPaddingPercentage);
+  
   // Ensure min and max have a reasonable distance between them
   const yDomain = [
-    Math.min(minValue, targetValue ? targetValue - 2 : minValue),
-    Math.max(maxValue, targetValue ? targetValue + 2 : maxValue)
+    Math.min(yMin, targetValue ? targetValue - (range * 0.1) : yMin),
+    Math.max(yMax, targetValue ? targetValue + (range * 0.1) : yMax)
   ];
+  
+  // Get nice tick values
+  const getYAxisTicks = () => {
+    const tickCount = 5;
+    const step = (yDomain[1] - yDomain[0]) / (tickCount - 1);
+    return Array.from({ length: tickCount }, (_, i) => yDomain[0] + step * i);
+  };
 
   return (
     <div className={cn("glassy-card rounded-xl overflow-hidden card-shadow hover-scale", className)}>
@@ -117,6 +131,7 @@ export default function ProgressChart({
                 width={30}
                 allowDecimals={true}
                 tickCount={5}
+                ticks={getYAxisTicks()}
               />
               <Tooltip 
                 contentStyle={{ 
@@ -130,6 +145,7 @@ export default function ProgressChart({
                   const item = items[0]?.payload;
                   return item?.originalDate || label;
                 }}
+                animationDuration={300}
               />
               {targetValue && (
                 <ReferenceLine 
