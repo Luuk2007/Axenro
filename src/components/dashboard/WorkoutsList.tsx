@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Dumbbell } from 'lucide-react';
+import { Dumbbell, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -19,9 +19,18 @@ interface WorkoutsListProps {
   title: string;
   className?: string;
   onViewAll?: () => void;
+  onDelete?: (id: string) => void;
+  showDeleteButton?: boolean;
 }
 
-export default function WorkoutsList({ workouts, title, className, onViewAll }: WorkoutsListProps) {
+export default function WorkoutsList({ 
+  workouts, 
+  title, 
+  className, 
+  onViewAll, 
+  onDelete, 
+  showDeleteButton = false 
+}: WorkoutsListProps) {
   const { t } = useLanguage();
   
   return (
@@ -75,6 +84,16 @@ export default function WorkoutsList({ workouts, title, className, onViewAll }: 
                 <Button variant="ghost" size="sm" className="h-8 text-xs">
                   {t("viewWorkout")}
                 </Button>
+                {showDeleteButton && onDelete && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    onClick={() => onDelete(workout.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           ))
