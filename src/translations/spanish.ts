@@ -158,7 +158,7 @@ export const spanish = {
   "noAccount": "¿No tienes cuenta?",
   "signIn": "Iniciar sesión",
   "signInWithGoogle": "Iniciar sesión con Google",
-  "or": "o",
+  "or": "O",
   
   // Common actions
   "add": "Añadir",
@@ -204,5 +204,12 @@ export const spanish = {
   "workoutCompleted": "¡Entrenamiento completado!",
   "selectExercise": "Seleccionar Ejercicio",
   "noExercisesError": "Por favor, añade al menos un ejercicio",
-  "completeOneSetError": "Por favor, completa al menos una serie"
+  "completeOneSetError": "Por favor, completa al menos una serie",
+  
+  // New translations from screenshots
+  "noExercisesAdded": "No se han añadido ejercicios aún",
+  "noMeasurementsYet": "Aún no hay mediciones",
+  "addFirstMeasurement": "Añadir Primera Medición",
+  "progressPhotos": "Fotos de Progreso",
+  "addPhoto": "Añadir Foto",
 };

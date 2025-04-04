@@ -1,3 +1,4 @@
+
 export const german = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -171,7 +172,7 @@ export const german = {
   "noAccount": "Noch kein Konto?",
   "signIn": "Anmelden",
   "signInWithGoogle": "Mit Google anmelden",
-  "or": "oder",
+  "or": "Oder",
   
   // Common actions
   "add": "Hinzufügen",
@@ -212,4 +213,15 @@ export const german = {
   "deleteWorkout": "Training Löschen",
   "confirmDeleteWorkout": "Bist du sicher, dass du dieses Training löschen möchtest?",
   "selectExercise": "Übung Auswählen",
+  
+  // New translations from screenshots
+  "noExercisesAdded": "Noch keine Übungen hinzugefügt",
+  "noMeasurementsYet": "Noch keine Messungen",
+  "addFirstMeasurement": "Erste Messung hinzufügen",
+  "progressPhotos": "Fortschrittsfotos",
+  "addPhoto": "Foto hinzufügen",
+  "save": "Speichern",
+  "saveWorkout": "Training speichern",
+  "workoutName": "Trainingsname",
+  "bmi": "BMI"
 };

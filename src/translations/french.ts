@@ -172,7 +172,7 @@ export const french = {
   "noAccount": "Vous n'avez pas de compte ?",
   "signIn": "Se connecter",
   "signInWithGoogle": "Se connecter avec Google",
-  "or": "ou",
+  "or": "Ou",
   
   // Common actions
   "add": "Ajouter",
@@ -219,5 +219,14 @@ export const french = {
   "addSet": "Ajouter une Série",
   "saveWorkout": "Enregistrer l'Entraînement",
   "workoutName": "Nom de l'Entraînement",
-  "trackWorkout": "Suivre l'Entraînement"
+  "trackWorkout": "Suivre l'Entraînement",
+  
+  // New translations from screenshots
+  "noExercisesAdded": "Aucun exercice ajouté pour l'instant",
+  "noMeasurementsYet": "Pas encore de mesures",
+  "addFirstMeasurement": "Ajouter Première Mesure",
+  "progressPhotos": "Photos de Progrès",
+  "addPhoto": "Ajouter Photo",
+  "save": "Enregistrer",
+  "bmi": "IMC"
 };

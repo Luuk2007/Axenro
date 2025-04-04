@@ -1,3 +1,4 @@
+
 import { Translations } from "./types";
 
 const english: Translations = {
@@ -194,7 +195,37 @@ const english: Translations = {
   weightToGain: "Weight to gain:",
   weightToLose: "Weight to lose:",
   bmi: "BMI",
-  calendar: "Calendar"
+  calendar: "Calendar",
+
+  // Auth related translations from screenshots
+  signIn: "Sign In",
+  signUp: "Sign Up",
+  signInWithGoogle: "Sign In with Google",
+  email: "Email",
+  password: "Password",
+  forgotPassword: "Forgot Password",
+  alreadyHaveAccount: "Already have an account?",
+  confirmPassword: "Confirm Password",
+  noAccount: "Don't have an account?",
+  or: "OR",
+  
+  // Translations from workout creation screenshot
+  workoutName: "Workout Name",
+  saveWorkout: "Save Workout",
+  noExercisesAdded: "No exercises added yet",
+  
+  // Translations from measurement history
+  noMeasurementsYet: "No Measurements Yet",
+  addFirstMeasurement: "Add First Measurement",
+  
+  // Translations from progress photos
+  progressPhotos: "Progress Photos",
+  addPhoto: "Add Photo",
+  
+  // Translations from one rep max calculator
+  oneRepMaxCalculator: "One Rep Max Calculator",
+  formula: "Formula", 
+  oneRepMaxDisclaimer: "This is an estimate based on the selected formula. Actual one rep max may vary."
 };
 
 export default english;

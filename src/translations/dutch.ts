@@ -174,7 +174,7 @@ export const dutch = {
   "noAccount": "Geen account?",
   "signIn": "Aanmelden",
   "signInWithGoogle": "Aanmelden met Google",
-  "or": "of",
+  "or": "Of",
   
   // Common actions
   "add": "Toevoegen",
@@ -245,7 +245,6 @@ export const dutch = {
   "totalSets": "Totale Sets",
   "totalWeight": "Totaal Gewicht",
   "workoutSaved": "Training succesvol opgeslagen",
-  // removed duplicate "resetPassword" entry here
   
   // Additional workout translations
   "noExercisesError": "Voeg ten minste één oefening toe",
@@ -255,4 +254,13 @@ export const dutch = {
   "deleteWorkout": "Training Verwijderen",
   "confirmDeleteWorkout": "Weet je zeker dat je deze training wilt verwijderen?",
   "selectExercise": "Selecteer Oefening",
+  
+  // New translations from screenshots
+  "noExercisesAdded": "Nog geen oefeningen toegevoegd",
+  "noMeasurementsYet": "Nog geen metingen",
+  "addFirstMeasurement": "Eerste Meting Toevoegen",
+  "progressPhotos": "Voortgangsfoto's",
+  "addPhoto": "Foto Toevoegen",
+  "save": "Opslaan",
+  "bmi": "BMI"
 };
