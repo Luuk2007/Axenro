@@ -1,5 +1,5 @@
+
 import React from 'react';
-import Layout from '@/components/layout/Layout';
 import { 
   Accordion,
   AccordionContent,
@@ -173,133 +173,133 @@ export default function Settings() {
                     </button>
                   </div>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-            {/* Notifications */}
-            <AccordionItem value="notifications" className="border rounded-lg p-1">
-              <AccordionTrigger className="px-4 py-2 hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <Bell className="h-5 w-5 text-primary" />
-                  <span className="font-medium">{t("notifications")}</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 pt-2">
-                <div className="space-y-6">
-                  {/* Workout Reminders */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <span className="font-medium">{t("workoutReminders")}</span>
-                      <p className="text-sm text-muted-foreground">{t("receiveReminders")}</p>
-                    </div>
-                    <Switch
-                      checked={notifications.workoutReminders}
-                      onCheckedChange={() => handleNotificationToggle('workoutReminders')}
-                    />
-                  </div>
-
-                  {/* Meal Logging Reminders */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <span className="font-medium">{t("mealLoggingReminders")}</span>
-                      <p className="text-sm text-muted-foreground">{t("getReminders")}</p>
-                    </div>
-                    <Switch
-                      checked={notifications.mealReminders}
-                      onCheckedChange={() => handleNotificationToggle('mealReminders')}
-                    />
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Privacy */}
-            <AccordionItem value="privacy" className="border rounded-lg p-1">
-              <AccordionTrigger className="px-4 py-2 hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <Globe className="h-5 w-5 text-primary" />
-                  <span className="font-medium">{t("privacy")}</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 pt-2">
-                {/* Store Profile Data */}
+          {/* Notifications */}
+          <AccordionItem value="notifications" className="border rounded-lg p-1">
+            <AccordionTrigger className="px-4 py-2 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <Bell className="h-5 w-5 text-primary" />
+                <span className="font-medium">{t("notifications")}</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4 pt-2">
+              <div className="space-y-6">
+                {/* Workout Reminders */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <span className="font-medium">{t("saveProfileData")}</span>
-                    <p className="text-sm text-muted-foreground">{t("storeProfileData")}</p>
+                    <span className="font-medium">{t("workoutReminders")}</span>
+                    <p className="text-sm text-muted-foreground">{t("receiveReminders")}</p>
                   </div>
                   <Switch
-                    checked={storeProfileData}
-                    onCheckedChange={handleStoreProfileDataToggle}
+                    checked={notifications.workoutReminders}
+                    onCheckedChange={() => handleNotificationToggle('workoutReminders')}
                   />
                 </div>
-              </AccordionContent>
-            </AccordionItem>
 
-            {/* Account Actions */}
-            <AccordionItem value="account" className="border rounded-lg p-1">
-              <AccordionTrigger className="px-4 py-2 hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <Settings2 className="h-5 w-5 text-primary" />
-                  <span className="font-medium">{t("accountActions")}</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 pt-2">
-                <div className="space-y-6">
-                  {/* Logout */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <span className="font-medium">{t("logOut")}</span>
-                      <p className="text-sm text-muted-foreground">{t("signOut")}</p>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      onClick={handleLogout}
-                      className="border-destructive text-destructive hover:bg-destructive/10"
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      {t("logOut")}
-                    </Button>
+                {/* Meal Logging Reminders */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <span className="font-medium">{t("mealLoggingReminders")}</span>
+                    <p className="text-sm text-muted-foreground">{t("getReminders")}</p>
                   </div>
+                  <Switch
+                    checked={notifications.mealReminders}
+                    onCheckedChange={() => handleNotificationToggle('mealReminders')}
+                  />
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-                  {/* Delete Account */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <span className="font-medium">{t("deleteAccount")}</span>
-                      <p className="text-sm text-muted-foreground">{t("permanentlyDelete")}</p>
-                    </div>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive">
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          {t("deleteAccount")}
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t("cannotBeUndone")}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={handleDeleteAccount}
-                            className="bg-destructive hover:bg-destructive/90"
-                          >
-                            {t("yesDelete")}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
+          {/* Privacy */}
+          <AccordionItem value="privacy" className="border rounded-lg p-1">
+            <AccordionTrigger className="px-4 py-2 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <Globe className="h-5 w-5 text-primary" />
+                <span className="font-medium">{t("privacy")}</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4 pt-2">
+              {/* Store Profile Data */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <span className="font-medium">{t("saveProfileData")}</span>
+                  <p className="text-sm text-muted-foreground">{t("storeProfileData")}</p>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
+                <Switch
+                  checked={storeProfileData}
+                  onCheckedChange={handleStoreProfileDataToggle}
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Account Actions */}
+          <AccordionItem value="account" className="border rounded-lg p-1">
+            <AccordionTrigger className="px-4 py-2 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <Settings2 className="h-5 w-5 text-primary" />
+                <span className="font-medium">{t("accountActions")}</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4 pt-2">
+              <div className="space-y-6">
+                {/* Logout */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <span className="font-medium">{t("logOut")}</span>
+                    <p className="text-sm text-muted-foreground">{t("signOut")}</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleLogout}
+                    className="border-destructive text-destructive hover:bg-destructive/10"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    {t("logOut")}
+                  </Button>
+                </div>
+
+                {/* Delete Account */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <span className="font-medium">{t("deleteAccount")}</span>
+                    <p className="text-sm text-muted-foreground">{t("permanentlyDelete")}</p>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {t("deleteAccount")}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {t("cannotBeUndone")}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={handleDeleteAccount}
+                          className="bg-destructive hover:bg-destructive/90"
+                        >
+                          {t("yesDelete")}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
-    
+    </div>
   );
 }
