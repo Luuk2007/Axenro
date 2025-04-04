@@ -14,6 +14,12 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
   
   // Safely access property with optional chaining to prevent errors
   const showTargetWeight = profile?.goal !== "maintain";
+  
+  // Function to capitalize the first letter
+  const capitalize = (str: string) => {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
 
   return (
     <Card>
@@ -68,7 +74,7 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
             <User2 className="h-4 w-4 text-muted-foreground" />
             <dt className="font-medium">{t("gender")}:</dt>
             <dd>
-              {profile.gender}
+              {profile.gender ? capitalize(t(profile.gender)) : ''}
             </dd>
           </div>
           

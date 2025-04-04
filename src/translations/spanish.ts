@@ -82,6 +82,7 @@ export const spanish = {
   "dailyCalorieNeeds": "Necesidades Calóricas Diarias",
   "dailyCalories": "Calorías Diarias",
   "caloriesPerDay": "calorías por día",
+  "targetWeight": "Peso Objetivo",
   
   // One Rep Max Calculator
   "oneRepMaxCalculator": "Calculadora de Máximo de Una Repetición",
@@ -223,5 +224,6 @@ export const spanish = {
   "protein": "Proteína",
   "carbs": "Carbohidratos",
   "fat": "Grasa",
-  "completeYourProfile": "Complete su perfil para ver su plan de nutrición"
+  "completeYourProfile": "Complete su perfil para ver su plan de nutrición",
+  "deleteMeasurement": "Eliminar Medición"
 };

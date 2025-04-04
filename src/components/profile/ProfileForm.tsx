@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface ProfileFormValues {
   name: string;
@@ -53,6 +54,8 @@ interface ProfileFormProps {
 }
 
 const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = defaultValues }) => {
+  const { t } = useLanguage();
+  
   const formSchema = z.object({
     name: z.string().min(2).max(50),
     gender: z.string(),
@@ -70,7 +73,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
   });
 
   const watchFitnessGoal = form.watch("fitnessGoal");
-  const showTargetWeight = watchFitnessGoal === "gain";
+  const showTargetWeight = watchFitnessGoal === "gain" || watchFitnessGoal === "lose";
 
   return (
     <Form {...form}>
@@ -80,10 +83,13 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>{t("fullName")}</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="" {...field} />
               </FormControl>
+              <FormDescription>
+                {t("profileNameDescription")}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -95,20 +101,20 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
             name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gender</FormLabel>
+                <FormLabel>{t("gender")}</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue placeholder={t("selectGender")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="male">{t("male")}</SelectItem>
+                    <SelectItem value="female">{t("female")}</SelectItem>
+                    <SelectItem value="other">{t("other")}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -121,7 +127,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
             name="age"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Age</FormLabel>
+                <FormLabel>{t("age")}</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
@@ -142,7 +148,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
             name="height"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Height (cm)</FormLabel>
+                <FormLabel>{t("height")} ({t("cm")})</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
@@ -161,7 +167,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
             name="weight"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Weight (kg)</FormLabel>
+                <FormLabel>{t("weight")} ({t("kg")})</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
@@ -182,26 +188,36 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
           name="activityLevel"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Activity Level</FormLabel>
+              <FormLabel>{t("exerciseFrequency")}</FormLabel>
               <Select 
-                onValueChange={field.onChange} 
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  // Also update the exerciseFrequency to keep in sync with activityLevel
+                  if (value === "sedentary" || value === "light") {
+                    form.setValue("exerciseFrequency", "0-2");
+                  } else if (value === "moderate") {
+                    form.setValue("exerciseFrequency", "3-5");
+                  } else {
+                    form.setValue("exerciseFrequency", "6+");
+                  }
+                }} 
                 defaultValue={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select activity level" />
+                    <SelectValue placeholder={t("selectActivityLevel")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="sedentary">Sedentary (little to no exercise)</SelectItem>
-                  <SelectItem value="light">Light (light exercise 1-3 days/week)</SelectItem>
-                  <SelectItem value="moderate">Moderate (moderate exercise 3-5 days/week)</SelectItem>
-                  <SelectItem value="active">Active (hard exercise 6-7 days/week)</SelectItem>
-                  <SelectItem value="veryActive">Very Active (very hard exercise, physical job or training twice a day)</SelectItem>
+                  <SelectItem value="sedentary">{t("sedentary")}</SelectItem>
+                  <SelectItem value="light">{t("light")}</SelectItem>
+                  <SelectItem value="moderate">{t("moderate")}</SelectItem>
+                  <SelectItem value="active">{t("active")}</SelectItem>
+                  <SelectItem value="veryActive">{t("veryActive")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>
-                This helps calculate your daily calorie needs.
+                {t("calorieCalculationExplanation")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -213,24 +229,28 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
           name="fitnessGoal"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Fitness Goal</FormLabel>
+              <FormLabel>{t("goal")}</FormLabel>
               <Select 
-                onValueChange={field.onChange} 
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  // Also update the goal to keep in sync with fitnessGoal
+                  form.setValue("goal", value);
+                }} 
                 defaultValue={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select fitness goal" />
+                    <SelectValue placeholder={t("selectGoal")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="lose">Lose Weight</SelectItem>
-                  <SelectItem value="maintain">Maintain Weight</SelectItem>
-                  <SelectItem value="gain">Gain Weight / Build Muscle</SelectItem>
+                  <SelectItem value="lose">{t("loseWeight")}</SelectItem>
+                  <SelectItem value="maintain">{t("maintainWeight")}</SelectItem>
+                  <SelectItem value="gain">{t("gainWeight")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>
-                This will adjust your calorie and macronutrient targets.
+                {t("calorieTargetExplanation")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -243,18 +263,21 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
             name="targetWeight"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Target Weight (kg)</FormLabel>
+                <FormLabel>{t("targetWeight")} ({t("kg")})</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="80" 
+                    placeholder="70" 
                     value={field.value || ''}
                     onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     step="0.1"
                   />
                 </FormControl>
                 <FormDescription>
-                  Your goal weight for muscle gain
+                  {watchFitnessGoal === "gain" 
+                    ? t("muscleGainGoalDescription")
+                    : t("weightLossGoalDescription")
+                  }
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -262,7 +285,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
           />
         )}
 
-        <Button type="submit">Save Changes</Button>
+        <Button type="submit">{t("saveChanges")}</Button>
       </form>
     </Form>
   );
