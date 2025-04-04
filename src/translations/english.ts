@@ -1,3 +1,4 @@
+
 import { Translations } from "./types";
 
 const english: Translations = {
@@ -194,7 +195,28 @@ const english: Translations = {
   weightToGain: "Weight to gain:",
   weightToLose: "Weight to lose:",
   bmi: "BMI",
-  calendar: "Calendar"
+  calendar: "Calendar",
+  
+  // Authentication translations
+  email: "Email",
+  password: "Password",
+  confirmPassword: "Confirm Password",
+  signIn: "Sign In",
+  signUp: "Sign Up",
+  signInWithGoogle: "Sign In With Google",
+  or: "or",
+  forgotPassword: "Forgot Password?",
+  alreadyHaveAccount: "Already have an account?",
+  noAccount: "Don't have an account?",
+  
+  // Progress page translations
+  noMeasurementsYet: "No Measurements Yet",
+  addFirstMeasurement: "Add First Measurement",
+  deleteMeasurement: "Delete Measurement",
+  confirmDeleteMeasurement: "Are you sure you want to delete this measurement?",
+  actions: "Actions",
+  progressPhotos: "Progress Photos",
+  addPhoto: "Add Photo"
 };
 
 export default english;

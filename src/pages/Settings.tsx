@@ -1,42 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { toast } from "sonner";
-import {
-  Globe,
-  Sun,
-  Moon,
-  Bell,
-  Lock,
-  LogOut,
-  Trash,
-  User,
-} from 'lucide-react';
 
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import {
+import React from 'react';
+import { Layout } from '@/components/layout/Layout';
+import { 
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger 
+} from '@/components/ui/accordion';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { 
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -45,421 +19,290 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { supabase } from '@/integrations/supabase/client';
+  AlertDialogTrigger 
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { CheckCircle, Globe, LogOut, Palette, Settings2, Trash2, Bell } from 'lucide-react';
 
-// Form schema
-const settingsFormSchema = z.object({
-  language: z.string().default("english"),
-  theme: z.string().default("light"),
-  notifyWorkouts: z.boolean().default(true),
-  notifyMeals: z.boolean().default(true),
-  saveProfile: z.boolean().default(true),
-});
-
-type SettingsFormValues = z.infer<typeof settingsFormSchema>;
-
-// Profile form schema
-const profileFormSchema = z.object({
-  fullName: z.string().min(2, {
-    message: "Full name must be at least 2 characters."
-  }),
-});
-
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
-
-const Settings = () => {
-  const [theme, setTheme] = useState<string>('light');
-  const { language, setLanguage, t } = useLanguage();
-  const { user, signOut } = useAuth();
-  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+export default function Settings() {
+  const { t, language, setLanguage } = useLanguage();
   
-  // Load saved settings from localStorage if available
-  const getSavedSettings = () => {
+  // Get saved theme from localStorage or default to light
+  const getSavedTheme = (): 'light' | 'dark' => {
     const savedSettings = localStorage.getItem("userSettings");
-    return savedSettings ? JSON.parse(savedSettings) : {
-      language: "english",
-      theme: "light",
-      notifyWorkouts: true,
-      notifyMeals: true,
-      saveProfile: true,
-    };
-  };
-  
-  // Initialize form with values from localStorage if available
-  const form = useForm<SettingsFormValues>({
-    resolver: zodResolver(settingsFormSchema),
-    defaultValues: getSavedSettings(),
-  });
-
-  // Profile form
-  const profileForm = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileFormSchema),
-    defaultValues: {
-      fullName: user?.user_metadata?.full_name || "",
-    },
-  });
-
-  // Update profile form values when user data changes
-  useEffect(() => {
-    if (user?.user_metadata?.full_name) {
-      profileForm.setValue('fullName', user.user_metadata.full_name);
+    if (savedSettings) {
+      const { theme } = JSON.parse(savedSettings);
+      if (theme === 'light' || theme === 'dark') {
+        return theme as 'light' | 'dark';
+      }
     }
-  }, [user, profileForm]);
+    return 'light';
+  };
 
-  // Update theme when the form value changes
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      if (value.theme) {
-        setTheme(value.theme);
-        updateTheme(value.theme);
-      }
-      // Update language when form value changes
-      if (value.language && value.language !== language) {
-        setLanguage(value.language as any);
-      }
-    });
+  const [theme, setTheme] = React.useState<'light' | 'dark'>(getSavedTheme);
+  const [notifications, setNotifications] = React.useState({
+    workoutReminders: true,
+    mealReminders: true
+  });
+  const [storeProfileData, setStoreProfileData] = React.useState(true);
+
+  // Handle theme change
+  const handleThemeChange = (newTheme: 'light' | 'dark') => {
+    setTheme(newTheme);
     
-    return () => subscription.unsubscribe();
-  }, [form.watch, language, setLanguage]);
-
-  // Apply theme to document
-  const updateTheme = (newTheme: string) => {
+    // Update localStorage
+    const savedSettings = localStorage.getItem("userSettings");
+    const settings = savedSettings ? JSON.parse(savedSettings) : {};
+    localStorage.setItem("userSettings", JSON.stringify({
+      ...settings,
+      theme: newTheme
+    }));
+    
+    // Apply theme to document
     if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  };
-
-  // Initialize theme on component mount
-  useEffect(() => {
-    const currentTheme = getSavedSettings().theme;
-    setTheme(currentTheme);
-    updateTheme(currentTheme);
-  }, []);
-
-  const onSubmit = (data: SettingsFormValues) => {
-    // Save to localStorage
-    localStorage.setItem("userSettings", JSON.stringify(data));
+    
     toast.success(t("settingsUpdated"));
   };
 
-  const onProfileSubmit = async (data: ProfileFormValues) => {
-    try {
-      setIsUpdatingProfile(true);
-      
-      // Update user metadata in Supabase
-      const { error } = await supabase.auth.updateUser({
-        data: { full_name: data.fullName }
-      });
-
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-
-      toast.success(t("profileUpdated"));
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsUpdatingProfile(false);
-    }
+  // Handle language change
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value as any);
+    toast.success(t("settingsUpdated"));
   };
 
-  const handleLogout = async () => {
-    await signOut();
+  // Handle notifications toggle
+  const handleNotificationToggle = (type: keyof typeof notifications) => {
+    setNotifications({
+      ...notifications,
+      [type]: !notifications[type]
+    });
+    toast.success(t("settingsUpdated"));
   };
 
-  const handleDeleteAccount = async () => {
-    try {
-      // In a real application, you would implement a secure way to handle account deletion
-      // This is a simplified version for demonstration purposes
-      
-      // Clear all localStorage data
-      localStorage.removeItem("userProfile");
-      localStorage.removeItem("userSettings");
-      localStorage.removeItem("measurements");
-      localStorage.removeItem("weightEntries");
-      
-      // Sign out the user
-      await signOut();
-      
-      toast.success(t("accountDeleted"));
-    } catch (error: any) {
-      toast.error(error.message);
-    }
+  // Handle store profile data toggle
+  const handleStoreProfileDataToggle = () => {
+    setStoreProfileData(!storeProfileData);
+    toast.success(t("settingsUpdated"));
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    // In a real app, you would call your auth service to logout
+    toast.success(t("loggedOut"));
+  };
+
+  // Handle account deletion
+  const handleDeleteAccount = () => {
+    // In a real app, you would call your auth service to delete the account
+    toast.success(t("accountDeleted"));
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold tracking-tight">{t("settings")}</h1>
+    <Layout>
+      <div className="container px-4 py-8 max-w-4xl mx-auto">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">{t("settings")}</h1>
+          <p className="text-muted-foreground">{t("appSettings")}</p>
+        </header>
+
+        <div className="space-y-6">
+          <Accordion type="single" collapsible className="w-full space-y-4">
+            {/* General Settings */}
+            <AccordionItem value="general" className="border rounded-lg p-1">
+              <AccordionTrigger className="px-4 py-2 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Settings2 className="h-5 w-5 text-primary" />
+                  <span className="font-medium">{t("general")}</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 pt-2">
+                <div className="space-y-6">
+                  {/* Language Selection */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{t("language")}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{t("selectLanguage")}</p>
+                    </div>
+                    <Select value={language} onValueChange={handleLanguageChange}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder={t("selectLanguage")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="english">English</SelectItem>
+                        <SelectItem value="dutch">Nederlands</SelectItem>
+                        <SelectItem value="french">Français</SelectItem>
+                        <SelectItem value="german">Deutsch</SelectItem>
+                        <SelectItem value="spanish">Español</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Theme Selection */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Palette className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{t("theme")}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{t("chooseTheme")}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => handleThemeChange('light')}
+                        className={`py-2 px-4 rounded-md flex items-center gap-2 ${
+                          theme === 'light' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
+                        }`}
+                      >
+                        {theme === 'light' && <CheckCircle className="h-4 w-4" />}
+                        {t("lightMode")}
+                      </button>
+                      <button
+                        onClick={() => handleThemeChange('dark')}
+                        className={`py-2 px-4 rounded-md flex items-center gap-2 ${
+                          theme === 'dark' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
+                        }`}
+                      >
+                        {theme === 'dark' && <CheckCircle className="h-4 w-4" />}
+                        {t("darkMode")}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Notifications */}
+            <AccordionItem value="notifications" className="border rounded-lg p-1">
+              <AccordionTrigger className="px-4 py-2 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Bell className="h-5 w-5 text-primary" />
+                  <span className="font-medium">{t("notifications")}</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 pt-2">
+                <div className="space-y-6">
+                  {/* Workout Reminders */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <span className="font-medium">{t("workoutReminders")}</span>
+                      <p className="text-sm text-muted-foreground">{t("receiveReminders")}</p>
+                    </div>
+                    <Switch
+                      checked={notifications.workoutReminders}
+                      onCheckedChange={() => handleNotificationToggle('workoutReminders')}
+                    />
+                  </div>
+
+                  {/* Meal Logging Reminders */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <span className="font-medium">{t("mealLoggingReminders")}</span>
+                      <p className="text-sm text-muted-foreground">{t("getReminders")}</p>
+                    </div>
+                    <Switch
+                      checked={notifications.mealReminders}
+                      onCheckedChange={() => handleNotificationToggle('mealReminders')}
+                    />
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Privacy */}
+            <AccordionItem value="privacy" className="border rounded-lg p-1">
+              <AccordionTrigger className="px-4 py-2 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-primary" />
+                  <span className="font-medium">{t("privacy")}</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 pt-2">
+                {/* Store Profile Data */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <span className="font-medium">{t("saveProfileData")}</span>
+                    <p className="text-sm text-muted-foreground">{t("storeProfileData")}</p>
+                  </div>
+                  <Switch
+                    checked={storeProfileData}
+                    onCheckedChange={handleStoreProfileDataToggle}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Account Actions */}
+            <AccordionItem value="account" className="border rounded-lg p-1">
+              <AccordionTrigger className="px-4 py-2 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Settings2 className="h-5 w-5 text-primary" />
+                  <span className="font-medium">{t("accountActions")}</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 pt-2">
+                <div className="space-y-6">
+                  {/* Logout */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <span className="font-medium">{t("logOut")}</span>
+                      <p className="text-sm text-muted-foreground">{t("signOut")}</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={handleLogout}
+                      className="border-destructive text-destructive hover:bg-destructive/10"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      {t("logOut")}
+                    </Button>
+                  </div>
+
+                  {/* Delete Account */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <span className="font-medium">{t("deleteAccount")}</span>
+                      <p className="text-sm text-muted-foreground">{t("permanentlyDelete")}</p>
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {t("deleteAccount")}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t("cannotBeUndone")}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={handleDeleteAccount}
+                            className="bg-destructive hover:bg-destructive/90"
+                          >
+                            {t("yesDelete")}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
       </div>
-      
-      {user && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("profileSettings")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...profileForm}>
-              <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <User className="h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1 space-y-2">
-                    <FormField
-                      control={profileForm.control}
-                      name="fullName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("fullName")}</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormDescription>{t("profileNameDescription")}</FormDescription>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                  <p className="text-sm text-muted-foreground flex-1">{t("emailAddress")}: {user.email}</p>
-                </div>
-
-                <Button type="submit" disabled={isUpdatingProfile}>
-                  {isUpdatingProfile ? t("updating") : t("updateProfile")}
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      )}
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("appSettings")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6"
-            >
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <Globe className="h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1 space-y-1">
-                    <FormField
-                      control={form.control}
-                      name="language"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("language")}</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full md:w-52">
-                                <SelectValue placeholder={t("selectLanguage")} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="english">English</SelectItem>
-                              <SelectItem value="dutch">Nederlands</SelectItem>
-                              <SelectItem value="french">Français</SelectItem>
-                              <SelectItem value="german">Deutsch</SelectItem>
-                              <SelectItem value="spanish">Español</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>
-                            {t("selectLanguage")}
-                          </FormDescription>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center gap-4">
-                  {theme === 'light' ? (
-                    <Sun className="h-5 w-5 text-muted-foreground" />
-                  ) : (
-                    <Moon className="h-5 w-5 text-muted-foreground" />
-                  )}
-                  <div className="flex-1 space-y-1">
-                    <FormField
-                      control={form.control}
-                      name="theme"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("theme")}</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full md:w-52">
-                                <SelectValue placeholder={t("theme")} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="light">{t("lightMode")}</SelectItem>
-                              <SelectItem value="dark">{t("darkMode")}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>
-                            {theme === 'light' ? t("lightMode") : t("darkMode")}
-                          </FormDescription>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center gap-4">
-                  <Bell className="h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1 space-y-4">
-                    <h3 className="text-lg font-medium">{t("notifications")}</h3>
-                    
-                    <FormField
-                      control={form.control}
-                      name="notifyWorkouts"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between">
-                          <div className="space-y-0.5">
-                            <FormLabel>{t("workoutReminders")}</FormLabel>
-                            <FormDescription>
-                              {t("receiveReminders")}
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="notifyMeals"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between">
-                          <div className="space-y-0.5">
-                            <FormLabel>{t("mealLoggingReminders")}</FormLabel>
-                            <FormDescription>
-                              {t("getReminders")}
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center gap-4">
-                  <Lock className="h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1 space-y-4">
-                    <h3 className="text-lg font-medium">{t("privacy")}</h3>
-                    
-                    <FormField
-                      control={form.control}
-                      name="saveProfile"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between">
-                          <div className="space-y-0.5">
-                            <FormLabel>{t("saveProfileData")}</FormLabel>
-                            <FormDescription>
-                              {t("storeProfileData")}
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Button type="submit">{t("saveChanges")}</Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-destructive">{t("accountActions")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <LogOut className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <h3 className="font-medium">{t("logOut")}</h3>
-                <p className="text-sm text-muted-foreground">{t("signOut")}</p>
-              </div>
-            </div>
-            <Button variant="outline" onClick={handleLogout}>{t("logOut")}</Button>
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Trash className="h-5 w-5 text-destructive" />
-              <div>
-                <h3 className="font-medium">{t("deleteAccount")}</h3>
-                <p className="text-sm text-muted-foreground">{t("permanentlyDelete")}</p>
-              </div>
-            </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">{t("deleteAccount")}</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t("cannotBeUndone")}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteAccount}>
-                    {t("yesDelete")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    </Layout>
   );
-};
-
-export default Settings;
+}
