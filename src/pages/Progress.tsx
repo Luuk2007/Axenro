@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Layout } from '@/components/layout/Layout';
+import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WeightTracker } from '@/components/progress/WeightTracker';
 import { MeasurementsTracker } from '@/components/progress/MeasurementsTracker';
