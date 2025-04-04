@@ -245,6 +245,7 @@ export const dutch = {
   "totalSets": "Totale Sets",
   "totalWeight": "Totaal Gewicht",
   "workoutSaved": "Training succesvol opgeslagen",
+  // removed duplicate "resetPassword" entry here
   
   // Additional workout translations
   "noExercisesError": "Voeg ten minste één oefening toe",
@@ -254,12 +255,4 @@ export const dutch = {
   "deleteWorkout": "Training Verwijderen",
   "confirmDeleteWorkout": "Weet je zeker dat je deze training wilt verwijderen?",
   "selectExercise": "Selecteer Oefening",
-  
-  // Progress tracking
-  "progressPhotos": "Voortgangsfoto's",
-  "addPhoto": "Foto Toevoegen",
-  "noMeasurementsYet": "Nog geen metingen",
-  "addFirstMeasurement": "Eerste meting toevoegen",
-  "deleteMeasurement": "Meting verwijderen",
-  "confirmDeleteMeasurement": "Weet je zeker dat je deze meting wilt verwijderen?",
 };
