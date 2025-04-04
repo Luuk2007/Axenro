@@ -13,6 +13,7 @@ interface WorkoutCalendarProps {
 const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   const { t } = useLanguage();
   const currentDate = new Date();
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(currentDate);
   
   // Get all workout dates in Date format
   const workoutDates = workouts
@@ -84,10 +85,12 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
           
           <Calendar 
             mode="single"
-            selected={undefined}
-            className="p-0 pointer-events-none"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            className="p-0"
             modifiers={modifiers}
             modifiersClassNames={modifiersClassNames}
+            weekStartsOn={1}
           />
         </div>
       </CardContent>

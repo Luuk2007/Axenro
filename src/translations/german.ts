@@ -223,5 +223,13 @@ export const german = {
   "save": "Speichern",
   "saveWorkout": "Training speichern",
   "workoutName": "Trainingsname",
-  "bmi": "BMI"
+  "bmi": "BMI",
+  "noPersonalRecords": "Keine Persönlichen Rekorde",
+  "addPersonalRecord": "Persönlichen Rekord hinzufügen",
+  "meals": "Mahlzeiten",
+  "water": "Wasser",
+  "todaysMeals": "Heutige Mahlzeiten",
+  "workoutCalendar": "Trainingskalender",
+  "workoutsThisWeek": "Trainingseinheiten Diese Woche",
+  "workoutsThisMonth": "Trainingseinheiten Diesen Monat"
 };

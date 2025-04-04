@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Apple, ArrowLeft, Camera, Check, Filter, GlassWater, Plus, Search, Utensils, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -59,7 +60,7 @@ const Nutrition = () => {
   const [showAddFood, setShowAddFood] = useState(false);
   const [showScanBarcode, setShowScanBarcode] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [filteredFoods, setFilteredFoods] = useState([]);
+  const [filteredFoods, setFilteredFoods] = useState<any[]>([]);
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<any | null>(null);
@@ -116,7 +117,7 @@ const Nutrition = () => {
         
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          videoRef.current.play();
+          await videoRef.current.play().catch(e => console.error("Error playing video:", e));
           
           // Simulate scanning a barcode after 2 seconds
           setTimeout(() => {
@@ -370,7 +371,7 @@ const Nutrition = () => {
                 <button className="p-2" onClick={handleCloseScan}>
                   <X className="h-5 w-5" />
                 </button>
-                <h3 className="font-medium text-lg">Scan Barcode</h3>
+                <h3 className="font-medium text-lg">{t("scanBarcode")}</h3>
                 <div className="w-9"></div>
               </div>
               
@@ -408,7 +409,7 @@ const Nutrition = () => {
                 <button className="p-2 mr-2" onClick={() => setScanStep('scanning')}>
                   <ArrowLeft className="h-5 w-5" />
                 </button>
-                <h3 className="font-medium text-lg">Add Food</h3>
+                <h3 className="font-medium text-lg">{t("addFood")}</h3>
               </div>
               
               {scannedProduct && (
@@ -475,17 +476,17 @@ const Nutrition = () => {
                       <div className="flex justify-between">
                         <div className="text-center">
                           <div className="text-xl font-semibold">{scannedProduct.macros.carbs.value}{scannedProduct.macros.carbs.unit}</div>
-                          <div className="text-xs text-gray-500">Carbs</div>
+                          <div className="text-xs text-gray-500">{t("carbs")}</div>
                         </div>
                         
                         <div className="text-center">
                           <div className="text-xl font-semibold">{scannedProduct.macros.fat.value}{scannedProduct.macros.fat.unit}</div>
-                          <div className="text-xs text-gray-500">Fat</div>
+                          <div className="text-xs text-gray-500">{t("fat")}</div>
                         </div>
                         
                         <div className="text-center">
                           <div className="text-xl font-semibold">{scannedProduct.macros.protein.value}{scannedProduct.macros.protein.unit}</div>
-                          <div className="text-xs text-gray-500">Protein</div>
+                          <div className="text-xs text-gray-500">{t("protein")}</div>
                         </div>
                       </div>
                     </div>
@@ -507,7 +508,7 @@ const Nutrition = () => {
       <div className="mt-4">
         <div className="glassy-card rounded-xl overflow-hidden card-shadow">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <h3 className="font-medium tracking-tight">Today's Meals</h3>
+            <h3 className="font-medium tracking-tight">{t("todayMeals")}</h3>
             <div className="flex gap-2">
               <Button 
                 variant={activeTab === 'meals' ? "default" : "outline"} 
@@ -515,7 +516,7 @@ const Nutrition = () => {
                 onClick={() => setActiveTab('meals')}
               >
                 <Utensils className="mr-2 h-4 w-4" />
-                Meals
+                {t("meals")}
               </Button>
               <Button 
                 variant={activeTab === 'water' ? "default" : "outline"} 
@@ -523,7 +524,7 @@ const Nutrition = () => {
                 onClick={() => setActiveTab('water')}
               >
                 <GlassWater className="mr-2 h-4 w-4" />
-                Water
+                {t("water")}
               </Button>
             </div>
           </div>
@@ -544,7 +545,7 @@ const Nutrition = () => {
                       onClick={() => handleAddItem(meal.id)}
                     >
                       <Plus className="mr-1 h-3 w-3" />
-                      Add Item
+                      {t("addItem")}
                     </Button>
                   </div>
                   <div className="space-y-3">
@@ -557,9 +558,9 @@ const Nutrition = () => {
                           <p className="text-sm font-medium">{item.name}</p>
                           <div className="flex text-xs text-muted-foreground space-x-2 mt-1">
                             <span>{item.calories} cal</span>
-                            <span>{item.protein}g protein</span>
-                            <span>{item.carbs}g carbs</span>
-                            <span>{item.fat}g fat</span>
+                            <span>{item.protein}g {t("protein")}</span>
+                            <span>{item.carbs}g {t("carbs")}</span>
+                            <span>{item.fat}g {t("fat")}</span>
                           </div>
                         </div>
                         <Button size="sm" variant="ghost" className="h-7 w-7 p-0">

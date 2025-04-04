@@ -140,7 +140,7 @@ export const dutch = {
   "consumed": "Verbruikt",
   "remaining": "Resterend",
   "grams": "g",
-  "calories": "calorieën",
+  "calories": "Calorieën",
   
   // BMI Calculator
   "bmiCalculator": "BMI Calculator",
@@ -262,5 +262,13 @@ export const dutch = {
   "progressPhotos": "Voortgangsfoto's",
   "addPhoto": "Foto Toevoegen",
   "save": "Opslaan",
-  "bmi": "BMI"
+  "bmi": "BMI",
+  "noPersonalRecords": "Geen Persoonlijke Records",
+  "addPersonalRecord": "Persoonlijk Record Toevoegen",
+  "meals": "Maaltijden",
+  "water": "Water",
+  "todaysMeals": "Maaltijden van Vandaag",
+  "workoutCalendar": "Trainingskalender",
+  "workoutsThisWeek": "Trainingen Deze Week",
+  "workoutsThisMonth": "Trainingen Deze Maand"
 };

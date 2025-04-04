@@ -138,7 +138,7 @@ export const french = {
   "consumed": "Consommé",
   "remaining": "Restant",
   "grams": "g",
-  "calories": "calories",
+  "calories": "Calories",
   
   // BMI Calculator
   "bmiCalculator": "Calculateur d'IMC",
@@ -228,5 +228,13 @@ export const french = {
   "progressPhotos": "Photos de Progrès",
   "addPhoto": "Ajouter Photo",
   "save": "Enregistrer",
-  "bmi": "IMC"
+  "bmi": "IMC",
+  "noPersonalRecords": "Aucun Record Personnel",
+  "addPersonalRecord": "Ajouter un Record Personnel",
+  "meals": "Repas",
+  "water": "Eau",
+  "todaysMeals": "Repas d'Aujourd'hui",
+  "workoutCalendar": "Calendrier d'Entraînement",
+  "workoutsThisWeek": "Entraînements Cette Semaine",
+  "workoutsThisMonth": "Entraînements Ce Mois"
 };

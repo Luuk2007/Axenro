@@ -124,7 +124,7 @@ export const spanish = {
   "consumed": "Consumido",
   "remaining": "Restante",
   "grams": "g",
-  "calories": "calorías",
+  "calories": "Calorías",
   
   // BMI Calculator
   "bmiCalculator": "Calculadora de IMC",
@@ -212,4 +212,16 @@ export const spanish = {
   "addFirstMeasurement": "Añadir Primera Medición",
   "progressPhotos": "Fotos de Progreso",
   "addPhoto": "Añadir Foto",
+  "noPersonalRecords": "Sin Records Personales",
+  "addPersonalRecord": "Añadir Record Personal",
+  "scanBarcode": "Escanear Código de Barras",
+  "meals": "Comidas",
+  "water": "Agua",
+  "todaysMeals": "Comidas de Hoy",
+  "workoutCalendar": "Calendario de Entrenamientos",
+  "workoutsThisWeek": "Entrenamientos Esta Semana",
+  "workoutsThisMonth": "Entrenamientos Este Mes",
+  "protein": "Proteína",
+  "carbs": "Carbohidratos",
+  "fat": "Grasa"
 };

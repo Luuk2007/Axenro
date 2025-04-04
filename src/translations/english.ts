@@ -186,7 +186,7 @@ const english: Translations = {
   macroBreakdown: "Macro Breakdown",
   carbs: "Carbs",
   fat: "Fat",
-  calories: "calories",
+  calories: "Calories",
   grams: "g",
   underweight: "Underweight",
   healthyWeight: "Healthy Weight",
@@ -225,7 +225,12 @@ const english: Translations = {
   // Translations from one rep max calculator
   oneRepMaxCalculator: "One Rep Max Calculator",
   formula: "Formula", 
-  oneRepMaxDisclaimer: "This is an estimate based on the selected formula. Actual one rep max may vary."
+  oneRepMaxDisclaimer: "This is an estimate based on the selected formula. Actual one rep max may vary.",
+  
+  // New translations from screenshots
+  noPersonalRecords: "No Personal Records",
+  addPersonalRecord: "Add Personal Record",
+  scanBarcode: "Scan Barcode"
 };
 
 export default english;
