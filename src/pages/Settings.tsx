@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { 
@@ -103,77 +102,75 @@ export default function Settings() {
   };
 
   return (
-    <Layout>
-      <div className="container px-4 py-8 max-w-4xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">{t("settings")}</h1>
-          <p className="text-muted-foreground">{t("appSettings")}</p>
-        </header>
+    <div className="container px-4 py-8 max-w-4xl mx-auto">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">{t("settings")}</h1>
+        <p className="text-muted-foreground">{t("appSettings")}</p>
+      </header>
 
-        <div className="space-y-6">
-          <Accordion type="single" collapsible className="w-full space-y-4">
-            {/* General Settings */}
-            <AccordionItem value="general" className="border rounded-lg p-1">
-              <AccordionTrigger className="px-4 py-2 hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <Settings2 className="h-5 w-5 text-primary" />
-                  <span className="font-medium">{t("general")}</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 pt-2">
-                <div className="space-y-6">
-                  {/* Language Selection */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{t("language")}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{t("selectLanguage")}</p>
+      <div className="space-y-6">
+        <Accordion type="single" collapsible className="w-full space-y-4">
+          {/* General Settings */}
+          <AccordionItem value="general" className="border rounded-lg p-1">
+            <AccordionTrigger className="px-4 py-2 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <Settings2 className="h-5 w-5 text-primary" />
+                <span className="font-medium">{t("general")}</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4 pt-2">
+              <div className="space-y-6">
+                {/* Language Selection */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{t("language")}</span>
                     </div>
-                    <Select value={language} onValueChange={handleLanguageChange}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder={t("selectLanguage")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="english">English</SelectItem>
-                        <SelectItem value="dutch">Nederlands</SelectItem>
-                        <SelectItem value="french">Français</SelectItem>
-                        <SelectItem value="german">Deutsch</SelectItem>
-                        <SelectItem value="spanish">Español</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <p className="text-sm text-muted-foreground">{t("selectLanguage")}</p>
                   </div>
+                  <Select value={language} onValueChange={handleLanguageChange}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder={t("selectLanguage")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="english">English</SelectItem>
+                      <SelectItem value="dutch">Nederlands</SelectItem>
+                      <SelectItem value="french">Français</SelectItem>
+                      <SelectItem value="german">Deutsch</SelectItem>
+                      <SelectItem value="spanish">Español</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                  {/* Theme Selection */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Palette className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{t("theme")}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{t("chooseTheme")}</p>
+                {/* Theme Selection */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Palette className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{t("theme")}</span>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => handleThemeChange('light')}
-                        className={`py-2 px-4 rounded-md flex items-center gap-2 ${
-                          theme === 'light' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
-                        }`}
-                      >
-                        {theme === 'light' && <CheckCircle className="h-4 w-4" />}
-                        {t("lightMode")}
-                      </button>
-                      <button
-                        onClick={() => handleThemeChange('dark')}
-                        className={`py-2 px-4 rounded-md flex items-center gap-2 ${
-                          theme === 'dark' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
-                        }`}
-                      >
-                        {theme === 'dark' && <CheckCircle className="h-4 w-4" />}
-                        {t("darkMode")}
-                      </button>
-                    </div>
+                    <p className="text-sm text-muted-foreground">{t("chooseTheme")}</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => handleThemeChange('light')}
+                      className={`py-2 px-4 rounded-md flex items-center gap-2 ${
+                        theme === 'light' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
+                      }`}
+                    >
+                      {theme === 'light' && <CheckCircle className="h-4 w-4" />}
+                      {t("lightMode")}
+                    </button>
+                    <button
+                      onClick={() => handleThemeChange('dark')}
+                      className={`py-2 px-4 rounded-md flex items-center gap-2 ${
+                        theme === 'dark' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
+                      }`}
+                    >
+                      {theme === 'dark' && <CheckCircle className="h-4 w-4" />}
+                      {t("darkMode")}
+                    </button>
                   </div>
                 </div>
               </AccordionContent>
@@ -303,6 +300,6 @@ export default function Settings() {
           </Accordion>
         </div>
       </div>
-    </Layout>
+    
   );
 }
