@@ -214,7 +214,6 @@ export const spanish = {
   "addPhoto": "Añadir Foto",
   "noPersonalRecords": "Sin Records Personales",
   "addPersonalRecord": "Añadir Record Personal",
-  "scanBarcode": "Escanear Código de Barras",
   "meals": "Comidas",
   "water": "Agua",
   "todaysMeals": "Comidas de Hoy",
@@ -223,5 +222,6 @@ export const spanish = {
   "workoutsThisMonth": "Entrenamientos Este Mes",
   "protein": "Proteína",
   "carbs": "Carbohidratos",
-  "fat": "Grasa"
+  "fat": "Grasa",
+  "completeYourProfile": "Complete su perfil para ver su plan de nutrición"
 };
