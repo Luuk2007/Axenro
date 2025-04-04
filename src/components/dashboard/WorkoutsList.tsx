@@ -52,7 +52,7 @@ export default function WorkoutsList({ workouts, title, className, onViewAll }: 
                   <div className="flex items-center text-xs text-muted-foreground">
                     <p>{workout.date}</p>
                     <span className="mx-1">•</span>
-                    <p>{workout.exerciseCount} exercises</p>
+                    <p>{workout.exerciseCount} {t("exercises")}</p>
                   </div>
                 </div>
               </div>

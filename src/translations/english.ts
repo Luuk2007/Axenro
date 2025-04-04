@@ -1,4 +1,3 @@
-
 import { Translations } from "./types";
 
 const english: Translations = {
@@ -121,6 +120,7 @@ const english: Translations = {
   createWorkout: "Create Workout",
   personalRecords: "Personal Records",
   dailyCalorieNeeds: "Daily Calorie Needs",
+  dailyCalories: "Daily Calories",
   dailySteps: "Daily Steps",
   addActivity: "Add Activity",
   personalDetails: "Personal Details",

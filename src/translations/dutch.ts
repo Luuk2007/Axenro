@@ -79,6 +79,7 @@ export const dutch = {
   "gainWeight": "Aankomen",
   "yourStats": "Jouw Statistieken",
   "dailyCalorieNeeds": "Dagelijkse Caloriebehoefte",
+  "dailyCalories": "Dagelijkse Calorieën",
   "caloriesPerDay": "calorieën per dag",
   "macroBreakdown": "Macro Verdeling",
   "protein": "Eiwit",
@@ -243,6 +244,7 @@ export const dutch = {
   "totalSets": "Totale Sets",
   "totalWeight": "Totaal Gewicht",
   "workoutSaved": "Training succesvol opgeslagen",
+  "resetPassword": "Wachtwoord Resetten",
 
   // Additional workout translations
   "noExercisesError": "Voeg ten minste één oefening toe",

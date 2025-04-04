@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Calendar, Dumbbell, Flame, Footprints, Plus, Target, Weight } from 'lucide-react';
+import { Calendar, Dumbbell, Flame, Footprints, Plus, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import StatsCard from '@/components/dashboard/StatsCard';
@@ -38,12 +38,12 @@ const meals = [
 ];
 
 const activityOptions = [
-  { id: '1', name: 'Running', icon: Activity },
+  { id: '1', name: 'Running', icon: Flame },
   { id: '2', name: 'Strength Training', icon: Dumbbell },
-  { id: '3', name: 'Cycling', icon: Activity },
-  { id: '4', name: 'Swimming', icon: Activity },
-  { id: '5', name: 'Yoga', icon: Activity },
-  { id: '6', name: 'Walking', icon: Activity },
+  { id: '3', name: 'Cycling', icon: Flame },
+  { id: '4', name: 'Swimming', icon: Flame },
+  { id: '5', name: 'Yoga', icon: Flame },
+  { id: '6', name: 'Walking', icon: Flame },
 ];
 
 const Dashboard = () => {
@@ -180,12 +180,6 @@ const Dashboard = () => {
           </Popover>
           
           <Dialog open={showAddActivity} onOpenChange={setShowAddActivity}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                {t("addActivity")}
-              </Button>
-            </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>{t("addActivity")}</DialogTitle>
@@ -210,7 +204,7 @@ const Dashboard = () => {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title={`${t("dailyCalorieNeeds")}`}
+          title={t("dailyCalories")}
           value={userCalories ? userCalories.toString() : "1,840"}
           icon={Flame}
           description={`${t("target")}: ${userCalories ? userCalories : 2200}`}
