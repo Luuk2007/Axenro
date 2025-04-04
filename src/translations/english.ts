@@ -194,44 +194,7 @@ const english: Translations = {
   weightToGain: "Weight to gain:",
   weightToLose: "Weight to lose:",
   bmi: "BMI",
-  calendar: "Calendar",
-  
-  // Authentication translations
-  signIn: "Sign In",
-  signUp: "Sign Up",
-  password: "Password",
-  email: "Email",
-  forgotPassword: "Forgot Password?",
-  confirmPassword: "Confirm Password",
-  alreadyHaveAccount: "Already have an account?",
-  signInWithGoogle: "Sign in with Google",
-  signUpWithGoogle: "Sign up with Google",
-  or: "OR",
-  
-  // Nutrition barcode scanner
-  scanBarcode: "Scan Barcode",
-  barcodeMatches: "Barcode matches:",
-  findBetterMatch: "Find a better match",
-  servingSize: "Serving Size",
-  numberOfServings: "Number of Servings",
-  meal: "Meal",
-  breakfast: "Breakfast",
-  lunch: "Lunch",
-  dinner: "Dinner",
-  snack: "Snack",
-  addToMealPlan: "Add to Meal Plan",
-  nutritionDetails: "Nutrition Details",
-  caloriesPerServing: "Calories per serving",
-  
-  // Progress photos
-  progressPhotos: "Progress Photos",
-  addPhoto: "Add Photo",
-  noProgressPhotos: "No Progress Photos",
-  startTrackingVisualProgress: "Start tracking your visual progress",
-  addFirstPhoto: "Add First Photo",
-  
-  // Measurements
-  deleteMeasurement: "Delete Measurement",
+  calendar: "Calendar"
 };
 
 export default english;
