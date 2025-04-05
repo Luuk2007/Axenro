@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Apple, ArrowLeft, Camera, Check, Filter, GlassWater, Plus, Search, Utensils, X } from 'lucide-react';
+import { Apple, ArrowLeft, ArrowRight, Camera, Check, Filter, GlassWater, Plus, Search, Trash2, Utensils, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
@@ -12,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import WaterTracking from '@/components/nutrition/WaterTracking';
 import DailySummary from '@/components/nutrition/DailySummary';
+import { format, addDays, isToday, isTomorrow, isYesterday } from 'date-fns';
 
 // Keep the food database and meals data the same
 const macroData = [
@@ -66,7 +66,7 @@ const Nutrition = () => {
   const [scannedProduct, setScannedProduct] = useState<any | null>(null);
   const [scanStep, setScanStep] = useState<'scanning' | 'result'>('scanning');
   const [activeTab, setActiveTab] = useState<'meals' | 'water'>('meals');
-  const [timeframe, setTimeframe] = useState('today'); // For the Today, Week, Month tabs
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [foodDatabase, setFoodDatabase] = useState<any[]>([]); // We'll load this from a module
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -86,6 +86,26 @@ const Nutrition = () => {
     setFoodDatabase(database);
     setFilteredFoods(database);
   }, []);
+
+  const formatDateDisplay = (date: Date) => {
+    if (isToday(date)) {
+      return t('today');
+    } else if (isYesterday(date)) {
+      return t('yesterday');
+    } else if (isTomorrow(date)) {
+      return t('tomorrow');
+    } else {
+      return format(date, 'EEEE, MMM d');
+    }
+  };
+
+  const goToPrevDay = () => {
+    setSelectedDate(prevDate => addDays(prevDate, -1));
+  };
+
+  const goToNextDay = () => {
+    setSelectedDate(prevDate => addDays(prevDate, 1));
+  };
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
@@ -238,6 +258,11 @@ const Nutrition = () => {
     setShowAddFood(false);
   };
 
+  const handleDeleteFoodItem = (mealId: string, itemId: string) => {
+    // In a real app, this would remove the item from the database
+    toast.success('Food item removed');
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -272,33 +297,19 @@ const Nutrition = () => {
         </div>
       </div>
 
-      {/* Updated layout for daily summary and tabs */}
+      {/* Updated date navigation */}
       <div className="flex flex-col space-y-4">
-        <Tabs defaultValue="today" className="w-full" value={timeframe} onValueChange={setTimeframe}>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-            <TabsList className="inline-flex">
-              <TabsTrigger value="today">Today</TabsTrigger>
-              <TabsTrigger value="week">Week</TabsTrigger>
-              <TabsTrigger value="month">Month</TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <TabsContent value="today">
-            <DailySummary className="mb-6" />
-          </TabsContent>
-          
-          <TabsContent value="week">
-            <div className="p-4 bg-muted/30 rounded-lg text-center">
-              <p className="text-muted-foreground">Weekly nutrition summary will be available in the next update.</p>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="month">
-            <div className="p-4 bg-muted/30 rounded-lg text-center">
-              <p className="text-muted-foreground">Monthly nutrition summary will be available in the next update.</p>
-            </div>
-          </TabsContent>
-        </Tabs>
+        <div className="flex justify-between items-center">
+          <Button variant="ghost" size="icon" onClick={goToPrevDay}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h2 className="text-lg font-medium">{formatDateDisplay(selectedDate)}</h2>
+          <Button variant="ghost" size="icon" onClick={goToNextDay}>
+            <ArrowRight className="h-5 w-5" />
+          </Button>
+        </div>
+        
+        <DailySummary className="mb-6" />
       </div>
 
       {/* Add food dialog */}
@@ -563,23 +574,13 @@ const Nutrition = () => {
                             <span>{item.fat}g {t("fat")}</span>
                           </div>
                         </div>
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="15"
-                            height="15"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-muted-foreground"
-                          >
-                            <circle cx="12" cy="12" r="1" />
-                            <circle cx="19" cy="12" r="1" />
-                            <circle cx="5" cy="12" r="1" />
-                          </svg>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="h-7 w-7 p-0"
+                          onClick={() => handleDeleteFoodItem(meal.id, item.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
                         </Button>
                       </div>
                     ))}
