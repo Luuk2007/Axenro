@@ -1,7 +1,8 @@
-
 import { Translations } from "./types";
 
 const english: Translations = {
+  // ... keep existing code (translations for other UI elements)
+  
   progress: "Progress",
   addMeasurement: "Add Measurement",
   add: "Add",
@@ -230,7 +231,13 @@ const english: Translations = {
   // New translations from screenshots
   noPersonalRecords: "No Personal Records",
   addPersonalRecord: "Add Personal Record",
-  scanBarcode: "Scan Barcode"
+  scanBarcode: "Scan Barcode",
+  
+  // Updated exercise frequency options
+  selectActivityLevel: "Select frequency",
+  male: "Male",
+  female: "Female",
+  other: "Other",
 };
 
 export default english;
