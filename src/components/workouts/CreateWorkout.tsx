@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 interface CreateWorkoutProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSaveWorkout: (name: string, exercises: Exercise[]) => void;
+  onSaveWorkout: (name: string, exercises: Exercise[], date: string) => void;
 }
 
 const CreateWorkout: React.FC<CreateWorkoutProps> = ({ 
@@ -40,6 +40,16 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [showExerciseForm, setShowExerciseForm] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
+
+  // Reset form state when dialog opens/closes
+  useEffect(() => {
+    if (open) {
+      // Only reset when dialog opens, not when it closes
+      setWorkoutName("");
+      setSelectedExercises([]);
+      setDate(new Date());
+    }
+  }, [open]);
 
   const handleAddExercise = (exerciseId: string) => {
     if (!exerciseId) return;
@@ -111,10 +121,7 @@ const CreateWorkout: React.FC<CreateWorkoutProps> = ({
     const formattedDate = format(date, "yyyy-MM-dd");
     
     // Pass the formatted date along with the workout name and exercises
-    onSaveWorkout(workoutName, selectedExercises);
-    setWorkoutName("");
-    setSelectedExercises([]);
-    setDate(new Date());
+    onSaveWorkout(workoutName, selectedExercises, formattedDate);
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar, Dumbbell, Flame, Footprints, Plus, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,9 +10,10 @@ import MacroProgressTracker from '@/components/dashboard/MacroProgressTracker';
 import MealsList from '@/components/dashboard/MealsList';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { format } from 'date-fns';
+import { format, parse, isValid, startOfWeek, endOfWeek } from 'date-fns';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { Workout } from '@/types/workout';
 
 const meals = [
   {
@@ -56,6 +58,9 @@ const Dashboard = () => {
   const [userTargetWeight, setUserTargetWeight] = useState<number | null>(null);
   const [userCalories, setUserCalories] = useState<number>(2200);
   const [dailySteps, setDailySteps] = useState<number>(8546);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [totalWorkoutsPlanned, setTotalWorkoutsPlanned] = useState(5);
+  const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
 
   useEffect(() => {
     // Get weight data from localStorage if available
@@ -86,6 +91,33 @@ const Dashboard = () => {
         setUserCalories(calories);
       } catch (error) {
         console.error("Error parsing profile data:", error);
+      }
+    }
+
+    // Load workouts from localStorage
+    const storedWorkouts = localStorage.getItem("workouts");
+    if (storedWorkouts) {
+      try {
+        const parsedWorkouts = JSON.parse(storedWorkouts);
+        setWorkouts(parsedWorkouts);
+        
+        // Calculate workouts this week
+        const currentDate = new Date();
+        const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Start from Monday
+        const currentWeekEnd = endOfWeek(currentDate, { weekStartsOn: 1 }); // End on Sunday
+        
+        const workoutDates = parsedWorkouts
+          .filter((workout: Workout) => workout.completed)
+          .map((workout: Workout) => parse(workout.date, "yyyy-MM-dd", new Date()))
+          .filter((date: Date) => isValid(date));
+        
+        const weeklyWorkouts = workoutDates.filter((date: Date) => 
+          date >= currentWeekStart && date <= currentWeekEnd
+        ).length;
+        
+        setWorkoutsThisWeek(weeklyWorkouts);
+      } catch (error) {
+        console.error("Error loading workouts:", error);
       }
     }
   }, []);
@@ -217,9 +249,10 @@ const Dashboard = () => {
         />
         <StatsCard
           title={`${t("workouts")}`}
-          value="4/5"
+          value={`${workoutsThisWeek}/${totalWorkoutsPlanned}`}
           icon={Dumbbell}
-          description={`80% ${t("completed")}`}
+          description={`${Math.round((workoutsThisWeek / totalWorkoutsPlanned) * 100)}% ${t("completed")}`}
+          onClick={navigateToWorkouts}
         />
         <StatsCard
           title={`${t("weight")}`}

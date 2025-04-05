@@ -6,13 +6,12 @@ import PersonalRecords from "@/components/workouts/PersonalRecords";
 import { Dumbbell, Trophy, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { Workout } from "@/types/workout";
 import CreateWorkout from "@/components/workouts/CreateWorkout";
 import DeleteWorkoutDialog from "@/components/workouts/DeleteWorkoutDialog";
 import TrackWorkout from "@/components/workouts/TrackWorkout";
 import WorkoutList from "@/components/workouts/WorkoutList";
 import WorkoutCalendar from "@/components/workouts/WorkoutCalendar";
+import { Workout } from "@/types/workout";
 
 const Workouts = () => {
   const { t } = useLanguage();
@@ -39,7 +38,7 @@ const Workouts = () => {
     setWorkouts(updatedWorkouts);
   };
 
-  const handleCreateWorkout = (name: string, exercises: any[]) => {
+  const handleCreateWorkout = (name: string, exercises: any[], date: string) => {
     // Mark all sets as completed automatically
     const completedExercises = exercises.map(exercise => ({
       ...exercise,
@@ -49,7 +48,7 @@ const Workouts = () => {
     const newWorkout: Workout = {
       id: Date.now().toString(),
       name: name,
-      date: format(new Date(), "yyyy-MM-dd"),
+      date: date, // Use the passed date parameter instead of generating a new one
       exercises: completedExercises,
       completed: true // Mark workout as completed automatically
     };

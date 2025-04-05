@@ -3,7 +3,7 @@ import React from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Workout } from "@/types/workout";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface WorkoutCalendarProps {
@@ -33,11 +33,11 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   ).length;
   
   // Count workouts within current week (last 7 days including today)
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 6); // Last 7 days including today
+  const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Start from Monday
+  const currentWeekEnd = endOfWeek(currentDate, { weekStartsOn: 1 }); // End on Sunday
   
   const workoutsThisWeek = workoutDates.filter(date => 
-    date >= oneWeekAgo && date <= currentDate
+    date >= currentWeekStart && date <= currentWeekEnd
   ).length;
   
   // Get all days in current month for activity heatmap
