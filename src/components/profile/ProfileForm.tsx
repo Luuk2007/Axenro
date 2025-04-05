@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,6 +66,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
     activityLevel: z.string(),
     fitnessGoal: z.string(),
     targetWeight: z.number().min(30).max(300).optional(),
+    // Add the missing fields to the form schema
+    exerciseFrequency: z.string().optional(),
+    goal: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -173,7 +177,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                     type="number" 
                     placeholder="75" 
                     {...field} 
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     step="0.1"
                   />
                 </FormControl>
