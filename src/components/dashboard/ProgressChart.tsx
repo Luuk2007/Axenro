@@ -106,7 +106,7 @@ export default function ProgressChart({
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={sortedData}
-              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              margin={{ top: 10, right: 10, left: 35, bottom: 0 }}
             >
               <defs>
                 <linearGradient id={`color${color}`} x1="0" y1="0" x2="0" y2="1">
@@ -128,10 +128,11 @@ export default function ProgressChart({
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 10 }}
-                width={30}
+                width={35}
                 allowDecimals={true}
                 tickCount={5}
                 ticks={getYAxisTicks()}
+                tickFormatter={(value) => value.toFixed(1)}
               />
               <Tooltip 
                 contentStyle={{ 
@@ -143,7 +144,7 @@ export default function ProgressChart({
                 labelFormatter={(label, items) => {
                   // If we have originalDate in our payload, use it for the tooltip
                   const item = items[0]?.payload;
-                  return item?.originalDate || label;
+                  return item?.originalDate ? format(parseISO(item.originalDate), 'MMM d, yyyy') : label;
                 }}
                 animationDuration={300}
               />

@@ -1,3 +1,4 @@
+
 import { Translations } from "./types";
 
 const english: Translations = {
@@ -238,6 +239,34 @@ const english: Translations = {
   male: "Male",
   female: "Female",
   other: "Other",
+  
+  // Progress related translations (newly added/updated)
+  chest: "Chest",
+  waist: "Waist",
+  hips: "Hips",
+  biceps: "Biceps",
+  thighs: "Thighs",
+  calves: "Calves",
+  bodyfat: "Body Fat",
+  measurement: "Measurement",
+  trackYourBodyMeasurements: "Track your body measurements over time",
+  noDataForThisMeasurement: "No data for this measurement yet",
+  measurementAdded: "measurement added successfully",
+  retake: "Retake",
+  savePhoto: "Save Photo",
+  takePhoto: "Take Photo",
+  uploadFromGallery: "Upload From Gallery",
+  positionYourselfAndClickButton: "Position yourself and click the button below",
+  progressPhotoSaved: "Progress photo saved successfully",
+  noProgressPhotos: "No Progress Photos Yet",
+  startTrackingVisualProgress: "Start tracking your visual progress over time",
+  addFirstPhoto: "Add First Photo",
+  photoRemoved: "Photo removed successfully",
+  addProgressPhoto: "Add Progress Photo",
+  trackYourProgressVisually: "Track your progress visually",
+  cameraNotAvailable: "Camera not available",
+  couldNotAccessCamera: "Could not access camera",
+  invalidMeasurementType: "Invalid measurement type",
 };
 
 export default english;

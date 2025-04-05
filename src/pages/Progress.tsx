@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X } from 'lucide-react';
+import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,8 +11,16 @@ import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { Progress as ProgressBar } from '@/components/ui/progress';
 import { WeightTracker } from '@/components/progress/WeightTracker';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
 
-// Measurement types
+// Measurement types with capitalized names
 const measurementTypes = [
   { id: 'weight', name: 'Weight', unit: 'kg' },
   { id: 'chest', name: 'Chest', unit: 'cm' },
@@ -90,9 +98,8 @@ export default function Progress() {
   
   // Save progress photos to localStorage whenever they change
   useEffect(() => {
-    if (progressPhotos.length > 0) {
-      localStorage.setItem('progressPhotos', JSON.stringify(progressPhotos));
-    }
+    // Always save photos, even if the array is empty (this fixes the deletion persistence bug)
+    localStorage.setItem('progressPhotos', JSON.stringify(progressPhotos));
   }, [progressPhotos]);
   
   const handleAddMeasurement = () => {
@@ -129,6 +136,11 @@ export default function Progress() {
     
     toast.success(`${selectedType.name} ${t('measurementAdded')}`);
     setMeasurementValue('');
+  };
+  
+  const handleDeleteMeasurement = (id: string) => {
+    setMeasurements(prev => prev.filter(measurement => measurement.id !== id));
+    toast.success(t('measurementDeleted'));
   };
   
   const handleCapturePhoto = async () => {
@@ -262,7 +274,7 @@ export default function Progress() {
         <div className="flex items-center gap-2">
           <Dialog>
             <DialogTrigger asChild>
-              <Button>
+              <Button data-dialog-trigger="true">
                 <Plus className="mr-2 h-4 w-4" />
                 {t("addMeasurement")}
               </Button>
@@ -281,7 +293,7 @@ export default function Progress() {
                     onChange={(e) => setMeasurementType(e.target.value)}
                   >
                     {measurementTypes.filter(type => type.id !== 'weight').map(type => (
-                      <option key={type.id} value={type.id}>{t(type.name.toLowerCase())}</option>
+                      <option key={type.id} value={type.id}>{t(type.id)}</option>
                     ))}
                   </select>
                 </div>
@@ -339,7 +351,7 @@ export default function Progress() {
                   
                   return (
                     <div key={type.id} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{t(type.name.toLowerCase())}</span>
+                      <span className="text-sm font-medium">{t(type.id)}</span>
                       <span className="text-sm">
                         {latestMeasurement ? `${latestMeasurement.value} ${type.unit}` : '—'}
                       </span>
@@ -356,27 +368,38 @@ export default function Progress() {
               <div className="p-5">
                 {measurements.length > 0 ? (
                   <div className="max-h-72 overflow-y-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="text-left border-b border-border">
-                          <th className="pb-2 font-medium">{t("date")}</th>
-                          <th className="pb-2 font-medium">{t("measurement")}</th>
-                          <th className="pb-2 font-medium text-right">{t("value")}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                    <Table className="w-full text-sm">
+                      <TableHeader>
+                        <TableRow className="border-b border-border">
+                          <TableHead className="pb-2 font-medium">{t("date")}</TableHead>
+                          <TableHead className="pb-2 font-medium">{t("measurement")}</TableHead>
+                          <TableHead className="pb-2 font-medium text-right">{t("value")}</TableHead>
+                          <TableHead className="pb-2 font-medium w-10"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {[...measurements]
                           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                           .map(measurement => (
-                            <tr key={measurement.id} className="border-b border-border">
-                              <td className="py-3">{format(parseISO(measurement.date), 'MMM d, yyyy')}</td>
-                              <td className="py-3">{t(measurementTypes.find(type => type.id === measurement.type)?.name.toLowerCase() || '')}</td>
-                              <td className="py-3 text-right">{measurement.value} {measurement.unit}</td>
-                            </tr>
+                            <TableRow key={measurement.id} className="border-b border-border">
+                              <TableCell className="py-3">{format(parseISO(measurement.date), 'MMM d, yyyy')}</TableCell>
+                              <TableCell className="py-3">{t(measurement.type)}</TableCell>
+                              <TableCell className="py-3 text-right">{measurement.value} {measurement.unit}</TableCell>
+                              <TableCell className="py-3">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                  onClick={() => handleDeleteMeasurement(measurement.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
                           ))
                         }
-                      </tbody>
-                    </table>
+                      </TableBody>
+                    </Table>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -399,7 +422,7 @@ export default function Progress() {
                   <TabsList className="mb-4 flex flex-wrap">
                     {measurementTypes.filter(type => type.id !== 'weight').map(type => (
                       <TabsTrigger key={type.id} value={type.id} disabled={getMeasurementsByType(type.id).length === 0}>
-                        {t(type.name.toLowerCase())}
+                        {t(type.id)}
                       </TabsTrigger>
                     ))}
                   </TabsList>
@@ -409,7 +432,7 @@ export default function Progress() {
                       {getMeasurementsByType(type.id).length > 0 ? (
                         <ProgressChart
                           data={prepareMeasurementDataForChart(type.id)}
-                          title={t(type.name.toLowerCase())}
+                          title={t(type.id)}
                           label={type.unit}
                           color="#4F46E5"
                         />
