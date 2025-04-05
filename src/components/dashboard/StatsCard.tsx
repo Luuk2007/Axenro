@@ -9,6 +9,7 @@ interface StatsCardProps {
   icon: LucideIcon;
   description?: string;
   className?: string;
+  onClick?: () => void;
 }
 
 export default function StatsCard({
@@ -17,12 +18,17 @@ export default function StatsCard({
   icon: Icon,
   description,
   className,
+  onClick,
 }: StatsCardProps) {
   return (
-    <div className={cn(
-      "glassy-card rounded-xl p-5 card-shadow hover-scale",
-      className
-    )}>
+    <div 
+      className={cn(
+        "glassy-card rounded-xl p-5 card-shadow hover-scale",
+        onClick && "cursor-pointer",
+        className
+      )}
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
