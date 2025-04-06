@@ -421,7 +421,7 @@ const Nutrition = () => {
       {!isAuthenticated && (
         <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-lg">
           <p className="text-sm">
-            {t('loginToSaveNutritionData')}
+            {t('Login To Save Nutrition Data')}
           </p>
         </div>
       )}
