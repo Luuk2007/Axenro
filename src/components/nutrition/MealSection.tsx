@@ -4,15 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Trash2, Utensils } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
-
-interface FoodItem {
-  id: string;
-  name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-}
+import { FoodItem } from '@/types/nutrition';
 
 interface MealSectionProps {
   id: string;
@@ -27,7 +19,7 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
 
   const handleDeleteItem = (itemId: string) => {
     // Confirm deletion
-    if (confirm(t('confirmDeleteFood') || 'Are you sure you want to delete this item?')) {
+    if (confirm(t('confirmDeleteFood') || 'Are you sure you want to delete this food item?')) {
       onDeleteItem(id, itemId);
       toast.success(t('foodItemRemoved') || 'Food item removed');
     }

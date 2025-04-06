@@ -1,6 +1,7 @@
 
 // Open Food Facts API service
 import { supabase } from "@/integrations/supabase/client";
+import { FoodItem, FoodLogEntry } from "@/types/nutrition";
 
 export interface NutritionInfo {
   calories: number;
@@ -135,7 +136,7 @@ export const searchProductsByName = async (query: string, lang = 'nl'): Promise<
 /**
  * Save food log to Supabase
  */
-export const saveFoodLog = async (foodItem: any, mealId: string, date: string) => {
+export const saveFoodLog = async (foodItem: FoodItem, mealId: string, date: string): Promise<FoodLogEntry | null> => {
   try {
     const { data: user } = await supabase.auth.getUser();
     
@@ -144,18 +145,22 @@ export const saveFoodLog = async (foodItem: any, mealId: string, date: string) =
       throw new Error('You must be logged in to save food logs');
     }
 
+    const newLog = {
+      user_id: user.user.id,
+      meal_id: mealId,
+      date,
+      food_item: foodItem
+    };
+
     const { data, error } = await supabase
       .from('food_logs')
-      .insert([{
-        user_id: user.user.id,
-        meal_id: mealId,
-        date,
-        food_item: foodItem
-      }]);
+      .insert([newLog])
+      .select()
+      .single();
 
     if (error) throw error;
     
-    return data;
+    return data as FoodLogEntry;
   } catch (error) {
     console.error('Error saving food log:', error);
     throw error;
@@ -165,7 +170,7 @@ export const saveFoodLog = async (foodItem: any, mealId: string, date: string) =
 /**
  * Get user's food logs for a specific date
  */
-export const getFoodLogs = async (date: string) => {
+export const getFoodLogs = async (date: string): Promise<FoodLogEntry[]> => {
   try {
     const { data: user } = await supabase.auth.getUser();
     
@@ -182,7 +187,7 @@ export const getFoodLogs = async (date: string) => {
 
     if (error) throw error;
     
-    return data || [];
+    return data as FoodLogEntry[];
   } catch (error) {
     console.error('Error getting food logs:', error);
     return [];
@@ -192,7 +197,7 @@ export const getFoodLogs = async (date: string) => {
 /**
  * Delete food log
  */
-export const deleteFoodLog = async (logId: string) => {
+export const deleteFoodLog = async (logId: string): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('food_logs')

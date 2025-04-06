@@ -14,7 +14,7 @@ const NutritionTabs = ({ activeTab, onTabChange }: NutritionTabsProps) => {
   const { t } = useLanguage();
 
   return (
-    <Tabs defaultValue={activeTab} onValueChange={(value) => onTabChange(value as 'meals' | 'water')}>
+    <Tabs value={activeTab} onValueChange={(value) => onTabChange(value as 'meals' | 'water')}>
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="meals" className="flex items-center">
           <Utensils className="mr-2 h-4 w-4" />
