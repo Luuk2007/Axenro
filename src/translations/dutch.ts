@@ -264,7 +264,7 @@ export const dutch: Translations = {
   percent: "%",
   target: "Doel",
   current: "Huidig",
-  progress_status: "Voortgang", // Renamed to avoid duplicate with 'progress' at line 5
+  progress_status: "Voortgang", // Fixed this duplicate key (was 'progress' but already exists at line 5)
   total: "Totaal",
   average: "Gemiddeld",
   min: "Min",
@@ -283,5 +283,13 @@ export const dutch: Translations = {
   exerciseFrequency: "Trainingsfrequentie",
   targetWeight: "Streefgewicht",
   meals: "Maaltijden",
-  addActivity: "Activiteit toevoegen"
+  addActivity: "Activiteit toevoegen",
+  onlineResults: "Online resultaten",
+  localDatabase: "Lokale database",
+  noResultsFound: "Geen resultaten gevonden",
+  typeToSearch: "Typ om te zoeken naar voedsel",
+  selectMeal: "Selecteer maaltijd",
+  food: "Voedsel",
+  searchFoods: "Zoek voedsel...",
+  loginToSaveNutritionData: "Log in om je voedingsgegevens op te slaan"
 };
