@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,22 +16,13 @@ import NutritionTabs from '@/components/nutrition/NutritionTabs';
 import WaterTracking from '@/components/nutrition/WaterTracking';
 import FoodDatabase from '@/components/nutrition/FoodDatabase';
 import { saveFoodLog, getFoodLogs, deleteFoodLog, ProductDetails } from '@/services/openFoodFactsService';
+import { FoodItem, FoodLogEntry } from '@/types/nutrition';
 
 // Define meal type
 interface Meal {
   id: string;
   name: string;
-  items: any[];
-}
-
-// Define a type for food log entries from Supabase
-interface FoodLogEntry {
-  id: string; 
-  user_id: string;
-  meal_id: string;
-  date: string;
-  created_at: string;
-  food_item: any;
+  items: FoodItem[];
 }
 
 const Nutrition = () => {
@@ -155,7 +145,7 @@ const Nutrition = () => {
     };
     
     loadFoodLogs();
-  }, [selectedDate, isAuthenticated, userId]);
+  }, [selectedDate, isAuthenticated, userId, meals, t]);
 
   // Fallback to localStorage for demo or when not logged in
   const loadFoodLogsFromLocalStorage = () => {
@@ -310,6 +300,7 @@ const Nutrition = () => {
   };
 
   return (
+    // ... keep existing code (UI components)
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
@@ -333,7 +324,7 @@ const Nutrition = () => {
                   <Apple className="mr-2 h-4 w-4" />
                   {t("addFood")}
                 </Button>
-                <Button className="flex-1" onClick={handleScanBarcode}>
+                <Button className="flex-1" onClick={() => setShowScanBarcode(true)}>
                   <Camera className="mr-2 h-4 w-4" />
                   {t("scanBarcode")}
                 </Button>

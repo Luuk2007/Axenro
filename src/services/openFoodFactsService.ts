@@ -152,13 +152,12 @@ export const saveFoodLog = async (foodItem: FoodItem, mealId: string, date: stri
       food_item: foodItem
     };
 
-    // Use 'as any' as a workaround for the TypeScript type limitations
-    // The database does have this table, but the TypeScript definitions are limited
-    const { data, error } = await (supabase
+    // Use a type assertion to work around TypeScript limitations with dynamic tables
+    const { data, error } = await supabase
       .from('food_logs' as any)
       .insert([newLog])
       .select()
-      .single() as any);
+      .single() as any;
 
     if (error) throw error;
     
@@ -181,12 +180,12 @@ export const getFoodLogs = async (date: string): Promise<FoodLogEntry[]> => {
       return [];
     }
 
-    // Use 'as any' as a workaround for the TypeScript type limitations
-    const { data, error } = await (supabase
+    // Use a type assertion to work around TypeScript limitations with dynamic tables
+    const { data, error } = await supabase
       .from('food_logs' as any)
       .select('*')
       .eq('user_id', user.user.id)
-      .eq('date', date) as any);
+      .eq('date', date) as any;
 
     if (error) throw error;
     
@@ -202,11 +201,11 @@ export const getFoodLogs = async (date: string): Promise<FoodLogEntry[]> => {
  */
 export const deleteFoodLog = async (logId: string): Promise<boolean> => {
   try {
-    // Use 'as any' as a workaround for the TypeScript type limitations
-    const { error } = await (supabase
+    // Use a type assertion to work around TypeScript limitations with dynamic tables
+    const { error } = await supabase
       .from('food_logs' as any)
       .delete()
-      .eq('id', logId) as any);
+      .eq('id', logId) as any;
 
     if (error) throw error;
     
