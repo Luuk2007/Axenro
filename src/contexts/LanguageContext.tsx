@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import englishDefault from '../translations/english';
 import { dutch } from '../translations/dutch';
@@ -11,7 +10,7 @@ import { Translations } from '../translations/types';
 const english = englishDefault;
 
 // Define the type for translations
-export type TranslationKeys = keyof typeof english;
+export type TranslationKeys = string;
 
 // Define languages available
 export type Language = 'english' | 'dutch' | 'french' | 'german' | 'spanish';
@@ -89,7 +88,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   // Translation function
   const t = (key: TranslationKeys): string => {
     const translation = translations[language];
-    return translation[key] || english[key] || key;
+    return (translation[key] as string) || (english[key] as string) || key;
   };
 
   return (
