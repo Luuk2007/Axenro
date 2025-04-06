@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
@@ -19,13 +18,16 @@ const defaultMacroTargets: MacroData = {
 
 interface DailySummaryProps {
   className?: string;
+  meals?: any[];
+  selectedDate?: Date;
+  refreshTrigger?: number;
 }
 
-export default function DailySummary({ className }: DailySummaryProps) {
+export default function DailySummary({ className, meals = [], selectedDate = new Date(), refreshTrigger = 0 }: DailySummaryProps) {
   const { t } = useLanguage();
   const [macroTargets, setMacroTargets] = useState<MacroData>(defaultMacroTargets);
   
-  // Load from local storage if available
+  // Load user profile and nutrition targets
   useEffect(() => {
     // Try to load nutrition goals from user profile
     const savedProfile = localStorage.getItem("userProfile");
@@ -117,36 +119,57 @@ export default function DailySummary({ className }: DailySummaryProps) {
         console.error("Error loading nutrition goals:", error);
       }
     }
-    
-    // Load logged food data for the day
-    const today = new Date().toLocaleDateString('en-US');
-    const savedFoodLog = localStorage.getItem(`foodLog_${today}`);
-    if (savedFoodLog) {
-      try {
-        const foodLog = JSON.parse(savedFoodLog);
-        
-        // Calculate consumed macros from food log
-        const consumed = foodLog.reduce((total: any, item: any) => {
-          return {
-            calories: total.calories + (item.calories || 0),
-            protein: total.protein + (item.protein || 0),
-            carbs: total.carbs + (item.carbs || 0),
-            fat: total.fat + (item.fat || 0),
-          };
-        }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
-        
-        // Update state with consumed values
+  }, []);
+
+  // Calculate macros from provided meals or from localStorage if not provided
+  useEffect(() => {
+    // Function to calculate consumed macros from food items
+    const calculateConsumedMacros = (allFoodItems: any[]) => {
+      const consumed = allFoodItems.reduce((total: any, item: any) => {
+        return {
+          calories: total.calories + (item.calories || 0),
+          protein: total.protein + (item.protein || 0),
+          carbs: total.carbs + (item.carbs || 0),
+          fat: total.fat + (item.fat || 0),
+        };
+      }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+      
+      // Update state with consumed values
+      setMacroTargets(prevState => ({
+        calories: { ...prevState.calories, consumed: consumed.calories },
+        protein: { ...prevState.protein, consumed: consumed.protein },
+        carbs: { ...prevState.carbs, consumed: consumed.carbs },
+        fat: { ...prevState.fat, consumed: consumed.fat },
+      }));
+    };
+
+    if (meals && meals.length > 0) {
+      // If meals are provided, extract all food items
+      const allFoodItems = meals.flatMap(meal => meal.items || []);
+      calculateConsumedMacros(allFoodItems);
+    } else {
+      // Otherwise load from localStorage
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const savedFoodLog = localStorage.getItem(`foodLog_${dateStr}`);
+      
+      if (savedFoodLog) {
+        try {
+          const foodLog = JSON.parse(savedFoodLog);
+          calculateConsumedMacros(foodLog);
+        } catch (error) {
+          console.error("Error loading food log:", error);
+        }
+      } else {
+        // Reset consumed values if no food log found
         setMacroTargets(prevState => ({
-          calories: { ...prevState.calories, consumed: consumed.calories },
-          protein: { ...prevState.protein, consumed: consumed.protein },
-          carbs: { ...prevState.carbs, consumed: consumed.carbs },
-          fat: { ...prevState.fat, consumed: consumed.fat },
+          calories: { ...prevState.calories, consumed: 0 },
+          protein: { ...prevState.protein, consumed: 0 },
+          carbs: { ...prevState.carbs, consumed: 0 },
+          fat: { ...prevState.fat, consumed: 0 },
         }));
-      } catch (error) {
-        console.error("Error loading food log:", error);
       }
     }
-  }, []);
+  }, [meals, selectedDate, refreshTrigger]);
 
   const calculatePercentage = (consumed: number, goal: number) => {
     return Math.min(Math.round((consumed / goal) * 100), 100);

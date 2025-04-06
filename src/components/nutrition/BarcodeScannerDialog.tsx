@@ -3,7 +3,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import { DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, ArrowLeft, Camera, Check, AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { X, ArrowLeft, Camera, Check, AlertCircle, Minus, Plus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Quagga from 'quagga';
 import { toast } from 'sonner';
@@ -30,6 +31,8 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
   const [error, setError] = useState<string | null>(null);
   const [selectedMealId, setSelectedMealId] = useState<string>(selectedMeal || "1");
   const [servings, setServings] = useState(1);
+  const [amount, setAmount] = useState<number>(100);
+  const [unit, setUnit] = useState<string>("gram");
   
   const videoRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -155,11 +158,37 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
 
   const handleConfirmProduct = () => {
     if (scannedProduct) {
-      const productWithServings = {
+      // Calculate nutritional values based on amount/servings
+      const adjustedProduct = {
         ...scannedProduct,
-        servings
+        servings,
+        amount,
+        unit,
+        nutrition: {
+          calories: calculateAdjustedValue(scannedProduct.nutrition.calories),
+          protein: calculateAdjustedValue(scannedProduct.nutrition.protein),
+          carbs: calculateAdjustedValue(scannedProduct.nutrition.carbs),
+          fat: calculateAdjustedValue(scannedProduct.nutrition.fat)
+        }
       };
-      onAddProduct(productWithServings);
+      onAddProduct(adjustedProduct);
+    }
+  };
+
+  const calculateAdjustedValue = (value: number): number => {
+    // Base calculation on the user-entered amount/unit
+    if (unit === "gram" || unit === "milliliter") {
+      return (value * amount) / 100; // Assuming nutrition values are per 100g/ml
+    } else {
+      // For pieces, slices, etc., multiply by servings
+      return value * servings;
+    }
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      setAmount(value);
     }
   };
 
@@ -192,7 +221,7 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
               <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
                 <AlertCircle className="h-10 w-10 text-destructive mb-2" />
                 <p className="text-white mb-4">{error}</p>
-                <Button onClick={handleRetry}>Try Again</Button>
+                <Button onClick={handleRetry}>{t("tryAgain")}</Button>
               </div>
             ) : (
               <>
@@ -211,7 +240,7 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
           </div>
           
           <div className="p-4 text-sm text-muted-foreground bg-muted/30">
-            <p>{t("scanBarcode")} {t("instructions") || "Instructions"}: {t("holdSteady") || "Hold the barcode steady in the frame"}</p>
+            <p>{t("scanBarcode")}: {t("holdSteady")}</p>
           </div>
         </div>
       ) : (
@@ -224,17 +253,17 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
           </div>
           
           {scannedProduct && (
-            <div className="p-4 space-y-6">
+            <div className="p-4 space-y-6 max-h-[70vh] overflow-y-auto">
               <div className="bg-blue-50 p-3 rounded-md mb-4">
                 <div className="flex items-center">
                   <p className="text-gray-600 text-sm flex-1">
-                    {t("barcodeMatches") || "Barcode matches"}: "{scannedProduct.id}"
+                    {t("barcodeMatches")}: "{scannedProduct.id}"
                   </p>
                   <button 
                     onClick={handleRetry} 
                     className="text-blue-500 text-sm whitespace-nowrap"
                   >
-                    {t("scanAgain") || "Scan again"}
+                    {t("scanAgain")}
                   </button>
                 </div>
               </div>
@@ -259,30 +288,68 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <p className="font-medium">{t("servingSize") || "Serving Size"}</p>
+                  <p className="font-medium">{t("servingSize")}</p>
                   <div className="bg-gray-100 rounded-md px-4 py-2 text-right w-1/2">
                     <span>{scannedProduct.servingSize}</span>
                   </div>
                 </div>
-                
-                <div className="flex justify-between items-center">
-                  <p className="font-medium">{t("numberOfServings") || "Number of Servings"}</p>
-                  <div className="flex items-center bg-gray-100 rounded-md px-2 w-1/2">
-                    <button 
-                      className="p-1"
-                      disabled={servings <= 0.25}
-                      onClick={() => setServings(prev => Math.max(0.25, prev - 0.25))}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                    <input
-                      type="number"
-                      value={servings}
-                      min="0.25"
-                      step="0.25"
-                      onChange={(e) => setServings(Number(e.target.value) || 1)}
-                      className="w-full bg-transparent text-right border-0 focus:ring-0"
-                    />
+
+                <div className="border-t pt-4">
+                  <h3 className="font-medium mb-3">{t("adjustServing")}</h3>
+                  
+                  <div className="flex gap-3 mb-4">
+                    <div className="flex-1">
+                      <label className="text-sm text-muted-foreground mb-1 block">{t("amount")}</label>
+                      <Input 
+                        type="number"
+                        value={amount}
+                        onChange={handleAmountChange}
+                        min="1"
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <div className="flex-1">
+                      <label className="text-sm text-muted-foreground mb-1 block">{t("unit")}</label>
+                      <Select
+                        value={unit}
+                        onValueChange={setUnit}
+                      >
+                        <SelectTrigger>
+                          <SelectValue>{t(unit) || unit}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="gram">{t("gram")}</SelectItem>
+                          <SelectItem value="milliliter">{t("milliliter")}</SelectItem>
+                          <SelectItem value="piece">{t("piece")}</SelectItem>
+                          <SelectItem value="slice">{t("slice")}</SelectItem>
+                          <SelectItem value="cup">{t("cup")}</SelectItem>
+                          <SelectItem value="tablespoon">{t("tablespoon")}</SelectItem>
+                          <SelectItem value="teaspoon">{t("teaspoon")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center mb-4">
+                    <p className="font-medium">{t("numberOfServings")}</p>
+                    <div className="flex items-center bg-gray-100 rounded-md px-2 w-1/2">
+                      <button 
+                        className="p-1"
+                        disabled={servings <= 0.25}
+                        onClick={() => setServings(prev => Math.max(0.25, prev - 0.25))}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <input
+                        type="number"
+                        value={servings}
+                        min="0.25"
+                        step="0.25"
+                        onChange={(e) => setServings(Number(e.target.value) || 1)}
+                        className="w-full bg-transparent text-right border-0 focus:ring-0"
+                      />
+                    </div>
                   </div>
                 </div>
                 
@@ -293,7 +360,7 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
                     onValueChange={setSelectedMealId}
                   >
                     <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder={t("selectMeal") || "Select meal"} />
+                      <SelectValue placeholder={t("selectMeal")} />
                     </SelectTrigger>
                     <SelectContent>
                       {meals.map(meal => (
@@ -304,47 +371,52 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
                 </div>
               </div>
               
-              <div className="flex items-stretch space-x-4">
-                <div className="bg-white rounded-full w-24 h-24 flex-shrink-0 flex flex-col items-center justify-center shadow-sm border border-gray-200">
-                  <span className="text-2xl font-bold">
-                    {Math.round(scannedProduct.nutrition.calories * servings)}
-                  </span>
-                  <span className="text-xs text-gray-500">cal</span>
-                </div>
+              <div className="border rounded-md p-4">
+                <h3 className="font-medium mb-2">{t("nutritionFacts")}</h3>
+                <p className="text-xs text-muted-foreground mb-3">{t("perServing")}</p>
                 
-                <div className="flex-1 flex flex-col justify-around">
-                  <div className="flex justify-between">
-                    <span className="text-green-500">
-                      {Math.round((scannedProduct.nutrition.carbs / (scannedProduct.nutrition.carbs + scannedProduct.nutrition.fat + scannedProduct.nutrition.protein)) * 100 || 0)}%
+                <div className="flex items-stretch space-x-4">
+                  <div className="bg-white rounded-full w-24 h-24 flex-shrink-0 flex flex-col items-center justify-center shadow-sm border border-gray-200">
+                    <span className="text-2xl font-bold">
+                      {Math.round(calculateAdjustedValue(scannedProduct.nutrition.calories))}
                     </span>
-                    <span className="text-blue-500">
-                      {Math.round((scannedProduct.nutrition.fat / (scannedProduct.nutrition.carbs + scannedProduct.nutrition.fat + scannedProduct.nutrition.protein)) * 100 || 0)}%
-                    </span>
-                    <span className="text-purple-500">
-                      {Math.round((scannedProduct.nutrition.protein / (scannedProduct.nutrition.carbs + scannedProduct.nutrition.fat + scannedProduct.nutrition.protein)) * 100 || 0)}%
-                    </span>
+                    <span className="text-xs text-gray-500">cal</span>
                   </div>
                   
-                  <div className="flex justify-between">
-                    <div className="text-center">
-                      <div className="text-xl font-semibold">
-                        {Math.round(scannedProduct.nutrition.carbs * servings * 10) / 10}g
-                      </div>
-                      <div className="text-xs text-gray-500">{t("carbs")}</div>
+                  <div className="flex-1 flex flex-col justify-around">
+                    <div className="flex justify-between">
+                      <span className="text-green-500">
+                        {Math.round((scannedProduct.nutrition.carbs / (scannedProduct.nutrition.carbs + scannedProduct.nutrition.fat + scannedProduct.nutrition.protein)) * 100 || 0)}%
+                      </span>
+                      <span className="text-blue-500">
+                        {Math.round((scannedProduct.nutrition.fat / (scannedProduct.nutrition.carbs + scannedProduct.nutrition.fat + scannedProduct.nutrition.protein)) * 100 || 0)}%
+                      </span>
+                      <span className="text-purple-500">
+                        {Math.round((scannedProduct.nutrition.protein / (scannedProduct.nutrition.carbs + scannedProduct.nutrition.fat + scannedProduct.nutrition.protein)) * 100 || 0)}%
+                      </span>
                     </div>
                     
-                    <div className="text-center">
-                      <div className="text-xl font-semibold">
-                        {Math.round(scannedProduct.nutrition.fat * servings * 10) / 10}g
+                    <div className="flex justify-between">
+                      <div className="text-center">
+                        <div className="text-xl font-semibold">
+                          {Math.round(calculateAdjustedValue(scannedProduct.nutrition.carbs) * 10) / 10}g
+                        </div>
+                        <div className="text-xs text-gray-500">{t("carbs")}</div>
                       </div>
-                      <div className="text-xs text-gray-500">{t("fat")}</div>
-                    </div>
-                    
-                    <div className="text-center">
-                      <div className="text-xl font-semibold">
-                        {Math.round(scannedProduct.nutrition.protein * servings * 10) / 10}g
+                      
+                      <div className="text-center">
+                        <div className="text-xl font-semibold">
+                          {Math.round(calculateAdjustedValue(scannedProduct.nutrition.fat) * 10) / 10}g
+                        </div>
+                        <div className="text-xs text-gray-500">{t("fat")}</div>
                       </div>
-                      <div className="text-xs text-gray-500">{t("protein")}</div>
+                      
+                      <div className="text-center">
+                        <div className="text-xl font-semibold">
+                          {Math.round(calculateAdjustedValue(scannedProduct.nutrition.protein) * 10) / 10}g
+                        </div>
+                        <div className="text-xs text-gray-500">{t("protein")}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -353,7 +425,7 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
               <div className="pt-4 flex justify-center">
                 <Button className="w-full" onClick={handleConfirmProduct}>
                   <Check className="mr-2 h-4 w-4" />
-                  {t("addToMealPlan") || "Add to Meal Plan"}
+                  {t("addToMealPlan")}
                 </Button>
               </div>
             </div>

@@ -18,6 +18,8 @@ export interface ProductDetails {
   imageUrl: string | null;
   servingSize: string;
   servings: number;
+  amount?: number;
+  unit?: string;
   nutrition: NutritionInfo;
 }
 
@@ -91,7 +93,7 @@ export const fetchProductByBarcode = async (barcode: string, lang = 'nl'): Promi
  */
 export const searchProductsByName = async (query: string, lang = 'nl'): Promise<ProductDetails[]> => {
   try {
-    const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&json=true&page_size=10`);
+    const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&json=true&page_size=20`);
     
     if (!response.ok) {
       console.error('Error searching products:', response.statusText);

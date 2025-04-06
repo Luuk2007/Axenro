@@ -4,10 +4,9 @@ import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/c
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Loader2 } from 'lucide-react';
+import { Plus, Search, Loader2, X, Minus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { searchProductsByName, ProductDetails } from '@/services/openFoodFactsService';
-import FoodDatabase from './FoodDatabase';
 
 interface Meal {
   id: string;
@@ -17,36 +16,26 @@ interface Meal {
 
 interface AddFoodDialogProps {
   meals: Meal[];
-  foodDatabase: any[];
   selectedMeal: string | null;
   onClose: () => void;
   onAddFood: (foodItem: any) => void;
 }
 
-const AddFoodDialog = ({ meals, foodDatabase, selectedMeal, onClose, onAddFood }: AddFoodDialogProps) => {
+const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialogProps) => {
   const { t, language } = useLanguage();
   const [searchValue, setSearchValue] = useState('');
-  const [filteredFoods, setFilteredFoods] = useState<any[]>(foodDatabase);
   const [apiResults, setApiResults] = useState<ProductDetails[]>([]);
   const [searching, setSearching] = useState(false);
   const [selectedMealId, setSelectedMealId] = useState<string>(selectedMeal || "1");
-
-  // Handle local database search
-  const handleLocalSearch = (value: string) => {
-    setSearchValue(value);
-    if (value) {
-      setFilteredFoods(foodDatabase.filter(food => 
-        food.name.toLowerCase().includes(value.toLowerCase())
-      ));
-    } else {
-      setFilteredFoods(foodDatabase);
-    }
-  };
+  const [selectedProduct, setSelectedProduct] = useState<ProductDetails | null>(null);
+  const [servings, setServings] = useState(1);
+  const [amount, setAmount] = useState<number>(100);
+  const [unit, setUnit] = useState<string>("gram");
 
   // Handle API search - debounced
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (searchValue && searchValue.length >= 3) {
+      if (searchValue && searchValue.length >= 2) {
         searchFromAPI(searchValue);
       } else {
         setApiResults([]);
@@ -75,32 +64,52 @@ const AddFoodDialog = ({ meals, foodDatabase, selectedMeal, onClose, onAddFood }
     }
   };
 
-  const handleAddLocalFood = (foodId: string) => {
-    const food = foodDatabase.find(item => item.id === foodId);
-    if (food) {
-      onAddFood({
-        ...food,
-        mealId: selectedMealId
-      });
+  const handleSelectProduct = (product: ProductDetails) => {
+    setSelectedProduct(product);
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      setAmount(value);
     }
   };
 
-  const handleAddAPIFood = (product: ProductDetails) => {
-    const foodItem = {
-      id: `${selectedMealId}-${Date.now()}`,
-      name: product.name,
-      brand: product.brand,
-      calories: product.nutrition.calories,
-      protein: product.nutrition.protein,
-      carbs: product.nutrition.carbs,
-      fat: product.nutrition.fat,
-      servingSize: product.servingSize,
-      servings: product.servings || 1,
-      mealId: selectedMealId,
-      imageUrl: product.imageUrl
-    };
-    
-    onAddFood(foodItem);
+  const calculateAdjustedValue = (value: number): number => {
+    // Base calculation on the user-entered amount/unit
+    if (unit === "gram" || unit === "milliliter") {
+      return (value * amount) / 100; // Assuming nutrition values are per 100g/ml
+    } else {
+      // For pieces, slices, etc., multiply by servings
+      return value * servings;
+    }
+  };
+
+  const handleAddProduct = () => {
+    if (selectedProduct) {
+      // Calculate nutritional values based on amount/servings
+      const foodItem = {
+        id: `${selectedMealId}-${Date.now()}`,
+        name: selectedProduct.name,
+        brand: selectedProduct.brand,
+        calories: Math.round(calculateAdjustedValue(selectedProduct.nutrition.calories)),
+        protein: Math.round(calculateAdjustedValue(selectedProduct.nutrition.protein) * 10) / 10,
+        carbs: Math.round(calculateAdjustedValue(selectedProduct.nutrition.carbs) * 10) / 10,
+        fat: Math.round(calculateAdjustedValue(selectedProduct.nutrition.fat) * 10) / 10,
+        servingSize: `${amount} ${t(unit)}`,
+        servings,
+        amount,
+        unit,
+        mealId: selectedMealId,
+        imageUrl: selectedProduct.imageUrl
+      };
+      
+      onAddFood(foodItem);
+    }
+  };
+
+  const handleBackToSearch = () => {
+    setSelectedProduct(null);
   };
 
   return (
@@ -108,55 +117,216 @@ const AddFoodDialog = ({ meals, foodDatabase, selectedMeal, onClose, onAddFood }
       <DialogHeader>
         <DialogTitle>{t("addFood")}</DialogTitle>
         <DialogDescription>
-          {t("searchFoods") || "Search for food or add a custom item"}
+          {t("searchFoods")}
         </DialogDescription>
       </DialogHeader>
-      <div className="space-y-4 py-4 flex-1 overflow-hidden flex flex-col">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">{t("meal")}</label>
-          <Select 
-            defaultValue={selectedMealId}
-            onValueChange={setSelectedMealId}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t("selectMeal") || "Select meal"} />
-            </SelectTrigger>
-            <SelectContent>
-              {meals.map(meal => (
-                <SelectItem key={meal.id} value={meal.id}>{meal.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">{t("food")}</label>
-          <div className="relative">
-            <Input 
-              placeholder={t("searchFoods") || "Search foods..."} 
-              onChange={(e) => handleLocalSearch(e.target.value)} 
-              value={searchValue}
-              className="pr-10"
-            />
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              {searching ? (
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              ) : (
-                <Search className="h-4 w-4 text-muted-foreground" />
-              )}
+      
+      {selectedProduct ? (
+        <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
+          <button className="flex items-center text-sm text-blue-500" onClick={handleBackToSearch}>
+            <X className="h-4 w-4 mr-1" /> {t("back")}
+          </button>
+          
+          <div>
+            <h2 className="text-xl font-bold">{selectedProduct.name}</h2>
+            <p className="text-gray-600">{selectedProduct.brand}</p>
+            {selectedProduct.description && (
+              <p className="text-gray-600 text-sm mt-1">{selectedProduct.description}</p>
+            )}
+          </div>
+          
+          {selectedProduct.imageUrl && (
+            <div className="flex justify-center">
+              <img 
+                src={selectedProduct.imageUrl} 
+                alt={selectedProduct.name} 
+                className="max-h-48 object-contain"
+              />
+            </div>
+          )}
+          
+          <div className="space-y-4">
+            <div className="border-t pt-4">
+              <h3 className="font-medium mb-3">{t("adjustServing")}</h3>
+              
+              <div className="flex gap-3 mb-4">
+                <div className="flex-1">
+                  <label className="text-sm text-muted-foreground mb-1 block">{t("amount")}</label>
+                  <Input 
+                    type="number"
+                    value={amount}
+                    onChange={handleAmountChange}
+                    min="1"
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="flex-1">
+                  <label className="text-sm text-muted-foreground mb-1 block">{t("unit")}</label>
+                  <Select
+                    value={unit}
+                    onValueChange={setUnit}
+                  >
+                    <SelectTrigger>
+                      <SelectValue>{t(unit) || unit}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gram">{t("gram")}</SelectItem>
+                      <SelectItem value="milliliter">{t("milliliter")}</SelectItem>
+                      <SelectItem value="piece">{t("piece")}</SelectItem>
+                      <SelectItem value="slice">{t("slice")}</SelectItem>
+                      <SelectItem value="cup">{t("cup")}</SelectItem>
+                      <SelectItem value="tablespoon">{t("tablespoon")}</SelectItem>
+                      <SelectItem value="teaspoon">{t("teaspoon")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center mb-4">
+                <p className="font-medium">{t("numberOfServings")}</p>
+                <div className="flex items-center bg-gray-100 rounded-md px-2 w-1/2">
+                  <button 
+                    className="p-1"
+                    disabled={servings <= 0.25}
+                    onClick={() => setServings(prev => Math.max(0.25, prev - 0.25))}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <input
+                    type="number"
+                    value={servings}
+                    min="0.25"
+                    step="0.25"
+                    onChange={(e) => setServings(Number(e.target.value) || 1)}
+                    className="w-full bg-transparent text-right border-0 focus:ring-0"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <p className="font-medium">{t("meal")}</p>
+              <Select 
+                value={selectedMealId} 
+                onValueChange={setSelectedMealId}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder={t("selectMeal")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {meals.map(meal => (
+                    <SelectItem key={meal.id} value={meal.id}>{meal.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
+          
+          <div className="border rounded-md p-4">
+            <h3 className="font-medium mb-2">{t("nutritionFacts")}</h3>
+            <p className="text-xs text-muted-foreground mb-3">{t("perServing")}</p>
+            
+            <div className="flex items-stretch space-x-4">
+              <div className="bg-white rounded-full w-24 h-24 flex-shrink-0 flex flex-col items-center justify-center shadow-sm border border-gray-200">
+                <span className="text-2xl font-bold">
+                  {Math.round(calculateAdjustedValue(selectedProduct.nutrition.calories))}
+                </span>
+                <span className="text-xs text-gray-500">cal</span>
+              </div>
+              
+              <div className="flex-1 flex flex-col justify-around">
+                <div className="flex justify-between">
+                  <span className="text-green-500">
+                    {Math.round((selectedProduct.nutrition.carbs / (selectedProduct.nutrition.carbs + selectedProduct.nutrition.fat + selectedProduct.nutrition.protein)) * 100 || 0)}%
+                  </span>
+                  <span className="text-blue-500">
+                    {Math.round((selectedProduct.nutrition.fat / (selectedProduct.nutrition.carbs + selectedProduct.nutrition.fat + selectedProduct.nutrition.protein)) * 100 || 0)}%
+                  </span>
+                  <span className="text-purple-500">
+                    {Math.round((selectedProduct.nutrition.protein / (selectedProduct.nutrition.carbs + selectedProduct.nutrition.fat + selectedProduct.nutrition.protein)) * 100 || 0)}%
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <div className="text-center">
+                    <div className="text-xl font-semibold">
+                      {Math.round(calculateAdjustedValue(selectedProduct.nutrition.carbs) * 10) / 10}g
+                    </div>
+                    <div className="text-xs text-gray-500">{t("carbs")}</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-xl font-semibold">
+                      {Math.round(calculateAdjustedValue(selectedProduct.nutrition.fat) * 10) / 10}g
+                    </div>
+                    <div className="text-xs text-gray-500">{t("fat")}</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-xl font-semibold">
+                      {Math.round(calculateAdjustedValue(selectedProduct.nutrition.protein) * 10) / 10}g
+                    </div>
+                    <div className="text-xs text-gray-500">{t("protein")}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="pt-4 flex justify-center">
+            <Button className="w-full" onClick={handleAddProduct}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t("addToMealPlan")}
+            </Button>
+          </div>
         </div>
-        <div className="flex-1 overflow-y-auto min-h-0">
-          {/* API Results */}
-          {apiResults.length > 0 && (
+      ) : (
+        <div className="space-y-4 py-4 flex-1 overflow-hidden flex flex-col">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">{t("meal")}</label>
+            <Select 
+              defaultValue={selectedMealId}
+              onValueChange={setSelectedMealId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("selectMeal")} />
+              </SelectTrigger>
+              <SelectContent>
+                {meals.map(meal => (
+                  <SelectItem key={meal.id} value={meal.id}>{meal.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">{t("food")}</label>
+            <div className="relative">
+              <Input 
+                placeholder={t("searchFoods")} 
+                onChange={(e) => setSearchValue(e.target.value)} 
+                value={searchValue}
+                className="pr-10"
+              />
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                {searching ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {/* API Results */}
             <div className="mb-4">
-              <h3 className="text-sm font-medium mb-2">{t("onlineResults") || "Online Results"}</h3>
+              <h3 className="text-sm font-medium mb-2">{apiResults.length > 0 ? t("onlineResults") : ""}</h3>
               <div className="space-y-2">
                 {apiResults.map(product => (
                   <div 
                     key={product.id} 
                     className="flex items-center justify-between bg-secondary/30 p-2 rounded-md cursor-pointer hover:bg-secondary/50"
-                    onClick={() => handleAddAPIFood(product)}
+                    onClick={() => handleSelectProduct(product)}
                   >
                     <div className="flex items-center gap-2">
                       {product.imageUrl && (
@@ -179,50 +349,33 @@ const AddFoodDialog = ({ meals, foodDatabase, selectedMeal, onClose, onAddFood }
                     </Button>
                   </div>
                 ))}
+                
+                {apiResults.length === 0 && !searching && searchValue && (
+                  <div className="text-center py-4 text-sm text-muted-foreground">
+                    {t("noResultsFound")}
+                  </div>
+                )}
+                
+                {!searchValue && (
+                  <div className="text-center py-4 text-sm text-muted-foreground">
+                    {t("typeToSearch")}
+                  </div>
+                )}
+                
+                {searching && (
+                  <div className="text-center py-4">
+                    <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                    <p className="text-sm text-muted-foreground mt-2">{t("loading")}</p>
+                  </div>
+                )}
               </div>
             </div>
-          )}
-          
-          {/* Local Database */}
-          <div>
-            <h3 className="text-sm font-medium mb-2">{filteredFoods.length > 0 ? (t("localDatabase") || "Local Database") : ""}</h3>
-            <div className="space-y-2">
-              {filteredFoods.map(food => (
-                <div 
-                  key={food.id} 
-                  className="flex items-center justify-between bg-secondary/30 p-2 rounded-md cursor-pointer hover:bg-secondary/50"
-                  onClick={() => handleAddLocalFood(food.id)}
-                >
-                  <div>
-                    <p className="font-medium">{food.name}</p>
-                    <div className="text-xs text-muted-foreground">
-                      {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | F: {food.fat}g
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              
-              {filteredFoods.length === 0 && apiResults.length === 0 && !searching && searchValue && (
-                <div className="text-center py-4 text-sm text-muted-foreground">
-                  {t("noResultsFound") || "No results found"}
-                </div>
-              )}
-              
-              {!searchValue && filteredFoods.length === 0 && (
-                <div className="text-center py-4 text-sm text-muted-foreground">
-                  {t("typeToSearch") || "Type to search for foods"}
-                </div>
-              )}
-            </div>
+          </div>
+          <div className="flex justify-end pt-2 border-t border-border">
+            <Button variant="outline" onClick={onClose}>{t("cancel")}</Button>
           </div>
         </div>
-      </div>
-      <div className="flex justify-end pt-2 border-t border-border">
-        <Button variant="outline" onClick={onClose}>{t("cancel") || "Cancel"}</Button>
-      </div>
+      )}
     </DialogContent>
   );
 };

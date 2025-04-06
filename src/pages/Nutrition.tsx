@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,6 @@ import AddFoodDialog from '@/components/nutrition/AddFoodDialog';
 import BarcodeScannerDialog from '@/components/nutrition/BarcodeScannerDialog';
 import NutritionTabs from '@/components/nutrition/NutritionTabs';
 import WaterTracking from '@/components/nutrition/WaterTracking';
-import FoodDatabase from '@/components/nutrition/FoodDatabase';
 import { saveFoodLog, getFoodLogs, deleteFoodLog, ProductDetails } from '@/services/openFoodFactsService';
 import { FoodItem, FoodLogEntry } from '@/types/nutrition';
 
@@ -35,6 +35,7 @@ const Nutrition = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   // Initialize empty meals structure
   const [meals, setMeals] = useState<Meal[]>([
@@ -145,7 +146,7 @@ const Nutrition = () => {
     };
     
     loadFoodLogs();
-  }, [selectedDate, isAuthenticated, userId, meals, t]);
+  }, [selectedDate, isAuthenticated, userId, t]);
 
   // Fallback to localStorage for demo or when not logged in
   const loadFoodLogsFromLocalStorage = () => {
@@ -203,7 +204,7 @@ const Nutrition = () => {
     const mealId = foodItem.mealId || selectedMeal;
     
     if (!mealId) {
-      toast.error(t('selectMealFirst') || 'Please select a meal first');
+      toast.error(t('selectMealFirst'));
       return;
     }
     
@@ -231,10 +232,12 @@ const Nutrition = () => {
         }
         
         setMeals(updatedMeals);
-        toast.success(`${foodItem.name} ${t('addedToMealPlan') || 'added to your meal plan'}`);
+        // Trigger a refresh of the summary
+        setRefreshTrigger(prev => prev + 1);
+        toast.success(`${foodItem.name} ${t('addedToMealPlan')}`);
       } catch (error) {
         console.error('Error saving food log:', error);
-        toast.error(t('errorSavingData') || 'Error saving food data');
+        toast.error(t('errorSavingData'));
       }
     }
     
@@ -267,9 +270,11 @@ const Nutrition = () => {
           }
           
           setMeals(updatedMeals);
+          // Trigger a refresh of the summary
+          setRefreshTrigger(prev => prev + 1);
         } catch (error) {
           console.error('Error deleting food log:', error);
-          toast.error(t('errorDeletingData') || 'Error deleting food data');
+          toast.error(t('errorDeletingData'));
         }
       }
     }
@@ -285,11 +290,11 @@ const Nutrition = () => {
       id: `${selectedMeal || '1'}-${Date.now()}`,
       name: product.name,
       brand: product.brand,
-      calories: Math.round(product.nutrition.calories * product.servings),
-      protein: Math.round(product.nutrition.protein * product.servings * 10) / 10,
-      carbs: Math.round(product.nutrition.carbs * product.servings * 10) / 10,
-      fat: Math.round(product.nutrition.fat * product.servings * 10) / 10,
-      servingSize: product.servingSize,
+      calories: Math.round(product.nutrition.calories),
+      protein: Math.round(product.nutrition.protein * 10) / 10,
+      carbs: Math.round(product.nutrition.carbs * 10) / 10,
+      fat: Math.round(product.nutrition.fat * 10) / 10,
+      servingSize: `${product.amount || 100} ${product.unit || 'g'}`,
       servings: product.servings || 1,
       mealId: selectedMeal || '1',
       imageUrl: product.imageUrl
@@ -300,7 +305,6 @@ const Nutrition = () => {
   };
 
   return (
-    // ... keep existing code (UI components)
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
@@ -317,7 +321,7 @@ const Nutrition = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t("addFood")}</DialogTitle>
-                <DialogDescription>{t("addFoodDescription") || "Add food to your meal plan"}</DialogDescription>
+                <DialogDescription>{t("addFoodDescription")}</DialogDescription>
               </DialogHeader>
               <div className="flex items-center gap-4 py-4">
                 <Button className="flex-1" onClick={() => setShowAddFood(true)}>
@@ -342,18 +346,24 @@ const Nutrition = () => {
         />
         
         {/* Daily Summary */}
-        <DailySummary className="mb-6" />
+        <DailySummary 
+          className="mb-6" 
+          meals={meals}
+          selectedDate={selectedDate}
+          refreshTrigger={refreshTrigger}
+        />
       </div>
 
       {/* Add Food Dialog */}
       <Dialog open={showAddFood} onOpenChange={setShowAddFood}>
-        <AddFoodDialog 
-          meals={meals}
-          foodDatabase={FoodDatabase}
-          selectedMeal={selectedMeal}
-          onClose={() => setShowAddFood(false)}
-          onAddFood={handleAddFood}
-        />
+        <DialogContent className="p-0">
+          <AddFoodDialog 
+            meals={meals}
+            selectedMeal={selectedMeal}
+            onClose={() => setShowAddFood(false)}
+            onAddFood={handleAddFood}
+          />
+        </DialogContent>
       </Dialog>
 
       {/* Barcode Scanner Dialog */}
@@ -385,7 +395,7 @@ const Nutrition = () => {
               {isLoading ? (
                 <div className="p-8 text-center">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <p className="mt-2 text-muted-foreground">{t("loading") || "Loading..."}</p>
+                  <p className="mt-2 text-muted-foreground">{t("loading")}</p>
                 </div>
               ) : (
                 meals.map((meal) => (
@@ -411,7 +421,7 @@ const Nutrition = () => {
       {!isAuthenticated && (
         <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-lg">
           <p className="text-sm">
-            {t('loginToSaveNutritionData') || 'Log in to save your nutrition data across devices and sessions.'}
+            {t('loginToSaveNutritionData')}
           </p>
         </div>
       )}
