@@ -18,6 +18,7 @@ export interface FoodItem {
   brand?: string;
   servingSize?: string;
   imageUrl?: string | null;
+  logId?: string; // Added for storing the database log ID for deletion
 }
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';

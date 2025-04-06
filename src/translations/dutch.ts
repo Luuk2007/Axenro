@@ -104,7 +104,7 @@ export const dutch: Translations = {
   exercises: "Oefeningen",
   sets: "Sets",
   reps: "Herhalingen",
-  weight: "Gewicht",
+  weight_workout: "Gewicht", // Renamed to avoid duplicate
   duration: "Duur",
   distance: "Afstand",
   rest: "Rust",
@@ -125,10 +125,10 @@ export const dutch: Translations = {
   enterWeight: "Voer gewicht in",
   
   // Exercise categories
-  chest: "Borst",
+  chest_category: "Borst", // Renamed to avoid duplicate
   back: "Rug",
   shoulders: "Schouders",
-  arms: "Armen",
+  arms_category: "Armen", // Renamed to avoid duplicate
   legs: "Benen",
   core: "Core",
   fullBody: "Volledig lichaam",
@@ -200,7 +200,7 @@ export const dutch: Translations = {
   metric: "Metrisch",
   imperial: "Imperiaal",
   theme: "Thema",
-  light: "Licht",
+  light_theme: "Licht", // Renamed to avoid duplicate
   dark: "Donker",
   dataPrivacy: "Gegevensprivacy",
   exportData: "Gegevens exporteren",
@@ -274,12 +274,12 @@ export const dutch: Translations = {
   high: "Hoog",
   completed: "Voltooid",
   pending: "In afwachting",
-  active: "Actief",
+  active_status: "Actief", // Renamed to avoid duplicate
   inactive: "Inactief",
   status: "Status",
   dailyCalories: "Dagelijkse calorieën",
   dailySteps: "Dagelijkse stappen",
-  workouts: "Workouts",
+  workouts_misc: "Workouts", // Renamed to avoid duplicate
   exerciseFrequency: "Trainingsfrequentie",
   targetWeight: "Streefgewicht",
   meals: "Maaltijden",
