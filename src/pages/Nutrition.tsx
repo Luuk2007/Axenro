@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 // Import components
 import DateNavigation from '@/components/nutrition/DateNavigation';
@@ -13,102 +15,273 @@ import AddFoodDialog from '@/components/nutrition/AddFoodDialog';
 import BarcodeScannerDialog from '@/components/nutrition/BarcodeScannerDialog';
 import NutritionTabs from '@/components/nutrition/NutritionTabs';
 import WaterTracking from '@/components/nutrition/WaterTracking';
-import FoodDatabase, { FoodItem } from '@/components/nutrition/FoodDatabase';
+import FoodDatabase from '@/components/nutrition/FoodDatabase';
+import { saveFoodLog, getFoodLogs, deleteFoodLog, ProductDetails } from '@/services/openFoodFactsService';
 
 // Define meal type
 interface Meal {
   id: string;
   name: string;
-  items: FoodItem[];
+  items: any[];
+}
+
+// Define a type for food log entries from Supabase
+interface FoodLogEntry {
+  id: string; 
+  user_id: string;
+  meal_id: string;
+  date: string;
+  created_at: string;
+  food_item: any;
 }
 
 const Nutrition = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [showAddFood, setShowAddFood] = useState(false);
   const [showScanBarcode, setShowScanBarcode] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'meals' | 'water'>('meals');
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  // Initialize empty meals structure
   const [meals, setMeals] = useState<Meal[]>([
     {
       id: '1',
-      name: 'Breakfast',
-      items: [
-        { id: '1-1', name: 'Protein Oatmeal', calories: 450, protein: 32, carbs: 60, fat: 10 },
-        { id: '1-2', name: 'Black Coffee', calories: 5, protein: 0, carbs: 0, fat: 0 },
-      ],
+      name: language === 'dutch' ? 'Ontbijt' : 'Breakfast',
+      items: [],
     },
     {
       id: '2',
-      name: 'Lunch',
-      items: [
-        { id: '2-1', name: 'Chicken Salad', calories: 550, protein: 45, carbs: 30, fat: 25 },
-        { id: '2-2', name: 'Green Tea', calories: 0, protein: 0, carbs: 0, fat: 0 },
-      ],
+      name: language === 'dutch' ? 'Lunch' : 'Lunch',
+      items: [],
     },
     {
       id: '3',
-      name: 'Snack',
-      items: [
-        { id: '3-1', name: 'Protein Shake', calories: 220, protein: 25, carbs: 15, fat: 5 },
-      ],
+      name: language === 'dutch' ? 'Avondeten' : 'Dinner',
+      items: [],
     },
     {
       id: '4',
-      name: 'Dinner',
-      items: [
-        { id: '4-1', name: 'Salmon with Vegetables', calories: 620, protein: 48, carbs: 35, fat: 30 },
-      ],
+      name: language === 'dutch' ? 'Snack' : 'Snack',
+      items: [],
     },
   ]);
 
-  // Load meals data for the selected date
+  // Check if user is authenticated
   useEffect(() => {
-    // In a real app, we would load meals from an API or local storage based on the selected date
-    // For now, we'll keep using the static data
-  }, [selectedDate]);
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+      setUserId(user?.id || null);
+    };
+    
+    checkAuth();
+    
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session?.user);
+      setUserId(session?.user?.id || null);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Update meal names when language changes
+  useEffect(() => {
+    // Update meal names based on language
+    setMeals(currentMeals => {
+      const updatedMeals = [...currentMeals];
+      
+      if (language === 'dutch') {
+        updatedMeals[0].name = 'Ontbijt';
+        updatedMeals[1].name = 'Lunch';
+        updatedMeals[2].name = 'Avondeten';
+        updatedMeals[3].name = 'Snack';
+      } else {
+        updatedMeals[0].name = 'Breakfast';
+        updatedMeals[1].name = 'Lunch';
+        updatedMeals[2].name = 'Dinner';
+        updatedMeals[3].name = 'Snack';
+      }
+      
+      return updatedMeals;
+    });
+  }, [language]);
+
+  // Load food logs for the selected date
+  useEffect(() => {
+    if (!isAuthenticated || !userId) {
+      // If not authenticated, load from local storage for demo
+      loadFoodLogsFromLocalStorage();
+      return;
+    }
+    
+    // Format date as YYYY-MM-DD for consistency
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    
+    const loadFoodLogs = async () => {
+      setIsLoading(true);
+      try {
+        const logs = await getFoodLogs(dateStr);
+        
+        // Reset meal items
+        const updatedMeals = meals.map(meal => ({
+          ...meal,
+          items: []
+        }));
+        
+        // Add food items to appropriate meals
+        logs.forEach((log: FoodLogEntry) => {
+          const mealIndex = updatedMeals.findIndex(meal => meal.id === log.meal_id);
+          
+          if (mealIndex >= 0) {
+            updatedMeals[mealIndex].items.push({
+              ...log.food_item,
+              logId: log.id // Store the log ID for deletion
+            });
+          }
+        });
+        
+        setMeals(updatedMeals);
+      } catch (error) {
+        console.error('Error loading food logs:', error);
+        toast.error(t('errorLoadingData') || 'Error loading food data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadFoodLogs();
+  }, [selectedDate, isAuthenticated, userId]);
+
+  // Fallback to localStorage for demo or when not logged in
+  const loadFoodLogsFromLocalStorage = () => {
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    const savedData = localStorage.getItem(`foodLog_${dateStr}`);
+    
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        
+        // Reset meal items
+        const updatedMeals = meals.map(meal => ({
+          ...meal,
+          items: []
+        }));
+        
+        // Add items to appropriate meals
+        parsedData.forEach((item: any) => {
+          if (item.mealId) {
+            const mealIndex = updatedMeals.findIndex(meal => meal.id === item.mealId);
+            if (mealIndex >= 0) {
+              updatedMeals[mealIndex].items.push(item);
+            }
+          }
+        });
+        
+        setMeals(updatedMeals);
+      } catch (error) {
+        console.error('Error parsing local food data:', error);
+      }
+    }
+  };
+
+  // Save food logs to localStorage for demo
+  const saveFoodLogsToLocalStorage = (updatedMeals: Meal[]) => {
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    
+    // Collect all food items from all meals
+    const allItems = updatedMeals.flatMap(meal => 
+      meal.items.map(item => ({
+        ...item,
+        mealId: meal.id
+      }))
+    );
+    
+    localStorage.setItem(`foodLog_${dateStr}`, JSON.stringify(allItems));
+  };
 
   const handleAddItem = (mealId: string) => {
     setSelectedMeal(mealId);
     setShowAddFood(true);
   };
 
-  const handleAddFood = (foodId: string) => {
-    const selectedFood = FoodDatabase.find(food => food.id === foodId);
+  const handleAddFood = async (foodItem: any) => {
+    const mealId = foodItem.mealId || selectedMeal;
     
-    if (selectedFood && selectedMeal) {
-      // Deep clone the meals array to avoid direct state mutation
-      const updatedMeals = JSON.parse(JSON.stringify(meals));
-      const mealIndex = updatedMeals.findIndex((meal: Meal) => meal.id === selectedMeal);
+    if (!mealId) {
+      toast.error(t('selectMealFirst') || 'Please select a meal first');
+      return;
+    }
+    
+    // Create a copy of current meals to avoid direct state mutation
+    const updatedMeals = [...meals];
+    const mealIndex = updatedMeals.findIndex(meal => meal.id === mealId);
+    
+    if (mealIndex >= 0) {
+      // Add new food item with unique ID
+      const newFoodItem = {
+        ...foodItem,
+        id: `${mealId}-${Date.now()}`,
+      };
       
-      if (mealIndex >= 0) {
-        // Add new food item to the selected meal
-        updatedMeals[mealIndex].items.push({
-          ...selectedFood,
-          id: `${selectedMeal}-${Date.now()}`, // Generate a unique ID
-        });
+      updatedMeals[mealIndex].items.push(newFoodItem);
+      
+      // Save to database if authenticated, otherwise to localStorage
+      try {
+        if (isAuthenticated) {
+          const dateStr = selectedDate.toISOString().split('T')[0];
+          await saveFoodLog(newFoodItem, mealId, dateStr);
+        } else {
+          // Fallback to localStorage
+          saveFoodLogsToLocalStorage(updatedMeals);
+        }
         
         setMeals(updatedMeals);
-        toast.success(`${selectedFood.name} added to your meal plan`);
+        toast.success(`${foodItem.name} ${t('addedToMealPlan') || 'added to your meal plan'}`);
+      } catch (error) {
+        console.error('Error saving food log:', error);
+        toast.error(t('errorSavingData') || 'Error saving food data');
       }
     }
     
     setShowAddFood(false);
   };
 
-  const handleDeleteFoodItem = (mealId: string, itemId: string) => {
-    // Deep clone the meals array
-    const updatedMeals = JSON.parse(JSON.stringify(meals));
-    const mealIndex = updatedMeals.findIndex((meal: Meal) => meal.id === mealId);
+  const handleDeleteFoodItem = async (mealId: string, itemId: string) => {
+    // Create a copy of current meals to avoid direct state mutation
+    const updatedMeals = [...meals];
+    const mealIndex = updatedMeals.findIndex(meal => meal.id === mealId);
     
     if (mealIndex >= 0) {
-      // Remove the item from the selected meal
-      updatedMeals[mealIndex].items = updatedMeals[mealIndex].items.filter(
-        (item: FoodItem) => item.id !== itemId
-      );
+      // Find the item to delete
+      const itemIndex = updatedMeals[mealIndex].items.findIndex(item => item.id === itemId);
       
-      setMeals(updatedMeals);
-      toast.success('Food item removed');
+      if (itemIndex >= 0) {
+        // Get item before removing (for Supabase deletion)
+        const item = updatedMeals[mealIndex].items[itemIndex];
+        
+        // Remove the item
+        updatedMeals[mealIndex].items.splice(itemIndex, 1);
+        
+        try {
+          if (isAuthenticated && item.logId) {
+            // Delete from Supabase
+            await deleteFoodLog(item.logId);
+          } else {
+            // Update localStorage
+            saveFoodLogsToLocalStorage(updatedMeals);
+          }
+          
+          setMeals(updatedMeals);
+        } catch (error) {
+          console.error('Error deleting food log:', error);
+          toast.error(t('errorDeletingData') || 'Error deleting food data');
+        }
+      }
     }
   };
 
@@ -116,9 +289,23 @@ const Nutrition = () => {
     setShowScanBarcode(true);
   };
 
-  const handleAddScannedProduct = () => {
-    // In a real app, we would add the scanned product to the selected meal
-    toast.success(`Added product to your meal plan`);
+  const handleAddScannedProduct = (product: ProductDetails) => {
+    // Convert to food item format
+    const foodItem = {
+      id: `${selectedMeal || '1'}-${Date.now()}`,
+      name: product.name,
+      brand: product.brand,
+      calories: Math.round(product.nutrition.calories * product.servings),
+      protein: Math.round(product.nutrition.protein * product.servings * 10) / 10,
+      carbs: Math.round(product.nutrition.carbs * product.servings * 10) / 10,
+      fat: Math.round(product.nutrition.fat * product.servings * 10) / 10,
+      servingSize: product.servingSize,
+      servings: product.servings || 1,
+      mealId: selectedMeal || '1',
+      imageUrl: product.imageUrl
+    };
+    
+    handleAddFood(foodItem);
     setShowScanBarcode(false);
   };
 
@@ -139,7 +326,7 @@ const Nutrition = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t("addFood")}</DialogTitle>
-                <DialogDescription>Add food to your meal plan</DialogDescription>
+                <DialogDescription>{t("addFoodDescription") || "Add food to your meal plan"}</DialogDescription>
               </DialogHeader>
               <div className="flex items-center gap-4 py-4">
                 <Button className="flex-1" onClick={() => setShowAddFood(true)}>
@@ -202,28 +389,41 @@ const Nutrition = () => {
             />
           </div>
           
-          {activeTab === 'meals' && (
+          {activeTab === 'meals' ? (
             <div className="divide-y divide-border">
-              {meals.map((meal) => (
-                <MealSection
-                  key={meal.id}
-                  id={meal.id}
-                  name={meal.name}
-                  items={meal.items}
-                  onAddItem={handleAddItem}
-                  onDeleteItem={handleDeleteFoodItem}
-                />
-              ))}
+              {isLoading ? (
+                <div className="p-8 text-center">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <p className="mt-2 text-muted-foreground">{t("loading") || "Loading..."}</p>
+                </div>
+              ) : (
+                meals.map((meal) => (
+                  <MealSection
+                    key={meal.id}
+                    id={meal.id}
+                    name={meal.name}
+                    items={meal.items}
+                    onAddItem={handleAddItem}
+                    onDeleteItem={handleDeleteFoodItem}
+                  />
+                ))
+              )}
             </div>
-          )}
-          
-          {activeTab === 'water' && (
+          ) : (
             <div className="p-5">
               <WaterTracking />
             </div>
           )}
         </div>
       </div>
+      
+      {!isAuthenticated && (
+        <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-lg">
+          <p className="text-sm">
+            {t('loginToSaveNutritionData') || 'Log in to save your nutrition data across devices and sessions.'}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

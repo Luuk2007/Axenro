@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar } from 'lucide-react';
 import { format, addDays, isToday, isTomorrow, isYesterday } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 
 interface DateNavigationProps {
   selectedDate: Date;
@@ -12,7 +14,18 @@ interface DateNavigationProps {
 }
 
 const DateNavigation = ({ selectedDate, onDateChange, className }: DateNavigationProps) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Get appropriate locale based on current language
+  const getLocale = () => {
+    switch (language) {
+      case 'dutch': return 'nl';
+      case 'french': return 'fr';
+      case 'german': return 'de';
+      case 'spanish': return 'es';
+      default: return 'en';
+    }
+  };
 
   const formatDateDisplay = (date: Date) => {
     if (isToday(date)) {
@@ -22,7 +35,7 @@ const DateNavigation = ({ selectedDate, onDateChange, className }: DateNavigatio
     } else if (isTomorrow(date)) {
       return t('tomorrow');
     } else {
-      return format(date, 'EEEE, MMM d');
+      return format(date, 'EEEE, MMM d', { locale: require(`date-fns/locale/${getLocale()}`) });
     }
   };
 
@@ -34,13 +47,39 @@ const DateNavigation = ({ selectedDate, onDateChange, className }: DateNavigatio
     onDateChange(addDays(selectedDate, 1));
   };
 
+  const goToToday = () => {
+    onDateChange(new Date());
+  };
+
   return (
     <div className={`flex justify-between items-center ${className}`}>
-      <Button variant="ghost" size="icon" onClick={goToPrevDay}>
+      <Button variant="ghost" size="icon" onClick={goToPrevDay} aria-label="Previous day">
         <ArrowLeft className="h-5 w-5" />
       </Button>
-      <h2 className="text-lg font-medium">{formatDateDisplay(selectedDate)}</h2>
-      <Button variant="ghost" size="icon" onClick={goToNextDay}>
+      
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="px-3 py-1">
+            <Calendar className="mr-2 h-4 w-4" />
+            <h2 className="text-lg font-medium">{formatDateDisplay(selectedDate)}</h2>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="center">
+          <CalendarComponent
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date) => date && onDateChange(date)}
+            initialFocus
+          />
+          <div className="p-3 border-t border-border">
+            <Button variant="outline" size="sm" onClick={goToToday} className="w-full">
+              {t('today')}
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+      
+      <Button variant="ghost" size="icon" onClick={goToNextDay} aria-label="Next day">
         <ArrowRight className="h-5 w-5" />
       </Button>
     </div>

@@ -1,4 +1,3 @@
-
 export const dutch = {
   // Dashboard
   "dashboard": "Dashboard",
@@ -270,5 +269,43 @@ export const dutch = {
   "todaysMeals": "Maaltijden van Vandaag",
   "workoutCalendar": "Trainingskalender",
   "workoutsThisWeek": "Trainingen Deze Week",
-  "workoutsThisMonth": "Trainingen Deze Maand"
+  "workoutsThisMonth": "Trainingen Deze Maand",
+  
+  // Updated translations for Nutrition page
+  "nutrition": "Voeding",
+  "meals": "Maaltijden",
+  "water": "Water",
+  "todayMeals": "Maaltijden van Vandaag",
+  "addItem": "Item Toevoegen",
+  "addFood": "Voedsel Toevoegen",
+  "scanBarcode": "Barcode Scannen",
+  "addFoodDescription": "Voeg voedsel toe aan je maaltijdplan",
+  "noFoodItemsYet": "Nog geen voedingsitems",
+  "confirmDeleteFood": "Weet je zeker dat je dit item wilt verwijderen?",
+  "foodItemRemoved": "Voedingsitem verwijderd",
+  "addedToMealPlan": "toegevoegd aan je maaltijdplan",
+  "errorLoadingData": "Fout bij het laden van voedingsgegevens",
+  "errorSavingData": "Fout bij het opslaan van voedingsgegevens",
+  "errorDeletingData": "Fout bij het verwijderen van voedingsgegevens",
+  "selectMealFirst": "Selecteer eerst een maaltijd",
+  "onlineResults": "Online Resultaten",
+  "localDatabase": "Lokale Database",
+  "noResultsFound": "Geen resultaten gevonden",
+  "typeToSearch": "Type om te zoeken naar voedsel",
+  "loading": "Laden...",
+  "barcodeMatches": "Barcode komt overeen",
+  "scanAgain": "Opnieuw scannen",
+  "servingSize": "Portiegrootte",
+  "numberOfServings": "Aantal porties",
+  "meal": "Maaltijd",
+  "selectMeal": "Selecteer maaltijd",
+  "addToMealPlan": "Toevoegen aan maaltijdplan",
+  "loginToSaveNutritionData": "Log in om je voedingsgegevens op te slaan op verschillende apparaten en sessies.",
+  "holdSteady": "Houd de barcode stil in het frame",
+  "instructions": "Instructies",
+  "cancel": "Annuleren",
+  "food": "Voedsel",
+  "today": "Vandaag",
+  "yesterday": "Gisteren",
+  "tomorrow": "Morgen"
 };

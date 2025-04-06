@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, Utensils } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
 
 interface FoodItem {
   id: string;
@@ -24,6 +25,14 @@ interface MealSectionProps {
 const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionProps) => {
   const { t } = useLanguage();
 
+  const handleDeleteItem = (itemId: string) => {
+    // Confirm deletion
+    if (confirm(t('confirmDeleteFood') || 'Are you sure you want to delete this item?')) {
+      onDeleteItem(id, itemId);
+      toast.success(t('foodItemRemoved') || 'Food item removed');
+    }
+  };
+
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-3">
@@ -42,6 +51,11 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
         </Button>
       </div>
       <div className="space-y-3">
+        {items.length === 0 && (
+          <div className="text-sm text-muted-foreground py-2 text-center">
+            {t('noFoodItemsYet') || 'No food items yet'}
+          </div>
+        )}
         {items.map((item) => (
           <div 
             key={item.id} 
@@ -60,7 +74,7 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
               size="sm" 
               variant="ghost" 
               className="h-7 w-7 p-0"
-              onClick={() => onDeleteItem(id, item.id)}
+              onClick={() => handleDeleteItem(item.id)}
             >
               <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
             </Button>
