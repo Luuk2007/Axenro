@@ -264,7 +264,7 @@ export const dutch: Translations = {
   percent: "%",
   target: "Doel",
   current: "Huidig",
-  progress: "Voortgang",
+  progress_status: "Voortgang", // Renamed to avoid duplicate with 'progress' at line 5
   total: "Totaal",
   average: "Gemiddeld",
   min: "Min",
