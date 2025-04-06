@@ -84,10 +84,12 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
       Quagga.onDetected(async (result) => {
         if (result && result.codeResult) {
           const code = result.codeResult.code;
+          console.log("Detected barcode:", code);
           
           if (code && code.length >= 8) {
             // Stop scanning
             Quagga.stop();
+            setCameraActive(false);
             
             // Take snapshot
             if (canvasRef.current) {
@@ -108,23 +110,36 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
                 setScannedProduct(product);
                 setScanStep('result');
               } else {
-                toast.error(`Product with barcode ${code} not found`);
-                // Restart scanner
-                Quagga.start();
+                toast.error(`${t("noResultsFound")}: ${code}`);
+                // Restart scanner after a short delay
+                setTimeout(() => {
+                  if (scanStep === 'scanning') {
+                    Quagga.start();
+                    setCameraActive(true);
+                  }
+                }, 1000);
               }
             } catch (err) {
               console.error("Error fetching product:", err);
-              toast.error("Failed to fetch product data");
-              // Restart scanner
-              Quagga.start();
+              toast.error(t("errorLoadingData"));
+              // Restart scanner after a short delay
+              setTimeout(() => {
+                if (scanStep === 'scanning') {
+                  Quagga.start();
+                  setCameraActive(true);
+                }
+              }, 1000);
+            } finally {
+              setLoading(false);
             }
-            setLoading(false);
           }
         }
       });
       
       return () => {
-        Quagga.stop();
+        if (cameraActive) {
+          Quagga.stop();
+        }
       };
     } catch (err) {
       console.error("Error setting up scanner:", err);
@@ -143,6 +158,7 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
         clearTimeout(timer);
         if (cameraActive) {
           Quagga.stop();
+          setCameraActive(false);
         }
       };
     }
@@ -197,6 +213,15 @@ const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: Ba
     setScanStep('scanning');
     setError(null);
   };
+
+  // Cleanup Quagga on unmount
+  useEffect(() => {
+    return () => {
+      if (cameraActive) {
+        Quagga.stop();
+      }
+    };
+  }, [cameraActive]);
 
   return (
     <DialogContent className="sm:max-w-md p-0 overflow-hidden">

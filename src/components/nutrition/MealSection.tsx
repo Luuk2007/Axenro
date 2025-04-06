@@ -45,7 +45,7 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
       <div className="space-y-3">
         {items.length === 0 && (
           <div className="text-sm text-muted-foreground py-2 text-center">
-            {t('noFoodItemsYet') || 'No food items yet'}
+            {t('noFoodItemsYet')}
           </div>
         )}
         {items.map((item) => (

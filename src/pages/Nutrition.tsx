@@ -146,7 +146,7 @@ const Nutrition = () => {
     };
     
     loadFoodLogs();
-  }, [selectedDate, isAuthenticated, userId, t]);
+  }, [selectedDate, isAuthenticated, userId, refreshTrigger, t]);
 
   // Fallback to localStorage for demo or when not logged in
   const loadFoodLogsFromLocalStorage = () => {

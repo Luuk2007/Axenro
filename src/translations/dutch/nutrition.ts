@@ -4,6 +4,7 @@ import { Translations } from "../types";
 export const nutritionTranslations: Translations = {
   // Nutrition and meals
   todayMeals: "Maaltijden Vandaag",
+  todaysMeals: "Maaltijden Vandaag",
   addMeal: "Maaltijd toevoegen",
   addItem: "Item toevoegen",
   scanBarcode: "Barcode scannen",
@@ -31,6 +32,7 @@ export const nutritionTranslations: Translations = {
   dinner: "Avondeten",
   snack: "Snack",
   searchFood: "Zoek voedsel",
+  searchFoods: "Zoek voedsel...",
   addFood: "Voedsel toevoegen",
   addWater: "Water toevoegen",
   foodName: "Naam van voedsel",
@@ -54,7 +56,6 @@ export const nutritionTranslations: Translations = {
   typeToSearch: "Typ om te zoeken naar voedsel",
   selectMeal: "Selecteer maaltijd",
   food: "Voedsel",
-  searchFoods: "Zoek voedsel...",
   loginToSaveNutritionData: "Log in om je voedingsgegevens op te slaan",
   holdSteady: "Houd de barcode stabiel in beeld",
   scanAgain: "Opnieuw scannen",
@@ -86,5 +87,17 @@ export const nutritionTranslations: Translations = {
   caloriesAmount: "Aantal calorieën",
   proteinAmount: "Hoeveelheid eiwitten",
   carbsAmount: "Hoeveelheid koolhydraten",
-  fatAmount: "Hoeveelheid vetten"
+  fatAmount: "Hoeveelheid vetten",
+  
+  // Additional missing translations from the screenshots
+  meals: "Maaltijden",
+  nutrition: "Voeding",
+  addFoods: "Voedsel toevoegen",
+  loading: "Laden...",
+  tryAgain: "Probeer opnieuw",
+  back: "Terug",
+  cancel: "Annuleren",
+  close: "Sluiten",
+  save: "Opslaan",
+  servings: "Porties"
 };

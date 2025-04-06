@@ -31,8 +31,11 @@ const apiCache = new Map<string, ProductDetails>();
  */
 export const fetchProductByBarcode = async (barcode: string, lang = 'nl'): Promise<ProductDetails | null> => {
   try {
+    console.log(`Fetching product data for barcode: ${barcode}`);
+    
     // Check cache first
     if (apiCache.has(barcode)) {
+      console.log('Using cached product data');
       return apiCache.get(barcode) || null;
     }
 
@@ -45,6 +48,7 @@ export const fetchProductByBarcode = async (barcode: string, lang = 'nl'): Promi
     }
 
     const data = await response.json();
+    console.log('API response:', data);
     
     // Check if product was found
     if (data.status !== 1 || !data.product) {
@@ -57,6 +61,7 @@ export const fetchProductByBarcode = async (barcode: string, lang = 'nl'): Promi
     // Extract relevant nutrition information
     const nutrients = product.nutriments || {};
     
+    // Set default values if data is missing
     const nutrition: NutritionInfo = {
       calories: nutrients['energy-kcal_100g'] || nutrients['energy-kcal'] || 0,
       protein: nutrients.proteins_100g || nutrients.proteins || 0,
@@ -80,6 +85,7 @@ export const fetchProductByBarcode = async (barcode: string, lang = 'nl'): Promi
 
     // Save to cache
     apiCache.set(barcode, productDetails);
+    console.log('Saved product to cache:', productDetails);
     
     return productDetails;
   } catch (error) {
@@ -93,7 +99,12 @@ export const fetchProductByBarcode = async (barcode: string, lang = 'nl'): Promi
  */
 export const searchProductsByName = async (query: string, lang = 'nl'): Promise<ProductDetails[]> => {
   try {
-    const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&json=true&page_size=20`);
+    console.log(`Searching products with query: ${query}`);
+    const encodedQuery = encodeURIComponent(query);
+    const apiUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodedQuery}&json=true&page_size=20`;
+    
+    console.log('API URL:', apiUrl);
+    const response = await fetch(apiUrl);
     
     if (!response.ok) {
       console.error('Error searching products:', response.statusText);
@@ -101,6 +112,7 @@ export const searchProductsByName = async (query: string, lang = 'nl'): Promise<
     }
 
     const data = await response.json();
+    console.log('Search results count:', data.count);
     
     if (!data.products || !Array.isArray(data.products)) {
       return [];
