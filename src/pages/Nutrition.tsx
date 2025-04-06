@@ -321,7 +321,7 @@ const Nutrition = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t("addFood")}</DialogTitle>
-                <DialogDescription>{t("addFoodDescription")}</DialogDescription>
+                <DialogDescription>{t("Add Food Description")}</DialogDescription>
               </DialogHeader>
               <div className="flex items-center gap-4 py-4">
                 <Button className="flex-1" onClick={() => setShowAddFood(true)}>
