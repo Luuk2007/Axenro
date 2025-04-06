@@ -383,7 +383,7 @@ const Nutrition = () => {
       <div className="mt-4">
         <div className="glassy-card rounded-xl overflow-hidden card-shadow">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <h3 className="font-medium tracking-tight">{t("todayMeals")}</h3>
+            <h3 className="font-medium tracking-tight">{t("Today Meals")}</h3>
             <NutritionTabs 
               activeTab={activeTab}
               onTabChange={setActiveTab}
