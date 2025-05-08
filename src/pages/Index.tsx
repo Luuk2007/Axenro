@@ -16,6 +16,51 @@ const Dashboard: React.FC = () => {
   const { t } = useLanguage();
   const [stepsData, setStepsData] = useState<any[]>([]);
 
+  // Mock data for meals
+  const mockMeals = [
+    {
+      id: '1',
+      name: t("breakfast"),
+      time: '08:30',
+      calories: 450,
+      protein: 22
+    },
+    {
+      id: '2',
+      name: t("lunch"),
+      time: '12:45',
+      calories: 680,
+      protein: 35
+    },
+    {
+      id: '3',
+      name: t("dinner"),
+      time: '19:30',
+      calories: 550,
+      protein: 28
+    }
+  ];
+
+  // Mock data for workouts
+  const mockWorkouts = [
+    {
+      id: '1',
+      name: t("upperBodyWorkout"),
+      date: `${new Date().toLocaleDateString()}`,
+      muscleGroups: [t("chest"), t("shoulders"), t("arms")],
+      exerciseCount: 6,
+      completed: true
+    },
+    {
+      id: '2',
+      name: t("cardioSession"),
+      date: `${new Date().toLocaleDateString()}`,
+      muscleGroups: [t("cardio")],
+      exerciseCount: 3,
+      completed: true
+    }
+  ];
+
   // Generate some mock data for the charts
   useEffect(() => {
     // Generate step data for the last 7 days
@@ -111,8 +156,16 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <MealsList />
-        <WorkoutsList />
+        <MealsList 
+          meals={mockMeals} 
+          title={t("todayMeals")} 
+          onViewAll={() => console.log('View all meals')}
+        />
+        <WorkoutsList 
+          workouts={mockWorkouts} 
+          title={t("recentWorkouts")} 
+          onViewAll={() => console.log('View all workouts')}
+        />
       </div>
     </div>
   );
