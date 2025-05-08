@@ -166,16 +166,16 @@ export const saveFoodLog = async (foodItem: FoodItem, mealId: string, date: stri
       food_item: foodItem
     };
 
-    // Use a type assertion to work around TypeScript limitations with dynamic tables
+    // Fix TypeScript issue by using the correct type casting
     const { data, error } = await supabase
-      .from('food_logs' as any)
+      .from('food_logs')
       .insert([newLog])
       .select()
-      .single() as any;
+      .single();
 
     if (error) throw error;
     
-    return data as FoodLogEntry;
+    return data as unknown as FoodLogEntry;
   } catch (error) {
     console.error('Error saving food log:', error);
     throw error;
@@ -194,16 +194,16 @@ export const getFoodLogs = async (date: string): Promise<FoodLogEntry[]> => {
       return [];
     }
 
-    // Use a type assertion to work around TypeScript limitations with dynamic tables
+    // Fix TypeScript issue by using the correct type casting
     const { data, error } = await supabase
-      .from('food_logs' as any)
+      .from('food_logs')
       .select('*')
       .eq('user_id', user.user.id)
-      .eq('date', date) as any;
+      .eq('date', date);
 
     if (error) throw error;
     
-    return data as FoodLogEntry[];
+    return data as unknown as FoodLogEntry[];
   } catch (error) {
     console.error('Error getting food logs:', error);
     return [];
@@ -215,11 +215,11 @@ export const getFoodLogs = async (date: string): Promise<FoodLogEntry[]> => {
  */
 export const deleteFoodLog = async (logId: string): Promise<boolean> => {
   try {
-    // Use a type assertion to work around TypeScript limitations with dynamic tables
+    // Fix TypeScript issue by using the correct type casting
     const { error } = await supabase
-      .from('food_logs' as any)
+      .from('food_logs')
       .delete()
-      .eq('id', logId) as any;
+      .eq('id', logId);
 
     if (error) throw error;
     

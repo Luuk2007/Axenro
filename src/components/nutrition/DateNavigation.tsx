@@ -6,8 +6,8 @@ import { format, addDays, isToday, isTomorrow, isYesterday } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-// Import all needed date-fns locales directly
-import { nl, fr, de, es, enUS } from 'date-fns/locale';
+// Import only needed date-fns locales
+import { nl, enUS } from 'date-fns/locale';
 
 interface DateNavigationProps {
   selectedDate: Date;
@@ -22,9 +22,6 @@ const DateNavigation = ({ selectedDate, onDateChange, className }: DateNavigatio
   const getLocale = () => {
     switch (language) {
       case 'dutch': return nl;
-      case 'french': return fr;
-      case 'german': return de;
-      case 'spanish': return es;
       default: return enUS;
     }
   };
