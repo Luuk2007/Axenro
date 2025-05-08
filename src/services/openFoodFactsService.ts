@@ -1,7 +1,7 @@
-
 // Open Food Facts API service
 import { supabase } from "@/integrations/supabase/client";
 import { FoodItem, FoodLogEntry } from "@/types/nutrition";
+import { Json } from "@/integrations/supabase/types";
 
 export interface NutritionInfo {
   calories: number;
@@ -163,10 +163,9 @@ export const saveFoodLog = async (foodItem: FoodItem, mealId: string, date: stri
       user_id: user.user.id,
       meal_id: mealId,
       date,
-      food_item: foodItem
+      food_item: foodItem as unknown as Json // Cast the FoodItem to Json type
     };
 
-    // Fix TypeScript issue by using the correct type casting
     const { data, error } = await supabase
       .from('food_logs')
       .insert([newLog])
@@ -194,7 +193,6 @@ export const getFoodLogs = async (date: string): Promise<FoodLogEntry[]> => {
       return [];
     }
 
-    // Fix TypeScript issue by using the correct type casting
     const { data, error } = await supabase
       .from('food_logs')
       .select('*')
@@ -215,7 +213,6 @@ export const getFoodLogs = async (date: string): Promise<FoodLogEntry[]> => {
  */
 export const deleteFoodLog = async (logId: string): Promise<boolean> => {
   try {
-    // Fix TypeScript issue by using the correct type casting
     const { error } = await supabase
       .from('food_logs')
       .delete()
