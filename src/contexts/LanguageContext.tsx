@@ -1,9 +1,7 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import englishDefault from '../translations/english';
 import { dutch } from '../translations/dutch';
-import { french } from '../translations/french';
-import { german } from '../translations/german';
-import { spanish } from '../translations/spanish';
 import { Translations } from '../translations/types';
 
 // Use the default import for english
@@ -13,15 +11,12 @@ const english = englishDefault;
 export type TranslationKeys = string;
 
 // Define languages available
-export type Language = 'english' | 'dutch' | 'french' | 'german' | 'spanish';
+export type Language = 'english' | 'dutch';
 
 // Translation object maps by language
 const translations = {
   english,
-  dutch,
-  french,
-  german,
-  spanish
+  dutch
 };
 
 interface LanguageContextType {

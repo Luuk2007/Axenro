@@ -270,9 +270,6 @@ const Settings = () => {
                             <SelectContent>
                               <SelectItem value="english">English</SelectItem>
                               <SelectItem value="dutch">Nederlands</SelectItem>
-                              <SelectItem value="french">Français</SelectItem>
-                              <SelectItem value="german">Deutsch</SelectItem>
-                              <SelectItem value="spanish">Español</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormDescription>
