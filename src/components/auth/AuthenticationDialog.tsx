@@ -78,7 +78,7 @@ export default function AuthenticationDialog({
     }
   };
 
-  const handle = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!resetEmail) {
@@ -86,7 +86,7 @@ export default function AuthenticationDialog({
       return;
     }
     
-    const { error } = await (resetEmail);
+    const { error } = await resetPassword(resetEmail);
     if (!error) {
       setShowForgotPassword(false);
       setResetEmail('');
@@ -126,11 +126,11 @@ export default function AuthenticationDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{showForgotPassword ? t("Reset Password") : t("login")}</DialogTitle>
+          <DialogTitle>{showForgotPassword ? t("resetPassword") : t("login")}</DialogTitle>
         </DialogHeader>
         {showForgotPassword ? (
           <form onSubmit={handleResetPassword} className="space-y-4 pt-4">
-            <DialogDescription>{t("Enter Email")}</DialogDescription>
+            <DialogDescription>{t("enterEmail")}</DialogDescription>
             <div className="space-y-2">
               <label htmlFor="reset-email" className="text-sm font-medium">{t("email")}</label>
               <Input 
