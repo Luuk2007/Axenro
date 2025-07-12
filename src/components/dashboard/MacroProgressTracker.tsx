@@ -128,7 +128,7 @@ export default function MacroProgressTracker() {
   return (
     <div className="glassy-card rounded-xl overflow-hidden card-shadow">
       <div className="px-5 py-4 border-b border-border">
-        <h3 className="font-medium tracking-tight">{t("dailyNutritionTracker")}</h3>
+        <h3 className="font-medium tracking-tight">{t("Daily Nutrition Tracker")}</h3>
       </div>
       <div className="p-5 space-y-6">
         <div className="space-y-2">
@@ -176,7 +176,7 @@ export default function MacroProgressTracker() {
         </div>
         
         <div className="mt-6 pt-4 border-t border-border">
-          <h4 className="text-sm font-medium mb-3">{t("dailyMacroRecommendations")}</h4>
+          <h4 className="text-sm font-medium mb-3">{t("Daily Macro Recommendations")}</h4>
           <div className="flex justify-between gap-2 text-sm">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
