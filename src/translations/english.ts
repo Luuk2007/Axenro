@@ -274,6 +274,8 @@ const english: Translations = {
   cameraNotAvailable: "Camera not available",
   couldNotAccessCamera: "Could not access camera",
   invalidMeasurementType: "Invalid measurement type",
+  dailyNutritionTracker: "Daily Nutrition Tracker",
+  dailyMacroRecommendations: "Daily Macro Recommendations",
 };
 
 export default english;
