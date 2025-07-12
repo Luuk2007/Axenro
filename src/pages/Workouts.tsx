@@ -12,7 +12,6 @@ import TrackWorkout from "@/components/workouts/TrackWorkout";
 import WorkoutList from "@/components/workouts/WorkoutList";
 import WorkoutCalendar from "@/components/workouts/WorkoutCalendar";
 import { Workout } from "@/types/workout";
-import PageHeader from "@/components/layout/PageHeader";
 
 const Workouts = () => {
   const { t } = useLanguage();
@@ -79,13 +78,14 @@ const Workouts = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <PageHeader title={t("workouts")}>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-semibold tracking-tight">{t("workouts")}</h1>
         <Button onClick={() => setShowWorkoutForm(true)}>
           <Plus className="h-4 w-4 mr-2" />
           {t("createWorkout")}
         </Button>
-      </PageHeader>
+      </div>
 
       <Tabs defaultValue="workouts">
         <TabsList>

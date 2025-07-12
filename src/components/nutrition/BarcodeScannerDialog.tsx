@@ -1,330 +1,462 @@
 
-import React, { useEffect, useRef, useState } from 'react';
-import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import React, { useRef, useState, useEffect } from 'react';
+import { DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Camera, RefreshCw, Ban } from 'lucide-react';
-import { fetchProductByBarcode, ProductDetails } from '@/services/openFoodFactsService';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { X, ArrowLeft, Camera, Check, AlertCircle, Minus, Plus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { toast } from 'sonner';
 import Quagga from 'quagga';
+import { toast } from 'sonner';
+import { fetchProductByBarcode, ProductDetails } from '@/services/openFoodFactsService';
+
+interface Meal {
+  id: string;
+  name: string;
+}
 
 interface BarcodeScannerDialogProps {
-  meals: any[];
+  meals: Meal[];
   selectedMeal: string | null;
   onClose: () => void;
   onAddProduct: (product: ProductDetails) => void;
 }
 
-interface ScannerConfig {
-  inputStream: {
-    type: string;
-    constraints: {
-      facingMode: string;
-      width: number;
-      height: number;
-    };
-    target: HTMLDivElement | null;
-  };
-  locator: {
-    patchSize: string;
-    halfSample: boolean;
-  };
-  numOfWorkers: number;
-  decoder: {
-    readers: string[];
-  };
-  locate: boolean;
-}
-
-const BarcodeScannerDialog: React.FC<BarcodeScannerDialogProps> = ({
-  meals,
-  selectedMeal,
-  onClose,
-  onAddProduct
-}) => {
-  const { t, language } = useLanguage();
-  const [isScanning, setIsScanning] = useState(false);
-  const [cameraReady, setCameraReady] = useState(false);
-  const [cameraPermission, setCameraPermission] = useState<boolean | null>(null);
-  const [hasError, setHasError] = useState(false);
+const BarcodeScannerDialog = ({ meals, selectedMeal, onClose, onAddProduct }: BarcodeScannerDialogProps) => {
+  const { t } = useLanguage();
+  const [cameraActive, setCameraActive] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<ProductDetails | null>(null);
-  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
-  const scannerRef = useRef<HTMLDivElement>(null);
+  const [scanStep, setScanStep] = useState<'scanning' | 'result'>('scanning');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedMealId, setSelectedMealId] = useState<string>(selectedMeal || "1");
+  const [servings, setServings] = useState(1);
+  const [amount, setAmount] = useState<number>(100);
+  const [unit, setUnit] = useState<string>("gram");
+  
+  const videoRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
-    // Request camera permission when component mounts
-    requestCameraPermission();
-
-    // Clean up when component unmounts
-    return () => {
-      if (isScanning) {
-        Quagga.stop();
-      }
-    };
-  }, []);
-
-  const requestCameraPermission = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      setCameraPermission(true);
-      stream.getTracks().forEach(track => track.stop()); // Release camera immediately
-      initScanner();
-    } catch (err) {
-      console.error('Error accessing camera:', err);
-      setCameraPermission(false);
-      setHasError(true);
-      toast.error(t('allowCamera'));
-    }
-  };
-
+  // Initialize barcode scanner
   const initScanner = () => {
-    if (!scannerRef.current) return;
-
-    setIsScanning(true);
-    setHasError(false);
-
-    const config: ScannerConfig = {
-      inputStream: {
-        type: 'LiveStream',
-        constraints: {
-          facingMode: 'environment',
-          width: 640,
-          height: 480
+    if (!videoRef.current) return;
+    
+    try {
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: videoRef.current,
+          constraints: {
+            facingMode: "environment", // Use the rear camera on mobile
+            width: { min: 450 },
+            height: { min: 300 },
+            aspectRatio: { min: 1, max: 2 }
+          },
         },
-        target: scannerRef.current
-      },
-      locator: {
-        patchSize: 'medium',
-        halfSample: true
-      },
-      numOfWorkers: 2,
-      decoder: {
-        readers: [
-          'ean_reader',
-          'ean_8_reader',
-          'upc_reader',
-          'upc_e_reader'
-        ]
-      },
-      locate: true
-    };
-
-    Quagga.init(config, (err) => {
-      if (err) {
-        console.error('Error initializing Quagga:', err);
-        setIsScanning(false);
-        setHasError(true);
-        return;
-      }
-
-      Quagga.start();
-      setCameraReady(true);
-
-      Quagga.onProcessed((result) => {
-        const drawingCtx = Quagga.canvas.ctx.overlay;
-        const drawingCanvas = Quagga.canvas.dom.overlay;
-
-        if (drawingCtx && drawingCanvas) {
-          drawingCtx.clearRect(
-            0,
-            0,
-            parseInt(drawingCanvas.getAttribute("width") || '0'),
-            parseInt(drawingCanvas.getAttribute("height") || '0')
-          );
-
-          if (result && result.boxes) {
-            result.boxes
-              .filter((box) => box !== result.box)
-              .forEach((box) => {
-                drawingCtx.strokeStyle = "green";
-                drawingCtx.lineWidth = 2;
-                drawingCtx.strokeRect(
-                  box[0],
-                  box[1],
-                  box[2] - box[0],
-                  box[3] - box[1]
-                );
-              });
-          }
-
-          if (result && result.box) {
-            drawingCtx.strokeStyle = "red";
-            drawingCtx.lineWidth = 2;
-            drawingCtx.strokeRect(
-              result.box.x,
-              result.box.y,
-              result.box.width,
-              result.box.height
-            );
-          }
-
-          if (result && result.codeResult && result.codeResult.code) {
-            drawingCtx.font = "24px Arial";
-            drawingCtx.fillStyle = "green";
-            drawingCtx.fillText(
-              result.codeResult.code,
-              10,
-              30
-            );
+        locator: {
+          patchSize: "medium",
+          halfSample: true
+        },
+        numOfWorkers: 2,
+        frequency: 10,
+        decoder: {
+          readers: [
+            "ean_reader",
+            "ean_8_reader",
+            "upc_reader",
+            "upc_e_reader"
+          ]
+        },
+        locate: true
+      }, function(err: any) {
+        if (err) {
+          console.error("Error initializing Quagga:", err);
+          setError("Could not access camera. Please check permissions.");
+          return;
+        }
+        
+        setCameraActive(true);
+        Quagga.start();
+      });
+      
+      // Setup barcode detection handler
+      Quagga.onDetected(async (result) => {
+        if (result && result.codeResult) {
+          const code = result.codeResult.code;
+          console.log("Detected barcode:", code);
+          
+          if (code && code.length >= 8) {
+            // Stop scanning
+            Quagga.stop();
+            setCameraActive(false);
+            
+            // Take snapshot
+            if (canvasRef.current) {
+              const context = canvasRef.current.getContext('2d');
+              const video = document.querySelector('video');
+              if (context && video) {
+                canvasRef.current.width = video.videoWidth;
+                canvasRef.current.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvasRef.current.width, canvasRef.current.height);
+              }
+            }
+            
+            // Fetch product data
+            setLoading(true);
+            try {
+              const product = await fetchProductByBarcode(code);
+              if (product) {
+                setScannedProduct(product);
+                setScanStep('result');
+              } else {
+                toast.error(`${t("noResultsFound")}: ${code}`);
+                // Restart scanner after a short delay
+                setTimeout(() => {
+                  if (scanStep === 'scanning') {
+                    Quagga.start();
+                    setCameraActive(true);
+                  }
+                }, 1000);
+              }
+            } catch (err) {
+              console.error("Error fetching product:", err);
+              toast.error(t("errorLoadingData"));
+              // Restart scanner after a short delay
+              setTimeout(() => {
+                if (scanStep === 'scanning') {
+                  Quagga.start();
+                  setCameraActive(true);
+                }
+              }, 1000);
+            } finally {
+              setLoading(false);
+            }
           }
         }
       });
-
-      Quagga.onDetected(handleBarcodeDetected);
-    });
-  };
-
-  const handleBarcodeDetected = async (result) => {
-    if (!result || !result.codeResult || !result.codeResult.code) return;
-
-    const barcode = result.codeResult.code;
-    console.log('Barcode detected:', barcode);
-    
-    // Stop scanning
-    Quagga.stop();
-    setIsScanning(false);
-    
-    // Fetch product details
-    setIsLoadingProduct(true);
-    try {
-      const lang = language === 'dutch' ? 'nl' : 'en';
-      const product = await fetchProductByBarcode(barcode, lang);
       
-      if (product) {
-        console.log('Product found:', product);
-        setScannedProduct(product);
-      } else {
-        console.log('No product found for barcode:', barcode);
-        toast.error(t('No product found'));
-        // Restart scanner
-        setTimeout(() => {
-          if (!scannedProduct) {
-            initScanner();
-          }
-        }, 1500);
-      }
-    } catch (error) {
-      console.error('Error fetching product details:', error);
-      toast.error(t('Error loading product data'));
-    } finally {
-      setIsLoadingProduct(false);
+      return () => {
+        if (cameraActive) {
+          Quagga.stop();
+        }
+      };
+    } catch (err) {
+      console.error("Error setting up scanner:", err);
+      setError("Failed to initialize camera. Your browser may not support this feature.");
     }
   };
 
-  const restartScanner = () => {
-    setScannedProduct(null);
-    if (cameraPermission) {
-      initScanner();
-    } else {
-      requestCameraPermission();
+  useEffect(() => {
+    if (scanStep === 'scanning') {
+      // Short delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        initScanner();
+      }, 500);
+      
+      return () => {
+        clearTimeout(timer);
+        if (cameraActive) {
+          Quagga.stop();
+          setCameraActive(false);
+        }
+      };
     }
+  }, [scanStep]);
+
+  const handleCloseScan = () => {
+    if (cameraActive) {
+      Quagga.stop();
+      setCameraActive(false);
+    }
+    onClose();
   };
 
-  const addProduct = () => {
+  const handleConfirmProduct = () => {
     if (scannedProduct) {
-      onAddProduct(scannedProduct);
+      // Calculate nutritional values based on amount/servings
+      const adjustedProduct = {
+        ...scannedProduct,
+        servings,
+        amount,
+        unit,
+        nutrition: {
+          calories: calculateAdjustedValue(scannedProduct.nutrition.calories),
+          protein: calculateAdjustedValue(scannedProduct.nutrition.protein),
+          carbs: calculateAdjustedValue(scannedProduct.nutrition.carbs),
+          fat: calculateAdjustedValue(scannedProduct.nutrition.fat)
+        }
+      };
+      onAddProduct(adjustedProduct);
     }
   };
+
+  const calculateAdjustedValue = (value: number): number => {
+    // Base calculation on the user-entered amount/unit
+    if (unit === "gram" || unit === "milliliter") {
+      return (value * amount) / 100; // Assuming nutrition values are per 100g/ml
+    } else {
+      // For pieces, slices, etc., multiply by servings
+      return value * servings;
+    }
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      setAmount(value);
+    }
+  };
+
+  const handleRetry = () => {
+    setScannedProduct(null);
+    setScanStep('scanning');
+    setError(null);
+  };
+
+  // Cleanup Quagga on unmount
+  useEffect(() => {
+    return () => {
+      if (cameraActive) {
+        Quagga.stop();
+      }
+    };
+  }, [cameraActive]);
 
   return (
-    <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-      <DialogHeader>
-        <DialogTitle>{t('scanBarcode')}</DialogTitle>
-        <DialogDescription>{t('holdSteady')}</DialogDescription>
-      </DialogHeader>
-
-      <div className="flex flex-col items-center space-y-4">
-        {hasError ? (
-          <div className="text-center p-4 bg-red-50 rounded-lg">
-            <Ban className="h-8 w-8 text-red-500 mx-auto mb-2" />
-            <p className="text-red-700">{t('Error accessing camera')}</p>
-            <Button 
-              onClick={requestCameraPermission} 
-              className="mt-2"
-              variant="secondary"
-            >
-              {t('allowCamera')}
-            </Button>
+    <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+      {scanStep === 'scanning' ? (
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <button className="p-2" onClick={handleCloseScan}>
+              <X className="h-5 w-5" />
+            </button>
+            <h3 className="font-medium text-lg">{t("scanBarcode")}</h3>
+            <div className="w-9"></div>
           </div>
-        ) : scannedProduct ? (
-          <div className="space-y-4 w-full">
-            <p className="text-center font-medium">{t('barcodeMatches')}:</p>
-            
-            <div className="flex items-center space-x-4">
-              {scannedProduct.imageUrl ? (
-                <img 
-                  src={scannedProduct.imageUrl} 
-                  alt={scannedProduct.name}
-                  className="w-16 h-16 object-contain" 
-                />
-              ) : (
-                <div className="w-16 h-16 bg-gray-100 flex items-center justify-center rounded">
-                  <Camera className="h-8 w-8 text-gray-400" />
-                </div>
-              )}
-              <div>
-                <p className="font-medium">{scannedProduct.name}</p>
-                <p className="text-sm text-muted-foreground">{scannedProduct.brand}</p>
-                <p className="text-xs">{scannedProduct.nutrition.calories} cal</p>
+          
+          <div className="relative flex-1 aspect-[9/16] bg-black">
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
               </div>
-            </div>
+            )}
             
-            <div className="flex space-x-2 mt-4">
-              <Button 
-                variant="outline" 
-                className="flex-1"
-                onClick={restartScanner}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                {t('scanAgain')}
-              </Button>
-              <Button 
-                className="flex-1"
-                onClick={addProduct}
-              >
-                {t('addFood')}
-              </Button>
-            </div>
+            {error ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                <AlertCircle className="h-10 w-10 text-destructive mb-2" />
+                <p className="text-white mb-4">{error}</p>
+                <Button onClick={handleRetry}>{t("tryAgain")}</Button>
+              </div>
+            ) : (
+              <>
+                <div ref={videoRef} className="absolute inset-0 w-full h-full"></div>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-2/3 h-32 relative">
+                    <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-blue-400"></div>
+                    <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-blue-400"></div>
+                    <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-blue-400"></div>
+                    <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-blue-400"></div>
+                  </div>
+                </div>
+              </>
+            )}
+            <canvas ref={canvasRef} className="hidden"></canvas>
           </div>
-        ) : (
-          <>
-            <div 
-              ref={scannerRef}
-              className="w-full h-64 overflow-hidden relative border border-border rounded-md"
-            >
-              {isLoadingProduct && (
-                <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          
+          <div className="p-4 text-sm text-muted-foreground bg-muted/30">
+            <p>{t("scanBarcode")}: {t("holdSteady")}</p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col">
+          <div className="flex items-center px-4 py-3 border-b border-border">
+            <button className="p-2 mr-2" onClick={handleRetry}>
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <h3 className="font-medium text-lg">{t("addFood")}</h3>
+          </div>
+          
+          {scannedProduct && (
+            <div className="p-4 space-y-6 max-h-[70vh] overflow-y-auto">
+              <div className="bg-blue-50 p-3 rounded-md mb-4">
+                <div className="flex items-center">
+                  <p className="text-gray-600 text-sm flex-1">
+                    {t("barcodeMatches")}: "{scannedProduct.id}"
+                  </p>
+                  <button 
+                    onClick={handleRetry} 
+                    className="text-blue-500 text-sm whitespace-nowrap"
+                  >
+                    {t("scanAgain")}
+                  </button>
+                </div>
+              </div>
+              
+              <div>
+                <h2 className="text-xl font-bold">{scannedProduct.name}</h2>
+                <p className="text-gray-600">{scannedProduct.brand}</p>
+                {scannedProduct.description && (
+                  <p className="text-gray-600 text-sm mt-1">{scannedProduct.description}</p>
+                )}
+              </div>
+              
+              {scannedProduct.imageUrl && (
+                <div className="flex justify-center">
+                  <img 
+                    src={scannedProduct.imageUrl} 
+                    alt={scannedProduct.name} 
+                    className="max-h-48 object-contain"
+                  />
                 </div>
               )}
               
-              {!cameraReady && !isLoadingProduct && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <p className="font-medium">{t("servingSize")}</p>
+                  <div className="bg-gray-100 rounded-md px-4 py-2 text-right w-1/2">
+                    <span>{scannedProduct.servingSize}</span>
+                  </div>
                 </div>
-              )}
-            </div>
 
-            <div className="flex space-x-2 w-full">
-              <Button 
-                onClick={onClose} 
-                variant="outline" 
-                className="flex-1"
-              >
-                {t('cancel')}
-              </Button>
-              <Button 
-                onClick={restartScanner}
-                variant="secondary"
-                className="flex-1"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                {t('scanAgain')}
-              </Button>
+                <div className="border-t pt-4">
+                  <h3 className="font-medium mb-3">{t("adjustServing")}</h3>
+                  
+                  <div className="flex gap-3 mb-4">
+                    <div className="flex-1">
+                      <label className="text-sm text-muted-foreground mb-1 block">{t("amount")}</label>
+                      <Input 
+                        type="number"
+                        value={amount}
+                        onChange={handleAmountChange}
+                        min="1"
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <div className="flex-1">
+                      <label className="text-sm text-muted-foreground mb-1 block">{t("unit")}</label>
+                      <Select
+                        value={unit}
+                        onValueChange={setUnit}
+                      >
+                        <SelectTrigger>
+                          <SelectValue>{t(unit) || unit}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="gram">{t("gram")}</SelectItem>
+                          <SelectItem value="milliliter">{t("milliliter")}</SelectItem>
+                          <SelectItem value="piece">{t("piece")}</SelectItem>
+                          <SelectItem value="slice">{t("slice")}</SelectItem>
+                          <SelectItem value="cup">{t("cup")}</SelectItem>
+                          <SelectItem value="tablespoon">{t("tablespoon")}</SelectItem>
+                          <SelectItem value="teaspoon">{t("teaspoon")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center mb-4">
+                    <p className="font-medium">{t("numberOfServings")}</p>
+                    <div className="flex items-center bg-gray-100 rounded-md px-2 w-1/2">
+                      <button 
+                        className="p-1"
+                        disabled={servings <= 0.25}
+                        onClick={() => setServings(prev => Math.max(0.25, prev - 0.25))}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <input
+                        type="number"
+                        value={servings}
+                        min="0.25"
+                        step="0.25"
+                        onChange={(e) => setServings(Number(e.target.value) || 1)}
+                        className="w-full bg-transparent text-right border-0 focus:ring-0"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <p className="font-medium">{t("meal")}</p>
+                  <Select 
+                    value={selectedMealId} 
+                    onValueChange={setSelectedMealId}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder={t("selectMeal")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {meals.map(meal => (
+                        <SelectItem key={meal.id} value={meal.id}>{meal.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="border rounded-md p-4">
+                <h3 className="font-medium mb-2">{t("nutritionFacts")}</h3>
+                <p className="text-xs text-muted-foreground mb-3">{t("perServing")}</p>
+                
+                <div className="flex items-stretch space-x-4">
+                  <div className="bg-white rounded-full w-24 h-24 flex-shrink-0 flex flex-col items-center justify-center shadow-sm border border-gray-200">
+                    <span className="text-2xl font-bold">
+                      {Math.round(calculateAdjustedValue(scannedProduct.nutrition.calories))}
+                    </span>
+                    <span className="text-xs text-gray-500">cal</span>
+                  </div>
+                  
+                  <div className="flex-1 flex flex-col justify-around">
+                    <div className="flex justify-between">
+                      <span className="text-green-500">
+                        {Math.round((scannedProduct.nutrition.carbs / (scannedProduct.nutrition.carbs + scannedProduct.nutrition.fat + scannedProduct.nutrition.protein)) * 100 || 0)}%
+                      </span>
+                      <span className="text-blue-500">
+                        {Math.round((scannedProduct.nutrition.fat / (scannedProduct.nutrition.carbs + scannedProduct.nutrition.fat + scannedProduct.nutrition.protein)) * 100 || 0)}%
+                      </span>
+                      <span className="text-purple-500">
+                        {Math.round((scannedProduct.nutrition.protein / (scannedProduct.nutrition.carbs + scannedProduct.nutrition.fat + scannedProduct.nutrition.protein)) * 100 || 0)}%
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <div className="text-center">
+                        <div className="text-xl font-semibold">
+                          {Math.round(calculateAdjustedValue(scannedProduct.nutrition.carbs) * 10) / 10}g
+                        </div>
+                        <div className="text-xs text-gray-500">{t("carbs")}</div>
+                      </div>
+                      
+                      <div className="text-center">
+                        <div className="text-xl font-semibold">
+                          {Math.round(calculateAdjustedValue(scannedProduct.nutrition.fat) * 10) / 10}g
+                        </div>
+                        <div className="text-xs text-gray-500">{t("fat")}</div>
+                      </div>
+                      
+                      <div className="text-center">
+                        <div className="text-xl font-semibold">
+                          {Math.round(calculateAdjustedValue(scannedProduct.nutrition.protein) * 10) / 10}g
+                        </div>
+                        <div className="text-xs text-gray-500">{t("protein")}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="pt-4 flex justify-center">
+                <Button className="w-full" onClick={handleConfirmProduct}>
+                  <Check className="mr-2 h-4 w-4" />
+                  {t("addToMealPlan")}
+                </Button>
+              </div>
             </div>
-          </>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </DialogContent>
   );
 };

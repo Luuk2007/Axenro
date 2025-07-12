@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import PageHeader from '@/components/layout/PageHeader';
 
 // Import components
 import DateNavigation from '@/components/nutrition/DateNavigation';
@@ -306,32 +306,37 @@ const Nutrition = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <PageHeader title={t("nutrition")}>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              {t("addFood")}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("addFood")}</DialogTitle>
-              <DialogDescription>{t("Search for a product or scan to add")}</DialogDescription>
-            </DialogHeader>
-            <div className="flex items-center gap-4 py-4">
-              <Button className="flex-1" onClick={() => setShowAddFood(true)}>
-                <Apple className="mr-2 h-4 w-4" />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("nutrition")}</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
                 {t("addFood")}
               </Button>
-              <Button className="flex-1" onClick={() => setShowScanBarcode(true)}>
-                <Camera className="mr-2 h-4 w-4" />
-                {t("scanBarcode")}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </PageHeader>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("addFood")}</DialogTitle>
+                <DialogDescription>{t("Search for a product or scan to add")}</DialogDescription>
+              </DialogHeader>
+              <div className="flex items-center gap-4 py-4">
+                <Button className="flex-1" onClick={() => setShowAddFood(true)}>
+                  <Apple className="mr-2 h-4 w-4" />
+                  {t("addFood")}
+                </Button>
+                <Button className="flex-1" onClick={() => setShowScanBarcode(true)}>
+                  <Camera className="mr-2 h-4 w-4" />
+                  {t("scanBarcode")}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
 
       <div className="flex flex-col space-y-4">
         {/* Date Navigation */}
