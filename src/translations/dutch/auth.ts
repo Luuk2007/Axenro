@@ -13,4 +13,8 @@ export const authTranslations: Translations = {
   registerSuccess: "Registratie succesvol",
   logoutSuccess: "Succesvol uitgelogd",
   passwordResetSuccess: "Wachtwoord reset succesvol",
+  signIn: "Inloggen",
+  signUp: "Aanmelden", 
+  signInWithGoogle: "Inloggen met Google",
+  enterEmail: "Voer e-mailadres in",
 };

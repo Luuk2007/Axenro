@@ -60,6 +60,11 @@ export const commonTranslations: Translations = {
   inactive: "Inactief",
   status: "Status",
   weight: "Gewicht",
+  todayMeals: "Vandaag Maaltijden", 
+  remaining: "resterend",
+  today: "Vandaag",
+  yesterday: "Gisteren", 
+  tomorrow: "Morgen",
   
   // Activity names
   running: "Hardlopen",

@@ -164,6 +164,11 @@ const english: Translations = {
   
   // Additional water tracking translations from screenshot
   todaysMeals: "Today's Meals",
+  todayMeals: "Today's Meals",
+  remaining: "remaining",
+  today: "Today",
+  yesterday: "Yesterday", 
+  tomorrow: "Tomorrow",
   meals: "Meals",
   water: "Water",
   addFood: "Add Food",
@@ -206,6 +211,8 @@ const english: Translations = {
   email: "Email",
   password: "Password",
   forgotPassword: "Forgot Password",
+  resetPassword: "Reset Password",
+  enterEmail: "Enter Email",
   alreadyHaveAccount: "Already have an account?",
   confirmPassword: "Confirm Password",
   noAccount: "Don't have an account?",
