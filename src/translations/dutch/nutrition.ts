@@ -99,5 +99,11 @@ export const nutritionTranslations: Translations = {
   cancel: "Annuleren",
   close: "Sluiten",
   save: "Opslaan",
-  servings: "Porties"
+  servings: "Porties",
+  
+  // Daily Nutrition Tracker translations
+  dailyNutritionTracker: "Dagelijkse Voedingstracker",
+  remainingToday: "resterend vandaag",
+  kcal: "kcal",
+  dailyMacroRecommendations: "Dagelijkse Macro Aanbevelingen",
 };

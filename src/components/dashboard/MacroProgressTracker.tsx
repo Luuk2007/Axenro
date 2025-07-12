@@ -128,67 +128,67 @@ export default function MacroProgressTracker() {
   return (
     <div className="glassy-card rounded-xl overflow-hidden card-shadow">
       <div className="px-5 py-4 border-b border-border">
-        <h3 className="font-medium tracking-tight">Daily Nutrition Tracker</h3>
+        <h3 className="font-medium tracking-tight">{t("dailyNutritionTracker")}</h3>
       </div>
       <div className="p-5 space-y-6">
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">Calories</span>
-            <span className="text-sm font-medium">0 / {macroTargets.calories.goal} kcal</span>
+            <span className="text-sm font-medium">{t("calories")}</span>
+            <span className="text-sm font-medium">0 / {macroTargets.calories.goal} {t("kcal")}</span>
           </div>
           <Progress value={0} className="h-2" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.calories.goal} kcal remaining today
+            {macroTargets.calories.goal} {t("kcal")} {t("remainingToday")}
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">Protein</span>
+            <span className="text-sm font-medium">{t("protein")}</span>
             <span className="text-sm font-medium">0 / {macroTargets.protein.goal}g</span>
           </div>
           <Progress value={0} className="h-2 bg-blue-100 [&>div]:bg-blue-500" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.protein.goal}g remaining today
+            {macroTargets.protein.goal}g {t("remainingToday")}
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">Carbs</span>
+            <span className="text-sm font-medium">{t("carbs")}</span>
             <span className="text-sm font-medium">0 / {macroTargets.carbs.goal}g</span>
           </div>
           <Progress value={0} className="h-2 bg-green-100 [&>div]:bg-green-500" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.carbs.goal}g remaining today
+            {macroTargets.carbs.goal}g {t("remainingToday")}
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">Fats</span>
+            <span className="text-sm font-medium">{t("fat")}</span>
             <span className="text-sm font-medium">0 / {macroTargets.fat.goal}g</span>
           </div>
           <Progress value={0} className="h-2 bg-yellow-100 [&>div]:bg-yellow-500" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.fat.goal}g remaining today
+            {macroTargets.fat.goal}g {t("remainingToday")}
           </div>
         </div>
         
         <div className="mt-6 pt-4 border-t border-border">
-          <h4 className="text-sm font-medium mb-3">Daily Macro Recommendations</h4>
+          <h4 className="text-sm font-medium mb-3">{t("dailyMacroRecommendations")}</h4>
           <div className="flex justify-between gap-2 text-sm">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-              Protein: {macroTargets.protein.goal}g (30%)
+              {t("protein")}: {macroTargets.protein.goal}g (30%)
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-              Carbs: {macroTargets.carbs.goal}g (40%)
+              {t("carbs")}: {macroTargets.carbs.goal}g (40%)
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
-              Fats: {macroTargets.fat.goal}g (30%)
+              {t("fat")}: {macroTargets.fat.goal}g (30%)
             </div>
           </div>
         </div>

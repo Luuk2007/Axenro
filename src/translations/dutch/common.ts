@@ -59,4 +59,13 @@ export const commonTranslations: Translations = {
   active_status: "Actief",
   inactive: "Inactief",
   status: "Status",
+  weight: "Gewicht",
+  
+  // Activity names
+  running: "Hardlopen",
+  strengthTraining: "Krachttraining",
+  cycling: "Fietsen",
+  swimming: "Zwemmen",
+  yoga: "Yoga",
+  walking: "Wandelen",
 };

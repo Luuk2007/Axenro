@@ -39,13 +39,13 @@ const meals = [
   },
 ];
 
-const activityOptions = [
-  { id: '1', name: 'Running', icon: Flame },
-  { id: '2', name: 'Strength Training', icon: Dumbbell },
-  { id: '3', name: 'Cycling', icon: Flame },
-  { id: '4', name: 'Swimming', icon: Flame },
-  { id: '5', name: 'Yoga', icon: Flame },
-  { id: '6', name: 'Walking', icon: Flame },
+const getActivityOptions = (t: (key: string) => string) => [
+  { id: '1', name: t('running'), icon: Flame },
+  { id: '2', name: t('strengthTraining'), icon: Dumbbell },
+  { id: '3', name: t('cycling'), icon: Flame },
+  { id: '4', name: t('swimming'), icon: Flame },
+  { id: '5', name: t('yoga'), icon: Flame },
+  { id: '6', name: t('walking'), icon: Flame },
 ];
 
 const Dashboard = () => {
@@ -217,7 +217,7 @@ const Dashboard = () => {
                 <DialogTitle>{t("addActivity")}</DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-4 py-4">
-                {activityOptions.map((activity) => (
+                {getActivityOptions(t).map((activity) => (
                   <Button
                     key={activity.id}
                     variant="outline"
@@ -255,7 +255,7 @@ const Dashboard = () => {
           onClick={navigateToWorkouts}
         />
         <StatsCard
-          title={`${t("weight")}`}
+          title={t("weight")}
           value={userWeight ? `${userWeight} kg` : "76.4 kg"}
           icon={Weight}
           description={`${t("target")}: ${userTargetWeight || '75'} kg`}
