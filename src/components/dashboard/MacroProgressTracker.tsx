@@ -138,7 +138,7 @@ export default function MacroProgressTracker() {
           </div>
           <Progress value={0} className="h-2" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.calories.goal} {t("kcal")} {t("remainingToday")}
+            {macroTargets.calories.goal} {t("kcal")} {t("remaining")}
           </div>
         </div>
         
@@ -149,7 +149,7 @@ export default function MacroProgressTracker() {
           </div>
           <Progress value={0} className="h-2 bg-blue-100 [&>div]:bg-blue-500" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.protein.goal}g {t("remainingToday")}
+            {macroTargets.protein.goal}g {t("remaining")}
           </div>
         </div>
         
@@ -160,7 +160,7 @@ export default function MacroProgressTracker() {
           </div>
           <Progress value={0} className="h-2 bg-green-100 [&>div]:bg-green-500" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.carbs.goal}g {t("remainingToday")}
+            {macroTargets.carbs.goal}g {t("remaining")}
           </div>
         </div>
         
@@ -171,7 +171,7 @@ export default function MacroProgressTracker() {
           </div>
           <Progress value={0} className="h-2 bg-yellow-100 [&>div]:bg-yellow-500" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.fat.goal}g {t("remainingToday")}
+            {macroTargets.fat.goal}g {t("remaining")}
           </div>
         </div>
         
