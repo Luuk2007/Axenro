@@ -117,7 +117,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
       <DialogHeader className="p-4 pb-0">
         <DialogTitle>{t("addFood")}</DialogTitle>
         <DialogDescription>
-          {t("searchFoods")}
+          {t("Search foods")}
         </DialogDescription>
       </DialogHeader>
       
@@ -305,7 +305,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
             <label className="text-sm font-medium">{t("food")}</label>
             <div className="relative">
               <Input 
-                placeholder={t("searchFoods")} 
+                placeholder={t("Search foods")} 
                 onChange={(e) => setSearchValue(e.target.value)} 
                 value={searchValue}
                 className="pr-10"
@@ -360,7 +360,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
                 
                 {!searchValue && (
                   <div className="text-center py-4 text-sm text-muted-foreground">
-                    {t("typeToSearch")}
+                    {t("Type to search")}
                   </div>
                 )}
                 
