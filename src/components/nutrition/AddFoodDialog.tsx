@@ -113,8 +113,8 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
   };
 
   return (
-    <DialogContent className="max-w-md max-h-[90vh] overflow-hidden flex flex-col">
-      <DialogHeader>
+    <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-0">
+      <DialogHeader className="p-4 pb-0">
         <DialogTitle>{t("addFood")}</DialogTitle>
         <DialogDescription>
           {t("searchFoods")}
@@ -124,7 +124,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
       {selectedProduct ? (
         <div className="flex flex-col h-full max-h-[80vh]">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="flex items-center justify-between p-4 border-b border-border bg-background">
             <Button variant="ghost" size="sm" onClick={handleBackToSearch}>
               <X className="h-4 w-4 mr-2" />
               {t("back")}
@@ -134,7 +134,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
           </div>
 
           {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 bg-background">
             {/* Product Info */}
             <div className="text-center mb-6">
               {selectedProduct.imageUrl && (
@@ -276,7 +276,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-border">
+          <div className="p-4 border-t border-border bg-background">
             <Button className="w-full" onClick={handleAddProduct}>
               <Plus className="mr-2 h-4 w-4" />
               {t("addToMealPlan")}
@@ -284,7 +284,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
           </div>
         </div>
       ) : (
-        <div className="space-y-4 py-4 flex-1 overflow-hidden flex flex-col">
+        <div className="space-y-4 p-4 flex-1 overflow-y-auto flex flex-col bg-background">
           <div className="space-y-2">
             <label className="text-sm font-medium">{t("meal")}</label>
             <Select 
@@ -373,7 +373,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
               </div>
             </div>
           </div>
-          <div className="flex justify-end pt-2 border-t border-border">
+          <div className="flex justify-end p-4 border-t border-border bg-background">
             <Button variant="outline" onClick={onClose}>{t("cancel")}</Button>
           </div>
         </div>
