@@ -39,13 +39,13 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
           onClick={() => onAddItem(id)}
         >
           <Plus className="mr-1 h-3 w-3" />
-          {t("addItem")}
+          {t("Add item")}
         </Button>
       </div>
       <div className="space-y-3">
         {items.length === 0 && (
           <div className="text-sm text-muted-foreground py-2 text-center">
-            {t('noFoodItemsYet')}
+            {t('No food items yet')}
           </div>
         )}
         {items.map((item) => (
