@@ -354,7 +354,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
                 
                 {apiResults.length === 0 && !searching && searchValue && (
                   <div className="text-center py-4 text-sm text-muted-foreground">
-                    {t("noResultsFound")}
+                    {t("No results found")}
                   </div>
                 )}
                 
