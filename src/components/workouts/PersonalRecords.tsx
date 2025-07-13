@@ -130,7 +130,7 @@ const PersonalRecords = () => {
                       {t('cancel')}
                     </Button>
                     <Button onClick={saveRecord} disabled={!exerciseName.trim()}>
-                      {t('saveRecord')}
+                      {t('Save Record')}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
