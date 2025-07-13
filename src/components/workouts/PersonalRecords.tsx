@@ -101,14 +101,14 @@ const PersonalRecords = () => {
                 <DialogTrigger asChild>
                   <Button>
                     <Trophy className="mr-2 h-4 w-4" />
-                    {t('saveRecord')}
+                    {t('Save Record')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>{t('saveRecord')}</DialogTitle>
+                    <DialogTitle>{t('Save Record')}</DialogTitle>
                     <DialogDescription>
-                      {t('estimatedOneRepMax')}: {calculatedWeight} kg
+                      {t('Estimated One Rep Max')}: {calculatedWeight} kg
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
