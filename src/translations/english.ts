@@ -276,6 +276,9 @@ const english: Translations = {
   invalidMeasurementType: "Invalid measurement type",
   dailyNutritionTracker: "Daily Nutrition Tracker",
   dailyMacroRecommendations: "Daily Macro Recommendations",
+  addToMeal: "Add to Meal",
+  portionSize: "Portion Size",
+  nutritionSummary: "Nutrition Summary",
 };
 
 export default english;

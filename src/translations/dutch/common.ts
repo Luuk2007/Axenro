@@ -65,6 +65,9 @@ export const commonTranslations: Translations = {
   today: "Vandaag",
   yesterday: "Gisteren", 
   tomorrow: "Morgen",
+  addToMeal: "Toevoegen aan maaltijd",
+  portionSize: "Portiegrootte",
+  nutritionSummary: "Voedingsoverzicht",
   
   // Activity names
   running: "Hardlopen",
