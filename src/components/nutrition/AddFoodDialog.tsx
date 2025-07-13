@@ -286,7 +286,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
       ) : (
         <div className="space-y-4 p-4 flex-1 overflow-y-auto flex flex-col bg-background">
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t("meal")}</label>
+            <label className="text-sm font-medium">{t("Meal")}</label>
             <Select 
               defaultValue={selectedMealId}
               onValueChange={setSelectedMealId}
@@ -302,7 +302,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
             </Select>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t("food")}</label>
+            <label className="text-sm font-medium">{t("Food")}</label>
             <div className="relative">
               <Input 
                 placeholder={t("Search foods")} 
