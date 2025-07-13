@@ -122,7 +122,7 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
           
           {result !== null && (
             <div className="mt-4 p-4 bg-muted rounded-md text-center">
-              <p className="text-sm text-muted-foreground">{t("estimatedOneRepMax")}</p>
+              <p className="text-sm text-muted-foreground">{t("Estimated One Rep Max")}</p>
               <p className="text-2xl font-bold">{result} kg</p>
             </div>
           )}
