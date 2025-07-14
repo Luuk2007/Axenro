@@ -58,7 +58,7 @@ export default function Sidebar() {
         <img 
           src="/lovable-uploads/5a043003-b31b-4592-a628-4f1d3a423ae2.png" 
           alt="Progresa Logo" 
-          className="h-8 w-auto object-contain"
+          className="h-12 w-auto object-contain max-w-full"
         />
       </div>
       <nav className="flex-1 overflow-auto py-6">
