@@ -1,460 +1,212 @@
-import React, { useState, useEffect } from 'react';
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { toast } from "sonner";
-import {
-  Globe,
-  Sun,
-  Moon,
-  Bell,
-  Lock,
-  LogOut,
-  Trash,
-  User,
-} from 'lucide-react';
 
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { supabase } from '@/integrations/supabase/client';
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { toast } from "sonner";
 
-// Form schema
-const settingsFormSchema = z.object({
-  language: z.string().default("english"),
-  theme: z.string().default("light"),
-  notifyWorkouts: z.boolean().default(true),
-  notifyMeals: z.boolean().default(true),
-  saveProfile: z.boolean().default(true),
-});
-
-type SettingsFormValues = z.infer<typeof settingsFormSchema>;
-
-// Profile form schema
-const profileFormSchema = z.object({
-  fullName: z.string().min(2, {
-    message: "Full name must be at least 2 characters."
-  }),
-});
-
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
+interface UserSettings {
+  theme: "light" | "dark" | "system";
+  language: "en" | "nl";
+  notifications: boolean;
+  dataBackup: boolean;
+}
 
 const Settings = () => {
-  const [theme, setTheme] = useState<string>('light');
-  const { language, setLanguage, t } = useLanguage();
-  const { user, signOut } = useAuth();
-  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
-  
-  // Load saved settings from localStorage if available
-  const getSavedSettings = () => {
+  const { t, language, setLanguage } = useLanguage();
+  const [settings, setSettings] = useState<UserSettings>({
+    theme: "light",
+    language: "en",
+    notifications: true,
+    dataBackup: false,
+  });
+
+  // Load settings from localStorage on component mount
+  useEffect(() => {
     const savedSettings = localStorage.getItem("userSettings");
-    return savedSettings ? JSON.parse(savedSettings) : {
-      language: "english",
-      theme: "light",
-      notifyWorkouts: true,
-      notifyMeals: true,
-      saveProfile: true,
-    };
-  };
-  
-  // Initialize form with values from localStorage if available
-  const form = useForm<SettingsFormValues>({
-    resolver: zodResolver(settingsFormSchema),
-    defaultValues: getSavedSettings(),
-  });
-
-  // Profile form
-  const profileForm = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileFormSchema),
-    defaultValues: {
-      fullName: user?.user_metadata?.full_name || "",
-    },
-  });
-
-  // Update profile form values when user data changes
-  useEffect(() => {
-    if (user?.user_metadata?.full_name) {
-      profileForm.setValue('fullName', user.user_metadata.full_name);
+    if (savedSettings) {
+      const parsedSettings = JSON.parse(savedSettings);
+      setSettings(parsedSettings);
     }
-  }, [user, profileForm]);
-
-  // Update theme when the form value changes
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      if (value.theme) {
-        setTheme(value.theme);
-        updateTheme(value.theme);
-      }
-      // Update language when form value changes
-      if (value.language && value.language !== language) {
-        setLanguage(value.language as any);
-      }
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [form.watch, language, setLanguage]);
-
-  // Apply theme to document
-  const updateTheme = (newTheme: string) => {
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
-
-  // Initialize theme on component mount
-  useEffect(() => {
-    const currentTheme = getSavedSettings().theme;
-    setTheme(currentTheme);
-    updateTheme(currentTheme);
   }, []);
 
-  const onSubmit = (data: SettingsFormValues) => {
-    // Save to localStorage
-    localStorage.setItem("userSettings", JSON.stringify(data));
-    toast.success(t("settingsUpdated"));
+  // Save settings to localStorage
+  const saveSettings = (newSettings: UserSettings) => {
+    localStorage.setItem("userSettings", JSON.stringify(newSettings));
+    setSettings(newSettings);
   };
 
-  const onProfileSubmit = async (data: ProfileFormValues) => {
-    try {
-      setIsUpdatingProfile(true);
-      
-      // Update user metadata in Supabase
-      const { error } = await supabase.auth.updateUser({
-        data: { full_name: data.fullName }
-      });
+  // Handle theme change
+  const handleThemeChange = (theme: "light" | "dark" | "system") => {
+    const newSettings = { ...settings, theme };
+    saveSettings(newSettings);
 
-      if (error) {
-        toast.error(error.message);
-        return;
+    // Apply theme to document
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else if (theme === "light") {
+      document.documentElement.classList.remove("dark");
+    } else {
+      // System theme
+      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (systemPrefersDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
       }
-
-      toast.success(t("profileUpdated"));
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsUpdatingProfile(false);
     }
+
+    toast.success(t("settingsSaved"));
   };
 
-  const handleLogout = async () => {
-    await signOut();
+  // Handle language change
+  const handleLanguageChange = (newLanguage: "en" | "nl") => {
+    const newSettings = { ...settings, language: newLanguage };
+    saveSettings(newSettings);
+    setLanguage(newLanguage);
+    toast.success(t("settingsSaved"));
   };
 
-  const handleDeleteAccount = async () => {
-    try {
-      // In a real application, you would implement a secure way to handle account deletion
-      // This is a simplified version for demonstration purposes
-      
-      // Clear all localStorage data
-      localStorage.removeItem("userProfile");
-      localStorage.removeItem("userSettings");
-      localStorage.removeItem("measurements");
-      localStorage.removeItem("weightEntries");
-      
-      // Sign out the user
-      await signOut();
-      
-      toast.success(t("accountDeleted"));
-    } catch (error: any) {
-      toast.error(error.message);
+  // Handle notifications toggle
+  const handleNotificationsChange = (notifications: boolean) => {
+    const newSettings = { ...settings, notifications };
+    saveSettings(newSettings);
+    toast.success(t("settingsSaved"));
+  };
+
+  // Handle data backup toggle
+  const handleDataBackupChange = (dataBackup: boolean) => {
+    const newSettings = { ...settings, dataBackup };
+    saveSettings(newSettings);
+    toast.success(t("settingsSaved"));
+  };
+
+  // Export user data
+  const exportData = () => {
+    const userData = {
+      profile: localStorage.getItem("userProfile"),
+      measurements: localStorage.getItem("measurements"),
+      weightData: localStorage.getItem("weightData"),
+      workouts: localStorage.getItem("workouts"),
+      nutritionData: localStorage.getItem("nutritionData"),
+      settings: localStorage.getItem("userSettings"),
+    };
+
+    const dataStr = JSON.stringify(userData, null, 2);
+    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
+    const exportFileDefaultName = "progresa-data-export.json";
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
+
+    toast.success(t("dataExported"));
+  };
+
+  // Clear all user data
+  const clearAllData = () => {
+    if (window.confirm(t("confirmClearData"))) {
+      localStorage.clear();
+      toast.success(t("dataCleared"));
+      window.location.reload();
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold tracking-tight">{t("settings")}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("settings")}</h1>
       </div>
-      
-      {user && (
+
+      <div className="grid gap-6">
+        {/* Appearance Settings */}
         <Card>
           <CardHeader>
-            <CardTitle>{t("profileSettings")}</CardTitle>
+            <CardTitle>{t("appearance")}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Form {...profileForm}>
-              <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <User className="h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1 space-y-2">
-                    <FormField
-                      control={profileForm.control}
-                      name="fullName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("fullName")}</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormDescription>{t("profileNameDescription")}</FormDescription>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                  <p className="text-sm text-muted-foreground flex-1">{t("emailAddress")}: {user.email}</p>
-                </div>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="theme">{t("theme")}</Label>
+              <Select
+                value={settings.theme}
+                onValueChange={handleThemeChange}
+              >
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">{t("light")}</SelectItem>
+                  <SelectItem value="dark">{t("dark")}</SelectItem>
+                  <SelectItem value="system">{t("system")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <Button type="submit" disabled={isUpdatingProfile}>
-                  {isUpdatingProfile ? t("updating") : t("updateProfile")}
-                </Button>
-              </form>
-            </Form>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="language">{t("language")}</Label>
+              <Select
+                value={settings.language}
+                onValueChange={handleLanguageChange}
+              >
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="nl">Nederlands</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardContent>
         </Card>
-      )}
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("appSettings")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6"
-            >
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <Globe className="h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1 space-y-1">
-                    <FormField
-                      control={form.control}
-                      name="language"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("language")}</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full md:w-52">
-                                <SelectValue placeholder={t("selectLanguage")} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="english">English</SelectItem>
-                              <SelectItem value="dutch">Nederlands</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>
-                            {t("selectLanguage")}
-                          </FormDescription>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
 
-                <Separator />
-
-                <div className="flex items-center gap-4">
-                  {theme === 'light' ? (
-                    <Sun className="h-5 w-5 text-muted-foreground" />
-                  ) : (
-                    <Moon className="h-5 w-5 text-muted-foreground" />
-                  )}
-                  <div className="flex-1 space-y-1">
-                    <FormField
-                      control={form.control}
-                      name="theme"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("theme")}</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full md:w-52">
-                                <SelectValue placeholder={t("theme")} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="light">{t("lightMode")}</SelectItem>
-                              <SelectItem value="dark">{t("darkMode")}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>
-                            {theme === 'light' ? t("lightMode") : t("darkMode")}
-                          </FormDescription>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center gap-4">
-                  <Bell className="h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1 space-y-4">
-                    <h3 className="text-lg font-medium">{t("notifications")}</h3>
-                    
-                    <FormField
-                      control={form.control}
-                      name="notifyWorkouts"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between">
-                          <div className="space-y-0.5">
-                            <FormLabel>{t("workoutReminders")}</FormLabel>
-                            <FormDescription>
-                              {t("receiveReminders")}
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="notifyMeals"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between">
-                          <div className="space-y-0.5">
-                            <FormLabel>{t("mealLoggingReminders")}</FormLabel>
-                            <FormDescription>
-                              {t("getReminders")}
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center gap-4">
-                  <Lock className="h-5 w-5 text-muted-foreground" />
-                  <div className="flex-1 space-y-4">
-                    <h3 className="text-lg font-medium">{t("privacy")}</h3>
-                    
-                    <FormField
-                      control={form.control}
-                      name="saveProfile"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between">
-                          <div className="space-y-0.5">
-                            <FormLabel>{t("saveProfileData")}</FormLabel>
-                            <FormDescription>
-                              {t("storeProfileData")}
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Button type="submit">{t("saveChanges")}</Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-destructive">{t("accountActions")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <LogOut className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <h3 className="font-medium">{t("logOut")}</h3>
-                <p className="text-sm text-muted-foreground">{t("signOut")}</p>
-              </div>
+        {/* Notification Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("notifications")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="notifications">{t("enableNotifications")}</Label>
+              <Switch
+                id="notifications"
+                checked={settings.notifications}
+                onCheckedChange={handleNotificationsChange}
+              />
             </div>
-            <Button variant="outline" onClick={handleLogout}>{t("logOut")}</Button>
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Trash className="h-5 w-5 text-destructive" />
-              <div>
-                <h3 className="font-medium">{t("deleteAccount")}</h3>
-                <p className="text-sm text-muted-foreground">{t("permanentlyDelete")}</p>
-              </div>
+          </CardContent>
+        </Card>
+
+        {/* Data Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("dataManagement")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="dataBackup">{t("autoBackup")}</Label>
+              <Switch
+                id="dataBackup"
+                checked={settings.dataBackup}
+                onCheckedChange={handleDataBackupChange}
+              />
             </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">{t("deleteAccount")}</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t("areYouSure")}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t("cannotBeUndone")}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteAccount}>
-                    {t("yesDelete")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </CardContent>
-      </Card>
+
+            <div className="flex gap-4 pt-4">
+              <Button onClick={exportData} variant="outline">
+                {t("exportData")}
+              </Button>
+              <Button onClick={clearAllData} variant="destructive">
+                {t("clearAllData")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
