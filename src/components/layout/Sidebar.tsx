@@ -55,7 +55,11 @@ export default function Sidebar() {
       isMobile ? "w-full border-b" : "w-64 border-r hidden md:flex"
     )}>
       <div className="flex h-16 items-center px-6">
-        <h1 className="text-xl font-semibold tracking-tight">Progresa</h1>
+        <img 
+          src="/lovable-uploads/5a043003-b31b-4592-a628-4f1d3a423ae2.png" 
+          alt="Progresa Logo" 
+          className="h-8 w-auto object-contain"
+        />
       </div>
       <nav className="flex-1 overflow-auto py-6">
         <ul className="grid gap-1 px-2">
