@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 
 interface UserSettings {
   theme: "light" | "dark" | "system";
-  language: "en" | "nl";
+  language: Language;
   notifications: boolean;
   dataBackup: boolean;
 }
@@ -19,7 +19,7 @@ const Settings = () => {
   const { t, language, setLanguage } = useLanguage();
   const [settings, setSettings] = useState<UserSettings>({
     theme: "light",
-    language: "en",
+    language: "english",
     notifications: true,
     dataBackup: false,
   });
@@ -63,7 +63,7 @@ const Settings = () => {
   };
 
   // Handle language change
-  const handleLanguageChange = (newLanguage: "en" | "nl") => {
+  const handleLanguageChange = (newLanguage: Language) => {
     const newSettings = { ...settings, language: newLanguage };
     saveSettings(newSettings);
     setLanguage(newLanguage);
@@ -156,8 +156,8 @@ const Settings = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="nl">Nederlands</SelectItem>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="dutch">Nederlands</SelectItem>
                 </SelectContent>
               </Select>
             </div>
