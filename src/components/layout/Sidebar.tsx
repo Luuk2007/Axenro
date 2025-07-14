@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -49,6 +48,9 @@ export default function Sidebar() {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
   
+  // Check if dark theme is active
+  const isDarkTheme = document.documentElement.classList.contains('dark');
+  
   return (
     <aside className={cn(
       "flex flex-col border-border bg-card/50 backdrop-blur-sm",
@@ -56,9 +58,9 @@ export default function Sidebar() {
     )}>
       <div className="flex h-16 items-center px-6">
         <img 
-          src="/lovable-uploads/5a043003-b31b-4592-a628-4f1d3a423ae2.png" 
+          src={isDarkTheme ? "/lovable-uploads/4e0637d9-9c94-49fe-9f8c-f51ba36232ca.png" : "/lovable-uploads/5a043003-b31b-4592-a628-4f1d3a423ae2.png"}
           alt="Progresa Logo" 
-          className="h-12 w-auto object-contain max-w-full"
+          className="h-16 w-auto object-contain max-w-full"
         />
       </div>
       <nav className="flex-1 overflow-auto py-6">

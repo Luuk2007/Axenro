@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +18,6 @@ const Profile = () => {
   const { t } = useLanguage();
   const [profile, setProfile] = useState<ProfileFormValues | null>(null);
   
-  // Load profile from localStorage on component mount
   useEffect(() => {
     const savedProfile = localStorage.getItem("userProfile");
     if (savedProfile) {
