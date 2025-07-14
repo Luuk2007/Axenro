@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils } from 'lucide-react';
@@ -47,9 +48,26 @@ const navItems: NavItem[] = [
 export default function Sidebar() {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
   
-  // Check if dark theme is active
-  const isDarkTheme = document.documentElement.classList.contains('dark');
+  // Monitor theme changes
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDarkTheme(document.documentElement.classList.contains('dark'));
+    };
+    
+    // Initial check
+    checkTheme();
+    
+    // Create observer to watch for theme changes
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    
+    return () => observer.disconnect();
+  }, []);
   
   return (
     <aside className={cn(
@@ -58,7 +76,7 @@ export default function Sidebar() {
     )}>
       <div className="flex h-16 items-center px-6">
         <img 
-          src={isDarkTheme ? "/lovable-uploads/4e0637d9-9c94-49fe-9f8c-f51ba36232ca.png" : "/lovable-uploads/5a043003-b31b-4592-a628-4f1d3a423ae2.png"}
+          src={isDarkTheme ? "/lovable-uploads/b2928c79-c690-4951-98d5-d0a7cdbec9e2.png" : "/lovable-uploads/5a043003-b31b-4592-a628-4f1d3a423ae2.png"}
           alt="Progresa Logo" 
           className="h-16 w-auto object-contain max-w-full"
         />
