@@ -293,7 +293,8 @@ export function WeightTracker() {
                 )}
               </div>
               
-              <div className="h-[200px]">
+              {/* Weight Progress Chart */}
+              <div className="h-[200px] mb-6">
                 <ProgressChart
                   data={chartData}
                   title=""
