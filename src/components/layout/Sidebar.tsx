@@ -76,7 +76,7 @@ export default function Sidebar() {
     )}>
       <div className="flex h-16 items-center px-6">
         <img 
-          src={isDarkTheme ? "/lovable-uploads/b2928c79-c690-4951-98d5-d0a7cdbec9e2.png" : "/lovable-uploads/5a043003-b31b-4592-a628-4f1d3a423ae2.png"}
+          src={isDarkTheme ? "/lovable-uploads/4c2ef019-f56c-4d5e-a2dc-2976a3b85f08.png" : "/lovable-uploads/6b406cc5-7fc7-419d-8d30-e7acd9762371.png"}
           alt="Progresa Logo" 
           className="h-16 w-auto object-contain max-w-full"
         />
