@@ -170,7 +170,7 @@ const Settings = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label htmlFor="notifications">{t("enableNotifications")}</Label>
+              <Label htmlFor="notifications">{t("Enable Notifications")}</Label>
               <Switch
                 id="notifications"
                 checked={settings.notifications}
@@ -187,7 +187,7 @@ const Settings = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label htmlFor="dataBackup">{t("autoBackup")}</Label>
+              <Label htmlFor="dataBackup">{t("Auto Backup")}</Label>
               <Switch
                 id="dataBackup"
                 checked={settings.dataBackup}
