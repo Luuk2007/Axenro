@@ -9,7 +9,7 @@ import { format, parseISO } from 'date-fns';
 interface ProgressData {
   date: string;
   value: number;
-  originalDate?: string; // For sorting and tooltip display purposes
+  originalDate?: string;
 }
 
 interface ProgressChartProps {
@@ -37,9 +37,7 @@ export default function ProgressChart({
   const sortedData = React.useMemo(() => {
     if (!data.length) return [];
     
-    // Create a copy to avoid mutating original data
     return [...data].sort((a, b) => {
-      // Use originalDate if available, otherwise use date
       const dateA = a.originalDate ? new Date(a.originalDate) : new Date(a.date);
       const dateB = b.originalDate ? new Date(b.originalDate) : new Date(b.date);
       return dateA.getTime() - dateB.getTime();
@@ -51,36 +49,24 @@ export default function ProgressChart({
   const difference = latestValue - previousValue;
   const isPositive = difference >= 0;
 
-  // Calculate min and max for better scaling with expanded range
+  // Calculate Y-axis domain with proper padding and target value consideration
   const values = sortedData.map(item => item.value);
+  if (targetValue) {
+    values.push(targetValue);
+  }
+  
   const min = Math.min(...values);
   const max = Math.max(...values);
-  
-  // Add more padding for Y axis to show a wider range
-  const yPaddingPercentage = 0.15; // 15% padding
   const range = max - min;
+  const padding = Math.max(range * 0.1, 1); // At least 1 unit of padding
   
-  // Calculate Y axis domain with padding
-  const yMin = Math.max(0, min - (range * yPaddingPercentage));
-  const yMax = max + (range * yPaddingPercentage);
-  
-  // Ensure min and max have a reasonable distance between them
-  const yDomain = [
-    Math.min(yMin, targetValue ? targetValue - (range * 0.1) : yMin),
-    Math.max(yMax, targetValue ? targetValue + (range * 0.1) : yMax)
-  ];
-  
-  // Get nice tick values
-  const getYAxisTicks = () => {
-    const tickCount = 5;
-    const step = (yDomain[1] - yDomain[0]) / (tickCount - 1);
-    return Array.from({ length: tickCount }, (_, i) => yDomain[0] + step * i);
-  };
+  const yMin = Math.max(0, min - padding);
+  const yMax = max + padding;
 
   return (
-    <div className={cn("glassy-card rounded-xl overflow-hidden card-shadow hover-scale", className)}>
-      <div className="px-5 py-4 border-b border-border">
-        <div className="flex items-center justify-between">
+    <div className={cn("w-full", className)}>
+      {title && (
+        <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium tracking-tight">{title}</h3>
           {onViewAll && (
             <Button variant="ghost" size="sm" onClick={onViewAll}>
@@ -88,34 +74,24 @@ export default function ProgressChart({
             </Button>
           )}
         </div>
-      </div>
-      <div className="p-4">
-        <div className="flex items-baseline">
-          <span className="text-2xl font-semibold tracking-tight mr-2">
-            {latestValue} {label}
-          </span>
-          {sortedData.length > 1 && (
-            <span className={cn(
-              "text-xs font-medium",
-              isPositive ? "text-green-500" : "text-red-500"
-            )}>
-              {isPositive ? "+" : ""}{Math.abs(difference).toFixed(1)} {label}
-            </span>
-          )}
-        </div>
-        <div className="h-[180px] mt-4">
+      )}
+      
+      {sortedData.length > 0 && (
+        <div className="w-full h-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={sortedData}
               margin={{ top: 10, right: 10, left: 35, bottom: 0 }}
             >
               <defs>
-                <linearGradient id={`color${color}`} x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={`gradient-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={color} stopOpacity={0.3} />
                   <stop offset="95%" stopColor={color} stopOpacity={0} />
                 </linearGradient>
               </defs>
+              
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+              
               <XAxis 
                 dataKey="date" 
                 axisLine={false}
@@ -124,61 +100,63 @@ export default function ProgressChart({
                 padding={{ left: 10, right: 10 }}
                 interval="preserveStartEnd"
               />
+              
               <YAxis 
-                domain={yDomain}
+                domain={[yMin, yMax]}
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 10 }}
                 width={35}
                 allowDecimals={true}
-                tickCount={5}
-                ticks={getYAxisTicks()}
                 tickFormatter={(value) => value.toFixed(1)}
               />
+              
               <Tooltip 
                 contentStyle={{ 
                   borderRadius: '8px', 
                   border: '1px solid rgba(0,0,0,0.05)', 
                   boxShadow: '0 2px 8px rgba(0,0,0,0.08)' 
                 }} 
-                formatter={(value) => [`${value} ${label}`, '']}
+                formatter={(value: number) => [`${value} ${label}`, '']}
                 labelFormatter={(label, items) => {
-                  // If we have originalDate in our payload, use it for the tooltip
-                  const item = items[0]?.payload;
+                  const item = items?.[0]?.payload;
                   return item?.originalDate ? format(parseISO(item.originalDate), 'MMM d, yyyy') : label;
                 }}
                 animationDuration={300}
               />
+              
               {targetValue && (
                 <ReferenceLine 
                   y={targetValue}
                   stroke="#FF6B6B"
-                  strokeDasharray="3 3"
-                  strokeWidth={1.5}
+                  strokeDasharray="5 5"
+                  strokeWidth={2}
                   label={{
                     position: 'right',
-                    value: `${t("targetWeight")}: ${targetValue}${label}`,
+                    value: `Target: ${targetValue}${label}`,
                     fill: '#FF6B6B',
-                    fontSize: 10
+                    fontSize: 10,
+                    offset: 10
                   }}
                 />
               )}
+              
               <Area 
                 type="monotone" 
                 dataKey="value" 
                 stroke={color} 
                 fillOpacity={1}
-                fill={`url(#color${color})`} 
+                fill={`url(#gradient-${color.replace('#', '')})`}
                 strokeWidth={2}
-                activeDot={{ r: 5, strokeWidth: 1 }}
-                dot={{ r: 3, strokeWidth: 1, fill: "white" }}
+                dot={{ r: 4, strokeWidth: 2, fill: "white", stroke: color }}
+                activeDot={{ r: 6, strokeWidth: 2, fill: color }}
                 isAnimationActive={true}
                 animationDuration={1000}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      )}
     </div>
   );
 }

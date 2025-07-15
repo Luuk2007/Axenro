@@ -5,15 +5,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { ArrowUp, ArrowDown, Plus, Weight } from 'lucide-react';
+import { ArrowUp, ArrowDown, Plus, Weight, Trash2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { Progress as ProgressBar } from '@/components/ui/progress';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
 
 interface WeightEntry {
   date: string;
   value: number;
-  originalDate?: string; // Store the full date for sorting
+  originalDate?: string;
+  id: string; // Add unique ID for deletion
 }
 
 export function WeightTracker() {
@@ -27,17 +36,25 @@ export function WeightTracker() {
   const [newTargetWeight, setNewTargetWeight] = useState('');
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
-  // On first load, check if we have weight data in localStorage
+  // Load data from localStorage on mount
   useEffect(() => {
     const savedWeightHistory = localStorage.getItem('weightHistory');
     const savedStartingWeight = localStorage.getItem('startingWeight');
     const savedTargetWeight = localStorage.getItem('targetWeight');
 
     if (savedWeightHistory) {
-      setWeightHistory(JSON.parse(savedWeightHistory));
-    } else {
-      // If no history exists, initialize with empty array
-      setWeightHistory([]);
+      try {
+        const parsedHistory = JSON.parse(savedWeightHistory);
+        // Ensure all entries have IDs for delete functionality
+        const historyWithIds = parsedHistory.map((entry: WeightEntry, index: number) => ({
+          ...entry,
+          id: entry.id || `weight-${Date.now()}-${index}`
+        }));
+        setWeightHistory(historyWithIds);
+      } catch (error) {
+        console.error('Error loading weight history:', error);
+        setWeightHistory([]);
+      }
     }
 
     if (savedStartingWeight) {
@@ -49,22 +66,26 @@ export function WeightTracker() {
     }
   }, []);
 
-  // Save to localStorage whenever our data changes
+  // Save to localStorage whenever data changes
   useEffect(() => {
     if (weightHistory.length > 0) {
       localStorage.setItem('weightHistory', JSON.stringify(weightHistory));
     }
+  }, [weightHistory]);
 
+  useEffect(() => {
     if (startingWeight !== null) {
       localStorage.setItem('startingWeight', startingWeight.toString());
     }
+  }, [startingWeight]);
 
+  useEffect(() => {
     if (targetWeight !== null) {
       localStorage.setItem('targetWeight', targetWeight.toString());
     }
-  }, [weightHistory, startingWeight, targetWeight]);
+  }, [targetWeight]);
 
-  // Calculate progress
+  // Calculate progress percentage
   const progressPercentage = React.useMemo(() => {
     if (!startingWeight || !targetWeight || startingWeight === targetWeight) {
       return 0;
@@ -77,12 +98,10 @@ export function WeightTracker() {
     const isGaining = targetWeight > startingWeight;
     
     if (isGaining) {
-      // Weight gain progress
       const totalToGain = targetWeight - startingWeight;
       const gained = latestWeight - startingWeight;
       return Math.min(Math.max(0, (gained / totalToGain) * 100), 100);
     } else {
-      // Weight loss progress  
       const totalToLose = startingWeight - targetWeight;
       const lost = startingWeight - latestWeight;
       return Math.min(Math.max(0, (lost / totalToLose) * 100), 100);
@@ -102,28 +121,24 @@ export function WeightTracker() {
       return;
     }
 
-    // Store the full date for sorting and use a formatted date for display
-    const dateObj = parseISO(selectedDate);
-    const originalDate = selectedDate;  // Store full ISO date for sorting
-    const formattedDate = format(dateObj, 'MMM d'); // Format for display
-    
     // Check if this is the first weight entry
     if (weightHistory.length === 0 && startingWeight === null) {
       setStartingWeight(weightValue);
     }
     
-    // Add the new weight entry with both dates
-    const newEntry = { 
+    // Create new entry with unique ID
+    const dateObj = parseISO(selectedDate);
+    const originalDate = selectedDate;
+    const formattedDate = format(dateObj, 'MMM d');
+    const newEntry: WeightEntry = { 
       date: formattedDate, 
       value: weightValue,
-      originalDate 
+      originalDate,
+      id: `weight-${Date.now()}-${Math.random()}`
     };
     
-    // Create a new array with the new entry
-    const updatedHistory = [...weightHistory, newEntry];
-    
-    // Sort by date using the original date string
-    updatedHistory.sort((a, b) => {
+    // Add and sort by date
+    const updatedHistory = [...weightHistory, newEntry].sort((a, b) => {
       const dateA = new Date(a.originalDate || a.date);
       const dateB = new Date(b.originalDate || b.date);
       return dateA.getTime() - dateB.getTime();
@@ -131,8 +146,24 @@ export function WeightTracker() {
     
     setWeightHistory(updatedHistory);
     setNewWeight('');
+    setSelectedDate(format(new Date(), 'yyyy-MM-dd'));
     setShowAddWeightDialog(false);
     toast.success(t("weightUpdated"));
+  };
+
+  // Delete weight entry
+  const handleDeleteWeight = (id: string) => {
+    const updatedHistory = weightHistory.filter(entry => entry.id !== id);
+    setWeightHistory(updatedHistory);
+    
+    // Update localStorage immediately
+    if (updatedHistory.length > 0) {
+      localStorage.setItem('weightHistory', JSON.stringify(updatedHistory));
+    } else {
+      localStorage.removeItem('weightHistory');
+    }
+    
+    toast.success(t("weightDeleted"));
   };
 
   // Update target weight
@@ -151,15 +182,15 @@ export function WeightTracker() {
     }
     
     setTargetWeight(parsedTarget);
+    setNewTargetWeight('');
     setShowTargetDialog(false);
     toast.success(t("targetUpdated"));
   };
 
-  // Calculate weight change indicators
+  // Get weight change indicators
   const getWeightChange = () => {
     if (weightHistory.length < 2) return null;
     
-    // Get the sorted history to ensure we're comparing latest entries
     const sortedHistory = [...weightHistory].sort((a, b) => {
       const dateA = new Date(a.originalDate || a.date);
       const dateB = new Date(b.originalDate || b.date);
@@ -176,10 +207,35 @@ export function WeightTracker() {
     };
   };
 
+  // Prepare chart data - ensure proper formatting
+  const chartData = React.useMemo(() => {
+    if (weightHistory.length === 0) return [];
+    
+    return [...weightHistory]
+      .sort((a, b) => {
+        const dateA = new Date(a.originalDate || a.date);
+        const dateB = new Date(b.originalDate || b.date);
+        return dateA.getTime() - dateB.getTime();
+      })
+      .map(entry => ({
+        date: entry.date,
+        value: entry.value,
+        originalDate: entry.originalDate
+      }));
+  }, [weightHistory]);
+
   const weightChange = getWeightChange();
+  const currentWeight = weightHistory.length > 0 
+    ? [...weightHistory].sort((a, b) => {
+        const dateA = new Date(a.originalDate || a.date);
+        const dateB = new Date(b.originalDate || b.date);
+        return dateB.getTime() - dateA.getTime();
+      })[0].value
+    : null;
 
   return (
     <>
+      {/* Main Weight Chart Card */}
       <div className="glassy-card rounded-xl overflow-hidden card-shadow">
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
           <h3 className="font-medium tracking-tight">{t("weightProgress")}</h3>
@@ -225,17 +281,9 @@ export function WeightTracker() {
         <div className="p-4">
           {weightHistory.length > 0 ? (
             <>
-              <div className="flex items-baseline">
+              <div className="flex items-baseline mb-4">
                 <span className="text-2xl font-semibold tracking-tight mr-2">
-                  {(() => {
-                    // Find the most recent entry
-                    const sortedEntries = [...weightHistory].sort((a, b) => {
-                      const dateA = new Date(a.originalDate || a.date);
-                      const dateB = new Date(b.originalDate || b.date);
-                      return dateB.getTime() - dateA.getTime(); // Sort in descending order
-                    });
-                    return sortedEntries[0].value;
-                  })()} kg
+                  {currentWeight} kg
                 </span>
                 {weightChange && (
                   <span className={`text-xs font-medium ${weightChange.isGain ? 'text-red-500' : 'text-green-500'}`}>
@@ -244,9 +292,10 @@ export function WeightTracker() {
                   </span>
                 )}
               </div>
-              <div className="h-[180px] mt-4">
+              
+              <div className="h-[200px]">
                 <ProgressChart
-                  data={weightHistory}
+                  data={chartData}
                   title=""
                   label="kg"
                   color="#4F46E5"
@@ -270,6 +319,56 @@ export function WeightTracker() {
         </div>
       </div>
 
+      {/* Weight History Table */}
+      {weightHistory.length > 0 && (
+        <div className="glassy-card rounded-xl overflow-hidden card-shadow">
+          <div className="px-5 py-4 border-b border-border">
+            <h3 className="font-medium tracking-tight">{t("weightHistory")}</h3>
+          </div>
+          <div className="p-5">
+            <div className="max-h-72 overflow-y-auto">
+              <Table className="w-full text-sm">
+                <TableHeader>
+                  <TableRow className="border-b border-border">
+                    <TableHead className="pb-2 font-medium">{t("date")}</TableHead>
+                    <TableHead className="pb-2 font-medium text-right">{t("weight")}</TableHead>
+                    <TableHead className="pb-2 font-medium w-10"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...weightHistory]
+                    .sort((a, b) => {
+                      const dateA = new Date(a.originalDate || a.date);
+                      const dateB = new Date(b.originalDate || b.date);
+                      return dateB.getTime() - dateA.getTime();
+                    })
+                    .map(entry => (
+                      <TableRow key={entry.id} className="border-b border-border">
+                        <TableCell className="py-3">
+                          {entry.originalDate ? format(parseISO(entry.originalDate), 'MMM d, yyyy') : entry.date}
+                        </TableCell>
+                        <TableCell className="py-3 text-right">{entry.value} kg</TableCell>
+                        <TableCell className="py-3">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeleteWeight(entry.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  }
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Weight Goal Card */}
       {weightHistory.length > 0 && (
         <div className="glassy-card rounded-xl overflow-hidden card-shadow">
           <div className="px-5 py-4 border-b border-border">
