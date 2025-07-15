@@ -125,7 +125,7 @@ const Settings = () => {
         {/* Appearance Settings */}
         <Card>
           <CardHeader>
-            <CardTitle>{t("appearance")}</CardTitle>
+            <CardTitle>{t("Appearance")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
@@ -183,7 +183,7 @@ const Settings = () => {
         {/* Data Management */}
         <Card>
           <CardHeader>
-            <CardTitle>{t("dataManagement")}</CardTitle>
+            <CardTitle>{t("Data Management")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
