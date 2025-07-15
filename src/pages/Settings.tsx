@@ -197,10 +197,10 @@ const Settings = () => {
 
             <div className="flex gap-4 pt-4">
               <Button onClick={exportData} variant="outline">
-                {t("exportData")}
+                {t("Export data")}
               </Button>
               <Button onClick={clearAllData} variant="destructive">
-                {t("clearAllData")}
+                {t("Clear all data")}
               </Button>
             </div>
           </CardContent>
