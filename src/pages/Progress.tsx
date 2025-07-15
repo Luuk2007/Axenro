@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -242,7 +241,9 @@ export default function Progress() {
   };
   
   const getMeasurementsByType = (type: string) => {
-    return measurements.filter(m => m.type === type);
+    const typeMeasurements = measurements.filter(m => m.type === type);
+    console.log(`getMeasurementsByType(${type}):`, typeMeasurements);
+    return typeMeasurements;
   };
   
   const getLatestMeasurement = (type: string) => {
@@ -253,7 +254,10 @@ export default function Progress() {
   };
   
   const prepareMeasurementDataForChart = (type: string) => {
-    return getMeasurementsByType(type).map(m => ({
+    const typeData = getMeasurementsByType(type);
+    console.log(`prepareMeasurementDataForChart(${type}) - raw data:`, typeData);
+    
+    const chartData = typeData.map(m => ({
       date: format(parseISO(m.date), 'MMM d'),
       value: m.value,
       originalDate: m.date
@@ -263,6 +267,9 @@ export default function Progress() {
       const dateB = new Date(b.originalDate || b.date);
       return dateA.getTime() - dateB.getTime();
     });
+    
+    console.log(`prepareMeasurementDataForChart(${type}) - formatted chart data:`, chartData);
+    return chartData;
   };
   
   return (
@@ -418,32 +425,44 @@ export default function Progress() {
             {/* Show measurement chart if we have data */}
             {measurements.length > 0 && (
               <div className="col-span-2">
-                <Tabs defaultValue="waist" className="w-full">
-                  <TabsList className="mb-4 flex flex-wrap">
-                    {measurementTypes.filter(type => type.id !== 'weight').map(type => (
-                      <TabsTrigger key={type.id} value={type.id} disabled={getMeasurementsByType(type.id).length === 0}>
-                        {t(type.id)}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                  
-                  {measurementTypes.filter(type => type.id !== 'weight').map(type => (
-                    <TabsContent key={type.id} value={type.id}>
-                      {getMeasurementsByType(type.id).length > 0 ? (
-                        <ProgressChart
-                          data={prepareMeasurementDataForChart(type.id)}
-                          title={t(type.id)}
-                          label={type.unit}
-                          color="#4F46E5"
-                        />
-                      ) : (
-                        <div className="p-4 text-center text-muted-foreground">
-                          {t("noDataForThisMeasurement")}
-                        </div>
-                      )}
-                    </TabsContent>
-                  ))}
-                </Tabs>
+                <div className="glassy-card rounded-xl overflow-hidden card-shadow">
+                  <div className="px-5 py-4 border-b border-border">
+                    <h3 className="font-medium tracking-tight">{t("measurementTrends")}</h3>
+                  </div>
+                  <div className="p-5">
+                    <Tabs defaultValue="waist" className="w-full">
+                      <TabsList className="mb-4 flex flex-wrap">
+                        {measurementTypes.filter(type => type.id !== 'weight').map(type => {
+                          const hasData = getMeasurementsByType(type.id).length > 0;
+                          return (
+                            <TabsTrigger key={type.id} value={type.id} disabled={!hasData}>
+                              {t(type.id)} {hasData && `(${getMeasurementsByType(type.id).length})`}
+                            </TabsTrigger>
+                          );
+                        })}
+                      </TabsList>
+                      
+                      {measurementTypes.filter(type => type.id !== 'weight').map(type => (
+                        <TabsContent key={type.id} value={type.id}>
+                          {getMeasurementsByType(type.id).length > 0 ? (
+                            <div className="h-[300px]">
+                              <ProgressChart
+                                data={prepareMeasurementDataForChart(type.id)}
+                                title=""
+                                label={type.unit}
+                                color="#4F46E5"
+                              />
+                            </div>
+                          ) : (
+                            <div className="p-4 text-center text-muted-foreground">
+                              {t("noDataForThisMeasurement")}
+                            </div>
+                          )}
+                        </TabsContent>
+                      ))}
+                    </Tabs>
+                  </div>
+                </div>
               </div>
             )}
           </div>

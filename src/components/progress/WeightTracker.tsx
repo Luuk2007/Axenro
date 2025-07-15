@@ -209,9 +209,14 @@ export function WeightTracker() {
 
   // Prepare chart data - ensure proper formatting
   const chartData = React.useMemo(() => {
-    if (weightHistory.length === 0) return [];
+    console.log('WeightTracker chartData - raw weightHistory:', weightHistory);
     
-    return [...weightHistory]
+    if (weightHistory.length === 0) {
+      console.log('WeightTracker chartData - no weight history, returning empty array');
+      return [];
+    }
+    
+    const sortedData = [...weightHistory]
       .sort((a, b) => {
         const dateA = new Date(a.originalDate || a.date);
         const dateB = new Date(b.originalDate || b.date);
@@ -222,6 +227,9 @@ export function WeightTracker() {
         value: entry.value,
         originalDate: entry.originalDate
       }));
+    
+    console.log('WeightTracker chartData - sorted and formatted:', sortedData);
+    return sortedData;
   }, [weightHistory]);
 
   const weightChange = getWeightChange();
@@ -232,6 +240,10 @@ export function WeightTracker() {
         return dateB.getTime() - dateA.getTime();
       })[0].value
     : null;
+
+  console.log('WeightTracker render - weightHistory length:', weightHistory.length);
+  console.log('WeightTracker render - chartData length:', chartData.length);
+  console.log('WeightTracker render - targetWeight:', targetWeight);
 
   return (
     <>
@@ -293,7 +305,7 @@ export function WeightTracker() {
                 )}
               </div>
               
-              {/* Weight Progress Chart */}
+              {/* Weight Progress Chart - Always show when data exists */}
               <div className="h-[200px] mb-6">
                 <ProgressChart
                   data={chartData}
