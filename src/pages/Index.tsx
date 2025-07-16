@@ -182,6 +182,10 @@ const Dashboard = () => {
     navigate('/workouts');
   };
 
+  const navigateToWeightProgress = () => {
+    navigate('/progress');
+  };
+
   const handleAddActivity = (activityId: string) => {
     toast.success(`Activity added to your plan`);
     setShowAddActivity(false);
@@ -259,6 +263,7 @@ const Dashboard = () => {
           value={userWeight ? `${userWeight} kg` : "76.4 kg"}
           icon={Weight}
           description={`${t("target")}: ${userTargetWeight || '75'} kg`}
+          onClick={navigateToWeightProgress}
         />
       </div>
 

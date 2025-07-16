@@ -32,10 +32,13 @@ const Settings = () => {
     }
   }, []);
 
-  // Save settings to localStorage
+  // Save settings to localStorage and dispatch custom event
   const saveSettings = (newSettings: UserSettings) => {
     localStorage.setItem("userSettings", JSON.stringify(newSettings));
     setSettings(newSettings);
+    
+    // Dispatch custom event to notify other components about settings change
+    window.dispatchEvent(new CustomEvent('settingsChanged'));
   };
 
   // Handle theme change

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BellIcon, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -16,6 +16,47 @@ export default function TopBar() {
   
   const [showNotifications, setShowNotifications] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  // Check notification settings from localStorage
+  useEffect(() => {
+    const checkNotificationSettings = () => {
+      const savedSettings = localStorage.getItem("userSettings");
+      if (savedSettings) {
+        try {
+          const settings = JSON.parse(savedSettings);
+          setNotificationsEnabled(settings.notifications ?? true);
+        } catch (error) {
+          console.error("Error parsing user settings:", error);
+          setNotificationsEnabled(true);
+        }
+      }
+    };
+
+    // Initial check
+    checkNotificationSettings();
+
+    // Listen for storage changes (when settings are updated)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "userSettings") {
+        checkNotificationSettings();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events within the same tab
+    const handleSettingsChange = () => {
+      checkNotificationSettings();
+    };
+    
+    window.addEventListener('settingsChanged', handleSettingsChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('settingsChanged', handleSettingsChange);
+    };
+  }, []);
   
   // Mark notifications as read when the notification dialog is opened
   const handleOpenNotifications = () => {
@@ -41,23 +82,25 @@ export default function TopBar() {
         )}
       </div>
       <div className="flex items-center gap-4">
-        <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
-          <DialogTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="relative hover:bg-accent"
-              onClick={handleOpenNotifications}
-            >
-              <BellIcon className="h-5 w-5" />
-              <span className="sr-only">{t("notifications")}</span>
-              {hasUnreadNotifications && (
-                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary"></span>
-              )}
-            </Button>
-          </DialogTrigger>
-          <NotificationsDialog open={showNotifications} setOpen={setShowNotifications} />
-        </Dialog>
+        {notificationsEnabled && (
+          <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative hover:bg-accent"
+                onClick={handleOpenNotifications}
+              >
+                <BellIcon className="h-5 w-5" />
+                <span className="sr-only">{t("notifications")}</span>
+                {hasUnreadNotifications && (
+                  <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary"></span>
+                )}
+              </Button>
+            </DialogTrigger>
+            <NotificationsDialog open={showNotifications} setOpen={setShowNotifications} />
+          </Dialog>
+        )}
         
         <UserMenu />
       </div>
