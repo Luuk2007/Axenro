@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Calendar, Dumbbell, Flame, Footprints, Plus, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import StatsCard from '@/components/dashboard/StatsCard';
 import MacroProgressTracker from '@/components/dashboard/MacroProgressTracker';
 import MealsList from '@/components/dashboard/MealsList';
 import ProgressChart from '@/components/dashboard/ProgressChart';
+import StepsConnectionModal from '@/components/dashboard/StepsConnectionModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { format, parse, isValid, startOfWeek, endOfWeek } from 'date-fns';
 import { toast } from 'sonner';
@@ -53,6 +53,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [date, setDate] = useState<Date>(new Date());
   const [showAddActivity, setShowAddActivity] = useState(false);
+  const [showStepsConnection, setShowStepsConnection] = useState(false);
   const [weightData, setWeightData] = useState<Array<{date: string, value: number}>>([]);
   const [userWeight, setUserWeight] = useState<number | null>(null);
   const [userTargetWeight, setUserTargetWeight] = useState<number | null>(null);
@@ -186,6 +187,10 @@ const Dashboard = () => {
     navigate('/progress');
   };
 
+  const handleOpenStepsConnection = () => {
+    setShowStepsConnection(true);
+  };
+
   const handleAddActivity = (activityId: string) => {
     toast.success(`Activity added to your plan`);
     setShowAddActivity(false);
@@ -250,6 +255,7 @@ const Dashboard = () => {
           value={dailySteps.toLocaleString()}
           icon={Footprints}
           description={`${t("target")}: 10,000`}
+          onClick={handleOpenStepsConnection}
         />
         <StatsCard
           title={`${t("workouts")}`}
@@ -284,6 +290,12 @@ const Dashboard = () => {
           onViewAll={navigateToNutrition}
         />
       </div>
+
+      {/* Steps Connection Modal */}
+      <StepsConnectionModal 
+        open={showStepsConnection} 
+        onOpenChange={setShowStepsConnection} 
+      />
     </div>
   );
 };
