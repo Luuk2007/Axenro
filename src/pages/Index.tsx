@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar, Dumbbell, Flame, Footprints, Plus, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -197,7 +198,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard")}</h1>
@@ -249,6 +250,7 @@ const Dashboard = () => {
           value={userCalories ? userCalories.toString() : "1,840"}
           icon={Flame}
           description={`${t("target")}: ${userCalories ? userCalories : 2200}`}
+          onClick={navigateToNutrition}
         />
         <StatsCard
           title={`${t("dailySteps")}`}
