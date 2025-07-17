@@ -32,16 +32,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Check subscription status after auth state is set
+      if (session?.user) {
+        checkSubscriptionStatus(session);
+      }
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      // Check subscription status on auth change
+      if (session?.user) {
+        checkSubscriptionStatus(session);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const checkSubscriptionStatus = async (session: Session) => {
+    try {
+      await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+    }
+  };
 
   const signIn = async (email: string, password: string) => {
     try {
