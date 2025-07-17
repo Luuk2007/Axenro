@@ -45,10 +45,10 @@ serve(async (req) => {
     if (!planId) throw new Error("Plan ID is required");
     logStep("Plan ID received", { planId });
 
-    // Define plan pricing (in cents)
+    // Define plan pricing using actual Stripe price IDs
     const planPricing = {
-      pro: { amount: 499, name: "Pro Plan" },
-      premium: { amount: 799, name: "Premium Plan" }
+      pro: { priceId: "price_1RlSreDs5WaqdwhXg8ai9HIf", name: "Pro Plan" },
+      premium: { priceId: "price_1RlSs0Ds5WaqdwhXoiriAHQK", name: "Premium Plan" }
     };
 
     if (!planPricing[planId as keyof typeof planPricing]) {
@@ -77,12 +77,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price_data: {
-            currency: "eur",
-            product_data: { name: selectedPlan.name },
-            unit_amount: selectedPlan.amount,
-            recurring: { interval: "month" },
-          },
+          price: selectedPlan.priceId,
           quantity: 1,
         },
       ],
