@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_steps: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          source: string
+          steps: number
+          synced_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          source: string
+          steps?: number
+          synced_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          source?: string
+          steps?: number
+          synced_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       food_logs: {
         Row: {
           created_at: string
@@ -37,6 +67,45 @@ export type Database = {
           food_item?: Json
           id?: string
           meal_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      health_connections: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          provider: string
+          provider_user_id: string | null
+          refresh_token: string | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          provider: string
+          provider_user_id?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          provider?: string
+          provider_user_id?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -100,7 +169,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_latest_daily_steps: {
+        Args: { user_uuid: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
