@@ -123,6 +123,8 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
       
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <div className="w-9"></div>
+          <h3 className="font-medium text-lg">Scan Barcode</h3>
           <button 
             className="p-2 hover:bg-gray-100 rounded-full" 
             onClick={handleClose} 
@@ -130,23 +132,85 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
           >
             <X className="h-5 w-5" />
           </button>
-          <h3 className="font-medium text-lg">Scan Barcode</h3>
-          <div className="w-9"></div>
         </div>
         
-        {/* Camera container - always rendered but conditionally visible */}
-        <div 
-          ref={scannerRef} 
-          className={`relative w-full ${isScanning ? 'block' : 'hidden'}`}
-          style={{ 
-            height: '400px',
-            background: '#000',
-            overflow: 'hidden',
-            position: 'relative'
-          }}
-        />
-        
-        {!isScanning ? (
+        {isScanning ? (
+          <div className="relative" style={{ height: '400px' }}>
+            {/* Camera container */}
+            <div 
+              ref={scannerRef} 
+              className="absolute inset-0 w-full h-full bg-black"
+              style={{ 
+                overflow: 'hidden'
+              }}
+            />
+            
+            {/* Loading overlay */}
+            {loading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-20">
+                <Loader2 className="h-8 w-8 text-white animate-spin mb-2" />
+                <p className="text-white text-sm">Processing barcode...</p>
+              </div>
+            )}
+            
+            {/* Error overlay */}
+            {error && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/50 z-20">
+                <AlertCircle className="h-10 w-10 text-red-400 mb-2" />
+                <p className="text-white mb-4 text-sm">{error}</p>
+                <Button onClick={() => setError(null)} size="sm" variant="secondary">
+                  Try Again
+                </Button>
+              </div>
+            )}
+            
+            {/* Scanning overlay - positioned on top of camera */}
+            {cameraActive && !loading && !error && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                <div className="relative w-3/4 h-32">
+                  {/* Corner brackets */}
+                  <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-green-400"></div>
+                  <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-green-400"></div>
+                  <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-green-400"></div>
+                  <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-green-400"></div>
+                  
+                  {/* Scanning line */}
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full h-0.5 bg-green-400 opacity-75 animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Status indicator */}
+            <div className="absolute top-4 left-4 right-4 z-15">
+              <div className="bg-black/70 text-white p-2 rounded text-xs text-center">
+                {isInitializing ? (
+                  <span className="text-yellow-400">● Initializing camera...</span>
+                ) : cameraActive ? (
+                  <span className="text-green-400">● Camera Active - Point at barcode</span>
+                ) : (
+                  <span className="text-yellow-400">● Starting camera...</span>
+                )}
+              </div>
+            </div>
+            
+            {/* Bottom controls */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 text-sm text-center bg-black/70 text-white z-15">
+              <p className="flex items-center justify-center gap-2 mb-2">
+                <Camera className="h-4 w-4" />
+                {cameraActive ? 'Point camera at barcode - scanning automatically' : 'Starting camera...'}
+              </p>
+              <Button 
+                onClick={stopScanner} 
+                variant="outline" 
+                size="sm"
+              >
+                Stop Camera
+              </Button>
+            </div>
+          </div>
+        ) : (
           <div className="p-6 text-center space-y-4">
             <Camera className="h-16 w-16 mx-auto text-gray-400" />
             <div>
@@ -225,72 +289,6 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
                 Search Product
               </Button>
             </div>
-          </div>
-        ) : (
-          <div className="relative flex-1" style={{ minHeight: '400px' }}>
-            {loading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-20">
-                <Loader2 className="h-8 w-8 text-white animate-spin mb-2" />
-                <p className="text-white text-sm">Processing barcode...</p>
-              </div>
-            )}
-            
-            {error && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/50 z-20">
-                <AlertCircle className="h-10 w-10 text-red-400 mb-2" />
-                <p className="text-white mb-4 text-sm">{error}</p>
-                <Button onClick={() => setError(null)} size="sm" variant="secondary">
-                  Try Again
-                </Button>
-              </div>
-            )}
-            
-            {/* Scanning overlay */}
-            {cameraActive && !loading && !error && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <div className="relative w-3/4 h-32">
-                  {/* Corner brackets */}
-                  <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-green-400"></div>
-                  <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-green-400"></div>
-                  <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-green-400"></div>
-                  <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-green-400"></div>
-                  
-                  {/* Scanning line */}
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full h-0.5 bg-green-400 opacity-75 animate-pulse"></div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Status indicator */}
-            <div className="absolute top-4 left-4 right-4 z-10">
-              <div className="bg-black/70 text-white p-2 rounded text-xs text-center">
-                {isInitializing ? (
-                  <span className="text-yellow-400">● Initializing camera...</span>
-                ) : cameraActive ? (
-                  <span className="text-green-400">● Camera Active - Point at barcode</span>
-                ) : (
-                  <span className="text-yellow-400">● Starting camera...</span>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {isScanning && (
-          <div className="p-4 text-sm text-center bg-muted/30 border-t">
-            <p className="flex items-center justify-center gap-2 mb-2">
-              <Camera className="h-4 w-4" />
-              {cameraActive ? 'Point camera at barcode - scanning automatically' : 'Starting camera...'}
-            </p>
-            <Button 
-              onClick={stopScanner} 
-              variant="outline" 
-              size="sm"
-            >
-              Stop Camera
-            </Button>
           </div>
         )}
       </div>
