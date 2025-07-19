@@ -146,7 +146,12 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
           Quagga.start();
           console.log('Quagga started');
           
-          setCameraActive(true);
+          // Set camera active after a short delay to ensure video element is created
+          setTimeout(() => {
+            setCameraActive(true);
+            console.log('Camera marked as active');
+          }, 500);
+          
           resolve();
         });
       });

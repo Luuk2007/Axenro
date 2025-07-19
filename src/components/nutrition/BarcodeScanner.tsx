@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -86,6 +86,35 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
     onClose();
   };
 
+  // Apply styles to Quagga video element when camera becomes active
+  useEffect(() => {
+    if (cameraActive && scannerRef.current) {
+      const videoElement = scannerRef.current.querySelector('video');
+      const canvasElements = scannerRef.current.querySelectorAll('canvas');
+      
+      if (videoElement) {
+        console.log('Styling video element for proper display');
+        videoElement.style.width = '100%';
+        videoElement.style.height = '100%';
+        videoElement.style.objectFit = 'cover';
+        videoElement.style.position = 'absolute';
+        videoElement.style.top = '0';
+        videoElement.style.left = '0';
+        videoElement.style.zIndex = '1';
+      }
+      
+      // Style canvas elements created by Quagga
+      canvasElements.forEach((canvas, index) => {
+        canvas.style.position = 'absolute';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.zIndex = index === 0 ? '2' : '3'; // Overlay canvas on top
+      });
+    }
+  }, [cameraActive]);
+
   return (
     <DialogContent className="sm:max-w-md p-0 overflow-hidden">
       <DialogHeader className="sr-only">
@@ -105,15 +134,15 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
           <div className="w-9"></div>
         </div>
         
-        {/* Always render camera container, but conditionally show it */}
+        {/* Camera container - always rendered but conditionally visible */}
         <div 
           ref={scannerRef} 
-          className={`absolute inset-0 w-full h-full bg-black ${!isScanning ? 'hidden' : ''}`}
+          className={`relative w-full ${isScanning ? 'block' : 'hidden'}`}
           style={{ 
-            display: !isScanning ? 'none' : 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1
+            height: '400px',
+            background: '#000',
+            overflow: 'hidden',
+            position: 'relative'
           }}
         />
         
@@ -198,7 +227,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
             </div>
           </div>
         ) : (
-          <div className="relative flex-1 bg-black min-h-[400px]" style={{ zIndex: 2 }}>
+          <div className="relative flex-1" style={{ minHeight: '400px' }}>
             {loading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-20">
                 <Loader2 className="h-8 w-8 text-white animate-spin mb-2" />
@@ -250,7 +279,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
         )}
         
         {isScanning && (
-          <div className="p-4 text-sm text-center bg-muted/30 border-t" style={{ zIndex: 3 }}>
+          <div className="p-4 text-sm text-center bg-muted/30 border-t">
             <p className="flex items-center justify-center gap-2 mb-2">
               <Camera className="h-4 w-4" />
               {cameraActive ? 'Point camera at barcode - scanning automatically' : 'Starting camera...'}
