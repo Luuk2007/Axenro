@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,8 @@ import DateNavigation from '@/components/nutrition/DateNavigation';
 import DailySummary from '@/components/nutrition/DailySummary';
 import MealSection from '@/components/nutrition/MealSection';
 import AddFoodDialog from '@/components/nutrition/AddFoodDialog';
-import BarcodeScannerDialog from '@/components/nutrition/BarcodeScannerDialog';
+import BarcodeScanner from '@/components/nutrition/BarcodeScanner';
+import ProductModal from '@/components/nutrition/ProductModal';
 import NutritionTabs from '@/components/nutrition/NutritionTabs';
 import WaterTracking from '@/components/nutrition/WaterTracking';
 import { saveFoodLog, getFoodLogs, deleteFoodLog, ProductDetails } from '@/services/openFoodFactsService';
@@ -29,6 +29,8 @@ const Nutrition = () => {
   const { t, language } = useLanguage();
   const [showAddFood, setShowAddFood] = useState(false);
   const [showScanBarcode, setShowScanBarcode] = useState(false);
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [scannedProduct, setScannedProduct] = useState<ProductDetails | null>(null);
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'meals' | 'water'>('meals');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -284,6 +286,12 @@ const Nutrition = () => {
     setShowScanBarcode(true);
   };
 
+  const handleProductScanned = (product: ProductDetails) => {
+    setScannedProduct(product);
+    setShowScanBarcode(false);
+    setShowProductModal(true);
+  };
+
   const handleAddScannedProduct = (product: ProductDetails) => {
     // Convert to food item format
     const foodItem = {
@@ -301,7 +309,14 @@ const Nutrition = () => {
     };
     
     handleAddFood(foodItem);
-    setShowScanBarcode(false);
+    setShowProductModal(false);
+    setScannedProduct(null);
+  };
+
+  const handleScanAgain = () => {
+    setShowProductModal(false);
+    setScannedProduct(null);
+    setShowScanBarcode(true);
   };
 
   return (
@@ -321,16 +336,16 @@ const Nutrition = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t("addFood")}</DialogTitle>
-                <DialogDescription>{t("Search for a product or scan to add")}</DialogDescription>
+                <DialogDescription>Search for a product or scan to add</DialogDescription>
               </DialogHeader>
               <div className="flex items-center gap-4 py-4">
                 <Button className="flex-1" onClick={() => setShowAddFood(true)}>
                   <Apple className="mr-2 h-4 w-4" />
                   {t("addFood")}
                 </Button>
-                <Button className="flex-1" onClick={() => setShowScanBarcode(true)}>
+                <Button className="flex-1" onClick={handleScanBarcode}>
                   <Camera className="mr-2 h-4 w-4" />
-                  {t("scanBarcode")}
+                  Scan Barcode
                 </Button>
               </div>
             </DialogContent>
@@ -367,17 +382,25 @@ const Nutrition = () => {
       </Dialog>
 
       {/* Barcode Scanner Dialog */}
-      <Dialog open={showScanBarcode} onOpenChange={(open) => {
-        if (!open) {
-          setShowScanBarcode(false);
-        }
-      }}>
-        <BarcodeScannerDialog
-          meals={meals}
-          selectedMeal={selectedMeal}
+      <Dialog open={showScanBarcode} onOpenChange={setShowScanBarcode}>
+        <BarcodeScanner
           onClose={() => setShowScanBarcode(false)}
-          onAddProduct={handleAddScannedProduct}
+          onProductScanned={handleProductScanned}
         />
+      </Dialog>
+
+      {/* Product Modal */}
+      <Dialog open={showProductModal} onOpenChange={setShowProductModal}>
+        {scannedProduct && (
+          <ProductModal
+            product={scannedProduct}
+            meals={meals}
+            selectedMeal={selectedMeal}
+            onClose={() => setShowProductModal(false)}
+            onAddProduct={handleAddScannedProduct}
+            onScanAgain={handleScanAgain}
+          />
+        )}
       </Dialog>
 
       <div className="mt-4">
