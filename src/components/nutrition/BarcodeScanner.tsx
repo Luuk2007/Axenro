@@ -17,11 +17,13 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [manualBarcode, setManualBarcode] = useState('');
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   const handleBarcodeDetected = async (barcode: string) => {
     console.log('Processing barcode:', barcode);
     setLoading(true);
     setError(null);
+    setDebugInfo(`Processing barcode: ${barcode}`);
     
     toast.info(`Scanning barcode: ${barcode}`);
     
@@ -47,6 +49,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
 
   const handleError = (errorMessage: string) => {
     setError(errorMessage);
+    setDebugInfo(`Error: ${errorMessage}`);
     toast.error(errorMessage);
   };
 
@@ -62,9 +65,18 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
     onError: handleError
   });
 
-  const handleStartScanning = () => {
+  const handleStartScanning = async () => {
     setError(null);
-    startScanner();
+    setDebugInfo('Starting camera...');
+    console.log('Starting scanner...');
+    
+    try {
+      await startScanner();
+      setDebugInfo('Camera started successfully');
+    } catch (err) {
+      console.error('Failed to start scanner:', err);
+      setDebugInfo(`Failed to start camera: ${err}`);
+    }
   };
 
   const handleManualSubmit = () => {
@@ -106,6 +118,12 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
                 Point your camera at a product barcode to scan it automatically
               </p>
             </div>
+            
+            {debugInfo && (
+              <div className="bg-blue-50 p-3 rounded-md">
+                <p className="text-blue-700 text-sm">{debugInfo}</p>
+              </div>
+            )}
             
             {error && (
               <div className="bg-red-50 p-3 rounded-md">
@@ -210,6 +228,12 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
                 </div>
               </div>
             )}
+
+            {debugInfo && (
+              <div className="absolute bottom-4 left-4 right-4 bg-black/70 text-white p-2 rounded text-xs">
+                Debug: {debugInfo}
+              </div>
+            )}
           </div>
         )}
         
@@ -219,6 +243,14 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
               <Camera className="h-4 w-4" />
               Point camera at barcode - scanning automatically
             </p>
+            <Button 
+              onClick={stopScanner} 
+              variant="outline" 
+              size="sm" 
+              className="mt-2"
+            >
+              Stop Camera
+            </Button>
           </div>
         )}
       </div>
