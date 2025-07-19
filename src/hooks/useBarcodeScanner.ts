@@ -11,9 +11,11 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
   const [isScanning, setIsScanning] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
+  const [isInitializing, setIsInitializing] = useState(false);
   const scannerRef = useRef<HTMLDivElement>(null);
   const processedBarcodes = useRef<Set<string>>(new Set());
   const streamRef = useRef<MediaStream | null>(null);
+  const quaggaInitialized = useRef(false);
 
   const checkCameraPermission = async () => {
     try {
@@ -28,26 +30,74 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
     }
   };
 
+  const requestCameraAccess = async (): Promise<MediaStream> => {
+    console.log('Requesting camera access...');
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { min: 320, ideal: 640, max: 1920 },
+          height: { min: 240, ideal: 480, max: 1080 }
+        }
+      });
+      
+      console.log('Camera access granted:', stream);
+      setCameraPermission('granted');
+      streamRef.current = stream;
+      return stream;
+    } catch (err: any) {
+      console.error('Camera access denied:', err);
+      
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setCameraPermission('denied');
+        throw new Error('Camera access denied. Please allow camera access and try again.');
+      } else if (err.name === 'NotFoundError') {
+        throw new Error('No camera found on this device.');
+      } else if (err.name === 'NotReadableError') {
+        throw new Error('Camera is being used by another application.');
+      } else {
+        throw new Error('Could not access camera. Please check your camera settings.');
+      }
+    }
+  };
+
   const startScanner = useCallback(async () => {
-    if (!scannerRef.current || isScanning) {
-      console.log('Scanner ref not available or already scanning');
+    if (isScanning || isInitializing) {
+      console.log('Scanner already running or initializing');
       return;
     }
 
-    try {
-      console.log('Starting camera...');
-      setIsScanning(true);
-      setCameraActive(false);
-      processedBarcodes.current.clear();
+    if (!scannerRef.current) {
+      console.error('Scanner ref not available');
+      onError('Camera container not ready. Please try again.');
+      return;
+    }
 
+    console.log('Starting camera scanner...');
+    setIsInitializing(true);
+    setIsScanning(true);
+    setCameraActive(false);
+    processedBarcodes.current.clear();
+
+    try {
       // Stop any existing Quagga instance
-      try {
-        Quagga.stop();
-      } catch (e) {
-        // Ignore if Quagga wasn't running
+      if (quaggaInitialized.current) {
+        try {
+          Quagga.stop();
+          Quagga.offDetected();
+          Quagga.offProcessed();
+        } catch (e) {
+          console.warn('Error stopping existing Quagga:', e);
+        }
+        quaggaInitialized.current = false;
       }
 
-      // Initialize Quagga with direct camera access
+      // Request camera access first
+      const stream = await requestCameraAccess();
+      console.log('Camera stream obtained, initializing Quagga...');
+
+      // Initialize Quagga with the camera stream
       await new Promise<void>((resolve, reject) => {
         const config = {
           inputStream: {
@@ -85,20 +135,18 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
         Quagga.init(config, (err) => {
           if (err) {
             console.error('Quagga initialization failed:', err);
-            onError('Failed to initialize camera: ' + err.message);
-            setIsScanning(false);
-            reject(err);
+            reject(new Error('Failed to initialize barcode scanner: ' + err.message));
             return;
           }
           
           console.log('Quagga initialized successfully');
+          quaggaInitialized.current = true;
           
           // Start Quagga scanner
           Quagga.start();
           console.log('Quagga started');
           
           setCameraActive(true);
-          setCameraPermission('granted');
           resolve();
         });
       });
@@ -121,37 +169,29 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
 
     } catch (err: any) {
       console.error('Scanner start error:', err);
-      let errorMessage = 'Could not access camera. ';
-      
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        errorMessage += 'Please allow camera access and try again.';
-        setCameraPermission('denied');
-      } else if (err.name === 'NotFoundError') {
-        errorMessage += 'No camera found on this device.';
-      } else if (err.name === 'NotReadableError') {
-        errorMessage += 'Camera is being used by another application.';
-      } else {
-        errorMessage += 'Please check your camera settings and try again.';
-      }
-      
-      onError(errorMessage);
+      onError(err.message || 'Failed to start camera scanner');
       setIsScanning(false);
       setCameraActive(false);
+    } finally {
+      setIsInitializing(false);
     }
-  }, [onDetected, onError, isScanning]);
+  }, [onDetected, onError, isScanning, isInitializing]);
 
   const stopScanner = useCallback(() => {
     console.log('Stopping scanner...');
     
-    try {
-      Quagga.stop();
-      Quagga.offDetected();
-      Quagga.offProcessed();
-    } catch (error) {
-      console.warn('Error stopping Quagga:', error);
+    if (quaggaInitialized.current) {
+      try {
+        Quagga.stop();
+        Quagga.offDetected();
+        Quagga.offProcessed();
+      } catch (error) {
+        console.warn('Error stopping Quagga:', error);
+      }
+      quaggaInitialized.current = false;
     }
 
-    // Clean up any media streams
+    // Clean up media streams
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {
         track.stop();
@@ -161,6 +201,7 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
 
     setIsScanning(false);
     setCameraActive(false);
+    setIsInitializing(false);
     processedBarcodes.current.clear();
   }, []);
 
@@ -177,6 +218,7 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
     isScanning,
     cameraActive,
     cameraPermission,
+    isInitializing,
     startScanner,
     stopScanner
   };

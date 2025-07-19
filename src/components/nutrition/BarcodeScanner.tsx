@@ -55,6 +55,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
     isScanning,
     cameraActive,
     cameraPermission,
+    isInitializing,
     startScanner,
     stopScanner
   } = useBarcodeScanner({
@@ -64,12 +65,13 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
 
   const handleStartScanning = async () => {
     setError(null);
-    console.log('Starting scanner...');
+    console.log('Starting scanner from UI...');
     
     try {
       await startScanner();
+      console.log('Scanner started successfully from UI');
     } catch (err) {
-      console.error('Failed to start scanner:', err);
+      console.error('Failed to start scanner from UI:', err);
     }
   };
 
@@ -103,6 +105,18 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
           <div className="w-9"></div>
         </div>
         
+        {/* Always render camera container, but conditionally show it */}
+        <div 
+          ref={scannerRef} 
+          className={`absolute inset-0 w-full h-full bg-black ${!isScanning ? 'hidden' : ''}`}
+          style={{ 
+            display: !isScanning ? 'none' : 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1
+          }}
+        />
+        
         {!isScanning ? (
           <div className="p-6 text-center space-y-4">
             <Camera className="h-16 w-16 mx-auto text-gray-400" />
@@ -126,9 +140,14 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
               <Button 
                 onClick={handleStartScanning} 
                 className="w-full"
-                disabled={loading}
+                disabled={loading || isInitializing}
               >
-                {loading ? (
+                {isInitializing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Starting Camera...
+                  </>
+                ) : loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Processing...
@@ -179,16 +198,16 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
             </div>
           </div>
         ) : (
-          <div className="relative flex-1 bg-black min-h-[400px]">
+          <div className="relative flex-1 bg-black min-h-[400px]" style={{ zIndex: 2 }}>
             {loading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-10">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-20">
                 <Loader2 className="h-8 w-8 text-white animate-spin mb-2" />
                 <p className="text-white text-sm">Processing barcode...</p>
               </div>
             )}
             
             {error && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/50 z-10">
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/50 z-20">
                 <AlertCircle className="h-10 w-10 text-red-400 mb-2" />
                 <p className="text-white mb-4 text-sm">{error}</p>
                 <Button onClick={() => setError(null)} size="sm" variant="secondary">
@@ -197,21 +216,9 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
               </div>
             )}
             
-            {/* Camera feed container */}
-            <div 
-              ref={scannerRef} 
-              className="absolute inset-0 w-full h-full"
-              style={{ 
-                background: '#000',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            />
-            
             {/* Scanning overlay */}
             {cameraActive && !loading && !error && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                 <div className="relative w-3/4 h-32">
                   {/* Corner brackets */}
                   <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-green-400"></div>
@@ -228,9 +235,11 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
             )}
             
             {/* Status indicator */}
-            <div className="absolute top-4 left-4 right-4">
+            <div className="absolute top-4 left-4 right-4 z-10">
               <div className="bg-black/70 text-white p-2 rounded text-xs text-center">
-                {cameraActive ? (
+                {isInitializing ? (
+                  <span className="text-yellow-400">● Initializing camera...</span>
+                ) : cameraActive ? (
                   <span className="text-green-400">● Camera Active - Point at barcode</span>
                 ) : (
                   <span className="text-yellow-400">● Starting camera...</span>
@@ -241,7 +250,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
         )}
         
         {isScanning && (
-          <div className="p-4 text-sm text-center bg-muted/30 border-t">
+          <div className="p-4 text-sm text-center bg-muted/30 border-t" style={{ zIndex: 3 }}>
             <p className="flex items-center justify-center gap-2 mb-2">
               <Camera className="h-4 w-4" />
               {cameraActive ? 'Point camera at barcode - scanning automatically' : 'Starting camera...'}
