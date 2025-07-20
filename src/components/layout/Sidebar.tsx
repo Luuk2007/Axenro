@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -143,17 +144,16 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           </ul>
         </nav>
         
-        {!isMobile && (
-          <div className="border-t border-border p-4">
-            <div 
-              className="glassy-card rounded-lg p-4 subtle-shadow cursor-pointer hover:bg-accent/50 transition-colors"
-              onClick={() => setSubscriptionModalOpen(true)}
-            >
-              <p className="text-xs font-medium text-muted-foreground">{getCurrentPlanDisplay()}</p>
-              <p className="text-xs mt-1 text-muted-foreground leading-relaxed">{getPlanDescription()}</p>
-            </div>
+        {/* Show subscription plan on both mobile and desktop */}
+        <div className="border-t border-border p-4">
+          <div 
+            className="glassy-card rounded-lg p-4 subtle-shadow cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => setSubscriptionModalOpen(true)}
+          >
+            <p className="text-xs font-medium text-muted-foreground">{getCurrentPlanDisplay()}</p>
+            <p className="text-xs mt-1 text-muted-foreground leading-relaxed">{getPlanDescription()}</p>
           </div>
-        )}
+        </div>
       </aside>
       
       <SubscriptionModal 
