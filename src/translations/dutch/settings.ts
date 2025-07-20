@@ -68,4 +68,6 @@ export const settingsTranslations: Translations = {
   dataExported: "Gegevens geëxporteerd",
   dataCleared: "Gegevens gewist",
   confirmClearData: "Weet je zeker dat je alle gegevens wilt wissen?",
+  "Meal updated successfully": "Maaltijd succesvol bijgewerkt",
+  "Exercise updated successfully": "Oefening succesvol bijgewerkt",
 };

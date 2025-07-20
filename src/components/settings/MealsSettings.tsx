@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trash2, Plus, ChevronDown, ChevronUp, Edit2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -20,6 +20,8 @@ const MealsSettings = () => {
   const [meals, setMeals] = useState<CustomMeal[]>([]);
   const [newMealName, setNewMealName] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [editingMeal, setEditingMeal] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState('');
 
   // Default meals
   const defaultMeals: CustomMeal[] = [
@@ -32,17 +34,44 @@ const MealsSettings = () => {
   useEffect(() => {
     // Load custom meals from localStorage
     const savedMeals = localStorage.getItem('customMeals');
+    const savedMealNames = localStorage.getItem('mealNames');
+    
+    let customMeals = [];
+    let mealNames = {};
+    
     if (savedMeals) {
-      const customMeals = JSON.parse(savedMeals);
-      setMeals([...defaultMeals, ...customMeals]);
-    } else {
-      setMeals(defaultMeals);
+      customMeals = JSON.parse(savedMeals);
     }
+    
+    if (savedMealNames) {
+      mealNames = JSON.parse(savedMealNames);
+    }
+    
+    // Apply custom names to default meals
+    const updatedDefaultMeals = defaultMeals.map(meal => ({
+      ...meal,
+      name: mealNames[meal.id] || meal.name
+    }));
+    
+    setMeals([...updatedDefaultMeals, ...customMeals]);
   }, []);
 
   const saveCustomMeals = (updatedMeals: CustomMeal[]) => {
     const customMeals = updatedMeals.filter(meal => !meal.isDefault);
+    const mealNames = {};
+    
+    // Save custom names for default meals
+    updatedMeals.forEach(meal => {
+      if (meal.isDefault) {
+        const originalName = defaultMeals.find(dm => dm.id === meal.id)?.name;
+        if (originalName !== meal.name) {
+          mealNames[meal.id] = meal.name;
+        }
+      }
+    });
+    
     localStorage.setItem('customMeals', JSON.stringify(customMeals));
+    localStorage.setItem('mealNames', JSON.stringify(mealNames));
     setMeals(updatedMeals);
     
     // Dispatch event to notify other components
@@ -73,6 +102,32 @@ const MealsSettings = () => {
     toast.success(t('Meal removed successfully'));
   };
 
+  const startEditing = (meal: CustomMeal) => {
+    setEditingMeal(meal.id);
+    setEditingName(meal.name);
+  };
+
+  const saveEdit = (mealId: string) => {
+    if (!editingName.trim()) {
+      toast.error(t('Please enter a meal name'));
+      return;
+    }
+
+    const updatedMeals = meals.map(meal => 
+      meal.id === mealId ? { ...meal, name: editingName.trim() } : meal
+    );
+    
+    saveCustomMeals(updatedMeals);
+    setEditingMeal(null);
+    setEditingName('');
+    toast.success(t('Meal updated successfully'));
+  };
+
+  const cancelEdit = () => {
+    setEditingMeal(null);
+    setEditingName('');
+  };
+
   return (
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -91,16 +146,52 @@ const MealsSettings = () => {
               <div className="space-y-2">
                 {meals.map((meal) => (
                   <div key={meal.id} className="flex items-center justify-between p-2 bg-secondary/30 rounded">
-                    <span className="text-sm">{meal.name}</span>
-                    {!meal.isDefault && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => removeMeal(meal.id)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    {editingMeal === meal.id ? (
+                      <div className="flex items-center gap-2 flex-1">
+                        <Input
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          className="flex-1"
+                          onKeyPress={(e) => e.key === 'Enter' && saveEdit(meal.id)}
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => saveEdit(meal.id)}
+                          className="h-8"
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={cancelEdit}
+                          className="h-8"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-sm">{meal.name}</span>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => startEditing(meal)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => removeMeal(meal.id)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </>
                     )}
                   </div>
                 ))}

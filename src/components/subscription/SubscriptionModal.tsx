@@ -125,7 +125,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl">
+      <DialogContent className="sm:max-w-5xl">
         <DialogHeader>
           <DialogTitle className="text-2xl sm:text-3xl font-bold text-center">Choose Your Plan</DialogTitle>
           <DialogDescription className="text-center text-muted-foreground text-base sm:text-lg">
