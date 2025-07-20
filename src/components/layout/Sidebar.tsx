@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -47,7 +46,11 @@ const navItems: NavItem[] = [
   },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+export default function Sidebar({ onNavigate }: SidebarProps) {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
   const [isDarkTheme, setIsDarkTheme] = useState(false);
@@ -86,6 +89,12 @@ export default function Sidebar() {
     if (subscription_tier === 'Premium') return 'Experience the full potential — all features, zero limits';
     return '';
   };
+
+  const handleNavClick = () => {
+    if (isMobile && onNavigate) {
+      onNavigate();
+    }
+  };
   
   return (
     <>
@@ -106,6 +115,7 @@ export default function Sidebar() {
               <li key={index}>
                 <NavLink
                   to={item.href}
+                  onClick={handleNavClick}
                   className={({ isActive }) =>
                     cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-300 ease-in-out text-muted-foreground hover:text-foreground",

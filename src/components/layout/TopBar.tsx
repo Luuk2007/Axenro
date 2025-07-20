@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { BellIcon, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,7 @@ export default function TopBar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Check notification settings from localStorage
   useEffect(() => {
@@ -64,11 +64,15 @@ export default function TopBar() {
     setHasUnreadNotifications(false);
   };
 
+  const handleSidebarNavigate = () => {
+    setSidebarOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 md:px-6">
       <div className="flex items-center gap-4">
         {isMobile && (
-          <Sheet>
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
                 <Menu className="h-5 w-5" />
@@ -76,7 +80,7 @@ export default function TopBar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0">
-              <Sidebar />
+              <Sidebar onNavigate={handleSidebarNavigate} />
             </SheetContent>
           </Sheet>
         )}
