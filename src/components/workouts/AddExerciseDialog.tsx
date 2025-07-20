@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { allExercises, muscleGroups } from "@/types/workout";
+import { getAllExercises, muscleGroups } from "@/types/workout";
 
 interface AddExerciseDialogProps {
   open: boolean;
@@ -34,7 +34,31 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
   const { t } = useLanguage();
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("all");
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
+  const [allExercises, setAllExercises] = useState(getAllExercises());
   const [filteredExercises, setFilteredExercises] = useState(allExercises);
+
+  // Listen for custom exercise changes
+  useEffect(() => {
+    const handleExercisesChanged = () => {
+      const updatedExercises = getAllExercises();
+      setAllExercises(updatedExercises);
+      
+      // Re-filter exercises if a muscle group is selected
+      if (selectedMuscleGroup === "all") {
+        setFilteredExercises(updatedExercises);
+      } else {
+        setFilteredExercises(
+          updatedExercises.filter(ex => ex.muscleGroup === selectedMuscleGroup)
+        );
+      }
+    };
+
+    window.addEventListener('exercisesChanged', handleExercisesChanged);
+    
+    return () => {
+      window.removeEventListener('exercisesChanged', handleExercisesChanged);
+    };
+  }, [selectedMuscleGroup]);
 
   useEffect(() => {
     // Filter exercises based on selected muscle group
@@ -45,7 +69,7 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
         allExercises.filter(ex => ex.muscleGroup === selectedMuscleGroup)
       );
     }
-  }, [selectedMuscleGroup]);
+  }, [selectedMuscleGroup, allExercises]);
 
   const handleAddExercise = () => {
     if (!selectedExerciseId) return;

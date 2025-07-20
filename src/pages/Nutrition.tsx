@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,7 @@ import ProductModal from '@/components/nutrition/ProductModal';
 import NutritionTabs from '@/components/nutrition/NutritionTabs';
 import WaterTracking from '@/components/nutrition/WaterTracking';
 import { saveFoodLog, getFoodLogs, deleteFoodLog, ProductDetails } from '@/services/openFoodFactsService';
-import { FoodItem, FoodLogEntry } from '@/types/nutrition';
+import { FoodItem, FoodLogEntry, getAvailableMeals } from '@/types/nutrition';
 
 // Define meal type
 interface Meal {
@@ -39,29 +40,33 @@ const Nutrition = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   
-  // Initialize empty meals structure
-  const [meals, setMeals] = useState<Meal[]>([
-    {
-      id: '1',
-      name: language === 'dutch' ? 'Ontbijt' : 'Breakfast',
-      items: [],
-    },
-    {
-      id: '2',
-      name: language === 'dutch' ? 'Lunch' : 'Lunch',
-      items: [],
-    },
-    {
-      id: '3',
-      name: language === 'dutch' ? 'Avondeten' : 'Dinner',
-      items: [],
-    },
-    {
-      id: '4',
-      name: language === 'dutch' ? 'Snack' : 'Snack',
-      items: [],
-    },
-  ]);
+  // Initialize meals from available meals including custom ones
+  const [meals, setMeals] = useState<Meal[]>([]);
+
+  // Initialize meals when component mounts
+  useEffect(() => {
+    const initializeMeals = () => {
+      const availableMeals = getAvailableMeals();
+      setMeals(availableMeals.map(meal => ({
+        id: meal.id,
+        name: meal.name,
+        items: []
+      })));
+    };
+
+    initializeMeals();
+
+    // Listen for custom meals changes
+    const handleMealsChanged = () => {
+      initializeMeals();
+    };
+
+    window.addEventListener('mealsChanged', handleMealsChanged);
+    
+    return () => {
+      window.removeEventListener('mealsChanged', handleMealsChanged);
+    };
+  }, []);
 
   // Check if user is authenticated
   useEffect(() => {
@@ -84,23 +89,16 @@ const Nutrition = () => {
 
   // Update meal names when language changes
   useEffect(() => {
-    // Update meal names based on language
+    const availableMeals = getAvailableMeals();
     setMeals(currentMeals => {
-      const updatedMeals = [...currentMeals];
-      
-      if (language === 'dutch') {
-        updatedMeals[0].name = 'Ontbijt';
-        updatedMeals[1].name = 'Lunch';
-        updatedMeals[2].name = 'Avondeten';
-        updatedMeals[3].name = 'Snack';
-      } else {
-        updatedMeals[0].name = 'Breakfast';
-        updatedMeals[1].name = 'Lunch';
-        updatedMeals[2].name = 'Dinner';
-        updatedMeals[3].name = 'Snack';
-      }
-      
-      return updatedMeals;
+      return availableMeals.map(availableMeal => {
+        const existingMeal = currentMeals.find(meal => meal.id === availableMeal.id);
+        return {
+          id: availableMeal.id,
+          name: availableMeal.name,
+          items: existingMeal?.items || []
+        };
+      });
     });
   }, [language]);
 
