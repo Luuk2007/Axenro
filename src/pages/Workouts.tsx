@@ -12,9 +12,11 @@ import TrackWorkout from "@/components/workouts/TrackWorkout";
 import WorkoutList from "@/components/workouts/WorkoutList";
 import WorkoutCalendar from "@/components/workouts/WorkoutCalendar";
 import { Workout } from "@/types/workout";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Workouts = () => {
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
   const [showWorkoutDetails, setShowWorkoutDetails] = useState(false);
@@ -88,7 +90,7 @@ const Workouts = () => {
       </div>
 
       <Tabs defaultValue="workouts">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="workouts">
             <Dumbbell className="h-4 w-4 mr-2" />
             {t("workouts")}
@@ -99,7 +101,7 @@ const Workouts = () => {
           </TabsTrigger>
           <TabsTrigger value="personal-records">
             <Trophy className="h-4 w-4 mr-2" />
-            {t("personalRecords")}
+            {isMobile ? "PR's" : t("personalRecords")}
           </TabsTrigger>
         </TabsList>
         
