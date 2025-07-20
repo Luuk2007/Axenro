@@ -64,9 +64,9 @@ export default function ProgressChart({
   const yMax = max + padding;
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("glassy-card rounded-xl card-shadow hover-scale h-full flex flex-col", className)}>
       {title && (
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between p-5 border-b border-border">
           <h3 className="font-medium tracking-tight">{title}</h3>
           {onViewAll && (
             <Button variant="ghost" size="sm" onClick={onViewAll}>
@@ -76,8 +76,8 @@ export default function ProgressChart({
         </div>
       )}
       
-      {sortedData.length > 0 && (
-        <div className="w-full h-full">
+      {sortedData.length > 0 ? (
+        <div className="flex-1 p-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={sortedData}
@@ -155,6 +155,12 @@ export default function ProgressChart({
               />
             </AreaChart>
           </ResponsiveContainer>
+        </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">No data available</p>
+          </div>
         </div>
       )}
     </div>

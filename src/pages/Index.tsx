@@ -277,20 +277,24 @@ const Dashboard = () => {
 
       <MacroProgressTracker />
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <ProgressChart
-          title={t("weight")}
-          data={weightData}
-          label="kg"
-          color="#4F46E5"
-          onViewAll={navigateToProgress}
-        />
+      <div className="grid gap-6 md:grid-cols-2 items-start">
+        <div className="h-[400px]">
+          <ProgressChart
+            title={t("weight")}
+            data={weightData}
+            label="kg"
+            color="#4F46E5"
+            onViewAll={navigateToProgress}
+          />
+        </div>
         
-        <MealsList
-          title={t("todayMeals")}
-          meals={meals}
-          onViewAll={navigateToNutrition}
-        />
+        <div className="max-h-[400px]">
+          <MealsList
+            title={t("todayMeals")}
+            meals={meals}
+            onViewAll={navigateToNutrition}
+          />
+        </div>
       </div>
 
       {/* Steps Connection Modal */}

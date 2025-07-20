@@ -24,7 +24,7 @@ export default function MealsList({ meals, title, className, onViewAll }: MealsL
   const { t } = useLanguage();
   
   return (
-    <div className={cn("glassy-card rounded-xl card-shadow hover-scale", className)}>
+    <div className={cn("glassy-card rounded-xl card-shadow hover-scale h-full flex flex-col", className)}>
       <div className="px-5 py-4 border-b border-border flex items-center justify-between">
         <h3 className="font-medium tracking-tight">{title}</h3>
         <div className="flex items-center gap-2">
@@ -39,40 +39,42 @@ export default function MealsList({ meals, title, className, onViewAll }: MealsL
           </Button>
         </div>
       </div>
-      <div className="divide-y divide-border">
-        {meals.length > 0 ? (
-          meals.map((meal) => (
-            <div
-              key={meal.id}
-              className="flex items-center justify-between p-4"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="rounded-lg bg-primary/10 p-2">
-                  <Utensils className="h-5 w-5 text-primary" />
+      <div className="flex-1 overflow-y-auto">
+        <div className="divide-y divide-border">
+          {meals.length > 0 ? (
+            meals.map((meal) => (
+              <div
+                key={meal.id}
+                className="flex items-center justify-between p-4"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="rounded-lg bg-primary/10 p-2">
+                    <Utensils className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{meal.name}</p>
+                    <p className="text-xs text-muted-foreground">{meal.time}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium">{meal.name}</p>
-                  <p className="text-xs text-muted-foreground">{meal.time}</p>
+                <div className="flex flex-col items-end">
+                  <p className="font-medium">{meal.calories} cal</p>
+                  <p className="text-xs text-muted-foreground">{meal.protein}g {t("protein")}</p>
                 </div>
               </div>
-              <div className="flex flex-col items-end">
-                <p className="font-medium">{meal.calories} cal</p>
-                <p className="text-xs text-muted-foreground">{meal.protein}g {t("protein")}</p>
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+              <div className="rounded-full bg-secondary p-3 mb-3">
+                <Utensils className="h-6 w-6 text-secondary-foreground" />
               </div>
+              <h4 className="text-sm font-medium mb-1">{t("noMealsTracked")}</h4>
+              <p className="text-xs text-muted-foreground mb-4">
+                {t("startTracking")}
+              </p>
+              <Button size="sm">{t("addMeal")}</Button>
             </div>
-          ))
-        ) : (
-          <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-            <div className="rounded-full bg-secondary p-3 mb-3">
-              <Utensils className="h-6 w-6 text-secondary-foreground" />
-            </div>
-            <h4 className="text-sm font-medium mb-1">{t("noMealsTracked")}</h4>
-            <p className="text-xs text-muted-foreground mb-4">
-              {t("startTracking")}
-            </p>
-            <Button size="sm">{t("addMeal")}</Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
