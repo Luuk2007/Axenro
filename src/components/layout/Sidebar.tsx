@@ -5,6 +5,7 @@ import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils } from
 import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SubscriptionModal from '@/components/subscription/SubscriptionModal';
+import { useSubscription } from '@/hooks/useSubscription';
 
 type NavItem = {
   titleKey: TranslationKeys;
@@ -50,6 +51,7 @@ export default function Sidebar() {
   const isMobile = useIsMobile();
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
+  const { subscribed, subscription_tier, loading } = useSubscription();
   
   // Monitor theme changes
   useEffect(() => {
@@ -69,6 +71,12 @@ export default function Sidebar() {
     
     return () => observer.disconnect();
   }, []);
+
+  const getCurrentPlanDisplay = () => {
+    if (loading) return 'Loading...';
+    if (!subscribed) return 'Free Plan';
+    return `${subscription_tier} Plan`;
+  };
   
   return (
     <>
@@ -122,7 +130,7 @@ export default function Sidebar() {
               className="glassy-card rounded-lg p-4 subtle-shadow cursor-pointer hover:bg-accent/50 transition-colors"
               onClick={() => setSubscriptionModalOpen(true)}
             >
-              <p className="text-xs font-medium text-muted-foreground">{t("premium")}</p>
+              <p className="text-xs font-medium text-muted-foreground">{getCurrentPlanDisplay()}</p>
               <p className="text-sm mt-1">{t("trackFitness")}</p>
             </div>
           </div>
