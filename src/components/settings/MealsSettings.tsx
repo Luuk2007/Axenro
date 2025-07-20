@@ -25,10 +25,10 @@ const MealsSettings = () => {
 
   // Default meals
   const defaultMeals: CustomMeal[] = [
-    { id: 'breakfast', name: t('breakfast'), isDefault: true },
-    { id: 'lunch', name: t('lunch'), isDefault: true },
-    { id: 'dinner', name: t('dinner'), isDefault: true },
-    { id: 'snack', name: t('snack'), isDefault: true },
+    { id: 'breakfast', name: t('Breakfast'), isDefault: true },
+    { id: 'lunch', name: t('Lunch'), isDefault: true },
+    { id: 'dinner', name: t('Dinner'), isDefault: true },
+    { id: 'snack', name: t('Snack'), isDefault: true },
   ];
 
   useEffect(() => {
