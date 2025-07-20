@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -77,6 +78,14 @@ export default function Sidebar() {
     if (!subscribed) return 'Free Plan';
     return `${subscription_tier} Plan`;
   };
+
+  const getPlanDescription = () => {
+    if (loading) return '';
+    if (!subscribed) return 'Get started with the basics — track your progress for free';
+    if (subscription_tier === 'Pro') return 'Unlock smarter tracking with added features and flexibility';
+    if (subscription_tier === 'Premium') return 'Experience the full potential — all features, zero limits';
+    return '';
+  };
   
   return (
     <>
@@ -131,7 +140,7 @@ export default function Sidebar() {
               onClick={() => setSubscriptionModalOpen(true)}
             >
               <p className="text-xs font-medium text-muted-foreground">{getCurrentPlanDisplay()}</p>
-              <p className="text-sm mt-1">{t("trackFitness")}</p>
+              <p className="text-xs mt-1 text-muted-foreground leading-relaxed">{getPlanDescription()}</p>
             </div>
           </div>
         )}

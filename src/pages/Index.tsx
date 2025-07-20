@@ -65,27 +65,48 @@ const Dashboard = () => {
   const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
 
   useEffect(() => {
-    // Get weight data from localStorage if available
-    const savedWeightData = localStorage.getItem("weightData");
-    if (savedWeightData) {
+    // Get weight data from localStorage (same source as WeightTracker)
+    const savedWeightHistory = localStorage.getItem('weightHistory');
+    if (savedWeightHistory) {
       try {
-        setWeightData(JSON.parse(savedWeightData));
+        const parsedHistory = JSON.parse(savedWeightHistory);
+        // Convert to chart data format and get the latest weight
+        const chartData = parsedHistory
+          .sort((a: any, b: any) => {
+            const dateA = new Date(a.originalDate || a.date);
+            const dateB = new Date(b.originalDate || b.date);
+            return dateA.getTime() - dateB.getTime();
+          })
+          .map((entry: any) => ({
+            date: entry.date,
+            value: entry.value,
+            originalDate: entry.originalDate
+          }));
+        
+        setWeightData(chartData);
+        
+        // Set current weight from the latest entry
+        if (parsedHistory.length > 0) {
+          const latestWeight = parsedHistory[parsedHistory.length - 1].value;
+          setUserWeight(latestWeight);
+        }
       } catch (error) {
-        console.error("Error parsing weight data:", error);
+        console.error("Error parsing weight history:", error);
         setWeightData([]);
       }
-    } else {
-      // Initialize with empty array if no data
-      setWeightData([]);
     }
 
-    // Get user profile from localStorage
+    // Get target weight from localStorage
+    const savedTargetWeight = localStorage.getItem('targetWeight');
+    if (savedTargetWeight) {
+      setUserTargetWeight(parseFloat(savedTargetWeight));
+    }
+
+    // Get user profile from localStorage for calories calculation
     const savedProfile = localStorage.getItem("userProfile");
     if (savedProfile) {
       try {
         const profileData = JSON.parse(savedProfile);
-        setUserWeight(profileData.weight);
-        setUserTargetWeight(profileData.targetWeight || profileData.weight);
         
         // Calculate calories
         const bmr = calculateBMR(profileData);
@@ -268,9 +289,9 @@ const Dashboard = () => {
         />
         <StatsCard
           title={t("weight")}
-          value={userWeight ? `${userWeight} kg` : "76.4 kg"}
+          value={userWeight ? `${userWeight} kg` : "No data"}
           icon={Weight}
-          description={`${t("target")}: ${userTargetWeight || '75'} kg`}
+          description={userTargetWeight ? `${t("target")}: ${userTargetWeight} kg` : "Set target weight"}
           onClick={navigateToWeightProgress}
         />
       </div>
@@ -285,6 +306,7 @@ const Dashboard = () => {
             label="kg"
             color="#4F46E5"
             onViewAll={navigateToProgress}
+            targetValue={userTargetWeight || undefined}
           />
         </div>
         
