@@ -110,7 +110,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
         canvas.style.left = '0';
         canvas.style.width = '100%';
         canvas.style.height = '100%';
-        canvas.style.zIndex = index === 0 ? '2' : '3'; // Overlay canvas on top
+        canvas.style.zIndex = index === 0 ? '2' : '3';
       });
     }
   }, [cameraActive]);
@@ -122,11 +122,10 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
       </DialogHeader>
       
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <div className="w-9"></div>
+        <div className="flex items-center justify-center px-4 py-3 border-b border-border">
           <h3 className="font-medium text-lg">Scan Barcode</h3>
           <button 
-            className="p-2 hover:bg-gray-100 rounded-full" 
+            className="absolute right-4 p-2 hover:bg-gray-100 rounded-full" 
             onClick={handleClose} 
             aria-label="Close scanner"
           >
@@ -134,17 +133,18 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
           </button>
         </div>
         
+        {/* Always render the scanner container but hide it when not scanning */}
+        <div 
+          ref={scannerRef} 
+          className={`absolute inset-0 w-full h-full bg-black ${!isScanning ? 'hidden' : ''}`}
+          style={{ 
+            overflow: 'hidden',
+            top: '60px' // Account for header height
+          }}
+        />
+        
         {isScanning ? (
           <div className="relative" style={{ height: '400px' }}>
-            {/* Camera container */}
-            <div 
-              ref={scannerRef} 
-              className="absolute inset-0 w-full h-full bg-black"
-              style={{ 
-                overflow: 'hidden'
-              }}
-            />
-            
             {/* Loading overlay */}
             {loading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-20">
@@ -164,7 +164,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
               </div>
             )}
             
-            {/* Scanning overlay - positioned on top of camera */}
+            {/* Scanning overlay */}
             {cameraActive && !loading && !error && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                 <div className="relative w-3/4 h-32">
