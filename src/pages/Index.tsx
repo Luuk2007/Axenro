@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar, Dumbbell, Flame, Footprints, Plus, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -243,64 +244,53 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main dashboard grid with proper alignment */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left column - Stats cards */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-            <StatsCard
-              title={t("dailyCalories")}
-              value={userCalories ? userCalories.toString() : "1,840"}
-              icon={Flame}
-              description={`${t("target")}: ${userCalories ? userCalories : 2200}`}
-              onClick={navigateToNutrition}
-            />
-            <StatsCard
-              title={`${t("dailySteps")}`}
-              value={dailySteps.toLocaleString()}
-              icon={Footprints}
-              description={`${t("target")}: 10,000`}
-              onClick={handleOpenStepsConnection}
-            />
-            <StatsCard
-              title={`${t("workouts")}`}
-              value={`${workoutsThisWeek}/${totalWorkoutsPlanned}`}
-              icon={Dumbbell}
-              description={`${Math.round((workoutsThisWeek / totalWorkoutsPlanned) * 100)}% ${t("completed")}`}
-              onClick={navigateToWorkouts}
-            />
-            <StatsCard
-              title={t("weight")}
-              value={userWeight ? `${userWeight} kg` : "76.4 kg"}
-              icon={Weight}
-              description={`${t("target")}: ${userTargetWeight || '75'} kg`}
-              onClick={navigateToWeightProgress}
-            />
-          </div>
-          
-          <div className="grid gap-6 md:grid-cols-2">
-            <ProgressChart
-              title={t("weight")}
-              data={weightData}
-              label="kg"
-              color="#4F46E5"
-              onViewAll={navigateToProgress}
-            />
-            
-            <MealsList
-              title={t("todayMeals")}
-              meals={meals}
-              onViewAll={navigateToNutrition}
-            />
-          </div>
-        </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          title={t("dailyCalories")}
+          value={userCalories ? userCalories.toString() : "1,840"}
+          icon={Flame}
+          description={`${t("target")}: ${userCalories ? userCalories : 2200}`}
+          onClick={navigateToNutrition}
+        />
+        <StatsCard
+          title={`${t("dailySteps")}`}
+          value={dailySteps.toLocaleString()}
+          icon={Footprints}
+          description={`${t("target")}: 10,000`}
+          onClick={handleOpenStepsConnection}
+        />
+        <StatsCard
+          title={`${t("workouts")}`}
+          value={`${workoutsThisWeek}/${totalWorkoutsPlanned}`}
+          icon={Dumbbell}
+          description={`${Math.round((workoutsThisWeek / totalWorkoutsPlanned) * 100)}% ${t("completed")}`}
+          onClick={navigateToWorkouts}
+        />
+        <StatsCard
+          title={t("weight")}
+          value={userWeight ? `${userWeight} kg` : "76.4 kg"}
+          icon={Weight}
+          description={`${t("target")}: ${userTargetWeight || '75'} kg`}
+          onClick={navigateToWeightProgress}
+        />
+      </div>
 
-        {/* Right column - Macro tracker */}
-        <div className="lg:col-span-1">
-          <div className="h-fit">
-            <MacroProgressTracker />
-          </div>
-        </div>
+      <MacroProgressTracker />
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <ProgressChart
+          title={t("weight")}
+          data={weightData}
+          label="kg"
+          color="#4F46E5"
+          onViewAll={navigateToProgress}
+        />
+        
+        <MealsList
+          title={t("todayMeals")}
+          meals={meals}
+          onViewAll={navigateToNutrition}
+        />
       </div>
 
       {/* Steps Connection Modal */}
