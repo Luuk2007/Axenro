@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Calendar, Dumbbell, Flame, Footprints, Plus, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -265,7 +264,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title={t("dailyCalories")}
           value={userCalories ? userCalories.toString() : "1,840"}

@@ -127,62 +127,62 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl">
         <DialogHeader>
-          <DialogTitle className="text-3xl font-bold text-center">Choose Your Plan</DialogTitle>
-          <DialogDescription className="text-center text-muted-foreground text-lg">
+          <DialogTitle className="text-2xl sm:text-3xl font-bold text-center">Choose Your Plan</DialogTitle>
+          <DialogDescription className="text-center text-muted-foreground text-base sm:text-lg">
             Unlock the full potential of your fitness journey with our premium features.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
           {plans.map((plan) => (
             <Card 
               key={plan.id} 
               className={`relative transition-all duration-200 hover:shadow-lg ${
-                plan.isPopular ? 'border-primary shadow-md scale-105' : ''
+                plan.isPopular ? 'border-primary shadow-md sm:scale-105' : ''
               } ${isCurrentPlan(plan) ? 'ring-2 ring-primary' : ''}`}
             >
               {plan.tagline && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground">
+                <div className="absolute -top-2 sm:-top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-primary text-primary-foreground text-xs">
                     {plan.tagline}
                   </Badge>
                 </div>
               )}
               
-              <CardHeader className="text-center pb-4">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
+              <CardHeader className="text-center pb-3 sm:pb-4 p-3 sm:p-6">
+                <div className="flex items-center justify-center gap-2 mb-1 sm:mb-2">
+                  <CardTitle className="text-lg sm:text-2xl font-bold">{plan.name}</CardTitle>
                   {isCurrentPlan(plan) && (
                     <Badge variant="secondary" className="text-xs">
                       Active
                     </Badge>
                   )}
                 </div>
-                <div className="text-3xl font-bold text-primary">
+                <div className="text-2xl sm:text-3xl font-bold text-primary">
                   {plan.price}
-                  {plan.id !== 'free' && <span className="text-sm font-normal text-muted-foreground">/month</span>}
+                  {plan.id !== 'free' && <span className="text-xs sm:text-sm font-normal text-muted-foreground">/month</span>}
                 </div>
               </CardHeader>
               
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
+              <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-6 pt-0">
+                <div className="space-y-2 sm:space-y-3">
                   {plan.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
+                    <div key={index} className="flex items-start gap-2 sm:gap-3">
+                      <Check className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0 mt-0.5" />
+                      <span className="text-xs sm:text-sm leading-tight">{feature}</span>
                     </div>
                   ))}
                 </div>
                 
                 <Button 
-                  className="w-full" 
+                  className="w-full text-xs sm:text-sm py-2 sm:py-2.5" 
                   variant={isCurrentPlan(plan) ? "secondary" : "default"}
                   disabled={isDisabled(plan)}
                   onClick={() => handleSelectPlan(plan.id)}
                 >
                   {loading === plan.id ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                       Processing...
                     </>
                   ) : (
@@ -195,15 +195,16 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         </div>
 
         {subscribed && (
-          <div className="flex justify-center mt-6 pt-6 border-t">
+          <div className="flex justify-center mt-4 sm:mt-6 pt-4 sm:pt-6 border-t">
             <Button 
               variant="outline" 
               onClick={handleManageSubscription}
               disabled={loading !== null}
+              className="text-xs sm:text-sm"
             >
               {loading === 'manage' ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                   Opening...
                 </>
               ) : (

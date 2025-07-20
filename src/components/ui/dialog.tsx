@@ -41,6 +41,8 @@ const DialogContent = React.forwardRef<
         "sm:max-w-lg sm:rounded-lg",
         // Mobile styling - centered with equal margins, border, and rounded corners
         "max-w-[calc(100vw-3rem)] mx-auto border-2 border-primary/20 rounded-xl",
+        // Ensure consistent height handling
+        "max-h-[calc(100vh-3rem)] overflow-auto",
         className
       )}
       {...props}
