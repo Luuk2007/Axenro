@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
+import MealsSettings from "@/components/settings/MealsSettings";
+import ExercisesSettings from "@/components/settings/ExercisesSettings";
 
 interface UserSettings {
   theme: "light" | "dark" | "system";
@@ -95,6 +97,8 @@ const Settings = () => {
       workouts: localStorage.getItem("workouts"),
       nutritionData: localStorage.getItem("nutritionData"),
       settings: localStorage.getItem("userSettings"),
+      customMeals: localStorage.getItem("customMeals"),
+      customExercises: localStorage.getItem("customExercises"),
     };
 
     const dataStr = JSON.stringify(userData, null, 2);
@@ -165,6 +169,12 @@ const Settings = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Meals Settings */}
+        <MealsSettings />
+
+        {/* Exercises Settings */}
+        <ExercisesSettings />
 
         {/* Notification Settings */}
         <Card>

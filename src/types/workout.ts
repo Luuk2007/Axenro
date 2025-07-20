@@ -96,10 +96,30 @@ export const exerciseDatabase = {
   ]
 };
 
-// Flatten the exercise database for easier selection
-export const allExercises = Object.entries(exerciseDatabase).flatMap(
-  ([group, exercises]) => exercises.map(ex => ({ ...ex, muscleGroup: group }))
-);
+// Function to get all exercises including custom ones
+export const getAllExercises = () => {
+  // Get default exercises
+  const defaultExercises = Object.entries(exerciseDatabase).flatMap(
+    ([group, exercises]) => exercises.map(ex => ({ ...ex, muscleGroup: group }))
+  );
+
+  // Get custom exercises from localStorage
+  const customExercisesData = localStorage.getItem('customExercises');
+  let customExercises = [];
+  
+  if (customExercisesData) {
+    try {
+      customExercises = JSON.parse(customExercisesData);
+    } catch (error) {
+      console.error('Error parsing custom exercises:', error);
+    }
+  }
+
+  return [...defaultExercises, ...customExercises];
+};
+
+// Flatten the exercise database for easier selection (backward compatibility)
+export const allExercises = getAllExercises();
 
 export const muscleGroups = [
   { value: "chest", label: "Chest" },

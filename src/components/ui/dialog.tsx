@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
@@ -37,14 +38,14 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         "fixed left-[50%] top-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
-        // Mobile-first responsive styling - enforce consistent sizing
-        "!max-w-[calc(100vw-2rem)] !mx-auto border-2 border-primary/20 rounded-xl",
+        // Mobile-first responsive styling - enforce consistent sizing for mobile
+        "max-w-[calc(100vw-2rem)] mx-auto border-2 border-primary/20 rounded-xl",
         // Height handling for mobile
         "max-h-[85vh] overflow-auto",
-        // Desktop responsive breakpoints
-        "sm:!max-w-lg sm:rounded-lg",
+        // Desktop responsive breakpoints - allow proper desktop sizing
+        "sm:max-w-lg sm:rounded-lg sm:border sm:border-border",
         // Allow larger modals on desktop when needed
-        "data-[size=medium]:sm:!max-w-2xl data-[size=large]:sm:!max-w-4xl data-[size=xl]:sm:!max-w-5xl",
+        "data-[size=medium]:sm:max-w-2xl data-[size=large]:sm:max-w-4xl data-[size=xl]:sm:max-w-5xl",
         className
       )}
       {...props}
