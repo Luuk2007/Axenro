@@ -124,13 +124,6 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-center px-4 py-3 border-b border-border">
           <h3 className="font-medium text-lg">Scan Barcode</h3>
-          <button 
-            className="absolute right-4 p-2 hover:bg-gray-100 rounded-full" 
-            onClick={handleClose} 
-            aria-label="Close scanner"
-          >
-            <X className="h-5 w-5" />
-          </button>
         </div>
         
         {/* Always render the scanner container but hide it when not scanning */}
