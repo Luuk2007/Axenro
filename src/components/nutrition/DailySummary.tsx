@@ -176,45 +176,45 @@ export default function DailySummary({ className, meals = [], selectedDate = new
   };
 
   return (
-    <div className={`grid grid-cols-1 gap-2 ${className}`}>
-      <div className="border rounded-lg p-3 shadow-sm">
-        <div className="flex justify-between items-center mb-1">
-          <div className="text-xs font-medium">{t("calories")}</div>
-          <div className="text-xs text-muted-foreground">
+    <div className={`grid grid-cols-1 gap-3 ${className}`}>
+      <div className="border rounded-lg p-4 shadow-sm">
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-sm font-medium">{t("calories")}</div>
+          <div className="text-sm text-muted-foreground">
             {macroTargets.calories.consumed} / {macroTargets.calories.goal}
           </div>
         </div>
         <Progress 
           value={calculatePercentage(macroTargets.calories.consumed, macroTargets.calories.goal)} 
-          className="h-1.5" 
+          className="h-2" 
         />
       </div>
       
-      <div className="grid grid-cols-3 gap-2">
-        <div className="border rounded-lg p-2 shadow-sm">
+      <div className="grid grid-cols-3 gap-3">
+        <div className="border rounded-lg p-3 shadow-sm">
           <div className="text-xs text-muted-foreground">{t("protein")}</div>
-          <div className="text-xs font-medium">{macroTargets.protein.consumed}g / {macroTargets.protein.goal}g</div>
+          <div className="text-sm font-medium">{macroTargets.protein.consumed}g / {macroTargets.protein.goal}g</div>
           <Progress 
             value={calculatePercentage(macroTargets.protein.consumed, macroTargets.protein.goal)} 
-            className="h-1 mt-1" 
+            className="h-1.5 mt-1" 
           />
         </div>
         
-        <div className="border rounded-lg p-2 shadow-sm">
+        <div className="border rounded-lg p-3 shadow-sm">
           <div className="text-xs text-muted-foreground">{t("carbs")}</div>
-          <div className="text-xs font-medium">{macroTargets.carbs.consumed}g / {macroTargets.carbs.goal}g</div>
+          <div className="text-sm font-medium">{macroTargets.carbs.consumed}g / {macroTargets.carbs.goal}g</div>
           <Progress 
             value={calculatePercentage(macroTargets.carbs.consumed, macroTargets.carbs.goal)} 
-            className="h-1 mt-1" 
+            className="h-1.5 mt-1" 
           />
         </div>
         
-        <div className="border rounded-lg p-2 shadow-sm">
+        <div className="border rounded-lg p-3 shadow-sm">
           <div className="text-xs text-muted-foreground">{t("fat")}</div>
-          <div className="text-xs font-medium">{macroTargets.fat.consumed}g / {macroTargets.fat.goal}g</div>
+          <div className="text-sm font-medium">{macroTargets.fat.consumed}g / {macroTargets.fat.goal}g</div>
           <Progress 
             value={calculatePercentage(macroTargets.fat.consumed, macroTargets.fat.goal)} 
-            className="h-1 mt-1" 
+            className="h-1.5 mt-1" 
           />
         </div>
       </div>

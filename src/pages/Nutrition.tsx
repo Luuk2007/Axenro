@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,23 +47,17 @@ const Nutrition = () => {
   useEffect(() => {
     const initializeMeals = () => {
       const availableMeals = getAvailableMeals();
-      console.log('Available meals from getAvailableMeals:', availableMeals);
-      
-      const initializedMeals = availableMeals.map(meal => ({
+      setMeals(availableMeals.map(meal => ({
         id: meal.id,
         name: meal.name,
         items: []
-      }));
-      
-      console.log('Initialized meals:', initializedMeals);
-      setMeals(initializedMeals);
+      })));
     };
 
     initializeMeals();
 
     // Listen for custom meals changes
     const handleMealsChanged = () => {
-      console.log('Meals changed event received');
       initializeMeals();
     };
 
@@ -95,10 +90,8 @@ const Nutrition = () => {
   // Update meal names when language changes
   useEffect(() => {
     const availableMeals = getAvailableMeals();
-    console.log('Language changed, updating meals:', availableMeals);
-    
     setMeals(currentMeals => {
-      const updatedMeals = availableMeals.map(availableMeal => {
+      return availableMeals.map(availableMeal => {
         const existingMeal = currentMeals.find(meal => meal.id === availableMeal.id);
         return {
           id: availableMeal.id,
@@ -106,9 +99,6 @@ const Nutrition = () => {
           items: existingMeal?.items || []
         };
       });
-      
-      console.log('Updated meals after language change:', updatedMeals);
-      return updatedMeals;
     });
   }, [language]);
 
@@ -368,9 +358,9 @@ const Nutrition = () => {
           onDateChange={setSelectedDate}
         />
         
-        {/* Daily Summary - Made more compact */}
+        {/* Daily Summary */}
         <DailySummary 
-          className="mb-4" 
+          className="mb-6" 
           meals={meals}
           selectedDate={selectedDate}
           refreshTrigger={refreshTrigger}
@@ -429,25 +419,16 @@ const Nutrition = () => {
                   <p className="mt-2 text-muted-foreground">{t("loading")}</p>
                 </div>
               ) : (
-                <>
-                  {console.log('Rendering meals:', meals)}
-                  {meals.length === 0 ? (
-                    <div className="p-8 text-center text-muted-foreground">
-                      No meals configured. Check your settings.
-                    </div>
-                  ) : (
-                    meals.map((meal) => (
-                      <MealSection
-                        key={meal.id}
-                        id={meal.id}
-                        name={meal.name}
-                        items={meal.items}
-                        onAddItem={handleAddItem}
-                        onDeleteItem={handleDeleteFoodItem}
-                      />
-                    ))
-                  )}
-                </>
+                meals.map((meal) => (
+                  <MealSection
+                    key={meal.id}
+                    id={meal.id}
+                    name={meal.name}
+                    items={meal.items}
+                    onAddItem={handleAddItem}
+                    onDeleteItem={handleDeleteFoodItem}
+                  />
+                ))
               )}
             </div>
           ) : (

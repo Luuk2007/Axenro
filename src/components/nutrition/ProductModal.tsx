@@ -4,7 +4,7 @@ import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Check, Minus, Plus, Package } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ProductDetails } from '@/services/openFoodFactsService';
 
@@ -36,16 +36,18 @@ const ProductModal = ({
   const [amount, setAmount] = useState<number>(100);
   const [unit, setUnit] = useState<string>("gram");
 
-  const calculateNutrition = (baseValue: number): number => {
-    const adjustedForAmount = unit === "gram" || unit === "milliliter" 
-      ? (baseValue * amount) / 100 
-      : baseValue;
-    return adjustedForAmount * servings;
+  const calculateAdjustedValue = (value: number): number => {
+    if (unit === "gram" || unit === "milliliter") {
+      return (value * amount) / 100;
+    } else {
+      return value * servings;
+    }
   };
 
-  const handleServingsChange = (newServings: number) => {
-    if (newServings > 0) {
-      setServings(newServings);
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      setAmount(value);
     }
   };
 
@@ -56,139 +58,215 @@ const ProductModal = ({
       amount,
       unit,
       nutrition: {
-        calories: calculateNutrition(product.nutrition.calories),
-        protein: calculateNutrition(product.nutrition.protein),
-        carbs: calculateNutrition(product.nutrition.carbs),
-        fat: calculateNutrition(product.nutrition.fat)
+        calories: calculateAdjustedValue(product.nutrition.calories),
+        protein: calculateAdjustedValue(product.nutrition.protein),
+        carbs: calculateAdjustedValue(product.nutrition.carbs),
+        fat: calculateAdjustedValue(product.nutrition.fat)
       }
     };
     onAddProduct(adjustedProduct);
   };
 
   return (
-    <DialogContent className="max-w-sm p-4">
-      <DialogHeader className="space-y-1">
-        <DialogTitle className="text-lg font-semibold text-center">{product.name}</DialogTitle>
-        {product.brand && (
-          <p className="text-sm text-muted-foreground text-center">{product.brand}</p>
-        )}
+    <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+      <DialogHeader className="sr-only">
+        <DialogTitle>Scanned Product</DialogTitle>
       </DialogHeader>
       
-      <div className="space-y-4">
-        {/* Product Image */}
-        {product.imageUrl && (
-          <div className="flex justify-center">
-            <img 
-              src={product.imageUrl} 
-              alt={product.name} 
-              className="h-20 w-20 object-contain rounded"
-            />
+      <div className="flex flex-col">
+        <div className="flex items-center px-4 py-3 border-b border-border">
+          <button 
+            className="p-2 mr-2 hover:bg-gray-100 rounded-full" 
+            onClick={onScanAgain}
+            aria-label="Scan again"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h3 className="font-medium text-lg flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Product Found
+          </h3>
+        </div>
+        
+        <div className="p-4 space-y-6 max-h-[70vh] overflow-y-auto">
+          <div className="bg-green-50 p-3 rounded-md">
+            <div className="flex items-center justify-between">
+              <p className="text-green-800 text-sm flex-1">
+                ✅ Barcode: {product.id}
+              </p>
+              <button 
+                onClick={onScanAgain} 
+                className="text-green-600 text-sm whitespace-nowrap hover:underline"
+              >
+                Scan Different
+              </button>
+            </div>
           </div>
-        )}
-
-        {/* Portion Size */}
-        <div>
-          <h3 className="font-medium mb-2">Portion Size</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-sm text-muted-foreground">amount</label>
-              <Input 
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(Number(e.target.value) || 100)}
-                className="h-10"
+          
+          <div>
+            <h2 className="text-xl font-bold">{product.name}</h2>
+            <p className="text-gray-600">{product.brand}</p>
+            {product.description && (
+              <p className="text-gray-600 text-sm mt-1 line-clamp-2">{product.description}</p>
+            )}
+          </div>
+          
+          {product.imageUrl && (
+            <div className="flex justify-center">
+              <img 
+                src={product.imageUrl} 
+                alt={product.name} 
+                className="max-h-48 object-contain rounded-md"
               />
             </div>
-            <div>
-              <label className="text-sm text-muted-foreground">unit</label>
-              <Select value={unit} onValueChange={setUnit}>
-                <SelectTrigger className="h-10">
-                  <SelectValue />
+          )}
+          
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <p className="font-medium">Serving Size</p>
+              <div className="bg-gray-100 rounded-md px-4 py-2 text-right">
+                <span>{product.servingSize}</span>
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <h3 className="font-medium mb-3">Adjust Serving</h3>
+              
+              <div className="flex gap-3 mb-4">
+                <div className="flex-1">
+                  <label className="text-sm text-muted-foreground mb-1 block">Amount</label>
+                  <Input 
+                    type="number"
+                    value={amount}
+                    onChange={handleAmountChange}
+                    min="1"
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="flex-1">
+                  <label className="text-sm text-muted-foreground mb-1 block">Unit</label>
+                  <Select value={unit} onValueChange={setUnit}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gram">Gram</SelectItem>
+                      <SelectItem value="milliliter">mL</SelectItem>
+                      <SelectItem value="piece">Piece</SelectItem>
+                      <SelectItem value="slice">Slice</SelectItem>
+                      <SelectItem value="cup">Cup</SelectItem>
+                      <SelectItem value="tablespoon">Tbsp</SelectItem>
+                      <SelectItem value="teaspoon">Tsp</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center mb-4">
+                <p className="font-medium">Number of Servings</p>
+                <div className="flex items-center bg-gray-100 rounded-md px-2">
+                  <button 
+                    className="p-1 hover:bg-gray-200 rounded"
+                    disabled={servings <= 0.25}
+                    onClick={() => setServings(prev => Math.max(0.25, prev - 0.25))}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <input
+                    type="number"
+                    value={servings}
+                    min="0.25"
+                    step="0.25"
+                    onChange={(e) => setServings(Number(e.target.value) || 1)}
+                    className="w-16 bg-transparent text-center border-0 focus:ring-0 py-2"
+                  />
+                  <button 
+                    className="p-1 hover:bg-gray-200 rounded"
+                    onClick={() => setServings(prev => prev + 0.25)}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <p className="font-medium">Add to Meal</p>
+              <Select value={selectedMealId} onValueChange={setSelectedMealId}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select meal" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gram">gram</SelectItem>
-                  <SelectItem value="milliliter">milliliter</SelectItem>
-                  <SelectItem value="piece">piece</SelectItem>
-                  <SelectItem value="slice">slice</SelectItem>
+                  {meals.map(meal => (
+                    <SelectItem key={meal.id} value={meal.id}>{meal.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
-        </div>
-
-        {/* Number of Servings */}
-        <div>
-          <label className="text-sm text-muted-foreground mb-2 block">numberOfServings</label>
-          <div className="flex items-center justify-center space-x-3">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => handleServingsChange(servings - 1)}
-              disabled={servings <= 1}
-            >
-              <Minus className="h-4 w-4" />
+          
+          <div className="border rounded-md p-4">
+            <h3 className="font-medium mb-2">Nutrition Facts</h3>
+            <p className="text-xs text-muted-foreground mb-3">Per adjusted serving</p>
+            
+            <div className="flex items-stretch space-x-4">
+              <div className="bg-white rounded-full w-24 h-24 flex-shrink-0 flex flex-col items-center justify-center shadow-sm border border-gray-200">
+                <span className="text-2xl font-bold">
+                  {Math.round(calculateAdjustedValue(product.nutrition.calories))}
+                </span>
+                <span className="text-xs text-gray-500">cal</span>
+              </div>
+              
+              <div className="flex-1 flex flex-col justify-around">
+                <div className="flex justify-between">
+                  <span className="text-green-500 text-sm">
+                    {Math.round((product.nutrition.carbs / (product.nutrition.carbs + product.nutrition.fat + product.nutrition.protein)) * 100 || 0)}%
+                  </span>
+                  <span className="text-blue-500 text-sm">
+                    {Math.round((product.nutrition.fat / (product.nutrition.carbs + product.nutrition.fat + product.nutrition.protein)) * 100 || 0)}%
+                  </span>
+                  <span className="text-purple-500 text-sm">
+                    {Math.round((product.nutrition.protein / (product.nutrition.carbs + product.nutrition.fat + product.nutrition.protein)) * 100 || 0)}%
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <div className="text-center">
+                    <div className="text-xl font-semibold">
+                      {Math.round(calculateAdjustedValue(product.nutrition.carbs) * 10) / 10}g
+                    </div>
+                    <div className="text-xs text-gray-500">Carbs</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-xl font-semibold">
+                      {Math.round(calculateAdjustedValue(product.nutrition.fat) * 10) / 10}g
+                    </div>
+                    <div className="text-xs text-gray-500">Fat</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-xl font-semibold">
+                      {Math.round(calculateAdjustedValue(product.nutrition.protein) * 10) / 10}g
+                    </div>
+                    <div className="text-xs text-gray-500">Protein</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="pt-4 space-y-2">
+            <Button className="w-full" onClick={handleConfirmProduct}>
+              <Check className="mr-2 h-4 w-4" />
+              Add to {meals.find(m => m.id === selectedMealId)?.name || 'Meal'}
             </Button>
-            <span className="text-xl font-semibold min-w-[3rem] text-center">{servings}</span>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => handleServingsChange(servings + 1)}
-            >
-              <Plus className="h-4 w-4" />
+            <Button variant="outline" className="w-full" onClick={onClose}>
+              Cancel
             </Button>
           </div>
         </div>
-
-        {/* Meal Selection */}
-        <div>
-          <label className="text-sm text-muted-foreground mb-2 block">Add to Meal</label>
-          <Select value={selectedMealId} onValueChange={setSelectedMealId}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {meals.map(meal => (
-                <SelectItem key={meal.id} value={meal.id}>{meal.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Nutrition Summary */}
-        <div className="bg-muted/50 rounded-lg p-4">
-          <h3 className="font-medium text-center mb-3">Nutrition Summary</h3>
-          <div className="text-center mb-3">
-            <div className="text-2xl font-bold">
-              {Math.round(calculateNutrition(product.nutrition.calories))} cal
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div className="text-lg font-semibold text-green-600">
-                {(calculateNutrition(product.nutrition.carbs)).toFixed(1)}g
-              </div>
-              <div className="text-sm text-muted-foreground">Carbs</div>
-            </div>
-            <div>
-              <div className="text-lg font-semibold text-orange-600">
-                {(calculateNutrition(product.nutrition.fat)).toFixed(1)}g
-              </div>
-              <div className="text-sm text-muted-foreground">Fat</div>
-            </div>
-            <div>
-              <div className="text-lg font-semibold text-blue-600">
-                {(calculateNutrition(product.nutrition.protein)).toFixed(1)}g
-              </div>
-              <div className="text-sm text-muted-foreground">Protein</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Add Button */}
-        <Button onClick={handleConfirmProduct} className="w-full">
-          <Plus className="mr-2 h-4 w-4" />
-          addToMealPlan
-        </Button>
       </div>
     </DialogContent>
   );
