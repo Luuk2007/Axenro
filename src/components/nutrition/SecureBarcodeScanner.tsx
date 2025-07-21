@@ -14,29 +14,27 @@ export const SecureBarcodeScanner: React.FC<SecureBarcodeScannerProps> = ({
   onBarcodeDetected,
   onClose,
 }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const { validateAndProcessBarcode, error: securityError } = useSecureBarcode();
-  const { startScanning, stopScanning, error: scanError } = useBarcodeScanner();
-
-  const handleBarcodeDetected = (barcode: string) => {
-    const validatedBarcode = validateAndProcessBarcode(barcode);
-    if (validatedBarcode) {
-      onBarcodeDetected(validatedBarcode);
-      onClose();
+  
+  const { scannerRef, startScanner, stopScanner, isScanning } = useBarcodeScanner({
+    onDetected: (barcode: string) => {
+      const validatedBarcode = validateAndProcessBarcode(barcode);
+      if (validatedBarcode) {
+        onBarcodeDetected(validatedBarcode);
+        onClose();
+      }
+    },
+    onError: (error: string) => {
+      console.error('Scanner error:', error);
     }
-  };
+  });
 
   useEffect(() => {
-    if (videoRef.current) {
-      startScanning(videoRef.current, handleBarcodeDetected);
-    }
-
+    startScanner();
     return () => {
-      stopScanning();
+      stopScanner();
     };
-  }, []);
-
-  const displayError = securityError || scanError;
+  }, [startScanner, stopScanner]);
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
@@ -53,13 +51,7 @@ export const SecureBarcodeScanner: React.FC<SecureBarcodeScannerProps> = ({
       </div>
       
       <div className="flex-1 relative">
-        <video
-          ref={videoRef}
-          className="w-full h-full object-cover"
-          autoPlay
-          muted
-          playsInline
-        />
+        <div ref={scannerRef} className="w-full h-full" />
         
         {/* Scanning overlay */}
         <div className="absolute inset-0 flex items-center justify-center">
@@ -72,9 +64,9 @@ export const SecureBarcodeScanner: React.FC<SecureBarcodeScannerProps> = ({
         </div>
       </div>
 
-      {displayError && (
+      {securityError && (
         <div className="p-4 bg-red-500/90 text-white text-center">
-          {displayError}
+          {securityError}
         </div>
       )}
       

@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import DateNavigation from '@/components/nutrition/DateNavigation';
 import DailySummary from '@/components/nutrition/DailySummary';
 import MealSection from '@/components/nutrition/MealSection';
-import AddFoodDialog from '@/components/nutrition/AddFoodDialog';
+import { AddFoodDialog } from '@/components/nutrition/AddFoodDialog';
 import BarcodeScanner from '@/components/nutrition/BarcodeScanner';
 import ProductModal from '@/components/nutrition/ProductModal';
 import NutritionTabs from '@/components/nutrition/NutritionTabs';

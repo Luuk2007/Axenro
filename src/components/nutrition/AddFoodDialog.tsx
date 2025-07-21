@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Camera, Search, Plus, Minus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { FoodItem } from '@/types/nutrition';
-import { FoodDatabase } from './FoodDatabase';
+import FoodDatabase from './FoodDatabase';
 import { SecureBarcodeScanner } from './SecureBarcodeScanner';
 import { validateFoodName, logSecurityEvent } from '@/utils/security';
 import { toast } from 'sonner';
@@ -27,7 +27,9 @@ export const AddFoodDialog: React.FC<AddFoodDialogProps> = ({
   const [quantity, setQuantity] = useState(1);
   const [showScanner, setShowScanner] = useState(false);
 
-  const searchResults = FoodDatabase.search(searchTerm);
+  const searchResults = FoodDatabase.filter(food => 
+    food.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleSearchChange = (value: string) => {
     try {
@@ -46,7 +48,7 @@ export const AddFoodDialog: React.FC<AddFoodDialogProps> = ({
 
   const handleBarcodeDetected = (barcode: string) => {
     try {
-      const food = FoodDatabase.findByBarcode(barcode);
+      const food = FoodDatabase.find(f => f.id === barcode);
       if (food) {
         setSelectedFood(food);
         setShowScanner(false);
@@ -125,18 +127,8 @@ export const AddFoodDialog: React.FC<AddFoodDialogProps> = ({
           {selectedFood ? (
             <div className="space-y-3">
               <div className="flex gap-3">
-                {selectedFood.imageUrl && (
-                  <img
-                    src={selectedFood.imageUrl}
-                    alt={selectedFood.name}
-                    className="w-12 h-12 object-cover rounded"
-                  />
-                )}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-sm truncate">{selectedFood.name}</h3>
-                  {selectedFood.brand && (
-                    <p className="text-xs text-gray-500 truncate">{selectedFood.brand}</p>
-                  )}
                   <div className="flex gap-1 mt-1">
                     <Badge variant="secondary" className="text-xs px-1 py-0">
                       {Math.round(selectedFood.calories * quantity)} cal
@@ -188,18 +180,8 @@ export const AddFoodDialog: React.FC<AddFoodDialogProps> = ({
                   className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
                   onClick={() => setSelectedFood(food)}
                 >
-                  {food.imageUrl && (
-                    <img
-                      src={food.imageUrl}
-                      alt={food.name}
-                      className="w-10 h-10 object-cover rounded"
-                    />
-                  )}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{food.name}</p>
-                    {food.brand && (
-                      <p className="text-xs text-gray-500 truncate">{food.brand}</p>
-                    )}
                     <div className="flex gap-1 mt-1">
                       <Badge variant="secondary" className="text-xs px-1 py-0">
                         {food.calories} cal
