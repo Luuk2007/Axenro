@@ -427,7 +427,7 @@ export default function Progress() {
               <div className="col-span-2">
                 <div className="glassy-card rounded-xl overflow-hidden card-shadow">
                   <div className="px-5 py-4 border-b border-border">
-                    <h3 className="font-medium tracking-tight">{t("measurementTrends")}</h3>
+                    <h3 className="font-medium tracking-tight">{t("Measurement Trends")}</h3>
                   </div>
                   <div className="p-5">
                     <Tabs defaultValue="waist" className="w-full">
