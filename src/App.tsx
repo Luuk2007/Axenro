@@ -26,11 +26,18 @@ function App() {
     // Check for password reset hash in URL
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
+    const accessToken = hashParams.get('access_token');
     
-    if (type === 'recovery') {
-      setShowPasswordReset(true);
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+    if (type === 'recovery' && accessToken) {
+      // Set the session with the recovery token
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: hashParams.get('refresh_token') || '',
+      }).then(() => {
+        setShowPasswordReset(true);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      });
     }
 
     // Listen for auth state changes to handle password recovery
