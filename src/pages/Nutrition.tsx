@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -368,16 +367,11 @@ const Nutrition = () => {
       </div>
 
       {/* Add Food Dialog */}
-      <Dialog open={showAddFood} onOpenChange={setShowAddFood}>
-        <DialogContent className="p-0">
-          <AddFoodDialog 
-            meals={meals}
-            selectedMeal={selectedMeal}
-            onClose={() => setShowAddFood(false)}
-            onAddFood={handleAddFood}
-          />
-        </DialogContent>
-      </Dialog>
+      <AddFoodDialog 
+        open={showAddFood}
+        onClose={() => setShowAddFood(false)}
+        onAddFood={handleAddFood}
+      />
 
       {/* Barcode Scanner Dialog */}
       <Dialog open={showScanBarcode} onOpenChange={setShowScanBarcode}>
