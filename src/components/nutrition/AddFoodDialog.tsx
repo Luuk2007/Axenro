@@ -172,7 +172,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
 
           {/* Number of Servings */}
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-foreground mb-2">{t("numberOfServings")}</h3>
+            <h3 className="text-sm font-medium text-foreground mb-2">{t("Number Of Servings")}</h3>
             <div className="flex items-center justify-center gap-3">
               <Button 
                 variant="outline"
@@ -250,7 +250,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
             onClick={handleAddProduct}
           >
             <Plus className="mr-2 h-4 w-4" />
-            {t("addToMealPlan")}
+            {t("Add To Meal Plan")}
           </Button>
         </div>
       ) : (
