@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import DateNavigation from '@/components/nutrition/DateNavigation';
 import DailySummary from '@/components/nutrition/DailySummary';
 import MealSection from '@/components/nutrition/MealSection';
-import { AddFoodDialog } from '@/components/nutrition/AddFoodDialog';
+import AddFoodDialog from '@/components/nutrition/AddFoodDialog';
 import BarcodeScanner from '@/components/nutrition/BarcodeScanner';
 import ProductModal from '@/components/nutrition/ProductModal';
 import NutritionTabs from '@/components/nutrition/NutritionTabs';
@@ -367,11 +368,16 @@ const Nutrition = () => {
       </div>
 
       {/* Add Food Dialog */}
-      <AddFoodDialog 
-        open={showAddFood}
-        onClose={() => setShowAddFood(false)}
-        onAddFood={handleAddFood}
-      />
+      <Dialog open={showAddFood} onOpenChange={setShowAddFood}>
+        <DialogContent className="p-0">
+          <AddFoodDialog 
+            meals={meals}
+            selectedMeal={selectedMeal}
+            onClose={() => setShowAddFood(false)}
+            onAddFood={handleAddFood}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Barcode Scanner Dialog */}
       <Dialog open={showScanBarcode} onOpenChange={setShowScanBarcode}>
