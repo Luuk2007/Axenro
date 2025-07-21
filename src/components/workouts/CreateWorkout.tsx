@@ -1,280 +1,170 @@
 
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription,
-  DialogFooter
-} from "@/components/ui/dialog";
-import { Plus, X, Calendar as CalendarIcon } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { toast } from "sonner";
-import { Exercise, allExercises } from "@/types/workout";
-import AddExerciseDialog from "./AddExerciseDialog";
-import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Plus, X, Calendar, Trash2 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import AddExerciseDialog from './AddExerciseDialog';
 
 interface CreateWorkoutProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSaveWorkout: (name: string, exercises: Exercise[], date: string) => void;
+  onSaveWorkout: (name: string, exercises: any[], date: string) => void;
 }
 
-const CreateWorkout: React.FC<CreateWorkoutProps> = ({ 
-  open, 
-  onOpenChange, 
-  onSaveWorkout 
-}) => {
+interface Exercise {
+  id: string;
+  name: string;
+  sets: {
+    id: string;
+    reps: number;
+    weight: number;
+    completed: boolean;
+  }[];
+}
+
+const CreateWorkout = ({ open, onOpenChange, onSaveWorkout }: CreateWorkoutProps) => {
   const { t } = useLanguage();
-  const [workoutName, setWorkoutName] = useState("");
-  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
-  const [showExerciseForm, setShowExerciseForm] = useState(false);
-  const [date, setDate] = useState<Date>(new Date());
+  const [workoutName, setWorkoutName] = useState('');
+  const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [showAddExercise, setShowAddExercise] = useState(false);
 
-  // Reset form state when dialog opens/closes
-  useEffect(() => {
-    if (open) {
-      // Only reset when dialog opens, not when it closes
-      setWorkoutName("");
-      setSelectedExercises([]);
-      setDate(new Date());
-    }
-  }, [open]);
+  const handleSaveWorkout = () => {
+    if (!workoutName.trim()) return;
+    
+    onSaveWorkout(workoutName, exercises, workoutDate);
+    
+    // Reset form
+    setWorkoutName('');
+    setWorkoutDate(new Date().toISOString().split('T')[0]);
+    setExercises([]);
+  };
 
-  const handleAddExercise = (exerciseId: string) => {
-    if (!exerciseId) return;
-    
-    const exercise = allExercises.find(ex => ex.id === exerciseId);
-    if (!exercise) return;
-    
-    const isCardio = exercise.muscleGroup === "cardio";
-    
+  const handleAddExercise = (exerciseData: any) => {
     const newExercise: Exercise = {
-      id: exercise.id,
-      name: exercise.name,
-      muscleGroup: exercise.muscleGroup,
-      sets: [{ id: 1, reps: isCardio ? 30 : 12, weight: isCardio ? 0 : 20, completed: false, isCardio }]
+      id: Date.now().toString(),
+      name: exerciseData.name,
+      sets: exerciseData.sets.map((set: any, index: number) => ({
+        id: `${Date.now()}-${index}`,
+        reps: set.reps,
+        weight: set.weight,
+        completed: false
+      }))
     };
     
-    setSelectedExercises([...selectedExercises, newExercise]);
+    setExercises(prev => [...prev, newExercise]);
+    setShowAddExercise(false);
   };
 
-  const handleAddSet = (exerciseIndex: number) => {
-    const updatedExercises = [...selectedExercises];
-    const exercise = updatedExercises[exerciseIndex];
-    const newSetId = exercise.sets.length > 0 
-      ? Math.max(...exercise.sets.map(set => set.id)) + 1 
-      : 1;
-    
-    const isCardio = exercise.muscleGroup === "cardio";
-    
-    exercise.sets.push({
-      id: newSetId,
-      reps: exercise.sets.length > 0 ? exercise.sets[exercise.sets.length - 1].reps : (isCardio ? 30 : 12),
-      weight: exercise.sets.length > 0 ? exercise.sets[exercise.sets.length - 1].weight : (isCardio ? 0 : 20),
-      completed: false,
-      isCardio
-    });
-    
-    setSelectedExercises(updatedExercises);
-  };
-
-  const handleRemoveSet = (exerciseIndex: number, setIndex: number) => {
-    const updatedExercises = [...selectedExercises];
-    updatedExercises[exerciseIndex].sets.splice(setIndex, 1);
-    setSelectedExercises(updatedExercises);
-  };
-
-  const handleUpdateSet = (
-    exerciseIndex: number,
-    setIndex: number,
-    field: 'reps' | 'weight',
-    value: string
-  ) => {
-    const updatedExercises = [...selectedExercises];
-    updatedExercises[exerciseIndex].sets[setIndex][field] = Number(value);
-    setSelectedExercises(updatedExercises);
-  };
-
-  const handleCreateWorkout = () => {
-    if (!workoutName.trim()) {
-      toast.error(t("fillAllFields"));
-      return;
-    }
-
-    if (selectedExercises.length === 0) {
-      toast.error(t("noExercisesError"));
-      return;
-    }
-
-    // Convert the date to string format YYYY-MM-DD
-    const formattedDate = format(date, "yyyy-MM-dd");
-    
-    // Pass the formatted date along with the workout name and exercises
-    onSaveWorkout(workoutName, selectedExercises, formattedDate);
+  const handleRemoveExercise = (exerciseId: string) => {
+    setExercises(prev => prev.filter(ex => ex.id !== exerciseId));
   };
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="sm:max-w-md mx-auto">
           <DialogHeader>
             <DialogTitle>{t("createWorkout")}</DialogTitle>
             <DialogDescription>
-              Create a new workout routine
+              {t("Create a new workout routine")}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t("workoutName")}</label>
-              <Input 
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium block mb-2">{t("workoutName")}</label>
+              <Input
                 value={workoutName}
                 onChange={(e) => setWorkoutName(e.target.value)}
-                placeholder="My Workout"
+                placeholder={t("My Workout")}
               />
             </div>
             
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t("date")}</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>{t("pickDate")}</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={(selectedDate) => selectedDate && setDate(selectedDate)}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
+            <div>
+              <label className="text-sm font-medium block mb-2">{t("date")}</label>
+              <div className="relative">
+                <Input
+                  type="date"
+                  value={workoutDate}
+                  onChange={(e) => setWorkoutDate(e.target.value)}
+                  className="pl-10"
+                />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              </div>
             </div>
             
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-3">
                 <label className="text-sm font-medium">{t("exercises")}</label>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={() => setShowExerciseForm(true)}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAddExercise(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   {t("addExercise")}
                 </Button>
               </div>
               
-              {selectedExercises.length === 0 ? (
-                <div className="border rounded-md p-8 text-center text-muted-foreground">
-                  No exercises added yet
+              {exercises.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-sm">{t("noExercisesAdded")}</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {selectedExercises.map((exercise, exerciseIndex) => {
-                    const isCardio = exercise.muscleGroup === "cardio";
-                    
-                    return (
-                      <div key={`${exercise.id}-${exerciseIndex}`} className="border rounded-md p-4">
-                        <h4 className="font-medium mb-2">{exercise.name}</h4>
-                        
-                        <div className="grid grid-cols-12 gap-2 mb-2">
-                          <div className="col-span-1 text-xs text-muted-foreground">#</div>
-                          <div className="col-span-5 text-xs text-muted-foreground">
-                            {isCardio ? t("minutes") : t("reps")}
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {exercises.map((exercise) => (
+                    <Card key={exercise.id} className="relative">
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium">{exercise.name}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {exercise.sets.length} {exercise.sets.length === 1 ? t("set") : t("sets")}
+                            </p>
                           </div>
-                          {!isCardio && (
-                            <div className="col-span-5 text-xs text-muted-foreground">
-                              {`${t("weight")} (${t("kg")})`}
-                            </div>
-                          )}
-                          <div className="col-span-1"></div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveExercise(exercise.id)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                         </div>
-                        
-                        {exercise.sets.map((set, setIndex) => (
-                          <div key={set.id} className="grid grid-cols-12 gap-2 mb-2">
-                            <div className="col-span-1 flex items-center">{setIndex + 1}</div>
-                            <div className={isCardio ? "col-span-10" : "col-span-5"}>
-                              <Input 
-                                type="number" 
-                                min="1"
-                                value={set.reps}
-                                onChange={(e) => handleUpdateSet(exerciseIndex, setIndex, 'reps', e.target.value)}
-                              />
-                            </div>
-                            {!isCardio && (
-                              <div className="col-span-5">
-                                <Input 
-                                  type="number" 
-                                  min="0" 
-                                  step="0.5"
-                                  value={set.weight}
-                                  onChange={(e) => handleUpdateSet(exerciseIndex, setIndex, 'weight', e.target.value)}
-                                />
-                              </div>
-                            )}
-                            <div className="col-span-1 flex items-center">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-8 w-8 p-0"
-                                onClick={() => handleRemoveSet(exerciseIndex, setIndex)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                        
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-2"
-                          onClick={() => handleAddSet(exerciseIndex)}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          {t("addSet")}
-                        </Button>
-                      </div>
-                    );
-                  })}
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               )}
             </div>
+            
+            <div className="flex gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="flex-1"
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                onClick={handleSaveWorkout}
+                disabled={!workoutName.trim()}
+                className="flex-1"
+              >
+                {t("saveWorkout")}
+              </Button>
+            </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {t("cancel")}
-            </Button>
-            <Button onClick={handleCreateWorkout}>
-              {t("saveWorkout")}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <AddExerciseDialog 
-        open={showExerciseForm}
-        onOpenChange={setShowExerciseForm}
+      <AddExerciseDialog
+        open={showAddExercise}
+        onOpenChange={setShowAddExercise}
         onAddExercise={handleAddExercise}
       />
     </>

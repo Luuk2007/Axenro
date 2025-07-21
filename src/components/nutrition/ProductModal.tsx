@@ -68,7 +68,7 @@ const ProductModal = ({
   };
 
   return (
-    <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+    <DialogContent className="sm:max-w-md mx-auto p-0 overflow-hidden">
       <DialogHeader className="sr-only">
         <DialogTitle>Scanned Product</DialogTitle>
       </DialogHeader>

@@ -109,7 +109,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
   };
 
   return (
-    <DialogContent className="max-w-sm mx-auto p-0 gap-0">
+    <DialogContent className="sm:max-w-md mx-auto p-0 gap-0">
       <DialogHeader className="p-4 pb-3 text-center">
         <DialogTitle className="text-xl font-semibold">{t("addFood")}</DialogTitle>
         <DialogDescription className="sr-only">
