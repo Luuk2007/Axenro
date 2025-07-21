@@ -7,6 +7,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function Layout() {
   const isMobile = useIsMobile();
@@ -16,11 +17,13 @@ export default function Layout() {
     <div className="h-screen w-screen overflow-hidden bg-background">
       <div className="flex h-full w-full">
         {!isMobile && <Sidebar />}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 flex flex-col overflow-hidden">
           <TopBar />
-          <div className="container py-6 px-4 md:px-6 animate-fade-in">
-            <Outlet />
-          </div>
+          <ScrollArea className="flex-1">
+            <div className="container py-6 px-4 md:px-6 animate-fade-in">
+              <Outlet />
+            </div>
+          </ScrollArea>
         </main>
       </div>
     </div>

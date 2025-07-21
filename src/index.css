@@ -74,8 +74,14 @@
     @apply border-border;
   }
 
-  body {
+  html, body {
     @apply bg-background text-foreground font-sans;
+    overflow: hidden; /* Prevent body scrolling */
+    height: 100%;
+  }
+  
+  #root {
+    height: 100%;
   }
 }
 
