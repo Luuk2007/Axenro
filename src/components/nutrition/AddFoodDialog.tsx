@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -148,7 +147,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
             <div className="mb-4">
               <h3 className="text-base font-semibold text-foreground mb-3">{t("portionSize")}</h3>
               
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1">{t("amount")}</label>
                   <Input 
@@ -179,32 +178,28 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
                 </div>
               </div>
 
-              {/* Number of Servings */}
-              <div className="mt-4">
+              {/* Number of Servings - Horizontal Layout */}
+              <div>
                 <label className="text-xs text-muted-foreground block mb-2">{t("numberOfServings")}</label>
-                <div className="flex items-center justify-center">
-                  <div className="flex items-center bg-muted rounded-lg overflow-hidden">
-                    <Button 
-                      variant="ghost"
-                      size="sm"
-                      className="h-10 w-10 rounded-none hover:bg-background"
-                      disabled={servings <= 0.25}
-                      onClick={() => setServings(prev => Math.max(0.25, prev - 0.25))}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <div className="bg-background px-4 py-2 min-w-[60px] text-center">
-                      <span className="text-lg font-semibold">{servings}</span>
-                    </div>
-                    <Button 
-                      variant="ghost"
-                      size="sm"
-                      className="h-10 w-10 rounded-none hover:bg-background"
-                      onClick={() => setServings(prev => prev + 0.25)}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
+                <div className="flex items-center justify-between bg-muted rounded-lg p-2">
+                  <Button 
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 rounded-full"
+                    disabled={servings <= 0.25}
+                    onClick={() => setServings(prev => Math.max(0.25, prev - 0.25))}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-lg font-semibold px-4">{servings}</span>
+                  <Button 
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 rounded-full"
+                    onClick={() => setServings(prev => prev + 0.25)}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
