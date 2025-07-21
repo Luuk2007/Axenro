@@ -27,15 +27,16 @@ export interface MealData {
   id: string; // Changed from MealType to string to support custom meals
   name: string;
   items: FoodItem[];
+  order?: number;
 }
 
 // Helper function to get all available meals
 export const getAvailableMeals = (): MealData[] => {
   const defaultMeals: MealData[] = [
-    { id: 'breakfast', name: 'Breakfast', items: [] },
-    { id: 'lunch', name: 'Lunch', items: [] },
-    { id: 'dinner', name: 'Dinner', items: [] },
-    { id: 'snack', name: 'Snack', items: [] },
+    { id: 'breakfast', name: 'Breakfast', items: [], order: 0 },
+    { id: 'lunch', name: 'Lunch', items: [], order: 1 },
+    { id: 'dinner', name: 'Dinner', items: [], order: 2 },
+    { id: 'snack', name: 'Snack', items: [], order: 3 },
   ];
 
   // Check for deleted meals
@@ -67,6 +68,24 @@ export const getAvailableMeals = (): MealData[] => {
     }
   }
 
+  // Load meal orders
+  const mealOrdersData = localStorage.getItem('mealOrders');
+  let mealOrders = {};
+  if (mealOrdersData) {
+    try {
+      mealOrders = JSON.parse(mealOrdersData);
+    } catch (error) {
+      console.error('Error parsing meal orders:', error);
+    }
+  }
+
+  // Apply custom orders to default meals
+  availableDefaultMeals.forEach(meal => {
+    if (mealOrders[meal.id] !== undefined) {
+      meal.order = mealOrders[meal.id];
+    }
+  });
+
   // Load custom meals from localStorage
   const customMealsData = localStorage.getItem('customMeals');
   if (customMealsData) {
@@ -76,12 +95,19 @@ export const getAvailableMeals = (): MealData[] => {
         id: meal.id,
         name: meal.name,
         items: [],
+        order: mealOrders[meal.id] !== undefined ? mealOrders[meal.id] : 1000
       }));
-      return [...availableDefaultMeals, ...customMealData];
+      
+      const allMeals = [...availableDefaultMeals, ...customMealData];
+      // Sort by order
+      allMeals.sort((a, b) => (a.order || 0) - (b.order || 0));
+      return allMeals;
     } catch (error) {
       console.error('Error parsing custom meals:', error);
     }
   }
 
+  // Sort default meals by order
+  availableDefaultMeals.sort((a, b) => (a.order || 0) - (b.order || 0));
   return availableDefaultMeals;
 };

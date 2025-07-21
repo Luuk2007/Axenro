@@ -47,12 +47,11 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout }: CreateWorkoutProps
     const newExercise: Exercise = {
       id: Date.now().toString(),
       name: exerciseData.name,
-      sets: exerciseData.sets.map((set: any, index: number) => ({
-        id: `${Date.now()}-${index}`,
-        reps: set.reps,
-        weight: set.weight,
-        completed: false
-      }))
+      sets: exerciseData.sets || [
+        { id: '1', reps: 12, weight: 0, completed: false },
+        { id: '2', reps: 12, weight: 0, completed: false },
+        { id: '3', reps: 12, weight: 0, completed: false }
+      ]
     };
     
     setExercises(prev => [...prev, newExercise]);

@@ -73,14 +73,30 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
 
   const handleAddExercise = () => {
     if (!selectedExerciseId) return;
-    onAddExercise(selectedExerciseId);
+    
+    // Find the selected exercise
+    const selectedExercise = allExercises.find(ex => ex.id === selectedExerciseId);
+    if (!selectedExercise) return;
+
+    // Create exercise data with default sets
+    const exerciseData = {
+      ...selectedExercise,
+      sets: [
+        { id: '1', reps: 12, weight: 0, completed: false },
+        { id: '2', reps: 12, weight: 0, completed: false },
+        { id: '3', reps: 12, weight: 0, completed: false }
+      ]
+    };
+
+    onAddExercise(exerciseData);
     setSelectedExerciseId("");
+    setSelectedMuscleGroup("all");
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md mx-auto">
         <DialogHeader>
           <DialogTitle>{t("addExercise")}</DialogTitle>
         </DialogHeader>
@@ -138,7 +154,10 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("cancel")}
           </Button>
-          <Button onClick={handleAddExercise}>
+          <Button 
+            onClick={handleAddExercise}
+            disabled={!selectedExerciseId}
+          >
             {t("addExercise")}
           </Button>
         </DialogFooter>

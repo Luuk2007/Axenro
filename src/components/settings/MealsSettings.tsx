@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trash2, Plus, ChevronDown, ChevronUp, Edit2 } from 'lucide-react';
+import { Trash2, Plus, ChevronDown, ChevronUp, Edit2, GripVertical } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -14,6 +14,7 @@ export interface CustomMeal {
   name: string;
   isDefault: boolean;
   deleted?: boolean;
+  order?: number;
 }
 
 const MealsSettings = () => {
@@ -23,13 +24,14 @@ const MealsSettings = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [draggedItem, setDraggedItem] = useState<string | null>(null);
 
-  // Default meals
+  // Default meals with order
   const defaultMeals: CustomMeal[] = [
-    { id: 'breakfast', name: t('Breakfast'), isDefault: true },
-    { id: 'lunch', name: t('Lunch'), isDefault: true },
-    { id: 'dinner', name: t('Dinner'), isDefault: true },
-    { id: 'snack', name: t('Snack'), isDefault: true },
+    { id: 'breakfast', name: t('Breakfast'), isDefault: true, order: 0 },
+    { id: 'lunch', name: t('Lunch'), isDefault: true, order: 1 },
+    { id: 'dinner', name: t('Dinner'), isDefault: true, order: 2 },
+    { id: 'snack', name: t('Snack'), isDefault: true, order: 3 },
   ];
 
   useEffect(() => {
@@ -37,10 +39,12 @@ const MealsSettings = () => {
     const savedMeals = localStorage.getItem('customMeals');
     const savedMealNames = localStorage.getItem('mealNames');
     const deletedMeals = localStorage.getItem('deletedMeals');
+    const mealOrders = localStorage.getItem('mealOrders');
     
     let customMeals = [];
     let mealNames = {};
     let deletedMealIds = [];
+    let orders = {};
     
     if (savedMeals) {
       customMeals = JSON.parse(savedMeals);
@@ -53,24 +57,43 @@ const MealsSettings = () => {
     if (deletedMeals) {
       deletedMealIds = JSON.parse(deletedMeals);
     }
+
+    if (mealOrders) {
+      orders = JSON.parse(mealOrders);
+    }
     
     // Apply custom names to default meals and mark deleted ones
     const updatedDefaultMeals = defaultMeals.map(meal => ({
       ...meal,
       name: mealNames[meal.id] || meal.name,
-      deleted: deletedMealIds.includes(meal.id)
+      deleted: deletedMealIds.includes(meal.id),
+      order: orders[meal.id] !== undefined ? orders[meal.id] : meal.order
     }));
     
-    setMeals([...updatedDefaultMeals, ...customMeals]);
+    // Add order to custom meals
+    const customMealsWithOrder = customMeals.map((meal: any) => ({
+      ...meal,
+      order: orders[meal.id] !== undefined ? orders[meal.id] : 1000 // Default high order for custom meals
+    }));
+    
+    const allMeals = [...updatedDefaultMeals, ...customMealsWithOrder];
+    // Sort by order
+    allMeals.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+    setMeals(allMeals);
   }, []);
 
   const saveCustomMeals = (updatedMeals: CustomMeal[]) => {
     const customMeals = updatedMeals.filter(meal => !meal.isDefault);
     const mealNames = {};
     const deletedMealIds = [];
+    const mealOrders = {};
     
     // Save custom names for default meals and track deleted ones
-    updatedMeals.forEach(meal => {
+    updatedMeals.forEach((meal, index) => {
+      // Save order for all meals
+      mealOrders[meal.id] = index;
+      
       if (meal.isDefault) {
         const originalName = defaultMeals.find(dm => dm.id === meal.id)?.name;
         if (originalName !== meal.name) {
@@ -85,10 +108,51 @@ const MealsSettings = () => {
     localStorage.setItem('customMeals', JSON.stringify(customMeals));
     localStorage.setItem('mealNames', JSON.stringify(mealNames));
     localStorage.setItem('deletedMeals', JSON.stringify(deletedMealIds));
+    localStorage.setItem('mealOrders', JSON.stringify(mealOrders));
     setMeals(updatedMeals);
     
     // Dispatch event to notify other components
     window.dispatchEvent(new CustomEvent('mealsChanged'));
+  };
+
+  const handleDragStart = (e: React.DragEvent, mealId: string) => {
+    setDraggedItem(mealId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, targetMealId: string) => {
+    e.preventDefault();
+    
+    if (!draggedItem || draggedItem === targetMealId) {
+      setDraggedItem(null);
+      return;
+    }
+
+    const draggedIndex = meals.findIndex(meal => meal.id === draggedItem);
+    const targetIndex = meals.findIndex(meal => meal.id === targetMealId);
+    
+    if (draggedIndex === -1 || targetIndex === -1) {
+      setDraggedItem(null);
+      return;
+    }
+
+    const newMeals = [...meals];
+    const [draggedMeal] = newMeals.splice(draggedIndex, 1);
+    newMeals.splice(targetIndex, 0, draggedMeal);
+    
+    // Update orders
+    const updatedMeals = newMeals.map((meal, index) => ({
+      ...meal,
+      order: index
+    }));
+    
+    saveCustomMeals(updatedMeals);
+    setDraggedItem(null);
   };
 
   const addMeal = () => {
@@ -101,6 +165,7 @@ const MealsSettings = () => {
       id: `custom-${Date.now()}`,
       name: newMealName.trim(),
       isDefault: false,
+      order: meals.length
     };
 
     const updatedMeals = [...meals, newMeal];
@@ -173,9 +238,19 @@ const MealsSettings = () => {
               <Label>{t('Available meals')}</Label>
               <div className="space-y-2">
                 {displayMeals.map((meal) => (
-                  <div key={meal.id} className="flex items-center justify-between p-2 bg-secondary/30 rounded">
+                  <div 
+                    key={meal.id} 
+                    className={`flex items-center justify-between p-2 bg-secondary/30 rounded cursor-move ${
+                      draggedItem === meal.id ? 'opacity-50' : ''
+                    }`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, meal.id)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, meal.id)}
+                  >
                     {editingMeal === meal.id ? (
                       <div className="flex items-center gap-2 flex-1">
+                        <GripVertical className="h-4 w-4 text-muted-foreground" />
                         <Input
                           value={editingName}
                           onChange={(e) => setEditingName(e.target.value)}
@@ -200,7 +275,10 @@ const MealsSettings = () => {
                       </div>
                     ) : (
                       <>
-                        <span className="text-sm">{meal.name}</span>
+                        <div className="flex items-center gap-2">
+                          <GripVertical className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{meal.name}</span>
+                        </div>
                         <div className="flex items-center gap-1">
                           <Button
                             size="sm"

@@ -1,131 +1,77 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { LanguageProvider } from "./contexts/LanguageContext";
-import { AuthProvider } from "./contexts/AuthContext";
-import Layout from "./components/layout/Layout";
-import Dashboard from "./pages/Index";
-import Nutrition from "./pages/Nutrition";
-import Workouts from "./pages/Workouts";
-import Progress from "./pages/Progress";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
-import { useEffect } from "react";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import Layout from "@/components/layout/Layout";
+import Index from "@/pages/Index";
+import Nutrition from "@/pages/Nutrition";
+import Workouts from "@/pages/Workouts";
+import Progress from "@/pages/Progress";
+import Profile from "@/pages/Profile";
+import Settings from "@/pages/Settings";
+import NotFound from "@/pages/NotFound";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import PasswordResetModal from "@/components/auth/PasswordResetModal";
 
 const queryClient = new QueryClient();
 
-// Function to apply theme from localStorage
-const applyThemeFromStorage = () => {
-  const savedSettings = localStorage.getItem("userSettings");
-  if (savedSettings) {
-    const { theme } = JSON.parse(savedSettings);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }
-};
+function App() {
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
 
-// Function to set favicon and mobile app icon
-const setAppIcons = () => {
-  // Set favicon
-  let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
-  if (!link) {
-    link = document.createElement('link');
-    link.rel = 'icon';
-    document.head.appendChild(link);
-  }
-  link.href = '/lovable-uploads/1bc772aa-ab78-4950-8119-39ad987b2e16.png';
-
-  // Add Apple touch icon for iOS devices
-  let touchIcon = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement;
-  if (!touchIcon) {
-    touchIcon = document.createElement('link');
-    touchIcon.rel = 'apple-touch-icon';
-    document.head.appendChild(touchIcon);
-  }
-  touchIcon.href = '/lovable-uploads/1bc772aa-ab78-4950-8119-39ad987b2e16.png';
-
-  // Add meta tags for mobile web app
-  let metaApple = document.querySelector("meta[name='apple-mobile-web-app-capable']");
-  if (!metaApple) {
-    metaApple = document.createElement('meta');
-    metaApple.setAttribute('name', 'apple-mobile-web-app-capable');
-    metaApple.setAttribute('content', 'yes');
-    document.head.appendChild(metaApple);
-  }
-  
-  // Add app name
-  let appName = document.querySelector("meta[name='application-name']");
-  if (!appName) {
-    appName = document.createElement('meta');
-    appName.setAttribute('name', 'application-name');
-    appName.setAttribute('content', 'Progresa');
-    document.head.appendChild(appName);
-  }
-};
-
-// Initialize first-time user data
-const initializeUserData = () => {
-  // Check if this is a first-time user
-  if (!localStorage.getItem("userDataInitialized")) {
-    // Initialize empty measurements and progress data
-    localStorage.setItem("measurements", JSON.stringify([]));
-    localStorage.setItem("weightEntries", JSON.stringify([]));
-    
-    // Mark that initialization has been done
-    localStorage.setItem("userDataInitialized", "true");
-  }
-};
-
-const App = () => {
-  // Apply theme, set app icons and initialize user data on initial load
   useEffect(() => {
-    applyThemeFromStorage();
-    setAppIcons();
-    initializeUserData();
+    // Check for password reset hash in URL
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get('type');
     
-    // Add event listener for storage changes (for cross-tab syncing)
-    const handleStorageChange = () => {
-      applyThemeFromStorage();
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    if (type === 'recovery') {
+      setShowPasswordReset(true);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Listen for auth state changes to handle password recovery
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setShowPasswordReset(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <TooltipProvider>
         <LanguageProvider>
           <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
+            <Toaster />
+            <BrowserRouter>
               <Routes>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/nutrition" element={<Nutrition />} />
-                  <Route path="/workouts" element={<Workouts />} />
-                  <Route path="/progress" element={<Progress />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/settings" element={<Settings />} />
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<Index />} />
+                  <Route path="nutrition" element={<Nutrition />} />
+                  <Route path="workouts" element={<Workouts />} />
+                  <Route path="progress" element={<Progress />} />
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="settings" element={<Settings />} />
+                  <Route path="*" element={<NotFound />} />
                 </Route>
-                <Route path="*" element={<NotFound />} />
               </Routes>
-            </TooltipProvider>
+            </BrowserRouter>
+            
+            <PasswordResetModal 
+              open={showPasswordReset}
+              onOpenChange={setShowPasswordReset}
+            />
           </AuthProvider>
         </LanguageProvider>
-      </BrowserRouter>
+      </TooltipProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
