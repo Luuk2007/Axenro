@@ -336,7 +336,7 @@ export function WeightTracker() {
       {weightHistory.length > 0 && (
         <div className="glassy-card rounded-xl overflow-hidden card-shadow">
           <div className="px-5 py-4 border-b border-border">
-            <h3 className="font-medium tracking-tight">{t("weightHistory")}</h3>
+            <h3 className="font-medium tracking-tight">{t("Weight History")}</h3>
           </div>
           <div className="p-5">
             <div className="max-h-72 overflow-y-auto">
