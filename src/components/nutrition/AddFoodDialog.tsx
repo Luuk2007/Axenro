@@ -76,13 +76,10 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
   };
 
   const calculateAdjustedValue = (value: number): number => {
-    // Base calculation on the user-entered amount/unit
-    if (unit === "gram" || unit === "milliliter") {
-      return (value * amount) / 100; // Assuming nutrition values are per 100g/ml
-    } else {
-      // For pieces, slices, etc., multiply by servings
-      return value * servings;
-    }
+    // First adjust for amount (per 100g/ml base)
+    const adjustedForAmount = (value * amount) / 100;
+    // Then multiply by servings
+    return adjustedForAmount * servings;
   };
 
   const handleAddProduct = () => {
@@ -113,27 +110,27 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
   };
 
   return (
-    <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-0">
-      <DialogHeader className="p-4 pb-0">
-        <DialogTitle>{t("addFood")}</DialogTitle>
-        <DialogDescription>
+    <DialogContent className="max-w-sm max-h-[90vh] flex flex-col p-0">
+      <DialogHeader className="p-3 pb-0">
+        <DialogTitle className="text-lg">{t("addFood")}</DialogTitle>
+        <DialogDescription className="text-sm">
           {t("Search foods")}
         </DialogDescription>
       </DialogHeader>
       
       {selectedProduct ? (
         <div className="flex flex-col h-full max-h-[90vh]">
-          {/* Header - Clean and Simple */}
-          <div className="p-6 text-center border-b bg-card">
-            <h3 className="text-xl font-semibold text-foreground">{t("addToMeal")}</h3>
+          {/* Header */}
+          <div className="p-4 text-center border-b bg-card">
+            <h3 className="text-lg font-semibold text-foreground">{t("addToMeal")}</h3>
           </div>
 
           {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto px-6 py-8 bg-background">
-            {/* Product Image and Info - Centered */}
-            <div className="text-center mb-8">
+          <div className="flex-1 overflow-y-auto px-4 py-4 bg-background">
+            {/* Product Image and Info */}
+            <div className="text-center mb-4">
               {selectedProduct.imageUrl && (
-                <div className="w-32 h-32 mx-auto mb-4 rounded-2xl overflow-hidden bg-muted shadow-lg">
+                <div className="w-20 h-20 mx-auto mb-3 rounded-xl overflow-hidden bg-muted shadow-md">
                   <img 
                     src={selectedProduct.imageUrl} 
                     alt={selectedProduct.name} 
@@ -141,32 +138,32 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
                   />
                 </div>
               )}
-              <h2 className="text-2xl font-bold text-foreground mb-1">{selectedProduct.name}</h2>
+              <h2 className="text-lg font-bold text-foreground mb-1">{selectedProduct.name}</h2>
               {selectedProduct.brand && (
-                <p className="text-base text-muted-foreground">{selectedProduct.brand}</p>
+                <p className="text-sm text-muted-foreground">{selectedProduct.brand}</p>
               )}
             </div>
 
             {/* Portion Size Section */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-foreground mb-4">{t("portionSize")}</h3>
+            <div className="mb-4">
+              <h3 className="text-base font-semibold text-foreground mb-3">{t("portionSize")}</h3>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm text-muted-foreground block mb-2">{t("amount")}</label>
+                  <label className="text-xs text-muted-foreground block mb-1">{t("amount")}</label>
                   <Input 
                     type="number"
                     value={amount}
                     onChange={handleAmountChange}
                     min="1"
-                    className="text-base font-medium h-12 text-center border-2"
+                    className="text-sm font-medium h-10 text-center"
                   />
                 </div>
                 
                 <div>
-                  <label className="text-sm text-muted-foreground block mb-2">{t("unit")}</label>
+                  <label className="text-xs text-muted-foreground block mb-1">{t("unit")}</label>
                   <Select value={unit} onValueChange={setUnit}>
-                    <SelectTrigger className="h-12 border-2 font-medium">
+                    <SelectTrigger className="h-10 text-sm font-medium">
                       <SelectValue>{t(unit) || unit}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
@@ -183,29 +180,29 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
               </div>
 
               {/* Number of Servings */}
-              <div className="mt-6">
-                <label className="text-sm text-muted-foreground block mb-3">{t("numberOfServings")}</label>
+              <div className="mt-4">
+                <label className="text-xs text-muted-foreground block mb-2">{t("numberOfServings")}</label>
                 <div className="flex items-center justify-center">
-                  <div className="flex items-center bg-muted rounded-xl overflow-hidden">
+                  <div className="flex items-center bg-muted rounded-lg overflow-hidden">
                     <Button 
                       variant="ghost"
                       size="sm"
-                      className="h-12 w-12 rounded-none hover:bg-background"
+                      className="h-10 w-10 rounded-none hover:bg-background"
                       disabled={servings <= 0.25}
                       onClick={() => setServings(prev => Math.max(0.25, prev - 0.25))}
                     >
-                      <Minus className="h-5 w-5" />
+                      <Minus className="h-4 w-4" />
                     </Button>
-                    <div className="bg-background px-6 py-3 min-w-[80px] text-center">
-                      <span className="text-xl font-semibold">{servings}</span>
+                    <div className="bg-background px-4 py-2 min-w-[60px] text-center">
+                      <span className="text-lg font-semibold">{servings}</span>
                     </div>
                     <Button 
                       variant="ghost"
                       size="sm"
-                      className="h-12 w-12 rounded-none hover:bg-background"
+                      className="h-10 w-10 rounded-none hover:bg-background"
                       onClick={() => setServings(prev => prev + 0.25)}
                     >
-                      <Plus className="h-5 w-5" />
+                      <Plus className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -213,10 +210,10 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
             </div>
 
             {/* Add to Meal Selection */}
-            <div className="mb-8">
-              <label className="text-sm text-muted-foreground block mb-3">{t("addToMeal")}</label>
+            <div className="mb-4">
+              <label className="text-xs text-muted-foreground block mb-2">{t("addToMeal")}</label>
               <Select value={selectedMealId} onValueChange={setSelectedMealId}>
-                <SelectTrigger className="h-12 border-2 font-medium">
+                <SelectTrigger className="h-10 text-sm font-medium">
                   <SelectValue placeholder={t("selectMeal")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -228,62 +225,62 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
             </div>
 
             {/* Nutrition Summary */}
-            <div className="bg-card border rounded-2xl p-6 mb-8">
-              <h3 className="text-lg font-semibold text-center mb-6">{t("nutritionSummary")}</h3>
+            <div className="bg-card border rounded-xl p-4 mb-4">
+              <h3 className="text-base font-semibold text-center mb-4">{t("nutritionSummary")}</h3>
               
               {/* Calories Display */}
-              <div className="text-center mb-6">
-                <div className="text-3xl font-bold text-foreground">
+              <div className="text-center mb-4">
+                <div className="text-2xl font-bold text-foreground">
                   {Math.round(calculateAdjustedValue(selectedProduct.nutrition.calories))} cal
                 </div>
               </div>
               
               {/* Macros in a clean row */}
-              <div className="grid grid-cols-3 gap-6 text-center">
+              <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-green-600 mb-1">
+                  <div className="text-lg font-bold text-green-600 mb-1">
                     {Math.round(calculateAdjustedValue(selectedProduct.nutrition.carbs) * 10) / 10}g
                   </div>
-                  <div className="text-sm text-muted-foreground font-medium">{t("carbs")}</div>
+                  <div className="text-xs text-muted-foreground font-medium">{t("carbs")}</div>
                 </div>
                 
                 <div>
-                  <div className="text-2xl font-bold text-orange-500 mb-1">
+                  <div className="text-lg font-bold text-orange-500 mb-1">
                     {Math.round(calculateAdjustedValue(selectedProduct.nutrition.fat) * 10) / 10}g
                   </div>
-                  <div className="text-sm text-muted-foreground font-medium">{t("fat")}</div>
+                  <div className="text-xs text-muted-foreground font-medium">{t("fat")}</div>
                 </div>
                 
                 <div>
-                  <div className="text-2xl font-bold text-blue-600 mb-1">
+                  <div className="text-lg font-bold text-blue-600 mb-1">
                     {Math.round(calculateAdjustedValue(selectedProduct.nutrition.protein) * 10) / 10}g
                   </div>
-                  <div className="text-sm text-muted-foreground font-medium">{t("protein")}</div>
+                  <div className="text-xs text-muted-foreground font-medium">{t("protein")}</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Fixed Footer with Add Button */}
-          <div className="p-6 border-t bg-background">
+          <div className="p-4 border-t bg-background">
             <Button 
-              className="w-full h-14 text-base font-semibold rounded-xl bg-primary hover:bg-primary/90" 
+              className="w-full h-12 text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90" 
               onClick={handleAddProduct}
             >
-              <Plus className="mr-2 h-5 w-5" />
+              <Plus className="mr-2 h-4 w-4" />
               {t("addToMealPlan")}
             </Button>
           </div>
         </div>
       ) : (
-        <div className="space-y-4 p-4 flex-1 overflow-y-auto flex flex-col bg-background">
+        <div className="space-y-3 p-3 flex-1 overflow-y-auto flex flex-col bg-background">
           <div className="space-y-2">
             <label className="text-sm font-medium">{t("Meal")}</label>
             <Select 
               defaultValue={selectedMealId}
               onValueChange={setSelectedMealId}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-10">
                 <SelectValue placeholder={t("selectMeal")} />
               </SelectTrigger>
               <SelectContent>
@@ -300,7 +297,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
                 placeholder={t("Search foods")} 
                 onChange={(e) => setSearchValue(e.target.value)} 
                 value={searchValue}
-                className="pr-10"
+                className="pr-10 h-10"
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                 {searching ? (
@@ -313,7 +310,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
           </div>
           <div className="flex-1 overflow-y-auto min-h-0">
             {/* API Results */}
-            <div className="mb-4">
+            <div className="mb-3">
               <h3 className="text-sm font-medium mb-2">{apiResults.length > 0 ? t("onlineResults") : ""}</h3>
               <div className="space-y-2">
                 {apiResults.map(product => (
@@ -327,7 +324,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
                         <img 
                           src={product.imageUrl} 
                           alt={product.name} 
-                          className="w-10 h-10 object-contain"
+                          className="w-8 h-8 object-contain"
                         />
                       )}
                       <div>
@@ -345,27 +342,27 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
                 ))}
                 
                 {apiResults.length === 0 && !searching && searchValue && (
-                  <div className="text-center py-4 text-sm text-muted-foreground">
+                  <div className="text-center py-3 text-sm text-muted-foreground">
                     {t("No results found")}
                   </div>
                 )}
                 
                 {!searchValue && (
-                  <div className="text-center py-4 text-sm text-muted-foreground">
+                  <div className="text-center py-3 text-sm text-muted-foreground">
                     {t("Type to search")}
                   </div>
                 )}
                 
                 {searching && (
-                  <div className="text-center py-4">
-                    <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                  <div className="text-center py-3">
+                    <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                     <p className="text-sm text-muted-foreground mt-2">{t("loading")}</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
-          <div className="flex justify-end p-4 border-t border-border bg-background">
+          <div className="flex justify-end p-3 border-t border-border bg-background">
             <Button variant="outline" onClick={onClose}>{t("cancel")}</Button>
           </div>
         </div>
