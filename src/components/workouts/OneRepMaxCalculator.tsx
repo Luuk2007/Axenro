@@ -5,13 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Calculator, Dumbbell } from 'lucide-react';
 
 interface OneRepMaxCalculatorProps {
@@ -22,31 +15,14 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
   const { t } = useLanguage();
   const [weight, setWeight] = useState<number | ''>('');
   const [reps, setReps] = useState<number | ''>('');
-  const [formula, setFormula] = useState('brzycki');
   const [result, setResult] = useState<number | null>(null);
   
-  // Formulas for calculating 1RM
+  // Calculate 1RM using Epley formula
   const calculateOneRM = () => {
     if (weight === '' || reps === '' || reps < 1) return;
     
-    let oneRM = 0;
-    
-    switch (formula) {
-      case 'brzycki':
-        // Brzycki: 1RM = weight × (36 / (37 - reps))
-        oneRM = weight * (36 / (37 - Math.min(reps, 36)));
-        break;
-      case 'epley':
-        // Epley: 1RM = weight × (1 + 0.0333 × reps)
-        oneRM = weight * (1 + 0.0333 * reps);
-        break;
-      case 'lander':
-        // Lander: 1RM = (100 × weight) / (101.3 - 2.67123 × reps)
-        oneRM = (100 * weight) / (101.3 - 2.67123 * reps);
-        break;
-      default:
-        oneRM = weight * (36 / (37 - Math.min(reps, 36)));
-    }
+    // Epley formula: 1RM = weight × (1 + 0.0333 × reps)
+    const oneRM = weight * (1 + 0.0333 * reps);
     
     const roundedResult = Math.round(oneRM * 10) / 10;
     setResult(roundedResult);
@@ -94,23 +70,6 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
             </div>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="formula">{t("formula")}</Label>
-            <Select
-              value={formula}
-              onValueChange={setFormula}
-            >
-              <SelectTrigger id="formula">
-                <SelectValue placeholder="Select formula" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="brzycki">Brzycki</SelectItem>
-                <SelectItem value="epley">Epley</SelectItem>
-                <SelectItem value="lander">Lander</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
           <Button 
             onClick={calculateOneRM} 
             className="w-full mt-4"
@@ -124,6 +83,7 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
             <div className="mt-4 p-4 bg-muted rounded-md text-center">
               <p className="text-sm text-muted-foreground">{t("Estimated One Rep Max")}</p>
               <p className="text-2xl font-bold">{result} kg</p>
+              <p className="text-xs text-muted-foreground mt-1">Using Epley Formula</p>
             </div>
           )}
           

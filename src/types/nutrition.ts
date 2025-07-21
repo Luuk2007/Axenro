@@ -38,6 +38,35 @@ export const getAvailableMeals = (): MealData[] => {
     { id: 'snack', name: 'Snack', items: [] },
   ];
 
+  // Check for deleted meals
+  const deletedMealsData = localStorage.getItem('deletedMeals');
+  let deletedMealIds = [];
+  if (deletedMealsData) {
+    try {
+      deletedMealIds = JSON.parse(deletedMealsData);
+    } catch (error) {
+      console.error('Error parsing deleted meals:', error);
+    }
+  }
+
+  // Filter out deleted default meals
+  const availableDefaultMeals = defaultMeals.filter(meal => !deletedMealIds.includes(meal.id));
+
+  // Load custom meal names for default meals
+  const mealNamesData = localStorage.getItem('mealNames');
+  if (mealNamesData) {
+    try {
+      const mealNames = JSON.parse(mealNamesData);
+      availableDefaultMeals.forEach(meal => {
+        if (mealNames[meal.id]) {
+          meal.name = mealNames[meal.id];
+        }
+      });
+    } catch (error) {
+      console.error('Error parsing meal names:', error);
+    }
+  }
+
   // Load custom meals from localStorage
   const customMealsData = localStorage.getItem('customMeals');
   if (customMealsData) {
@@ -48,11 +77,11 @@ export const getAvailableMeals = (): MealData[] => {
         name: meal.name,
         items: [],
       }));
-      return [...defaultMeals, ...customMealData];
+      return [...availableDefaultMeals, ...customMealData];
     } catch (error) {
       console.error('Error parsing custom meals:', error);
     }
   }
 
-  return defaultMeals;
+  return availableDefaultMeals;
 };

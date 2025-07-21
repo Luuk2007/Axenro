@@ -13,6 +13,7 @@ export interface CustomMeal {
   id: string;
   name: string;
   isDefault: boolean;
+  deleted?: boolean;
 }
 
 const MealsSettings = () => {
@@ -35,9 +36,11 @@ const MealsSettings = () => {
     // Load custom meals from localStorage
     const savedMeals = localStorage.getItem('customMeals');
     const savedMealNames = localStorage.getItem('mealNames');
+    const deletedMeals = localStorage.getItem('deletedMeals');
     
     let customMeals = [];
     let mealNames = {};
+    let deletedMealIds = [];
     
     if (savedMeals) {
       customMeals = JSON.parse(savedMeals);
@@ -47,10 +50,15 @@ const MealsSettings = () => {
       mealNames = JSON.parse(savedMealNames);
     }
     
-    // Apply custom names to default meals
+    if (deletedMeals) {
+      deletedMealIds = JSON.parse(deletedMeals);
+    }
+    
+    // Apply custom names to default meals and mark deleted ones
     const updatedDefaultMeals = defaultMeals.map(meal => ({
       ...meal,
-      name: mealNames[meal.id] || meal.name
+      name: mealNames[meal.id] || meal.name,
+      deleted: deletedMealIds.includes(meal.id)
     }));
     
     setMeals([...updatedDefaultMeals, ...customMeals]);
@@ -59,19 +67,24 @@ const MealsSettings = () => {
   const saveCustomMeals = (updatedMeals: CustomMeal[]) => {
     const customMeals = updatedMeals.filter(meal => !meal.isDefault);
     const mealNames = {};
+    const deletedMealIds = [];
     
-    // Save custom names for default meals
+    // Save custom names for default meals and track deleted ones
     updatedMeals.forEach(meal => {
       if (meal.isDefault) {
         const originalName = defaultMeals.find(dm => dm.id === meal.id)?.name;
         if (originalName !== meal.name) {
           mealNames[meal.id] = meal.name;
         }
+        if (meal.deleted) {
+          deletedMealIds.push(meal.id);
+        }
       }
     });
     
     localStorage.setItem('customMeals', JSON.stringify(customMeals));
     localStorage.setItem('mealNames', JSON.stringify(mealNames));
+    localStorage.setItem('deletedMeals', JSON.stringify(deletedMealIds));
     setMeals(updatedMeals);
     
     // Dispatch event to notify other components
@@ -97,8 +110,20 @@ const MealsSettings = () => {
   };
 
   const removeMeal = (mealId: string) => {
-    const updatedMeals = meals.filter(meal => meal.id !== mealId);
-    saveCustomMeals(updatedMeals);
+    const meal = meals.find(m => m.id === mealId);
+    
+    if (meal?.isDefault) {
+      // For default meals, mark as deleted
+      const updatedMeals = meals.map(m => 
+        m.id === mealId ? { ...m, deleted: true } : m
+      );
+      saveCustomMeals(updatedMeals);
+    } else {
+      // For custom meals, remove completely
+      const updatedMeals = meals.filter(meal => meal.id !== mealId);
+      saveCustomMeals(updatedMeals);
+    }
+    
     toast.success(t('Meal removed successfully'));
   };
 
@@ -128,6 +153,9 @@ const MealsSettings = () => {
     setEditingName('');
   };
 
+  // Filter out deleted meals for display
+  const displayMeals = meals.filter(meal => !meal.deleted);
+
   return (
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -144,7 +172,7 @@ const MealsSettings = () => {
             <div className="space-y-2">
               <Label>{t('Available meals')}</Label>
               <div className="space-y-2">
-                {meals.map((meal) => (
+                {displayMeals.map((meal) => (
                   <div key={meal.id} className="flex items-center justify-between p-2 bg-secondary/30 rounded">
                     {editingMeal === meal.id ? (
                       <div className="flex items-center gap-2 flex-1">
