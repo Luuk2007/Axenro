@@ -47,9 +47,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <LanguageProvider>
-          <AuthProvider>
-            <Toaster />
-            <BrowserRouter>
+          <Toaster />
+          <BrowserRouter>
+            <AuthProvider>
               <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Index />} />
@@ -61,13 +61,13 @@ function App() {
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
-            </BrowserRouter>
-            
-            <PasswordResetModal 
-              open={showPasswordReset}
-              onOpenChange={setShowPasswordReset}
-            />
-          </AuthProvider>
+              
+              <PasswordResetModal 
+                open={showPasswordReset}
+                onOpenChange={setShowPasswordReset}
+              />
+            </AuthProvider>
+          </BrowserRouter>
         </LanguageProvider>
       </TooltipProvider>
     </QueryClientProvider>
