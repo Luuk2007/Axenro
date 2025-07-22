@@ -105,9 +105,9 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
       )}>
         <div className="flex h-16 items-center px-6">
           <img 
-            src={isDarkTheme ? "/lovable-uploads/4c2ef019-f56c-4d5e-a2dc-2976a3b85f08.png" : "/lovable-uploads/6b406cc5-7fc7-419d-8d30-e7acd9762371.png"}
-            alt="Progresa Logo" 
-            className="h-16 w-auto object-contain max-w-full"
+            src={isDarkTheme ? "/lovable-uploads/b94d76e9-30f7-400c-8294-58d72b2d16cf.png" : "/lovable-uploads/2622c944-7422-4825-b6cb-9803e827ef96.png"}
+            alt="Axenro Logo" 
+            className="h-10 w-auto object-contain max-w-full"
           />
         </div>
         <nav className="flex-1 overflow-auto py-6">
