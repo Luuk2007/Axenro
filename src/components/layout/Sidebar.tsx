@@ -103,11 +103,11 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         "flex flex-col border-border bg-card/50 backdrop-blur-sm",
         isMobile ? "w-full border-b" : "w-64 border-r hidden md:flex"
       )}>
-        <div className="flex h-16 items-center justify-start px-4">
+        <div className="flex h-20 items-center justify-center px-2">
           <img 
             src={isDarkTheme ? "/lovable-uploads/b94d76e9-30f7-400c-8294-58d72b2d16cf.png" : "/lovable-uploads/2622c944-7422-4825-b6cb-9803e827ef96.png"}
             alt="Axenro Logo" 
-            className="h-12 w-auto object-contain"
+            className="h-16 w-auto object-contain max-w-[90%]"
           />
         </div>
         <nav className="flex-1 overflow-auto py-6">
