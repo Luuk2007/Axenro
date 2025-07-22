@@ -76,7 +76,7 @@ const Settings = () => {
     const newSettings = { ...settings, language: newLanguage };
     saveSettings(newSettings);
     setLanguage(newLanguage);
-    toast.success(t("settingsSaved"));
+    toast.success(t("Settings Saved"));
   };
 
   // Handle notifications toggle
