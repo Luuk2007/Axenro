@@ -83,14 +83,14 @@ const Settings = () => {
   const handleNotificationsChange = (notifications: boolean) => {
     const newSettings = { ...settings, notifications };
     saveSettings(newSettings);
-    toast.success(t("settingsSaved"));
+    toast.success(t("Settings saved"));
   };
 
   // Handle data backup toggle
   const handleDataBackupChange = (dataBackup: boolean) => {
     const newSettings = { ...settings, dataBackup };
     saveSettings(newSettings);
-    toast.success(t("settingsSaved"));
+    toast.success(t("Settings saved"));
   };
 
   // Export user data
