@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import englishDefault from '../translations/english';
 import { dutch } from '../translations/dutch';
@@ -28,8 +27,26 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  // Get saved language from localStorage or default to English
+  // Detect domain-based language
+  const getDomainBasedLanguage = (): Language => {
+    const hostname = window.location.hostname;
+    if (hostname === 'axenro.nl') {
+      return 'dutch';
+    }
+    return 'english'; // Default for axenro.com and other domains
+  };
+
+  // Get saved language from localStorage or use domain-based detection
   const getSavedLanguage = (): Language => {
+    // First check if we should use domain-based language
+    const domainLanguage = getDomainBasedLanguage();
+    
+    // If it's a domain-specific URL, use that language
+    if (window.location.hostname === 'axenro.nl' || window.location.hostname === 'axenro.com') {
+      return domainLanguage;
+    }
+    
+    // Otherwise, check localStorage
     const savedSettings = localStorage.getItem("userSettings");
     if (savedSettings) {
       const { language } = JSON.parse(savedSettings);
@@ -54,7 +71,16 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const [language, setLanguage] = useState<Language>(getSavedLanguage);
 
-  // Apply theme on initial load
+  // Set title based on language and domain
+  const updateTitle = (lang: Language) => {
+    if (lang === 'dutch') {
+      document.title = 'Axenro | jouw persoonlijke gezondheidstracker';
+    } else {
+      document.title = 'Axenro | your personal health tracker';
+    }
+  };
+
+  // Apply theme on initial load and set initial title
   useEffect(() => {
     const theme = getSavedTheme();
     if (theme === 'dark') {
@@ -62,16 +88,28 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     } else {
       document.documentElement.classList.remove('dark');
     }
+
+    // Set initial title based on language
+    updateTitle(language);
   }, []);
 
-  // Update localStorage whenever language changes
+  // Update localStorage whenever language changes (but not for domain-based routing)
   useEffect(() => {
-    const savedSettings = localStorage.getItem("userSettings");
-    const settings = savedSettings ? JSON.parse(savedSettings) : {};
-    localStorage.setItem("userSettings", JSON.stringify({
-      ...settings,
-      language
-    }));
+    const hostname = window.location.hostname;
+    const isDomainSpecific = hostname === 'axenro.nl' || hostname === 'axenro.com';
+    
+    // Only save to localStorage if it's not a domain-specific URL
+    if (!isDomainSpecific) {
+      const savedSettings = localStorage.getItem("userSettings");
+      const settings = savedSettings ? JSON.parse(savedSettings) : {};
+      localStorage.setItem("userSettings", JSON.stringify({
+        ...settings,
+        language
+      }));
+    }
+    
+    // Update title when language changes
+    updateTitle(language);
     
     // Force a re-render of the entire application
     document.documentElement.setAttribute('lang', language);
