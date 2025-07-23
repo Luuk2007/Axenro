@@ -1,238 +1,126 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Plus, ChevronDown, ChevronUp, Edit2 } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { toast } from 'sonner';
-import { muscleGroups, getAllExercises } from '@/types/workout';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { X, ChevronDown, ChevronUp } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { toast } from "sonner";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export interface CustomExercise {
-  id: string;
+interface CustomExercise {
   name: string;
   muscleGroup: string;
-  isCustom: boolean;
 }
 
 const ExercisesSettings = () => {
   const { t } = useLanguage();
-  const [customExercises, setCustomExercises] = useState<CustomExercise[]>([]);
+  const [customExercises, setCustomExercises] = useState<CustomExercise[]>(() => {
+    const saved = localStorage.getItem('customExercises');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [newExerciseName, setNewExerciseName] = useState('');
-  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const [editingExercise, setEditingExercise] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState('');
-  const [allExercises, setAllExercises] = useState(getAllExercises());
+  const [newMuscleGroup, setNewMuscleGroup] = useState('');
+  const [exercisesOpen, setExercisesOpen] = useState(false);
 
-  useEffect(() => {
-    // Load custom exercises from localStorage
-    const savedExercises = localStorage.getItem('customExercises');
-    if (savedExercises) {
-      setCustomExercises(JSON.parse(savedExercises));
-    }
-    
-    // Update all exercises when component mounts
-    setAllExercises(getAllExercises());
-  }, []);
+  const muscleGroups = [
+    'chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'cardio', 'full body'
+  ];
 
-  const saveCustomExercises = (exercises: CustomExercise[]) => {
-    localStorage.setItem('customExercises', JSON.stringify(exercises));
-    setCustomExercises(exercises);
-    setAllExercises(getAllExercises());
-    
-    // Dispatch event to notify other components
-    window.dispatchEvent(new CustomEvent('exercisesChanged'));
-  };
-
-  const addExercise = () => {
+  const addCustomExercise = () => {
     if (!newExerciseName.trim()) {
-      toast.error(t('Please enter an exercise name'));
+      toast.error(t("Please enter an exercise name"));
       return;
     }
 
-    if (!selectedMuscleGroup) {
-      toast.error(t('Please select a muscle group'));
+    if (!newMuscleGroup) {
+      toast.error(t("Please select a muscle group"));
       return;
     }
 
     const newExercise: CustomExercise = {
-      id: `custom-${Date.now()}`,
       name: newExerciseName.trim(),
-      muscleGroup: selectedMuscleGroup,
-      isCustom: true,
+      muscleGroup: newMuscleGroup
     };
 
     const updatedExercises = [...customExercises, newExercise];
-    saveCustomExercises(updatedExercises);
+    setCustomExercises(updatedExercises);
+    localStorage.setItem('customExercises', JSON.stringify(updatedExercises));
     setNewExerciseName('');
-    setSelectedMuscleGroup('');
-    toast.success(t('Exercise added successfully'));
+    setNewMuscleGroup('');
+    toast.success(t("Exercise added successfully"));
   };
 
-  const removeExercise = (exerciseId: string) => {
-    const updatedExercises = customExercises.filter(exercise => exercise.id !== exerciseId);
-    saveCustomExercises(updatedExercises);
-    toast.success(t('Exercise removed successfully'));
+  const removeCustomExercise = (index: number) => {
+    const updatedExercises = customExercises.filter((_, i) => i !== index);
+    setCustomExercises(updatedExercises);
+    localStorage.setItem('customExercises', JSON.stringify(updatedExercises));
+    toast.success(t("Exercise removed successfully"));
   };
-
-  const startEditing = (exercise: CustomExercise) => {
-    setEditingExercise(exercise.id);
-    setEditingName(exercise.name);
-  };
-
-  const saveEdit = (exerciseId: string) => {
-    if (!editingName.trim()) {
-      toast.error(t('Please enter an exercise name'));
-      return;
-    }
-
-    const updatedExercises = customExercises.map(exercise => 
-      exercise.id === exerciseId ? { ...exercise, name: editingName.trim() } : exercise
-    );
-    
-    saveCustomExercises(updatedExercises);
-    setEditingExercise(null);
-    setEditingName('');
-    toast.success(t('Exercise updated successfully'));
-  };
-
-  const cancelEdit = () => {
-    setEditingExercise(null);
-    setEditingName('');
-  };
-
-  // Get exercises for selected muscle group
-  const getExercisesForMuscleGroup = (muscleGroup: string) => {
-    return allExercises.filter(exercise => exercise.muscleGroup === muscleGroup);
-  };
-
-  // Group exercises by muscle group
-  const exercisesByMuscleGroup = customExercises.reduce((acc, exercise) => {
-    if (!acc[exercise.muscleGroup]) {
-      acc[exercise.muscleGroup] = [];
-    }
-    acc[exercise.muscleGroup].push(exercise);
-    return acc;
-  }, {} as Record<string, CustomExercise[]>);
 
   return (
     <Card>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Collapsible open={exercisesOpen} onOpenChange={setExercisesOpen}>
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
             <div className="flex items-center justify-between">
-              <CardTitle>{t('exercises')}</CardTitle>
-              {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              <CardTitle className="text-base">{t("exercises")}</CardTitle>
+              {exercisesOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </div>
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="space-y-4">
-            {Object.keys(exercisesByMuscleGroup).length > 0 && (
-              <div className="space-y-3">
-                <Label>{t('Custom exercises')}</Label>
-                {Object.entries(exercisesByMuscleGroup).map(([muscleGroup, exercises]) => (
-                  <div key={muscleGroup} className="space-y-2">
-                    <h4 className="text-sm font-medium capitalize">{muscleGroup}</h4>
-                    <div className="space-y-1 ml-4">
-                      {exercises.map((exercise) => (
-                        <div key={exercise.id} className="flex items-center justify-between p-2 bg-secondary/30 rounded">
-                          {editingExercise === exercise.id ? (
-                            <div className="flex items-center gap-2 flex-1">
-                              <Input
-                                value={editingName}
-                                onChange={(e) => setEditingName(e.target.value)}
-                                className="flex-1"
-                                onKeyPress={(e) => e.key === 'Enter' && saveEdit(exercise.id)}
-                              />
-                              <Button
-                                size="sm"
-                                onClick={() => saveEdit(exercise.id)}
-                                className="h-8"
-                              >
-                                Save
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={cancelEdit}
-                                className="h-8"
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          ) : (
-                            <>
-                              <span className="text-sm">{exercise.name}</span>
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => startEditing(exercise)}
-                                  className="h-8 w-8 p-0"
-                                >
-                                  <Edit2 className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => removeExercise(exercise.id)}
-                                  className="h-8 w-8 p-0"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      ))}
+            <div className="space-y-2">
+              <h3 className="font-medium">{t("Custom exercises")}</h3>
+              <div className="space-y-2">
+                {customExercises.map((exercise, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 border rounded">
+                    <div>
+                      <span className="font-medium">{exercise.name}</span>
+                      <span className="text-sm text-muted-foreground ml-2">
+                        ({t(exercise.muscleGroup)})
+                      </span>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeCustomExercise(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))}
+                {customExercises.length === 0 && (
+                  <p className="text-muted-foreground text-sm">No custom exercises added yet</p>
+                )}
               </div>
-            )}
+            </div>
 
             <div className="space-y-2">
-              <Label>{t('Add custom exercise')}</Label>
+              <h3 className="font-medium">{t("Add custom exercise")}</h3>
               <div className="space-y-2">
                 <Input
+                  placeholder={t("Enter exercise name")}
                   value={newExerciseName}
                   onChange={(e) => setNewExerciseName(e.target.value)}
-                  placeholder={t('Enter exercise name')}
                 />
-                <Select value={selectedMuscleGroup} onValueChange={setSelectedMuscleGroup}>
+                <Select value={newMuscleGroup} onValueChange={setNewMuscleGroup}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('Select muscle group')} />
+                    <SelectValue placeholder={t("Select muscle group")} />
                   </SelectTrigger>
                   <SelectContent>
                     {muscleGroups.map((group) => (
-                      <SelectItem key={group.value} value={group.value}>
-                        {group.label}
+                      <SelectItem key={group} value={group}>
+                        {t(group)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                
-                {selectedMuscleGroup && (
-                  <div className="p-3 bg-muted/30 rounded">
-                    <Label className="text-sm font-medium">Existing exercises in {selectedMuscleGroup}:</Label>
-                    <div className="mt-2 space-y-1">
-                      {getExercisesForMuscleGroup(selectedMuscleGroup).map((exercise) => (
-                        <div key={exercise.id} className="text-sm text-muted-foreground">
-                          • {exercise.name}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                <Button onClick={addExercise} size="sm" className="w-full">
-                  <Plus className="h-4 w-4 mr-1" />
-                  {t('Add Exercise')}
+                <Button onClick={addCustomExercise} className="w-full">
+                  {t("Add Exercise")}
                 </Button>
               </div>
             </div>
