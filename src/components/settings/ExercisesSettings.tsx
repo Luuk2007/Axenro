@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,7 +62,7 @@ const ExercisesSettings = () => {
     <Card>
       <Collapsible open={exercisesOpen} onOpenChange={setExercisesOpen}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">{t("exercises")}</CardTitle>
               {exercisesOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -71,15 +70,15 @@ const ExercisesSettings = () => {
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 py-3">
             <div className="space-y-2">
-              <h3 className="font-medium">{t("Custom exercises")}</h3>
+              <h3 className="font-medium text-sm">{t("Custom exercises")}</h3>
               <div className="space-y-2">
                 {customExercises.map((exercise, index) => (
                   <div key={index} className="flex items-center justify-between p-2 border rounded">
                     <div>
-                      <span className="font-medium">{exercise.name}</span>
-                      <span className="text-sm text-muted-foreground ml-2">
+                      <span className="font-medium text-sm">{exercise.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2">
                         ({t(exercise.muscleGroup)})
                       </span>
                     </div>
@@ -87,9 +86,9 @@ const ExercisesSettings = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => removeCustomExercise(index)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3 w-3" />
                     </Button>
                   </div>
                 ))}
@@ -100,15 +99,16 @@ const ExercisesSettings = () => {
             </div>
 
             <div className="space-y-2">
-              <h3 className="font-medium">{t("Add custom exercise")}</h3>
+              <h3 className="font-medium text-sm">{t("Add custom exercise")}</h3>
               <div className="space-y-2">
                 <Input
                   placeholder={t("Enter exercise name")}
                   value={newExerciseName}
                   onChange={(e) => setNewExerciseName(e.target.value)}
+                  className="text-sm h-9"
                 />
                 <Select value={newMuscleGroup} onValueChange={setNewMuscleGroup}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9">
                     <SelectValue placeholder={t("Select muscle group")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -119,7 +119,7 @@ const ExercisesSettings = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button onClick={addCustomExercise} className="w-full">
+                <Button onClick={addCustomExercise} className="w-full h-9">
                   {t("Add Exercise")}
                 </Button>
               </div>

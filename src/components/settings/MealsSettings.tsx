@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,6 @@ const MealsSettings = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Handle both old format (array of strings) and new format (array of objects)
         if (Array.isArray(parsed)) {
           return parsed.map((meal, index) => {
             if (typeof meal === 'string') {
@@ -69,7 +67,7 @@ const MealsSettings = () => {
     <Card>
       <Collapsible open={mealsOpen} onOpenChange={setMealsOpen}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">{t("meals")}</CardTitle>
               {mealsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -77,20 +75,20 @@ const MealsSettings = () => {
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 py-3">
             <div className="space-y-2">
-              <h3 className="font-medium">{t("Available meals")}</h3>
+              <h3 className="font-medium text-sm">{t("Available meals")}</h3>
               <div className="space-y-2">
                 {customMeals.map((meal, index) => (
                   <div key={meal.id || index} className="flex items-center justify-between p-2 border rounded">
-                    <span>{meal.name}</span>
+                    <span className="text-sm">{meal.name}</span>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => removeCustomMeal(index)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3 w-3" />
                     </Button>
                   </div>
                 ))}
@@ -101,15 +99,16 @@ const MealsSettings = () => {
             </div>
 
             <div className="space-y-2">
-              <h3 className="font-medium">{t("Add custom meal")}</h3>
+              <h3 className="font-medium text-sm">{t("Add custom meal")}</h3>
               <div className="flex gap-2">
                 <Input
                   placeholder={t("Enter meal name")}
                   value={newMealName}
                   onChange={(e) => setNewMealName(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && addCustomMeal()}
+                  className="text-sm h-9"
                 />
-                <Button onClick={addCustomMeal}>
+                <Button onClick={addCustomMeal} size="sm" className="h-9">
                   {t("Add")}
                 </Button>
               </div>

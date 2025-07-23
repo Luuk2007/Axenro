@@ -165,12 +165,12 @@ const Settings = () => {
         <h1 className="text-2xl font-semibold">{t("settings")}</h1>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-4">
         {/* Appearance Settings */}
         <Card>
           <Collapsible open={appearanceOpen} onOpenChange={setAppearanceOpen}>
             <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{t("Appearance")}</CardTitle>
                   {appearanceOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -178,7 +178,7 @@ const Settings = () => {
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 py-3">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="theme">{t("theme")}</Label>
                   <Select
@@ -226,7 +226,7 @@ const Settings = () => {
         <Card>
           <Collapsible open={notificationsOpen} onOpenChange={setNotificationsOpen}>
             <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{t("notifications")}</CardTitle>
                   {notificationsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -234,7 +234,7 @@ const Settings = () => {
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 py-3">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="notifications">{t("Enable Notifications")}</Label>
                   <Switch
@@ -252,7 +252,7 @@ const Settings = () => {
         <Card>
           <Collapsible open={subscriptionOpen} onOpenChange={setSubscriptionOpen}>
             <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{t("Subscription Management")}</CardTitle>
                   {subscriptionOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -260,8 +260,8 @@ const Settings = () => {
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
+              <CardContent className="space-y-3 py-3">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label>{t("Current subscription")}</Label>
                     <span className="text-sm font-medium">
@@ -294,7 +294,7 @@ const Settings = () => {
                   )}
                 </div>
 
-                <div className="flex gap-4 pt-4">
+                <div className="flex gap-4 pt-2">
                   <Button onClick={handleManageSubscription} disabled={loading}>
                     {subscribed ? t("Manage billing") : t("Upgrade")}
                   </Button>
@@ -313,7 +313,7 @@ const Settings = () => {
         <Card>
           <Collapsible open={dataManagementOpen} onOpenChange={setDataManagementOpen}>
             <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{t("Data Management")}</CardTitle>
                   {dataManagementOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -321,7 +321,7 @@ const Settings = () => {
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 py-3">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="dataBackup">{t("Auto Backup")}</Label>
                   <Switch
@@ -331,7 +331,7 @@ const Settings = () => {
                   />
                 </div>
 
-                <div className="flex gap-4 pt-4">
+                <div className="flex gap-4 pt-2">
                   <Button onClick={exportData} variant="outline">
                     {t("Export data")}
                   </Button>
