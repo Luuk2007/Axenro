@@ -8,11 +8,34 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
+interface CustomMeal {
+  id: string;
+  name: string;
+  isDefault?: boolean;
+  order?: number;
+}
+
 const MealsSettings = () => {
   const { t } = useLanguage();
-  const [customMeals, setCustomMeals] = useState<string[]>(() => {
+  const [customMeals, setCustomMeals] = useState<CustomMeal[]>(() => {
     const saved = localStorage.getItem('customMeals');
-    return saved ? JSON.parse(saved) : [];
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Handle both old format (array of strings) and new format (array of objects)
+        if (Array.isArray(parsed)) {
+          return parsed.map((meal, index) => {
+            if (typeof meal === 'string') {
+              return { id: `custom-${index}`, name: meal };
+            }
+            return meal;
+          });
+        }
+      } catch (error) {
+        console.error('Error parsing custom meals:', error);
+      }
+    }
+    return [];
   });
   const [newMealName, setNewMealName] = useState('');
   const [mealsOpen, setMealsOpen] = useState(false);
@@ -23,7 +46,12 @@ const MealsSettings = () => {
       return;
     }
 
-    const updatedMeals = [...customMeals, newMealName.trim()];
+    const newMeal: CustomMeal = {
+      id: `custom-${Date.now()}`,
+      name: newMealName.trim()
+    };
+
+    const updatedMeals = [...customMeals, newMeal];
     setCustomMeals(updatedMeals);
     localStorage.setItem('customMeals', JSON.stringify(updatedMeals));
     setNewMealName('');
@@ -54,8 +82,8 @@ const MealsSettings = () => {
               <h3 className="font-medium">{t("Available meals")}</h3>
               <div className="space-y-2">
                 {customMeals.map((meal, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 border rounded">
-                    <span>{meal}</span>
+                  <div key={meal.id || index} className="flex items-center justify-between p-2 border rounded">
+                    <span>{meal.name}</span>
                     <Button
                       variant="ghost"
                       size="sm"
