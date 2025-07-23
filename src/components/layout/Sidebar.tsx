@@ -78,16 +78,16 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   }, []);
 
   const getCurrentPlanDisplay = () => {
-    if (loading) return 'Loading...';
-    if (!subscribed) return 'Free Plan';
-    return `${subscription_tier} Plan`;
+    if (loading) return t('Loading...');
+    if (!subscribed) return t('Free Plan');
+    return `${subscription_tier} ${t('Plan')}`;
   };
 
   const getPlanDescription = () => {
     if (loading) return '';
-    if (!subscribed) return 'Get started with the basics — track your progress for free';
-    if (subscription_tier === 'Pro') return 'Unlock smarter tracking with added features and flexibility';
-    if (subscription_tier === 'Premium') return 'Experience the full potential — all features, zero limits';
+    if (!subscribed) return t('Get started with the basics — track your progress for free');
+    if (subscription_tier === 'Pro') return t('Unlock smarter tracking with added features and flexibility');
+    if (subscription_tier === 'Premium') return t('Experience the full potential — all features, zero limits');
     return '';
   };
 

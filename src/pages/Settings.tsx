@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, CreditCard } from "lucide-react";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import MealsSettings from "@/components/settings/MealsSettings";
 import ExercisesSettings from "@/components/settings/ExercisesSettings";
+import { useSubscription } from "@/hooks/useSubscription";
+import SubscriptionModal from "@/components/subscription/SubscriptionModal";
 
 interface UserSettings {
   theme: "light" | "dark" | "system";
@@ -21,6 +23,7 @@ interface UserSettings {
 
 const Settings = () => {
   const { t, language, setLanguage } = useLanguage();
+  const { subscribed, subscription_tier, subscription_end, openCustomerPortal, loading } = useSubscription();
   const [settings, setSettings] = useState<UserSettings>({
     theme: "light",
     language: "english",
@@ -30,6 +33,8 @@ const Settings = () => {
   const [appearanceOpen, setAppearanceOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [dataManagementOpen, setDataManagementOpen] = useState(false);
+  const [subscriptionOpen, setSubscriptionOpen] = useState(false);
+  const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
 
   useEffect(() => {
     const savedSettings = localStorage.getItem("userSettings");
@@ -127,6 +132,34 @@ const Settings = () => {
     }
   };
 
+  const handleManageSubscription = async () => {
+    if (!subscribed) {
+      setSubscriptionModalOpen(true);
+      return;
+    }
+
+    try {
+      await openCustomerPortal();
+      toast.success(t("Opening customer portal..."));
+    } catch (error) {
+      console.error('Portal error:', error);
+      toast.error(t("Failed to open customer portal"));
+    }
+  };
+
+  const formatNextBillingDate = () => {
+    if (!subscription_end) return "";
+    const date = new Date(subscription_end);
+    return date.toLocaleDateString(language === 'dutch' ? 'nl-NL' : 'en-US');
+  };
+
+  const getSubscriptionAmount = () => {
+    if (!subscribed) return "";
+    if (subscription_tier === "Pro") return "€4.99";
+    if (subscription_tier === "Premium") return "€7.99";
+    return "";
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -140,7 +173,7 @@ const Settings = () => {
             <CollapsibleTrigger asChild>
               <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  <CardTitle>{t("Appearance")}</CardTitle>
+                  <CardTitle className="text-lg">{t("Appearance")}</CardTitle>
                   {appearanceOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                 </div>
               </CardHeader>
@@ -196,7 +229,7 @@ const Settings = () => {
             <CollapsibleTrigger asChild>
               <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  <CardTitle>{t("notifications")}</CardTitle>
+                  <CardTitle className="text-lg">{t("notifications")}</CardTitle>
                   {notificationsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                 </div>
               </CardHeader>
@@ -216,13 +249,77 @@ const Settings = () => {
           </Collapsible>
         </Card>
 
+        {/* Subscription Management */}
+        <Card>
+          <Collapsible open={subscriptionOpen} onOpenChange={setSubscriptionOpen}>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    {t("Subscription Management")}
+                  </CardTitle>
+                  {subscriptionOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>{t("Current subscription")}</Label>
+                    <span className="text-sm font-medium">
+                      {loading ? t("Loading...") : (subscribed ? `${subscription_tier} ${t("Plan")}` : t("Free Plan"))}
+                    </span>
+                  </div>
+                  
+                  {subscribed && (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <Label>{t("Amount")}</Label>
+                        <span className="text-sm font-medium">
+                          {getSubscriptionAmount()} {t("per month")}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <Label>{t("Next billing date")}</Label>
+                        <span className="text-sm font-medium">
+                          {formatNextBillingDate()}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {!subscribed && (
+                    <p className="text-sm text-muted-foreground">
+                      {t("You are currently on the free plan")}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <Button onClick={handleManageSubscription} disabled={loading}>
+                    {subscribed ? t("Manage billing") : t("Upgrade")}
+                  </Button>
+                  {subscribed && (
+                    <Button variant="outline" onClick={handleManageSubscription}>
+                      {t("View subscription details")}
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+
         {/* Data Management */}
         <Card>
           <Collapsible open={dataManagementOpen} onOpenChange={setDataManagementOpen}>
             <CollapsibleTrigger asChild>
               <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  <CardTitle>{t("Data Management")}</CardTitle>
+                  <CardTitle className="text-lg">{t("Data Management")}</CardTitle>
                   {dataManagementOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                 </div>
               </CardHeader>
@@ -251,6 +348,11 @@ const Settings = () => {
           </Collapsible>
         </Card>
       </div>
+
+      <SubscriptionModal 
+        open={subscriptionModalOpen} 
+        onOpenChange={setSubscriptionModalOpen} 
+      />
     </div>
   );
 };
