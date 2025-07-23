@@ -70,6 +70,7 @@ export const settingsTranslations: Translations = {
   confirmClearData: "Weet je zeker dat je alle gegevens wilt wissen?",
   "Meal updated successfully": "Maaltijd succesvol bijgewerkt",
   "Exercise updated successfully": "Oefening succesvol bijgewerkt",
+  "Settings saved": "Instellingen opgeslagen",
   
   // Subscription modal translations
   "Choose Your Plan": "Kies je abonnement",
@@ -85,7 +86,6 @@ export const settingsTranslations: Translations = {
   "Unlimited workout history": "Onbeperkte workout geschiedenis",
   "Detailed nutrition analysis": "Gedetailleerde voedingsanalyse",
   "Progress charts": "Voortgangsgrafieken",
-  "Export data": "Gegevens exporteren",
   "Everything in Pro": "Alles in Pro",
   "AI-powered recommendations": "AI-aangedreven aanbevelingen",
   "Advanced analytics": "Geavanceerde analytics",
@@ -127,4 +127,5 @@ export const settingsTranslations: Translations = {
   "Manage billing": "Facturering beheren",
   "View subscription details": "Bekijk abonnementdetails",
   "per month": "per maand",
+  "Plan": "Abonnement",
 };
