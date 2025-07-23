@@ -14,6 +14,8 @@ import { Check, Loader2 } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 
 interface Plan {
   id: string;
@@ -30,45 +32,47 @@ interface SubscriptionModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const plans: Plan[] = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: '€0',
-    features: ['Basic fitness tracking', 'Limited workout history', 'Basic nutrition logging'],
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: '€4.99',
-    tagline: 'Most Popular',
-    features: [
-      'Advanced fitness tracking',
-      'Unlimited workout history', 
-      'Detailed nutrition analysis',
-      'Progress charts',
-      'Export data'
-    ],
-    isPopular: true,
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    price: '€7.99',
-    features: [
-      'Everything in Pro',
-      'AI-powered recommendations',
-      'Advanced analytics',
-      'Personalized meal plans',
-      'Priority support',
-      'Early access to new features'
-    ],
-  },
-];
-
 export default function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps) {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
   const { subscribed, subscription_tier, createCheckout, openCustomerPortal } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
+
+  const plans: Plan[] = [
+    {
+      id: 'free',
+      name: t('Free'),
+      price: '€0',
+      features: [t('Basic fitness tracking'), t('Limited workout history'), t('Basic nutrition logging')],
+    },
+    {
+      id: 'pro',
+      name: t('Pro'),
+      price: '€4.99',
+      tagline: t('Most Popular'),
+      features: [
+        t('Advanced fitness tracking'),
+        t('Unlimited workout history'), 
+        t('Detailed nutrition analysis'),
+        t('Progress charts'),
+        t('Export data')
+      ],
+      isPopular: true,
+    },
+    {
+      id: 'premium',
+      name: t('Premium'),
+      price: '€7.99',
+      features: [
+        t('Everything in Pro'),
+        t('AI-powered recommendations'),
+        t('Advanced analytics'),
+        t('Personalized meal plans'),
+        t('Priority support'),
+        t('Early access to new features')
+      ],
+    },
+  ];
 
   const handleSelectPlan = async (planId: string) => {
     if (planId === 'free') return;
@@ -76,10 +80,10 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     try {
       setLoading(planId);
       await createCheckout(planId);
-      toast.success('Redirecting to Stripe checkout...');
+      toast.success(t('Redirecting to Stripe checkout...'));
     } catch (error) {
       console.error('Checkout error:', error);
-      toast.error('Failed to start checkout process');
+      toast.error(t('Failed to start checkout process'));
     } finally {
       setLoading(null);
     }
@@ -88,11 +92,12 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
   const handleManageSubscription = async () => {
     try {
       setLoading('manage');
-      await openCustomerPortal();
-      toast.success('Opening customer portal...');
+      onOpenChange(false);
+      navigate('/settings');
+      toast.success(t('Opening customer portal...'));
     } catch (error) {
-      console.error('Portal error:', error);
-      toast.error('Failed to open customer portal');
+      console.error('Navigation error:', error);
+      toast.error(t('Failed to open customer portal'));
     } finally {
       setLoading(null);
     }
@@ -100,23 +105,23 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   const getButtonText = (plan: Plan) => {
     if (plan.id === 'free') {
-      return subscribed ? 'Downgrade' : 'Current Plan';
+      return subscribed ? t('Downgrade') : t('Current Plan');
     }
     
-    if (subscribed && subscription_tier === plan.name) {
-      return 'Current Plan';
+    if (subscribed && subscription_tier === plan.name.replace(t(''), '')) {
+      return t('Current Plan');
     }
     
     if (subscribed) {
-      return subscription_tier === 'Pro' && plan.id === 'premium' ? 'Upgrade' : 'Switch Plan';
+      return subscription_tier === 'Pro' && plan.id === 'premium' ? t('Upgrade') : t('Switch Plan');
     }
     
-    return 'Select Plan';
+    return t('Select Plan');
   };
 
   const isCurrentPlan = (plan: Plan) => {
     if (plan.id === 'free' && !subscribed) return true;
-    return subscribed && subscription_tier === plan.name;
+    return subscribed && subscription_tier === plan.name.replace(t(''), '');
   };
 
   const isDisabled = (plan: Plan) => {
@@ -127,9 +132,9 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-5xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl sm:text-3xl font-bold text-center">Choose Your Plan</DialogTitle>
+          <DialogTitle className="text-2xl sm:text-3xl font-bold text-center">{t('Choose Your Plan')}</DialogTitle>
           <DialogDescription className="text-center text-muted-foreground text-base sm:text-lg">
-            Unlock the full potential of your fitness journey with our premium features.
+            {t('Unlock the full potential of your fitness journey with our premium features.')}
           </DialogDescription>
         </DialogHeader>
         
@@ -154,13 +159,13 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
                   <CardTitle className="text-lg sm:text-2xl font-bold">{plan.name}</CardTitle>
                   {isCurrentPlan(plan) && (
                     <Badge variant="secondary" className="text-xs">
-                      Active
+                      {t('Active')}
                     </Badge>
                   )}
                 </div>
                 <div className="text-2xl sm:text-3xl font-bold text-primary">
                   {plan.price}
-                  {plan.id !== 'free' && <span className="text-xs sm:text-sm font-normal text-muted-foreground">/month</span>}
+                  {plan.id !== 'free' && <span className="text-xs sm:text-sm font-normal text-muted-foreground">/{t('per month')}</span>}
                 </div>
               </CardHeader>
               
@@ -183,7 +188,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
                   {loading === plan.id ? (
                     <>
                       <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                      Processing...
+                      {t('Processing...')}
                     </>
                   ) : (
                     getButtonText(plan)
@@ -205,10 +210,10 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
               {loading === 'manage' ? (
                 <>
                   <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                  Opening...
+                  {t('Opening...')}
                 </>
               ) : (
-                'Manage Subscription'
+                t('Manage Subscription')
               )}
             </Button>
           </div>

@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, CreditCard } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -173,7 +172,7 @@ const Settings = () => {
             <CollapsibleTrigger asChild>
               <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{t("Appearance")}</CardTitle>
+                  <CardTitle className="text-base">{t("Appearance")}</CardTitle>
                   {appearanceOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                 </div>
               </CardHeader>
@@ -229,7 +228,7 @@ const Settings = () => {
             <CollapsibleTrigger asChild>
               <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{t("notifications")}</CardTitle>
+                  <CardTitle className="text-base">{t("notifications")}</CardTitle>
                   {notificationsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                 </div>
               </CardHeader>
@@ -255,10 +254,7 @@ const Settings = () => {
             <CollapsibleTrigger asChild>
               <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    {t("Subscription Management")}
-                  </CardTitle>
+                  <CardTitle className="text-base">{t("Subscription Management")}</CardTitle>
                   {subscriptionOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                 </div>
               </CardHeader>
@@ -319,7 +315,7 @@ const Settings = () => {
             <CollapsibleTrigger asChild>
               <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{t("Data Management")}</CardTitle>
+                  <CardTitle className="text-base">{t("Data Management")}</CardTitle>
                   {dataManagementOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                 </div>
               </CardHeader>
