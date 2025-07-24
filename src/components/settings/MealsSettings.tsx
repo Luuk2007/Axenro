@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,14 +38,6 @@ const MealsSettings = () => {
   const [newMealName, setNewMealName] = useState('');
   const [mealsOpen, setMealsOpen] = useState(false);
 
-  // Default meals from nutrition page
-  const defaultMeals = [
-    { id: 'breakfast', name: t('breakfast'), isDefault: true },
-    { id: 'lunch', name: t('lunch'), isDefault: true },
-    { id: 'dinner', name: t('dinner'), isDefault: true },
-    { id: 'snack', name: t('snack'), isDefault: true }
-  ];
-
   const addCustomMeal = () => {
     if (!newMealName.trim()) {
       toast.error(t("Please enter a meal name"));
@@ -72,46 +63,38 @@ const MealsSettings = () => {
     toast.success(t("Meal removed successfully"));
   };
 
-  const allMeals = [...defaultMeals, ...customMeals];
-
   return (
     <Card>
       <Collapsible open={mealsOpen} onOpenChange={setMealsOpen}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-2">
+          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">{t("meals")}</CardTitle>
-              {mealsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <CardTitle className="text-base">{t("meals")}</CardTitle>
+              {mealsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </div>
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="space-y-2 py-2">
+          <CardContent className="space-y-3 py-3">
             <div className="space-y-2">
               <h3 className="font-medium text-sm">{t("Available meals")}</h3>
-              <div className="space-y-1">
-                {allMeals.map((meal, index) => (
-                  <div key={meal.id || index} className="flex items-center justify-between p-2 border rounded text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{meal.name}</span>
-                      {meal.isDefault && (
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                          Default
-                        </span>
-                      )}
-                    </div>
-                    {!meal.isDefault && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeCustomMeal(index - defaultMeals.length)}
-                        className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    )}
+              <div className="space-y-2">
+                {customMeals.map((meal, index) => (
+                  <div key={meal.id || index} className="flex items-center justify-between p-2 border rounded">
+                    <span className="text-sm">{meal.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeCustomMeal(index)}
+                      className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
                   </div>
                 ))}
+                {customMeals.length === 0 && (
+                  <p className="text-muted-foreground text-sm">No custom meals added yet</p>
+                )}
               </div>
             </div>
 
@@ -123,9 +106,9 @@ const MealsSettings = () => {
                   value={newMealName}
                   onChange={(e) => setNewMealName(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && addCustomMeal()}
-                  className="text-sm h-8"
+                  className="text-sm h-9"
                 />
-                <Button onClick={addCustomMeal} size="sm" className="h-8 text-sm">
+                <Button onClick={addCustomMeal} size="sm" className="h-9">
                   {t("Add")}
                 </Button>
               </div>
