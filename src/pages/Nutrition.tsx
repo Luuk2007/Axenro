@@ -382,6 +382,7 @@ const Nutrition = () => {
       {/* Barcode Scanner Dialog */}
       <Dialog open={showScanBarcode} onOpenChange={setShowScanBarcode}>
         <BarcodeScanner
+          key={showScanBarcode ? 'scanner-open' : 'scanner-closed'}
           onClose={() => setShowScanBarcode(false)}
           onProductScanned={handleProductScanned}
         />
