@@ -22,6 +22,7 @@ const meals = [
     time: 'Today, 8:00 AM',
     calories: 450,
     protein: 32,
+    meal: 'breakfast',
   },
   {
     id: '2',
@@ -29,6 +30,7 @@ const meals = [
     time: 'Today, 1:00 PM',
     calories: 550,
     protein: 45,
+    meal: 'lunch',
   },
   {
     id: '3',
@@ -36,6 +38,7 @@ const meals = [
     time: 'Today, 4:30 PM',
     calories: 220,
     protein: 25,
+    meal: 'snack',
   },
 ];
 
@@ -311,9 +314,7 @@ const Dashboard = () => {
         
         <div className="max-h-[400px]">
           <MealsList
-            title={t("todayMeals")}
             meals={meals}
-            onViewAll={navigateToNutrition}
           />
         </div>
       </div>

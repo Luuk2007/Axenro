@@ -9,7 +9,7 @@ import { Plus, Calendar, TrendingUp, Target, Camera } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import WeightTracker from "@/components/progress/WeightTracker";
+import { WeightTracker } from "@/components/progress/WeightTracker";
 import ProgressChart from "@/components/dashboard/ProgressChart";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -45,7 +45,7 @@ const Progress = () => {
       if (parsedMeasurements.length > 0) {
         const measurementTypes = ['waist', 'hips', 'chest', 'arms', 'thighs'];
         const firstMeasurementWithData = measurementTypes.find(type => 
-          parsedMeasurements.some((m: MeasurementEntry) => m[type as keyof MeasurementEntry] > 0)
+          parsedMeasurements.some((m: MeasurementEntry) => Number(m[type as keyof MeasurementEntry]) > 0)
         );
         if (firstMeasurementWithData) {
           setSelectedMeasurement(firstMeasurementWithData);
@@ -86,10 +86,10 @@ const Progress = () => {
 
   const getMeasurementData = (type: string) => {
     return measurements
-      .filter(m => m[type as keyof MeasurementEntry] > 0)
+      .filter(m => Number(m[type as keyof MeasurementEntry]) > 0)
       .map(m => ({
         date: format(new Date(m.date), 'MMM dd'),
-        value: m[type as keyof MeasurementEntry] as number,
+        value: Number(m[type as keyof MeasurementEntry]),
         originalDate: m.date
       }));
   };
