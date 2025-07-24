@@ -35,7 +35,7 @@ interface SubscriptionModalProps {
 export default function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { subscribed, subscription_tier, createCheckout, openCustomerPortal } = useSubscription();
+  const { subscribed, subscription_tier, createCheckout } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
 
   const plans: Plan[] = [
@@ -89,18 +89,9 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     }
   };
 
-  const handleManageSubscription = async () => {
-    try {
-      setLoading('manage');
-      onOpenChange(false);
-      navigate('/settings');
-      toast.success(t('Opening customer portal...'));
-    } catch (error) {
-      console.error('Navigation error:', error);
-      toast.error(t('Failed to open customer portal'));
-    } finally {
-      setLoading(null);
-    }
+  const handleManageSubscription = () => {
+    onOpenChange(false);
+    navigate('/settings?tab=subscription');
   };
 
   const getButtonText = (plan: Plan) => {
