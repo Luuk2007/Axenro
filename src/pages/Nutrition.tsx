@@ -326,7 +326,7 @@ const Nutrition = () => {
         <div className="flex items-center gap-2">
           <Dialog>
             <DialogTrigger asChild>
-              <Button>
+              <Button data-testid="add-food-trigger">
                 <Plus className="mr-2 h-4 w-4" />
                 {t("addFood")}
               </Button>

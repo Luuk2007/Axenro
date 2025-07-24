@@ -158,14 +158,10 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
         <h3 className="font-medium tracking-tight">{title}</h3>
         <div className="flex items-center gap-2">
           {onViewAll && (
-            <Button variant="ghost" size="sm" onClick={onViewAll}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/nutrition')}>
               {t("viewAll")}
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/nutrition')}>
-            <Plus className="h-4 w-4" />
-            <span className="sr-only">{t("addMeal")}</span>
-          </Button>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto">
@@ -200,7 +196,16 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
               <p className="text-xs text-muted-foreground mb-4">
                 {t("startTracking")}
               </p>
-              <Button size="sm" onClick={() => navigate('/nutrition')}>{t("addMeal")}</Button>
+              <Button size="sm" onClick={() => {
+                navigate('/nutrition');
+                // Trigger the add food dialog after a short delay
+                setTimeout(() => {
+                  const addFoodBtn = document.querySelector('[data-testid="add-food-trigger"]');
+                  if (addFoodBtn) {
+                    (addFoodBtn as HTMLElement).click();
+                  }
+                }, 100);
+              }}>{t("addMeal")}</Button>
             </div>
           )}
         </div>

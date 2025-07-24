@@ -67,6 +67,28 @@ const MealsSettings = () => {
     toast.success(t("Meal removed successfully"));
   };
 
+  const removeDefaultMeal = (mealId: string) => {
+    // Get current deleted meals list
+    const deletedMealsData = localStorage.getItem('deletedMeals');
+    let deletedMealIds = [];
+    
+    if (deletedMealsData) {
+      try {
+        deletedMealIds = JSON.parse(deletedMealsData);
+      } catch (error) {
+        console.error('Error parsing deleted meals:', error);
+      }
+    }
+    
+    // Add this meal to deleted list
+    deletedMealIds.push(mealId);
+    localStorage.setItem('deletedMeals', JSON.stringify(deletedMealIds));
+    
+    // Trigger meals change event
+    window.dispatchEvent(new Event('mealsChanged'));
+    toast.success(t("Meal removed successfully"));
+  };
+
   return (
     <Card>
       <Collapsible open={mealsOpen} onOpenChange={setMealsOpen}>
@@ -91,11 +113,20 @@ const MealsSettings = () => {
                         <span className="text-xs text-muted-foreground">(Default)</span>
                       )}
                     </div>
-                    {customMeals.find(cm => cm.id === meal.id) && (
+                    {customMeals.find(cm => cm.id === meal.id) ? (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => removeCustomMeal(customMeals.findIndex(cm => cm.id === meal.id))}
+                        className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeDefaultMeal(meal.id)}
                         className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
                       >
                         <X className="h-3 w-3" />
