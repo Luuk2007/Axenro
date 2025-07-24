@@ -97,6 +97,32 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
       const stream = await requestCameraAccess();
       console.log('Camera stream obtained, initializing Quagga...');
 
+      // Create video element immediately and attach stream
+      if (scannerRef.current && stream) {
+        const videoElement = document.createElement('video');
+        videoElement.srcObject = stream;
+        videoElement.autoplay = true;
+        videoElement.playsInline = true;
+        videoElement.muted = true;
+        videoElement.style.width = '100%';
+        videoElement.style.height = '100%';
+        videoElement.style.objectFit = 'cover';
+        videoElement.style.position = 'absolute';
+        videoElement.style.top = '0';
+        videoElement.style.left = '0';
+        videoElement.style.zIndex = '1';
+        
+        // Clear any existing content and add video
+        scannerRef.current.innerHTML = '';
+        scannerRef.current.appendChild(videoElement);
+        
+        // Set camera active immediately when video starts playing
+        videoElement.onloadedmetadata = () => {
+          setCameraActive(true);
+          console.log('Video stream started, camera active');
+        };
+      }
+
       // Initialize Quagga with the camera stream
       await new Promise<void>((resolve, reject) => {
         const config = {
@@ -145,12 +171,6 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
           // Start Quagga scanner
           Quagga.start();
           console.log('Quagga started');
-          
-          // Set camera active after a short delay to ensure video element is created
-          setTimeout(() => {
-            setCameraActive(true);
-            console.log('Camera marked as active');
-          }, 500);
           
           resolve();
         });
