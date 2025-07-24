@@ -32,11 +32,12 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
   const [amount, setAmount] = useState<number>(100);
   const [unit, setUnit] = useState<string>("gram");
 
-  // Handle API search - debounced
+  // Handle API search - debounced with rate limiting
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (searchValue && searchValue.length >= 2) {
-        searchFromAPI(searchValue);
+      const sanitizedQuery = searchValue.trim();
+      if (sanitizedQuery && sanitizedQuery.length >= 2 && sanitizedQuery.length <= 100) {
+        searchFromAPI(sanitizedQuery);
       } else {
         setApiResults([]);
       }
@@ -46,6 +47,14 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
   }, [searchValue]);
 
   const searchFromAPI = async (query: string) => {
+    // Input validation and sanitization
+    const sanitizedQuery = query.trim().replace(/[<>]/g, '');
+    
+    if (sanitizedQuery.length < 2 || sanitizedQuery.length > 100) {
+      console.warn('Invalid query length');
+      return;
+    }
+    
     setSearching(true);
     try {
       const lang = language === 'english' ? 'en' : 
@@ -54,10 +63,11 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
                   language === 'german' ? 'de' : 
                   language === 'spanish' ? 'es' : 'en';
       
-      const results = await searchProductsByName(query, lang);
+      const results = await searchProductsByName(sanitizedQuery, lang);
       setApiResults(results);
     } catch (error) {
       console.error('Error searching products:', error);
+      setApiResults([]);
     } finally {
       setSearching(false);
     }

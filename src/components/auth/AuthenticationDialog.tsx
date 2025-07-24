@@ -44,9 +44,22 @@ export default function AuthenticationDialog({
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple validation
+    // Enhanced validation
     if (!email || !password) {
       toast.error(t("fillAllFields"));
+      return;
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error(t("invalidEmail"));
+      return;
+    }
+    
+    // Password length validation
+    if (password.length < 6) {
+      toast.error(t("passwordTooShort"));
       return;
     }
     
@@ -60,9 +73,29 @@ export default function AuthenticationDialog({
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple validation
+    // Enhanced validation
     if (!email || !password || !fullName || !confirmPassword) {
       toast.error(t("fillAllFields"));
+      return;
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error(t("invalidEmail"));
+      return;
+    }
+    
+    // Full name validation (2-50 characters, no special characters)
+    const nameRegex = /^[a-zA-Z\s]{2,50}$/;
+    if (!nameRegex.test(fullName.trim())) {
+      toast.error(t("invalidName"));
+      return;
+    }
+    
+    // Password strength validation
+    if (password.length < 8) {
+      toast.error(t("passwordTooShort"));
       return;
     }
     
@@ -71,7 +104,7 @@ export default function AuthenticationDialog({
       return;
     }
     
-    const { error } = await signUp(email, password, fullName);
+    const { error } = await signUp(email, password, fullName.trim());
     if (!error) {
       onOpenChange(false);
       resetForm();

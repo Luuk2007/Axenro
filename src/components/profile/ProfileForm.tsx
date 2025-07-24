@@ -23,16 +23,15 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface ProfileFormValues {
   name: string;
-  gender: string;
+  gender: "male" | "female" | "other";
   age: number;
   height: number;
   weight: number;
-  activityLevel: string;
-  fitnessGoal: string;
+  activityLevel: "sedentary" | "light" | "moderate" | "active" | "very_active";
+  fitnessGoal: "lose" | "maintain" | "gain";
   targetWeight?: number;
-  // Add the missing properties that are being used in other components
-  exerciseFrequency?: string;
-  goal?: string;
+  exerciseFrequency?: "0-1" | "2-3" | "4-5" | "6+";
+  goal?: "lose" | "maintain" | "gain";
 }
 
 export const defaultValues: ProfileFormValues = {
@@ -56,17 +55,28 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
   const { t } = useLanguage();
   
   const formSchema = z.object({
-    name: z.string().min(2).max(50),
-    gender: z.string(),
-    age: z.number().min(16).max(100),
-    height: z.number().min(100).max(250),
-    weight: z.number().min(30).max(300),
-    activityLevel: z.string(),
-    fitnessGoal: z.string(),
-    targetWeight: z.number().min(30).max(300).optional(),
-    // Add the missing fields to the form schema
-    exerciseFrequency: z.string().optional(),
-    goal: z.string().optional(),
+    name: z.string()
+      .min(2, "Name must be at least 2 characters")
+      .max(50, "Name must be less than 50 characters")
+      .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
+    gender: z.enum(["male", "female", "other"]),
+    age: z.number()
+      .min(16, "Age must be at least 16")
+      .max(100, "Age must be less than 100"),
+    height: z.number()
+      .min(100, "Height must be at least 100cm")
+      .max(250, "Height must be less than 250cm"),
+    weight: z.number()
+      .min(30, "Weight must be at least 30kg")
+      .max(300, "Weight must be less than 300kg"),
+    activityLevel: z.enum(["sedentary", "light", "moderate", "active", "very_active"]),
+    fitnessGoal: z.enum(["lose", "maintain", "gain"]),
+    targetWeight: z.number()
+      .min(30, "Target weight must be at least 30kg")
+      .max(300, "Target weight must be less than 300kg")
+      .optional(),
+    exerciseFrequency: z.enum(["0-1", "2-3", "4-5", "6+"]).optional(),
+    goal: z.enum(["lose", "maintain", "gain"]).optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -228,11 +238,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
             <FormItem>
               <FormLabel>{t("goal")}</FormLabel>
               <Select 
-                onValueChange={(value) => {
+                onValueChange={(value: "lose" | "maintain" | "gain") => {
                   field.onChange(value);
                   // Also update the goal to keep in sync with fitnessGoal
                   form.setValue("goal", value);
-                }} 
+                }}
                 defaultValue={field.value}
               >
                 <FormControl>

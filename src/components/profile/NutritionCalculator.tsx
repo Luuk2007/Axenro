@@ -33,14 +33,17 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     
     // Apply activity multiplier - safely access properties
     let activityMultiplier = 1.2; // Sedentary default
-    const exerciseFreq = data?.exerciseFrequency || "0-2";
+    const exerciseFreq = data?.exerciseFrequency || "0-1";
     
     switch (exerciseFreq) {
-      case "0-2":
+      case "0-1":
         activityMultiplier = 1.375; // Light activity
         break;
-      case "3-5":
+      case "2-3":
         activityMultiplier = 1.55; // Moderate activity
+        break;
+      case "4-5":
+        activityMultiplier = 1.65; // Active
         break;
       case "6+":
         activityMultiplier = 1.725; // Very active
