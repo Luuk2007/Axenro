@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { exerciseDatabase } from '@/types/workout';
 
 interface CustomExercise {
   name: string;
@@ -22,10 +23,15 @@ const ExercisesSettings = () => {
   const [newExerciseName, setNewExerciseName] = useState('');
   const [newMuscleGroup, setNewMuscleGroup] = useState('');
   const [exercisesOpen, setExercisesOpen] = useState(false);
+  const [showExistingExercises, setShowExistingExercises] = useState(false);
 
   const muscleGroups = [
     'chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'cardio', 'full body'
   ];
+
+  const getExistingExercisesForGroup = (muscleGroup: string) => {
+    return exerciseDatabase[muscleGroup as keyof typeof exerciseDatabase] || [];
+  };
 
   const addCustomExercise = () => {
     if (!newExerciseName.trim()) {
@@ -107,7 +113,10 @@ const ExercisesSettings = () => {
                   onChange={(e) => setNewExerciseName(e.target.value)}
                   className="text-sm h-9"
                 />
-                <Select value={newMuscleGroup} onValueChange={setNewMuscleGroup}>
+                <Select value={newMuscleGroup} onValueChange={(value) => {
+                  setNewMuscleGroup(value);
+                  setShowExistingExercises(!!value);
+                }}>
                   <SelectTrigger className="h-9">
                     <SelectValue placeholder={t("Select muscle group")} />
                   </SelectTrigger>
@@ -119,6 +128,19 @@ const ExercisesSettings = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                
+                {showExistingExercises && newMuscleGroup && (
+                  <div className="mt-3 p-3 border rounded-md bg-muted/30">
+                    <h4 className="text-xs font-medium mb-2">{t("Existing exercises in")} {t(newMuscleGroup)}:</h4>
+                    <div className="grid grid-cols-1 gap-1 max-h-32 overflow-y-auto">
+                      {getExistingExercisesForGroup(newMuscleGroup).map((exercise) => (
+                        <div key={exercise.id} className="text-xs text-muted-foreground">
+                          • {exercise.name}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <Button onClick={addCustomExercise} className="w-full h-9">
                   {t("Add Exercise")}
                 </Button>

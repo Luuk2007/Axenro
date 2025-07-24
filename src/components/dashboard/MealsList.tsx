@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { getAvailableMeals, MealData, FoodItem } from '@/types/nutrition';
 import { getFoodLogs } from '@/services/openFoodFactsService';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 interface MealItemData {
   id: string;
@@ -25,6 +26,7 @@ interface MealsListProps {
 
 export default function MealsList({ title, className, onViewAll }: MealsListProps) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [meals, setMeals] = useState<MealItemData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -160,7 +162,7 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
               {t("viewAll")}
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/nutrition')}>
             <Plus className="h-4 w-4" />
             <span className="sr-only">{t("addMeal")}</span>
           </Button>
@@ -198,7 +200,7 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
               <p className="text-xs text-muted-foreground mb-4">
                 {t("startTracking")}
               </p>
-              <Button size="sm">{t("addMeal")}</Button>
+              <Button size="sm" onClick={() => navigate('/nutrition')}>{t("addMeal")}</Button>
             </div>
           )}
         </div>

@@ -12,6 +12,7 @@ import MealsSettings from "@/components/settings/MealsSettings";
 import ExercisesSettings from "@/components/settings/ExercisesSettings";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionModal from "@/components/subscription/SubscriptionModal";
+import { useLocation } from "react-router-dom";
 
 interface UserSettings {
   theme: "light" | "dark" | "system";
@@ -23,6 +24,7 @@ interface UserSettings {
 const Settings = () => {
   const { t, language, setLanguage } = useLanguage();
   const { subscribed, subscription_tier, subscription_end, openCustomerPortal, loading } = useSubscription();
+  const location = useLocation();
   const [settings, setSettings] = useState<UserSettings>({
     theme: "light",
     language: "english",
@@ -34,6 +36,16 @@ const Settings = () => {
   const [dataManagementOpen, setDataManagementOpen] = useState(false);
   const [subscriptionOpen, setSubscriptionOpen] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
+
+  // Check URL parameters to open specific tabs
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get('tab');
+    
+    if (tab === 'subscription') {
+      setSubscriptionOpen(true);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     const savedSettings = localStorage.getItem("userSettings");

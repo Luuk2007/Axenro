@@ -6,6 +6,7 @@ import { X, ChevronDown, ChevronUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { getAvailableMeals } from '@/types/nutrition';
 
 interface CustomMeal {
   id: string;
@@ -37,6 +38,9 @@ const MealsSettings = () => {
   });
   const [newMealName, setNewMealName] = useState('');
   const [mealsOpen, setMealsOpen] = useState(false);
+
+  // Get all meals including default ones
+  const allMeals = getAvailableMeals();
 
   const addCustomMeal = () => {
     if (!newMealName.trim()) {
@@ -79,22 +83,26 @@ const MealsSettings = () => {
             <div className="space-y-2">
               <h3 className="font-medium text-sm">{t("Available meals")}</h3>
               <div className="space-y-2">
-                {customMeals.map((meal, index) => (
+                {allMeals.map((meal, index) => (
                   <div key={meal.id || index} className="flex items-center justify-between p-2 border rounded">
-                    <span className="text-sm">{meal.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeCustomMeal(index)}
-                      className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{meal.name}</span>
+                      {!customMeals.find(cm => cm.id === meal.id) && (
+                        <span className="text-xs text-muted-foreground">(Default)</span>
+                      )}
+                    </div>
+                    {customMeals.find(cm => cm.id === meal.id) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeCustomMeal(customMeals.findIndex(cm => cm.id === meal.id))}
+                        className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
                   </div>
                 ))}
-                {customMeals.length === 0 && (
-                  <p className="text-muted-foreground text-sm">No custom meals added yet</p>
-                )}
               </div>
             </div>
 

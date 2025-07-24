@@ -93,11 +93,11 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     try {
       setLoading('manage');
       onOpenChange(false);
-      navigate('/settings');
-      toast.success(t('Opening customer portal...'));
+      navigate('/settings?tab=subscription');
+      toast.success(t('Opening settings...'));
     } catch (error) {
       console.error('Navigation error:', error);
-      toast.error(t('Failed to open customer portal'));
+      toast.error(t('Failed to open settings'));
     } finally {
       setLoading(null);
     }
