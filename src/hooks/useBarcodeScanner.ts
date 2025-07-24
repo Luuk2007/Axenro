@@ -116,10 +116,11 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
         scannerRef.current.innerHTML = '';
         scannerRef.current.appendChild(videoElement);
         
-        // Set camera active immediately when video starts playing
-        videoElement.onloadedmetadata = () => {
+        // Set camera active immediately when video can start playing
+        videoElement.oncanplay = () => {
           setCameraActive(true);
-          console.log('Video stream started, camera active');
+          setIsInitializing(false);
+          console.log('Video stream ready, camera active');
         };
       }
 
@@ -197,7 +198,6 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
       onError(err.message || 'Failed to start camera scanner');
       setIsScanning(false);
       setCameraActive(false);
-    } finally {
       setIsInitializing(false);
     }
   }, [onDetected, onError, isScanning, isInitializing]);
