@@ -224,6 +224,11 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
       streamRef.current = null;
     }
 
+    // Clear the scanner container
+    if (scannerRef.current) {
+      scannerRef.current.innerHTML = '';
+    }
+
     setIsScanning(false);
     setCameraActive(false);
     setIsInitializing(false);

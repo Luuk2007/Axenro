@@ -18,6 +18,13 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
   const [error, setError] = useState<string | null>(null);
   const [manualBarcode, setManualBarcode] = useState('');
 
+  // Reset state when component mounts
+  useEffect(() => {
+    setLoading(false);
+    setError(null);
+    setManualBarcode('');
+  }, []);
+
   const handleBarcodeDetected = async (barcode: string) => {
     console.log('Processing barcode:', barcode);
     setLoading(true);
@@ -83,6 +90,9 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
 
   const handleClose = () => {
     stopScanner();
+    setError(null);
+    setLoading(false);
+    setManualBarcode('');
     onClose();
   };
 
