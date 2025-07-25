@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -62,7 +61,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const [termsModalOpen, setTermsModalOpen] = useState(false);
   const { subscribed, subscription_tier, loading } = useSubscription();
   
-  // Monitor theme changes
   useEffect(() => {
     const checkTheme = () => {
       setIsDarkTheme(document.documentElement.classList.contains('dark'));
@@ -114,69 +112,145 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
             className="h-18 w-auto object-contain"
           />
         </div>
-        <nav className="flex-1 overflow-auto py-2">
-          <ul className="grid gap-1 px-2">
-            {navItems.map((item, index) => (
-              <li key={index}>
-                <NavLink
-                  to={item.href}
-                  onClick={handleNavClick}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-300 ease-in-out text-muted-foreground hover:text-foreground",
-                      isActive ? 
-                        "bg-primary/10 text-primary font-medium" : 
-                        "hover:bg-accent"
-                    )
-                  }
+        
+        {isMobile ? (
+          // Mobile layout with flex-1 for main nav and bottom section for legal/subscription
+          <>
+            <nav className="flex-1 overflow-auto py-2">
+              <ul className="grid gap-1 px-2">
+                {navItems.map((item, index) => (
+                  <li key={index}>
+                    <NavLink
+                      to={item.href}
+                      onClick={handleNavClick}
+                      className={({ isActive }) =>
+                        cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-300 ease-in-out text-muted-foreground hover:text-foreground",
+                          isActive ? 
+                            "bg-primary/10 text-primary font-medium" : 
+                            "hover:bg-accent"
+                        )
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <item.icon 
+                            size={18} 
+                            className={cn(
+                              "transition-transform duration-300",
+                              isActive && "text-primary"
+                            )} 
+                          />
+                          <span>{t(item.titleKey)}</span>
+                        </>
+                      )}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            
+            {/* Bottom section for mobile with legal links and subscription */}
+            <div className="mt-auto">
+              {/* Legal links section */}
+              <div className="px-4 pb-2">
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    onClick={() => setPrivacyModalOpen(true)}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+                  >
+                    Privacy Policy
+                  </button>
+                  <span className="text-xs text-muted-foreground">•</span>
+                  <button
+                    onClick={() => setTermsModalOpen(true)}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+                  >
+                    Terms & Conditions
+                  </button>
+                </div>
+              </div>
+              
+              {/* Subscription plan section */}
+              <div className="border-t border-border p-4">
+                <div 
+                  className="glassy-card rounded-lg p-4 subtle-shadow cursor-pointer hover:bg-accent/50 transition-colors"
+                  onClick={() => setSubscriptionModalOpen(true)}
                 >
-                  {({ isActive }) => (
-                    <>
-                      <item.icon 
-                        size={18} 
-                        className={cn(
-                          "transition-transform duration-300",
-                          isActive && "text-primary"
-                        )} 
-                      />
-                      <span>{t(item.titleKey)}</span>
-                    </>
-                  )}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        
-        {/* Legal links section */}
-        <div className="px-4 pb-2">
-          <div className="flex items-center justify-center gap-4">
-            <button
-              onClick={() => setPrivacyModalOpen(true)}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
-            >
-              Privacy Policy
-            </button>
-            <span className="text-xs text-muted-foreground">•</span>
-            <button
-              onClick={() => setTermsModalOpen(true)}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
-            >
-              Terms & Conditions
-            </button>
-          </div>
-        </div>
-        
-        {/* Show subscription plan on both mobile and desktop */}
-        <div className="border-t border-border p-4">
-          <div 
-            className="glassy-card rounded-lg p-4 subtle-shadow cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => setSubscriptionModalOpen(true)}
-          >
-            <p className="text-xs font-medium text-muted-foreground">{getCurrentPlanDisplay()}</p>
-            <p className="text-xs mt-1 text-muted-foreground leading-relaxed">{getPlanDescription()}</p>
-          </div>
-        </div>
+                  <p className="text-xs font-medium text-muted-foreground">{getCurrentPlanDisplay()}</p>
+                  <p className="text-xs mt-1 text-muted-foreground leading-relaxed">{getPlanDescription()}</p>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          // Desktop layout (unchanged)
+          <>
+            <nav className="flex-1 overflow-auto py-2">
+              <ul className="grid gap-1 px-2">
+                {navItems.map((item, index) => (
+                  <li key={index}>
+                    <NavLink
+                      to={item.href}
+                      onClick={handleNavClick}
+                      className={({ isActive }) =>
+                        cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-300 ease-in-out text-muted-foreground hover:text-foreground",
+                          isActive ? 
+                            "bg-primary/10 text-primary font-medium" : 
+                            "hover:bg-accent"
+                        )
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <item.icon 
+                            size={18} 
+                            className={cn(
+                              "transition-transform duration-300",
+                              isActive && "text-primary"
+                            )} 
+                          />
+                          <span>{t(item.titleKey)}</span>
+                        </>
+                      )}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            
+            {/* Legal links section */}
+            <div className="px-4 pb-2">
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={() => setPrivacyModalOpen(true)}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+                >
+                  Privacy Policy
+                </button>
+                <span className="text-xs text-muted-foreground">•</span>
+                <button
+                  onClick={() => setTermsModalOpen(true)}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+                >
+                  Terms & Conditions
+                </button>
+              </div>
+            </div>
+            
+            {/* Subscription plan section */}
+            <div className="border-t border-border p-4">
+              <div 
+                className="glassy-card rounded-lg p-4 subtle-shadow cursor-pointer hover:bg-accent/50 transition-colors"
+                onClick={() => setSubscriptionModalOpen(true)}
+              >
+                <p className="text-xs font-medium text-muted-foreground">{getCurrentPlanDisplay()}</p>
+                <p className="text-xs mt-1 text-muted-foreground leading-relaxed">{getPlanDescription()}</p>
+              </div>
+            </div>
+          </>
+        )}
       </aside>
       
       <SubscriptionModal 
