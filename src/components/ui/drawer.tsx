@@ -48,7 +48,7 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       {children}
-    </DrawerContent>
+    </DrawerPrimitive.Content>
   </DrawerPortal>
 ))
 DrawerContent.displayName = "DrawerContent"
