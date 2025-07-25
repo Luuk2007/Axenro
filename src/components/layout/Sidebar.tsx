@@ -7,6 +7,8 @@ import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SubscriptionModal from '@/components/subscription/SubscriptionModal';
 import { useSubscription } from '@/hooks/useSubscription';
+import PrivacyPolicyModal from '@/components/legal/PrivacyPolicyModal';
+import TermsConditionsModal from '@/components/legal/TermsConditionsModal';
 
 type NavItem = {
   titleKey: TranslationKeys;
@@ -56,6 +58,8 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const isMobile = useIsMobile();
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
+  const [termsModalOpen, setTermsModalOpen] = useState(false);
   const { subscribed, subscription_tier, loading } = useSubscription();
   
   // Monitor theme changes
@@ -144,6 +148,25 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           </ul>
         </nav>
         
+        {/* Legal links section */}
+        <div className="px-4 pb-2">
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={() => setPrivacyModalOpen(true)}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+            >
+              Privacy Policy
+            </button>
+            <span className="text-xs text-muted-foreground">•</span>
+            <button
+              onClick={() => setTermsModalOpen(true)}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+            >
+              Terms & Conditions
+            </button>
+          </div>
+        </div>
+        
         {/* Show subscription plan on both mobile and desktop */}
         <div className="border-t border-border p-4">
           <div 
@@ -159,6 +182,16 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
       <SubscriptionModal 
         open={subscriptionModalOpen} 
         onOpenChange={setSubscriptionModalOpen} 
+      />
+      
+      <PrivacyPolicyModal 
+        open={privacyModalOpen} 
+        onOpenChange={setPrivacyModalOpen} 
+      />
+      
+      <TermsConditionsModal 
+        open={termsModalOpen} 
+        onOpenChange={setTermsModalOpen} 
       />
     </>
   );
