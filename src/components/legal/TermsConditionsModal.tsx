@@ -11,7 +11,7 @@ interface TermsConditionsModalProps {
 export default function TermsConditionsModal({ open, onOpenChange }: TermsConditionsModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] mx-4 sm:mx-auto">
+      <DialogContent className="max-w-4xl max-h-[80vh] mx-6 sm:mx-auto">
         <DialogHeader>
           <DialogTitle>Terms & Conditions</DialogTitle>
         </DialogHeader>
