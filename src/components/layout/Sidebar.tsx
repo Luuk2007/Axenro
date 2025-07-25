@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -105,7 +104,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
     <>
       <aside className={cn(
         "flex flex-col border-border bg-card/50 backdrop-blur-sm",
-        isMobile ? "w-full border-b" : "w-64 border-r hidden md:flex"
+        isMobile ? "w-full border-b h-full" : "w-64 border-r hidden md:flex"
       )}>
         <div className="flex h-20 items-center justify-start px-4 pt-2">
           <img 
@@ -114,67 +113,73 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
             className="h-18 w-auto object-contain"
           />
         </div>
-        <nav className="flex-1 overflow-auto py-2">
-          <ul className="grid gap-1 px-2">
-            {navItems.map((item, index) => (
-              <li key={index}>
-                <NavLink
-                  to={item.href}
-                  onClick={handleNavClick}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-300 ease-in-out text-muted-foreground hover:text-foreground",
-                      isActive ? 
-                        "bg-primary/10 text-primary font-medium" : 
-                        "hover:bg-accent"
-                    )
-                  }
+        
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <nav className="flex-1 overflow-auto py-2">
+            <ul className="grid gap-1 px-2">
+              {navItems.map((item, index) => (
+                <li key={index}>
+                  <NavLink
+                    to={item.href}
+                    onClick={handleNavClick}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-300 ease-in-out text-muted-foreground hover:text-foreground",
+                        isActive ? 
+                          "bg-primary/10 text-primary font-medium" : 
+                          "hover:bg-accent"
+                      )
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <item.icon 
+                          size={18} 
+                          className={cn(
+                            "transition-transform duration-300",
+                            isActive && "text-primary"
+                          )} 
+                        />
+                        <span>{t(item.titleKey)}</span>
+                      </>
+                    )}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          
+          {/* Bottom section with legal links and subscription plan */}
+          <div className="mt-auto">
+            {/* Legal links section */}
+            <div className="px-4 pb-2">
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={() => setPrivacyModalOpen(true)}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
                 >
-                  {({ isActive }) => (
-                    <>
-                      <item.icon 
-                        size={18} 
-                        className={cn(
-                          "transition-transform duration-300",
-                          isActive && "text-primary"
-                        )} 
-                      />
-                      <span>{t(item.titleKey)}</span>
-                    </>
-                  )}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        
-        {/* Legal links section */}
-        <div className="px-4 pb-2">
-          <div className="flex items-center justify-center gap-4">
-            <button
-              onClick={() => setPrivacyModalOpen(true)}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
-            >
-              Privacy Policy
-            </button>
-            <span className="text-xs text-muted-foreground">•</span>
-            <button
-              onClick={() => setTermsModalOpen(true)}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
-            >
-              Terms & Conditions
-            </button>
-          </div>
-        </div>
-        
-        {/* Show subscription plan on both mobile and desktop */}
-        <div className="border-t border-border p-4">
-          <div 
-            className="glassy-card rounded-lg p-4 subtle-shadow cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => setSubscriptionModalOpen(true)}
-          >
-            <p className="text-xs font-medium text-muted-foreground">{getCurrentPlanDisplay()}</p>
-            <p className="text-xs mt-1 text-muted-foreground leading-relaxed">{getPlanDescription()}</p>
+                  Privacy Policy
+                </button>
+                <span className="text-xs text-muted-foreground">•</span>
+                <button
+                  onClick={() => setTermsModalOpen(true)}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+                >
+                  Terms & Conditions
+                </button>
+              </div>
+            </div>
+            
+            {/* Subscription plan section */}
+            <div className="border-t border-border p-4">
+              <div 
+                className="glassy-card rounded-lg p-4 subtle-shadow cursor-pointer hover:bg-accent/50 transition-colors"
+                onClick={() => setSubscriptionModalOpen(true)}
+              >
+                <p className="text-xs font-medium text-muted-foreground">{getCurrentPlanDisplay()}</p>
+                <p className="text-xs mt-1 text-muted-foreground leading-relaxed">{getPlanDescription()}</p>
+              </div>
+            </div>
           </div>
         </div>
       </aside>
