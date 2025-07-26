@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { exerciseDatabase } from '@/types/workout';
 
 interface CustomExercise {
+  id: string;
   name: string;
   muscleGroup: string;
 }
@@ -18,7 +20,20 @@ const ExercisesSettings = () => {
   const { t } = useLanguage();
   const [customExercises, setCustomExercises] = useState<CustomExercise[]>(() => {
     const saved = localStorage.getItem('customExercises');
-    return saved ? JSON.parse(saved) : [];
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Ensure all custom exercises have IDs
+        return parsed.map((exercise: any, index: number) => ({
+          id: exercise.id || `custom-${Date.now()}-${index}`,
+          name: exercise.name,
+          muscleGroup: exercise.muscleGroup
+        }));
+      } catch (error) {
+        console.error('Error parsing custom exercises:', error);
+      }
+    }
+    return [];
   });
   const [newExerciseName, setNewExerciseName] = useState('');
   const [newMuscleGroup, setNewMuscleGroup] = useState('');
@@ -45,6 +60,7 @@ const ExercisesSettings = () => {
     }
 
     const newExercise: CustomExercise = {
+      id: `custom-${Date.now()}`,
       name: newExerciseName.trim(),
       muscleGroup: newMuscleGroup
     };
@@ -54,6 +70,9 @@ const ExercisesSettings = () => {
     localStorage.setItem('customExercises', JSON.stringify(updatedExercises));
     setNewExerciseName('');
     setNewMuscleGroup('');
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new Event('exercisesChanged'));
     toast.success(t("Exercise added successfully"));
   };
 
@@ -61,6 +80,9 @@ const ExercisesSettings = () => {
     const updatedExercises = customExercises.filter((_, i) => i !== index);
     setCustomExercises(updatedExercises);
     localStorage.setItem('customExercises', JSON.stringify(updatedExercises));
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new Event('exercisesChanged'));
     toast.success(t("Exercise removed successfully"));
   };
 
@@ -81,7 +103,7 @@ const ExercisesSettings = () => {
               <h3 className="font-medium text-sm">{t("Custom exercises")}</h3>
               <div className="space-y-2">
                 {customExercises.map((exercise, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 border rounded">
+                  <div key={exercise.id || index} className="flex items-center justify-between p-2 border rounded">
                     <div>
                       <span className="font-medium text-sm">{exercise.name}</span>
                       <span className="text-xs text-muted-foreground ml-2">

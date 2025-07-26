@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, ChevronDown, ChevronUp } from "lucide-react";
+import { X, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -38,6 +39,20 @@ const MealsSettings = () => {
   });
   const [newMealName, setNewMealName] = useState('');
   const [mealsOpen, setMealsOpen] = useState(false);
+
+  // Check if there are deleted default meals
+  const hasDeletedDefaultMeals = () => {
+    const deletedMealsData = localStorage.getItem('deletedMeals');
+    if (deletedMealsData) {
+      try {
+        const deletedMealIds = JSON.parse(deletedMealsData);
+        return deletedMealIds.length > 0;
+      } catch (error) {
+        return false;
+      }
+    }
+    return false;
+  };
 
   // Get all meals including default ones
   const allMeals = getAvailableMeals();
@@ -89,6 +104,15 @@ const MealsSettings = () => {
     toast.success(t("Meal removed successfully"));
   };
 
+  const restoreDefaultMeals = () => {
+    // Clear the deleted meals list
+    localStorage.removeItem('deletedMeals');
+    
+    // Trigger meals change event
+    window.dispatchEvent(new Event('mealsChanged'));
+    toast.success(t("Default meals restored successfully"));
+  };
+
   return (
     <Card>
       <Collapsible open={mealsOpen} onOpenChange={setMealsOpen}>
@@ -136,6 +160,20 @@ const MealsSettings = () => {
                 ))}
               </div>
             </div>
+
+            {hasDeletedDefaultMeals() && (
+              <div className="pt-2">
+                <Button
+                  onClick={restoreDefaultMeals}
+                  variant="outline"
+                  size="sm"
+                  className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+                >
+                  <RotateCcw className="h-3 w-3 mr-2" />
+                  {t("Restore to default")}
+                </Button>
+              </div>
+            )}
 
             <div className="space-y-2">
               <h3 className="font-medium text-sm">{t("Add custom meal")}</h3>

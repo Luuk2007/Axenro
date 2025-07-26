@@ -1,21 +1,25 @@
-
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface PrivacyPolicyModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function PrivacyPolicyModal({ open, onOpenChange }: PrivacyPolicyModalProps) {
+const PrivacyPolicyModal = ({ open, onOpenChange }: PrivacyPolicyModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] p-6">
+      <DialogContent className="max-w-4xl max-h-[80vh] p-4 mx-4 sm:mx-6 md:mx-8">
         <DialogHeader>
           <DialogTitle>Privacy Policy</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-[60vh] pr-4">
+        <ScrollArea className="max-h-[60vh] pr-4">
           <div className="space-y-4 text-sm">
             <section>
               <h3 className="font-semibold mb-2">1. Information We Collect</h3>
@@ -78,4 +82,6 @@ export default function PrivacyPolicyModal({ open, onOpenChange }: PrivacyPolicy
       </DialogContent>
     </Dialog>
   );
-}
+};
+
+export default PrivacyPolicyModal;

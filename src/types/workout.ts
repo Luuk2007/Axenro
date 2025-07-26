@@ -109,7 +109,12 @@ export const getAllExercises = () => {
   
   if (customExercisesData) {
     try {
-      customExercises = JSON.parse(customExercisesData);
+      const parsed = JSON.parse(customExercisesData);
+      customExercises = parsed.map((exercise: any, index: number) => ({
+        id: exercise.id || `custom-${Date.now()}-${index}`,
+        name: exercise.name,
+        muscleGroup: exercise.muscleGroup
+      }));
     } catch (error) {
       console.error('Error parsing custom exercises:', error);
     }
