@@ -34,11 +34,18 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
     console.log('Requesting camera access...');
     
     try {
+      // Optimized camera constraints for better performance and quality
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: { ideal: 'environment' },
-          width: { min: 320, ideal: 640, max: 1920 },
-          height: { min: 240, ideal: 480, max: 1080 }
+          width: { min: 640, ideal: 1280, max: 1920 },
+          height: { min: 480, ideal: 720, max: 1080 },
+          frameRate: { ideal: 30, max: 60 },
+          // Enable autofocus for sharper images
+          focusMode: { ideal: 'continuous' },
+          // Better exposure for barcode scanning
+          exposureMode: { ideal: 'continuous' },
+          whiteBalanceMode: { ideal: 'continuous' }
         }
       });
       
@@ -124,7 +131,7 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
         };
       }
 
-      // Initialize Quagga with the camera stream
+      // Initialize Quagga with optimized settings for faster scanning
       await new Promise<void>((resolve, reject) => {
         const config = {
           inputStream: {
@@ -132,18 +139,34 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
             type: "LiveStream",
             target: scannerRef.current,
             constraints: {
-              width: { min: 320, ideal: 640, max: 1920 },
-              height: { min: 240, ideal: 480, max: 1080 },
+              width: { min: 640, ideal: 1280, max: 1920 },
+              height: { min: 480, ideal: 720, max: 1080 },
               facingMode: "environment",
               aspectRatio: { min: 1, max: 2 }
             }
           },
           locator: {
             patchSize: "medium",
-            halfSample: true
+            halfSample: false, // Keep full resolution for better accuracy
+            debug: {
+              showCanvas: false,
+              showPatches: false,
+              showFoundPatches: false,
+              showSkeleton: false,
+              showLabels: false,
+              showPatchLabels: false,
+              showRemainingPatchLabels: false,
+              boxFromPatches: {
+                showTransformed: false,
+                showTransformedBox: false,
+                showBB: false
+              }
+            }
           },
-          numOfWorkers: navigator.hardwareConcurrency || 2,
-          frequency: 10,
+          // Increase worker count for better performance
+          numOfWorkers: Math.min(navigator.hardwareConcurrency || 4, 8),
+          // Increase frequency for faster scanning
+          frequency: 20,
           decoder: {
             readers: [
               "ean_reader",
@@ -152,12 +175,20 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
               "code_39_reader",
               "codabar_reader",
               "i2of5_reader"
-            ]
+            ],
+            // Optimize decoder settings for speed
+            multiple: false,
+            debug: {
+              drawBoundingBox: false,
+              showFrequency: false,
+              drawScanline: false,
+              drawPatches: false
+            }
           },
           locate: true
         };
 
-        console.log('Initializing Quagga with config:', config);
+        console.log('Initializing Quagga with optimized config:', config);
         
         Quagga.init(config, (err) => {
           if (err) {
@@ -177,19 +208,22 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
         });
       });
 
-      // Set up barcode detection
+      // Set up barcode detection with confidence filtering
       Quagga.onDetected((data) => {
         const code = data.codeResult.code;
-        console.log('Barcode detected:', code);
+        const confidence = data.codeResult.decodedCodes.reduce((acc, code) => acc + code.error || 0, 0) / data.codeResult.decodedCodes.length;
         
-        if (!processedBarcodes.current.has(code)) {
+        console.log('Barcode detected:', code, 'Confidence:', confidence);
+        
+        // Only process barcodes with good confidence (lower error rate is better)
+        if (confidence < 0.25 && !processedBarcodes.current.has(code)) {
           processedBarcodes.current.add(code);
           onDetected(code);
           
-          // Clear the processed barcode after a delay to allow rescanning
+          // Clear the processed barcode after a shorter delay for faster rescanning
           setTimeout(() => {
             processedBarcodes.current.delete(code);
-          }, 3000);
+          }, 1000);
         }
       });
 

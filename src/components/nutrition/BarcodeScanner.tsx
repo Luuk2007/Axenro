@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -27,6 +26,13 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
 
   const handleBarcodeDetected = async (barcode: string) => {
     console.log('Processing barcode:', barcode);
+    
+    // Prevent multiple concurrent requests
+    if (loading) {
+      console.log('Already processing a barcode, skipping...');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     
@@ -96,14 +102,14 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
     onClose();
   };
 
-  // Apply styles to Quagga video element when camera becomes active
+  // Apply optimized styles to Quagga video element when camera becomes active
   useEffect(() => {
     if (cameraActive && scannerRef.current) {
       const videoElement = scannerRef.current.querySelector('video');
       const canvasElements = scannerRef.current.querySelectorAll('canvas');
       
       if (videoElement) {
-        console.log('Styling video element for proper display');
+        console.log('Styling video element for optimal scanning');
         videoElement.style.width = '100%';
         videoElement.style.height = '100%';
         videoElement.style.objectFit = 'cover';
@@ -111,9 +117,11 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
         videoElement.style.top = '0';
         videoElement.style.left = '0';
         videoElement.style.zIndex = '1';
+        // Optimize video for barcode scanning
+        videoElement.style.filter = 'contrast(1.2) brightness(1.1)';
       }
       
-      // Style canvas elements created by Quagga
+      // Hide debug canvas elements to improve performance
       canvasElements.forEach((canvas, index) => {
         canvas.style.position = 'absolute';
         canvas.style.top = '0';
@@ -121,6 +129,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
         canvas.style.width = '100%';
         canvas.style.height = '100%';
         canvas.style.zIndex = index === 0 ? '2' : '3';
+        canvas.style.display = 'none'; // Hide for better performance
       });
     }
   }, [cameraActive]);
@@ -167,19 +176,24 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
               </div>
             )}
             
-            {/* Scanning overlay */}
+            {/* Enhanced scanning overlay with better visual feedback */}
             {cameraActive && !loading && !error && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <div className="relative w-3/4 h-32">
-                  {/* Corner brackets */}
-                  <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-green-400"></div>
-                  <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-green-400"></div>
-                  <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-green-400"></div>
-                  <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-green-400"></div>
+                <div className="relative w-3/4 h-40">
+                  {/* Enhanced corner brackets */}
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-400 rounded-tl-lg"></div>
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-400 rounded-tr-lg"></div>
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-green-400 rounded-bl-lg"></div>
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-green-400 rounded-br-lg"></div>
                   
-                  {/* Scanning line */}
+                  {/* Animated scanning line */}
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full h-0.5 bg-green-400 opacity-75 animate-pulse"></div>
+                    <div className="w-full h-1 bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-75 animate-pulse"></div>
+                  </div>
+                  
+                  {/* Center focus indicator */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-green-400 rounded-full animate-ping"></div>
                   </div>
                 </div>
               </div>
@@ -187,11 +201,11 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
             
             {/* Status indicator */}
             <div className="absolute top-4 left-4 right-4 z-15">
-              <div className="bg-black/70 text-white p-2 rounded text-xs text-center">
+              <div className="bg-black/80 text-white p-3 rounded-lg text-sm text-center backdrop-blur-sm">
                 {isInitializing ? (
-                  <span className="text-yellow-400">● Initializing camera...</span>
+                  <span className="text-yellow-400">● Initializing high-quality camera...</span>
                 ) : cameraActive ? (
-                  <span className="text-green-400">● Camera Active - Point at barcode</span>
+                  <span className="text-green-400">● Camera Active - Hold steady and center barcode</span>
                 ) : (
                   <span className="text-yellow-400">● Starting camera...</span>
                 )}
@@ -199,15 +213,16 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
             </div>
             
             {/* Bottom controls */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-sm text-center bg-black/70 text-white z-15">
-              <p className="flex items-center justify-center gap-2 mb-2">
+            <div className="absolute bottom-0 left-0 right-0 p-4 text-sm text-center bg-gradient-to-t from-black/80 to-transparent text-white z-15">
+              <p className="flex items-center justify-center gap-2 mb-3">
                 <Camera className="h-4 w-4" />
-                {cameraActive ? 'Point camera at barcode - scanning automatically' : 'Starting camera...'}
+                {cameraActive ? 'Scanning automatically - keep barcode in focus' : 'Starting enhanced camera...'}
               </p>
               <Button 
                 onClick={stopScanner} 
                 variant="outline" 
                 size="sm"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
               >
                 Stop Camera
               </Button>
@@ -241,7 +256,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
                 {isInitializing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Starting Camera...
+                    Starting Enhanced Camera...
                   </>
                 ) : loading ? (
                   <>
@@ -251,7 +266,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
                 ) : (
                   <>
                     <Camera className="mr-2 h-4 w-4" />
-                    Start Camera
+                    Start High-Quality Camera
                   </>
                 )}
               </Button>
