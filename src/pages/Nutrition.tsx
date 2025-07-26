@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -200,7 +201,7 @@ const Nutrition = () => {
   };
 
   const handleAddFood = async (foodItem: any) => {
-    const mealId = selectedMeal;
+    const mealId = foodItem.mealId || selectedMeal;
     
     if (!mealId) {
       toast.error(t('selectMealFirst'));
@@ -241,7 +242,6 @@ const Nutrition = () => {
     }
     
     setShowAddFood(false);
-    setSelectedMeal(null); // Reset selected meal
   };
 
   const handleDeleteFoodItem = async (mealId: string, itemId: string) => {
@@ -368,11 +368,16 @@ const Nutrition = () => {
       </div>
 
       {/* Add Food Dialog */}
-      <AddFoodDialog 
-        open={showAddFood}
-        onOpenChange={setShowAddFood}
-        onAddFood={handleAddFood}
-      />
+      <Dialog open={showAddFood} onOpenChange={setShowAddFood}>
+        <DialogContent className="p-0">
+          <AddFoodDialog 
+            meals={meals}
+            selectedMeal={selectedMeal}
+            onClose={() => setShowAddFood(false)}
+            onAddFood={handleAddFood}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Barcode Scanner Dialog */}
       <Dialog open={showScanBarcode} onOpenChange={setShowScanBarcode}>
