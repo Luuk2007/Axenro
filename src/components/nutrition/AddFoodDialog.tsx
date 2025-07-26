@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,6 @@ export default function AddFoodDialog({ open, onOpenChange, onAddFood }: AddFood
   const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
-  const [quantity, setQuantity] = useState('100');
 
   // Use secure input for search query
   const searchInput = useSecureInput('', { 
@@ -84,30 +84,25 @@ export default function AddFoodDialog({ open, onOpenChange, onAddFood }: AddFood
       return;
     }
 
-    const scaledNutrition: NutritionData = {
-      calories: Math.round((selectedFood.nutrition.calories * qty) / 100),
-      protein: Math.round((selectedFood.nutrition.protein * qty) / 100 * 10) / 10,
-      carbs: Math.round((selectedFood.nutrition.carbs * qty) / 100 * 10) / 10,
-      fat: Math.round((selectedFood.nutrition.fat * qty) / 100 * 10) / 10,
-      fiber: selectedFood.nutrition.fiber ? Math.round((selectedFood.nutrition.fiber * qty) / 100 * 10) / 10 : undefined,
-      sugar: selectedFood.nutrition.sugar ? Math.round((selectedFood.nutrition.sugar * qty) / 100 * 10) / 10 : undefined,
-      sodium: selectedFood.nutrition.sodium ? Math.round((selectedFood.nutrition.sodium * qty) / 100 * 10) / 10 : undefined,
-    };
-
-    const foodToAdd: FoodItem = {
+    // Scale nutrition values based on quantity
+    const scaledFood: FoodItem = {
       ...selectedFood,
       name: SecurityUtils.escapeHtml(selectedFood.name),
-      nutrition: scaledNutrition,
+      calories: Math.round((selectedFood.calories * qty) / 100),
+      protein: Math.round((selectedFood.protein * qty) / 100 * 10) / 10,
+      carbs: Math.round((selectedFood.carbs * qty) / 100 * 10) / 10,
+      fat: Math.round((selectedFood.fat * qty) / 100 * 10) / 10,
       quantity: qty,
     };
 
-    onAddFood(foodToAdd);
+    onAddFood(scaledFood);
     
     // Reset form
     searchInput.reset();
     quantityInput.updateValue('100');
     setSelectedFood(null);
     setSearchResults([]);
+    onOpenChange(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -163,10 +158,10 @@ export default function AddFoodDialog({ open, onOpenChange, onAddFood }: AddFood
                 >
                   <div className="font-medium">{SecurityUtils.escapeHtml(food.name)}</div>
                   <div className="text-sm text-muted-foreground">
-                    {food.nutrition.calories} {t('kcalPer100g')} | 
-                    {t('protein')}: {food.nutrition.protein}g | 
-                    {t('carbs')}: {food.nutrition.carbs}g | 
-                    {t('fat')}: {food.nutrition.fat}g
+                    {food.calories} {t('kcalPer100g')} | 
+                    {t('protein')}: {food.protein}g | 
+                    {t('carbs')}: {food.carbs}g | 
+                    {t('fat')}: {food.fat}g
                   </div>
                   {food.brand && (
                     <div className="text-xs text-muted-foreground">

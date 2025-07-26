@@ -1,6 +1,6 @@
 // Open Food Facts API service
 import { supabase } from "@/integrations/supabase/client";
-import { FoodItem, FoodLogEntry } from "@/types/nutrition";
+import { FoodItem, FoodLogEntry, NutritionData } from "@/types/nutrition";
 import { Json } from "@/integrations/supabase/types";
 
 export interface NutritionInfo {
@@ -25,6 +25,63 @@ export interface ProductDetails {
 
 // Cache API responses to reduce repeated network requests
 const apiCache = new Map<string, ProductDetails>();
+
+/**
+ * Search for food items using Open Food Facts API
+ */
+export const searchOpenFoodFacts = async (query: string, lang = 'nl'): Promise<FoodItem[]> => {
+  try {
+    console.log(`Searching Open Food Facts with query: ${query}`);
+    const encodedQuery = encodeURIComponent(query);
+    const apiUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodedQuery}&json=true&page_size=20`;
+    
+    const response = await fetch(apiUrl);
+    
+    if (!response.ok) {
+      console.error('Error searching Open Food Facts:', response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+    console.log('Search results count:', data.count);
+    
+    if (!data.products || !Array.isArray(data.products)) {
+      return [];
+    }
+
+    return data.products.map((product: any) => {
+      const nutrients = product.nutriments || {};
+      
+      const nutrition: NutritionData = {
+        calories: nutrients['energy-kcal_100g'] || nutrients['energy-kcal'] || 0,
+        protein: nutrients.proteins_100g || nutrients.proteins || 0,
+        carbs: nutrients.carbohydrates_100g || nutrients.carbohydrates || 0,
+        fat: nutrients.fat_100g || nutrients.fat || 0,
+        fiber: nutrients.fiber_100g || nutrients.fiber || undefined,
+        sugar: nutrients.sugars_100g || nutrients.sugars || undefined,
+        sodium: nutrients.sodium_100g || nutrients.sodium || undefined,
+      };
+
+      const productName = product[`product_name_${lang}`] || product.product_name || 'Unknown Product';
+      
+      return {
+        id: product.code || String(Date.now()),
+        name: productName,
+        calories: nutrition.calories,
+        protein: nutrition.protein,
+        carbs: nutrition.carbs,
+        fat: nutrition.fat,
+        brand: product.brands || 'Generic',
+        imageUrl: product.image_front_url || null,
+        nutrition,
+        quantity: 100 // Default quantity for search results
+      };
+    });
+  } catch (error) {
+    console.error('Error searching Open Food Facts:', error);
+    return [];
+  }
+};
 
 /**
  * Fetch product information from Open Food Facts API by barcode

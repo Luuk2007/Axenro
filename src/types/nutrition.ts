@@ -8,6 +8,16 @@ export interface FoodLogEntry {
   created_at?: string;
 }
 
+export interface NutritionData {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber?: number;
+  sugar?: number;
+  sodium?: number;
+}
+
 export interface FoodItem {
   id: string;
   name: string;
@@ -19,6 +29,8 @@ export interface FoodItem {
   servingSize?: string;
   imageUrl?: string | null;
   logId?: string; // Added for storing the database log ID for deletion
+  nutrition?: NutritionData; // Add nutrition property for compatibility
+  quantity?: number; // Add quantity for scaling
 }
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
