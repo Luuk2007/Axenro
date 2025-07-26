@@ -1,4 +1,3 @@
-
 import { useRef, useState, useEffect, useCallback } from 'react';
 import Quagga from 'quagga';
 
@@ -40,12 +39,7 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
           facingMode: { ideal: 'environment' },
           width: { min: 640, ideal: 1280, max: 1920 },
           height: { min: 480, ideal: 720, max: 1080 },
-          frameRate: { ideal: 30, max: 60 },
-          // Enable autofocus for sharper images
-          focusMode: { ideal: 'continuous' },
-          // Better exposure for barcode scanning
-          exposureMode: { ideal: 'continuous' },
-          whiteBalanceMode: { ideal: 'continuous' }
+          frameRate: { ideal: 30, max: 60 }
         }
       });
       
