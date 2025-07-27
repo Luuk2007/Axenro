@@ -158,14 +158,14 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                   onClick={() => setPrivacyModalOpen(true)}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
                 >
-                  Privacy Policy
+                  {t('Privacy Policy')}
                 </button>
                 <span className="text-xs text-muted-foreground">•</span>
                 <button
                   onClick={() => setTermsModalOpen(true)}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
                 >
-                  Terms & Conditions
+                  {t('Terms & Conditions')}
                 </button>
               </div>
             </div>
