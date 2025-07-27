@@ -25,6 +25,11 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
     }
   };
 
+  const handleAddItem = () => {
+    // Trigger the add food modal by dispatching a custom event
+    window.dispatchEvent(new CustomEvent('openAddFoodModal', { detail: { mealId: id } }));
+  };
+
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-3">
@@ -36,7 +41,7 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
           size="sm" 
           variant="ghost" 
           className="h-8 text-xs"
-          onClick={() => onAddItem(id)}
+          onClick={handleAddItem}
         >
           <Plus className="mr-1 h-3 w-3" />
           {t("Add item")}

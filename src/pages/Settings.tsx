@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ const Settings = () => {
   const location = useLocation();
   const [settings, setSettings] = useState<UserSettings>({
     theme: "light",
-    language: "english",
+    language: language, // Initialize with current language from context
     notifications: true,
     dataBackup: false,
   });
@@ -51,9 +52,17 @@ const Settings = () => {
     const savedSettings = localStorage.getItem("userSettings");
     if (savedSettings) {
       const parsedSettings = JSON.parse(savedSettings);
-      setSettings(parsedSettings);
+      // Ensure language matches current context language
+      const updatedSettings = {
+        ...parsedSettings,
+        language: language // Always use the current language from context
+      };
+      setSettings(updatedSettings);
+    } else {
+      // If no saved settings, use current language from context
+      setSettings(prev => ({ ...prev, language }));
     }
-  }, []);
+  }, [language]);
 
   // Save settings to localStorage and dispatch custom event
   const saveSettings = (newSettings: UserSettings) => {
@@ -194,11 +203,11 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="theme">{t("theme")}</Label>
                   <Select
-                    value={settings.theme}
+                    value={settings.theme || "light"}
                     onValueChange={handleThemeChange}
                   >
                     <SelectTrigger className="w-40">
-                      <SelectValue />
+                      <SelectValue placeholder={t("theme")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="light">{t("light")}</SelectItem>
@@ -211,11 +220,11 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="language">{t("language")}</Label>
                   <Select
-                    value={settings.language}
+                    value={settings.language || language}
                     onValueChange={handleLanguageChange}
                   >
                     <SelectTrigger className="w-40">
-                      <SelectValue />
+                      <SelectValue placeholder={t("language")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="english">English</SelectItem>
