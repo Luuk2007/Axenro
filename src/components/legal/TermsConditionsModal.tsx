@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Dialog,
@@ -16,12 +15,12 @@ interface TermsConditionsModalProps {
 const TermsConditionsModal = ({ open, onOpenChange }: TermsConditionsModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] mx-4 sm:mx-6 md:mx-8">
+      <DialogContent className="max-w-4xl max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>Terms & Conditions</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="max-h-[60vh] pr-4">
-          <div className="space-y-4 text-sm">
+        <ScrollArea className="max-h-[60vh]">
+          <div className="space-y-4 text-sm px-4">
             <section>
               <h3 className="font-semibold mb-2">1. Acceptance of Terms</h3>
               <p className="text-muted-foreground">
