@@ -141,7 +141,6 @@ export const commonTranslations: Translations = {
   available: "Beschikbaar",
   unavailable: "Niet beschikbaar",
   busy: "Bezig",
-  free: "Vrij",
   open: "Open",
   closed: "Gesloten",
   public: "Openbaar",
