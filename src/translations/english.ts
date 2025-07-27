@@ -684,76 +684,7 @@ const english: Translations = {
   cameraNotAvailable: "Camera not available",
   couldNotAccessCamera: "Could not access camera",
   dailyNutritionTracker: "Daily nutrition tracker",
-  dailyMacroRecommendations: "Daily macro recommendations",
-  
-  // Additional notification translations
-  "workoutReminder": "Workout Reminder",
-  "yourScheduledWorkout": "Your scheduled workout",
-  "isDueIn": "is due in",
-  "goalReached": "Goal Reached!",
-  "congratulationsStepGoal": "Congratulations! You've reached your daily step goal of",
-  "stepsReached": "steps",
-  
-  // Additional password reset translations
-  "resetYourPassword": "Reset Your Password",
-  "newPassword": "New Password",
-  "passwordMustBeSixChars": "Password must be at least 6 characters",
-  "passwordsDoNotMatch": "Passwords do not match",
-  "passwordUpdatedSuccessfully": "Password updated successfully",
-  "failedToUpdatePassword": "Failed to update password",
-  
-  // Additional product modal translations
-  "productFound": "Product Found",
-  "barcode": "Barcode:",
-  "scanDifferent": "Scan Different",
-  "servingSize": "Serving Size",
-  "adjustServing": "Adjust Serving",
-  "amount": "Amount",
-  "unit": "Unit",
-  "numberOfServings": "Number of Servings",
-  "addToMealButton": "Add to Meal",
-  "nutritionFacts": "Nutrition Facts",
-  "perAdjustedServing": "Per adjusted serving",
-  "gram": "Gram",
-  "piece": "Piece",
-  "slice": "Slice",
-  "cup": "Cup",
-  "tbsp": "Tbsp",
-  "tsp": "Tsp",
-  "addToMealMenu": "Add to",
-  
-  // Additional barcode scanner translations
-  "scanBarcodeTitle": "Scan Barcode",
-  "readyToScan": "Ready to scan",
-  "pointCameraAtBarcode": "Point your camera at a product barcode to scan it automatically",
-  "startHighQualityCamera": "Start High-Quality Camera",
-  "orText": "Or",
-  "enterBarcodeManually": "Enter barcode manually",
-  "searchProduct": "Search product",
-  
-  // Additional loading and connection states
-  "processingBarcode": "Processing barcode...",
-  "barcodeFound": "Barcode found",
-  "noBarcodeDetected": "No barcode detected",
-  "invalidBarcode": "Invalid barcode",
-  "productNotFound": "Product not found",
-  "connected": "Connected",
-  "disconnected": "Disconnected",
-  "connecting": "Connecting...",
-  "connectionFailed": "Connection failed",
-  "retryConnection": "Retry connection",
-  
-  // Additional form validation
-  "thisFieldIsRequired": "This field is required",
-  "pleaseEnterValidEmail": "Please enter a valid email",
-  "pleaseEnterValidNumber": "Please enter a valid number",
-  "valueMustBeGreaterThanZero": "Value must be greater than 0",
-  
-  // Additional camera permissions
-  "cameraPermissionDenied": "Camera permission denied",
-  "pleaseAllowCameraAccess": "Please allow camera access to scan barcodes",
-  "cameraNotAvailable": "Camera not available",
-  "couldNotAccessCamera": "Could not access camera"
+  dailyMacroRecommendations: "Daily macro recommendations"
 };
 
 export default english;
