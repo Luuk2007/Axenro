@@ -23,11 +23,9 @@ export default function NotificationsDialog({ open, setOpen }: NotificationsDial
             <BellIcon className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <p className="font-medium">{t("Workout Reminder")}</p>
-            <p className="text-sm text-muted-foreground">
-              {t("Your scheduled workout")} "Upper Body Strength" {t("is due in")} 30 {t("minutes")}.
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">{t("today")}, 9:00 AM</p>
+            <p className="font-medium">Workout Reminder</p>
+            <p className="text-sm text-muted-foreground">Your scheduled workout "Upper Body Strength" is due in 30 minutes.</p>
+            <p className="text-xs text-muted-foreground mt-1">Today, 9:00 AM</p>
           </div>
         </div>
         <div className="flex items-start gap-4">
@@ -35,11 +33,9 @@ export default function NotificationsDialog({ open, setOpen }: NotificationsDial
             <BellIcon className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <p className="font-medium">{t("Goal Reached!")}</p>
-            <p className="text-sm text-muted-foreground">
-              {t("Congratulations! You've reached your daily step goal of")} 10,000 {t("steps")}.
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">{t("yesterday")}, 8:30 PM</p>
+            <p className="font-medium">Goal Reached!</p>
+            <p className="text-sm text-muted-foreground">Congratulations! You've reached your daily step goal of 10,000 steps.</p>
+            <p className="text-xs text-muted-foreground mt-1">Yesterday, 8:30 PM</p>
           </div>
         </div>
       </div>
