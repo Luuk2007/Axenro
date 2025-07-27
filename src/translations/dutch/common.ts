@@ -72,7 +72,6 @@ export const commonTranslations: Translations = {
   bookmark: "Bladwijzer",
   comment: "Reactie",
   reply: "Antwoorden",
-  forward: "Doorsturen",
   report: "Rapporteren",
   block: "Blokkeren",
   unblock: "Deblokkeren",
@@ -351,4 +350,31 @@ export const commonTranslations: Translations = {
   cardio: "Cardio",
   flexibility: "Flexibiliteit",
   balance: "Balans",
+  
+  // Dashboard translations
+  "No data": "Geen gegevens",
+  "Set target weight": "Stel streefgewicht in",
+  
+  // Barcode scanner translations
+  "Scan Barcode": "Barcode scannen",
+  "Ready to scan": "Klaar om te scannen",
+  "Point your camera at a product barcode to scan it automatically": "Richt uw camera op een productbarcode om deze automatisch te scannen",
+  "Start High-Quality Camera": "Start camera",
+  "Or": "Of",
+  "Enter barcode manually": "Voer de barcode handmatig in",
+  "Search product": "Zoek product",
+  
+  // Add food modal
+  "Search for a product or scan to add": "Zoek naar een product of scan om toe te voegen",
+  
+  // Workout translations
+  "Create a new workout routine": "Creëer een nieuwe trainingsroutine",
+  "My workout": "Mijn training",
+  "No exercises added yet": "Nog geen oefeningen toegevoegd",
+  "Save workout": "Training opslaan",
+  "Workouts This Week": "Trainingen deze week",
+  "Workouts this month": "Trainingen deze maand",
+  
+  // Settings translations
+  "No custom exercises added yet": "Nog geen aangepaste oefeningen toegevoegd",
 };
