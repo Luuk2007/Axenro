@@ -70,7 +70,7 @@ const ProductModal = ({
   return (
     <DialogContent className="sm:max-w-md mx-auto p-0 overflow-hidden">
       <DialogHeader className="sr-only">
-        <DialogTitle>{t("Product Found")}</DialogTitle>
+        <DialogTitle>{t("productFound")}</DialogTitle>
       </DialogHeader>
       
       <div className="flex flex-col">
@@ -78,13 +78,13 @@ const ProductModal = ({
           <button 
             className="p-2 mr-2 hover:bg-gray-100 rounded-full" 
             onClick={onScanAgain}
-            aria-label={t("Scan again")}
+            aria-label={t("scanAgain")}
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <h3 className="font-medium text-lg flex items-center gap-2">
             <Package className="h-5 w-5" />
-            {t("Product Found")}
+            {t("productFound")}
           </h3>
         </div>
         
@@ -92,13 +92,13 @@ const ProductModal = ({
           <div className="bg-green-50 p-3 rounded-md">
             <div className="flex items-center justify-between">
               <p className="text-green-800 text-sm flex-1">
-                ✅ {t("Barcode:"))} {product.id}
+                ✅ {t("barcode")} {product.id}
               </p>
               <button 
                 onClick={onScanAgain} 
                 className="text-green-600 text-sm whitespace-nowrap hover:underline"
               >
-                {t("Scan Different")}
+                {t("scanDifferent")}
               </button>
             </div>
           </div>
@@ -123,18 +123,18 @@ const ProductModal = ({
           
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <p className="font-medium">{t("Serving Size")}</p>
+              <p className="font-medium">{t("servingSize")}</p>
               <div className="bg-gray-100 rounded-md px-4 py-2 text-right">
                 <span>{product.servingSize}</span>
               </div>
             </div>
 
             <div className="border-t pt-4">
-              <h3 className="font-medium mb-3">{t("Adjust Serving")}</h3>
+              <h3 className="font-medium mb-3">{t("adjustServing")}</h3>
               
               <div className="flex gap-3 mb-4">
                 <div className="flex-1">
-                  <label className="text-sm text-muted-foreground mb-1 block">{t("Amount")}</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">{t("amount")}</label>
                   <Input 
                     type="number"
                     value={amount}
@@ -145,26 +145,26 @@ const ProductModal = ({
                 </div>
                 
                 <div className="flex-1">
-                  <label className="text-sm text-muted-foreground mb-1 block">{t("Unit")}</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">{t("unit")}</label>
                   <Select value={unit} onValueChange={setUnit}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="gram">{t("Gram")}</SelectItem>
+                      <SelectItem value="gram">{t("gram")}</SelectItem>
                       <SelectItem value="milliliter">mL</SelectItem>
-                      <SelectItem value="piece">{t("Piece")}</SelectItem>
-                      <SelectItem value="slice">{t("Slice")}</SelectItem>
-                      <SelectItem value="cup">{t("Cup")}</SelectItem>
-                      <SelectItem value="tablespoon">{t("Tbsp")}</SelectItem>
-                      <SelectItem value="teaspoon">{t("Tsp")}</SelectItem>
+                      <SelectItem value="piece">{t("piece")}</SelectItem>
+                      <SelectItem value="slice">{t("slice")}</SelectItem>
+                      <SelectItem value="cup">{t("cup")}</SelectItem>
+                      <SelectItem value="tablespoon">{t("tablespoon")}</SelectItem>
+                      <SelectItem value="teaspoon">{t("teaspoon")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               
               <div className="flex justify-between items-center mb-4">
-                <p className="font-medium">{t("Number of Servings")}</p>
+                <p className="font-medium">{t("numberOfServings")}</p>
                 <div className="flex items-center bg-gray-100 rounded-md px-2">
                   <button 
                     className="p-1 hover:bg-gray-200 rounded"
@@ -192,10 +192,10 @@ const ProductModal = ({
             </div>
             
             <div className="flex justify-between items-center">
-              <p className="font-medium">{t("Add to Meal")}</p>
+              <p className="font-medium">{t("addToMeal")}</p>
               <Select value={selectedMealId} onValueChange={setSelectedMealId}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder={t("Select meal")} />
+                  <SelectValue placeholder={t("selectMeal")} />
                 </SelectTrigger>
                 <SelectContent>
                   {meals.map(meal => (
@@ -207,8 +207,8 @@ const ProductModal = ({
           </div>
           
           <div className="border rounded-md p-4">
-            <h3 className="font-medium mb-2">{t("Nutrition Facts")}</h3>
-            <p className="text-xs text-muted-foreground mb-3">{t("Per adjusted serving")}</p>
+            <h3 className="font-medium mb-2">{t("nutritionFacts")}</h3>
+            <p className="text-xs text-muted-foreground mb-3">{t("perAdjustedServing")}</p>
             
             <div className="flex items-stretch space-x-4">
               <div className="bg-white rounded-full w-24 h-24 flex-shrink-0 flex flex-col items-center justify-center shadow-sm border border-gray-200">
@@ -260,7 +260,7 @@ const ProductModal = ({
           <div className="pt-4 space-y-2">
             <Button className="w-full" onClick={handleConfirmProduct}>
               <Check className="mr-2 h-4 w-4" />
-              {t("Add to")} {meals.find(m => m.id === selectedMealId)?.name || t("Meal")}
+              {t("addTo")} {meals.find(m => m.id === selectedMealId)?.name || t("meal")}
             </Button>
             <Button variant="outline" className="w-full" onClick={onClose}>
               {t("cancel")}
