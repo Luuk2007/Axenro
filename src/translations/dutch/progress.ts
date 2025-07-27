@@ -48,6 +48,17 @@ export const progressTranslations: Translations = {
   targetUpdated: "Doel bijgewerkt",
   weightUpdated: "Gewicht bijgewerkt",
   
+  // Progress photos
+  "progress photos": "voortgangsfoto's",
+  "No progress photos yet": "Nog geen voortgangsfoto's",
+  "Start tracking your visual progress over time": "Begin met het volgen van uw visuele voortgang in de loop van de tijd",
+  "Add First Photo": "Eerste foto toevoegen",
+  
+  // Measurements
+  "Measurement History": "Meetgeschiedenis",
+  "No Measurements Yet": "Nog geen metingen",
+  "Add First Measurement": "Eerste meting toevoegen",
+  
   // BMI Calculator
   bmiCalculator: "BMI Calculator",
   yourBmi: "Jouw BMI",
