@@ -1,4 +1,3 @@
-
 import { Translations } from "../types";
 
 export const commonTranslations: Translations = {
@@ -377,4 +376,102 @@ export const commonTranslations: Translations = {
   
   // Settings translations
   "No custom exercises added yet": "Nog geen aangepaste oefeningen toegevoegd",
+  
+  // Notification dialog translations
+  "Workout Reminder": "Trainingsherinnering",
+  "Your scheduled workout": "Je geplande training",
+  "is due in": "is verschuldigd in",
+  "minutes": "minuten",
+  "Goal Reached!": "Doel bereikt!",
+  "Congratulations! You've reached your daily step goal of": "Gefeliciteerd! Je hebt je dagelijkse stapdoel van",
+  "steps": "stappen bereikt",
+  
+  // Password reset modal translations
+  "Reset Your Password": "Wachtwoord resetten",
+  "New Password": "Nieuw wachtwoord",
+  "Confirm Password": "Bevestig wachtwoord",
+  "Update Password": "Wachtwoord bijwerken",
+  "Updating...": "Bijwerken...",
+  "Password must be at least 6 characters": "Wachtwoord moet minimaal 6 tekens hebben",
+  "Passwords do not match": "Wachtwoorden komen niet overeen",
+  "Password updated successfully": "Wachtwoord succesvol bijgewerkt",
+  "Failed to update password": "Wachtwoord bijwerken mislukt",
+  
+  // Product modal translations
+  "Product Found": "Product gevonden",
+  "Barcode:": "Barcode:",
+  "Scan Different": "Scan anders",
+  "Serving Size": "Portiegrootte",
+  "Adjust Serving": "Portie aanpassen",
+  "Amount": "Hoeveelheid",
+  "Unit": "Eenheid",
+  "Number of Servings": "Aantal porties",
+  "Add to Meal": "Toevoegen aan maaltijd",
+  "Nutrition Facts": "Voedingswaarden",
+  "Per adjusted serving": "Per aangepaste portie",
+  "Gram": "Gram",
+  "Piece": "Stuk",
+  "Slice": "Plak",
+  "Cup": "Kopje",
+  "Tbsp": "Eetlepel",
+  "Tsp": "Theelepel",
+  "Add to": "Toevoegen aan",
+  
+  // Steps connection modal translations
+  "Connect your steps": "Verbind je stappen",
+  "Sync your daily steps from your favorite health app": "Synchroniseer je dagelijkse stappen van je favoriete gezondheidsapp",
+  "Connect with Apple Health": "Verbind met Apple Health",
+  "Connect with Google Fit": "Verbind met Google Fit",
+  "Connect with Samsung Health": "Verbind met Samsung Health",
+  "We use secure connections to protect your data": "We gebruiken beveiligde verbindingen om je gegevens te beschermen",
+  
+  // Progress chart translations
+  "No data available": "Geen gegevens beschikbaar",
+  
+  // Profile form translations
+  "Male": "Man",
+  "Female": "Vrouw",
+  "Other": "Anders",
+  
+  // General toast messages
+  "Something went wrong": "Er ging iets mis",
+  "Please try again": "Probeer het opnieuw",
+  "Success": "Succes",
+  "Error": "Fout",
+  "Warning": "Waarschuwing",
+  "Info": "Informatie",
+  
+  // Loading states
+  "Loading...": "Laden...",
+  "Processing...": "Verwerken...",
+  "Saving...": "Opslaan...",
+  "Uploading...": "Uploaden...",
+  "Downloading...": "Downloaden...",
+  
+  // Form validation
+  "This field is required": "Dit veld is verplicht",
+  "Please enter a valid email": "Voer een geldig e-mailadres in",
+  "Please enter a valid number": "Voer een geldig getal in",
+  "Value must be greater than 0": "Waarde moet groter dan 0 zijn",
+  
+  // Camera permissions
+  "Camera permission denied": "Camera toestemming geweigerd",
+  "Please allow camera access to scan barcodes": "Sta camera toegang toe om barcodes te scannen",
+  "Camera not available": "Camera niet beschikbaar",
+  "Could not access camera": "Kon geen toegang krijgen tot camera",
+  
+  // Barcode scanning states
+  "Scanning...": "Scannen...",
+  "Processing barcode...": "Barcode verwerken...",
+  "Barcode found": "Barcode gevonden",
+  "No barcode detected": "Geen barcode gedetecteerd",
+  "Invalid barcode": "Ongeldige barcode",
+  "Product not found": "Product niet gevonden",
+  
+  // Connection states
+  "Connected": "Verbonden",
+  "Disconnected": "Losgekoppeld",
+  "Connecting...": "Verbinden...",
+  "Connection failed": "Verbinding mislukt",
+  "Retry connection": "Verbinding opnieuw proberen",
 };
