@@ -244,7 +244,6 @@ export const commonTranslations: Translations = {
   addToMeal: "Toevoegen aan maaltijd",
   portionSize: "Portiegrootte",
   nutritionSummary: "Voedingsoverzicht",
-  meals: "maaltijden",
   
   // Activity names
   running: "Hardlopen",
