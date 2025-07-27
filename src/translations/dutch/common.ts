@@ -168,7 +168,6 @@ export const commonTranslations: Translations = {
   // Directions
   up: "Omhoog",
   down: "Omlaag",
-  forward: "Vooruit",
   backward: "Achteruit",
   
   // Quality
