@@ -49,14 +49,14 @@ export const useSubscription = () => {
     }
   };
 
-  const createCheckout = async (planId: string) => {
+  const createCheckout = async (planId: string, billingInterval: 'monthly' | 'annually') => {
     if (!user || !session) {
       throw new Error('User not authenticated');
     }
 
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { planId },
+        body: { planId, billingInterval },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },

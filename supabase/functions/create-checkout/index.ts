@@ -41,21 +41,32 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { planId } = await req.json();
+    const { planId, billingInterval } = await req.json();
     if (!planId) throw new Error("Plan ID is required");
-    logStep("Plan ID received", { planId });
+    if (!billingInterval) throw new Error("Billing interval is required");
+    logStep("Plan details received", { planId, billingInterval });
 
-    // Define plan pricing using actual Stripe price IDs
+    // Define plan pricing using your new Stripe price IDs
     const planPricing = {
-      pro: { priceId: "price_1RlSreDs5WaqdwhXg8ai9HIf", name: "Pro Plan" },
-      premium: { priceId: "price_1RlSs0Ds5WaqdwhXoiriAHQK", name: "Premium Plan" }
+      pro: { 
+        monthly: { priceId: "price_1RolU1RtLPgCAftzGpargdZc", name: "Pro Monthly" },
+        annually: { priceId: "price_1RolcgRtLPgCAftzTeK0rEEJ", name: "Pro Annual" }
+      },
+      premium: { 
+        monthly: { priceId: "price_1RolfZRtLPgCAftzsrh5TkUb", name: "Premium Monthly" },
+        annually: { priceId: "price_1RolgQRtLPgCAftzzprZbszL", name: "Premium Annual" }
+      }
     };
 
     if (!planPricing[planId as keyof typeof planPricing]) {
       throw new Error("Invalid plan ID");
     }
 
-    const selectedPlan = planPricing[planId as keyof typeof planPricing];
+    const selectedPlan = planPricing[planId as keyof typeof planPricing][billingInterval as keyof typeof planPricing[keyof typeof planPricing]];
+    if (!selectedPlan) {
+      throw new Error("Invalid billing interval");
+    }
+
     logStep("Plan selected", selectedPlan);
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });

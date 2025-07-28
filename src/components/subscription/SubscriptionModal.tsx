@@ -10,6 +10,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Check, Loader2 } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useState } from 'react';
@@ -20,7 +21,8 @@ import { useNavigate } from 'react-router-dom';
 interface Plan {
   id: string;
   name: string;
-  price: string;
+  monthlyPrice: string;
+  annualPrice: string;
   tagline?: string;
   features: string[];
   isActive?: boolean;
@@ -37,18 +39,21 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
   const navigate = useNavigate();
   const { subscribed, subscription_tier, createCheckout, openCustomerPortal } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annually'>('monthly');
 
   const plans: Plan[] = [
     {
       id: 'free',
       name: t('Free'),
-      price: '€0',
+      monthlyPrice: '€0',
+      annualPrice: '€0',
       features: [t('Basic fitness tracking'), t('Limited workout history'), t('Basic nutrition logging')],
     },
     {
       id: 'pro',
       name: t('Pro'),
-      price: '€4.99',
+      monthlyPrice: '€14.99',
+      annualPrice: '€149.99',
       tagline: t('Most Popular'),
       features: [
         t('Advanced fitness tracking'),
@@ -62,7 +67,8 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     {
       id: 'premium',
       name: t('Premium'),
-      price: '€7.99',
+      monthlyPrice: '€24.99',
+      annualPrice: '€249.99',
       features: [
         t('Everything in Pro'),
         t('AI-powered recommendations'),
@@ -79,7 +85,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     
     try {
       setLoading(planId);
-      await createCheckout(planId);
+      await createCheckout(planId, billingInterval);
       toast.success(t('Redirecting to Stripe checkout...'));
     } catch (error) {
       console.error('Checkout error:', error);
@@ -128,6 +134,14 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     return isCurrentPlan(plan) || loading !== null;
   };
 
+  const getCurrentPrice = (plan: Plan) => {
+    return billingInterval === 'monthly' ? plan.monthlyPrice : plan.annualPrice;
+  };
+
+  const getSavingsText = () => {
+    return billingInterval === 'annually' ? t('Save 20%') : '';
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-5xl">
@@ -137,6 +151,22 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
             {t('Unlock the full potential of your fitness journey with our premium features.')}
           </DialogDescription>
         </DialogHeader>
+        
+        <div className="flex justify-center mt-4 mb-6">
+          <Tabs value={billingInterval} onValueChange={(value) => setBillingInterval(value as 'monthly' | 'annually')}>
+            <TabsList className="grid w-full grid-cols-2 max-w-sm">
+              <TabsTrigger value="monthly">{t('Monthly')}</TabsTrigger>
+              <TabsTrigger value="annually" className="relative">
+                {t('Annual')}
+                {getSavingsText() && (
+                  <Badge className="ml-2 text-xs bg-green-100 text-green-800">
+                    {getSavingsText()}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
           {plans.map((plan) => (
@@ -164,8 +194,12 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
                   )}
                 </div>
                 <div className="text-2xl sm:text-3xl font-bold text-primary">
-                  {plan.price}
-                  {plan.id !== 'free' && <span className="text-xs sm:text-sm font-normal text-muted-foreground">/{t('per month')}</span>}
+                  {getCurrentPrice(plan)}
+                  {plan.id !== 'free' && (
+                    <span className="text-xs sm:text-sm font-normal text-muted-foreground">
+                      /{billingInterval === 'monthly' ? t('per month') : t('per year')}
+                    </span>
+                  )}
                 </div>
               </CardHeader>
               

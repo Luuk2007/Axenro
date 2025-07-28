@@ -28,6 +28,13 @@ export const settingsTranslations: Translations = {
   "View subscription details": "Bekijk abonnement details",
   "Opening customer portal...": "Klantportaal openen...",
   "Failed to open customer portal": "Kon klantportaal niet openen",
+  "Monthly": "Maandelijks",
+  "Annual": "Jaarlijks",
+  "Save 20%": "Bespaar 20%",
+  "per year": "per jaar",
+  "Free Plan": "Gratis Plan",
+  "Plan": "Plan",
+  "Upgrade": "Upgraden",
   
   // Data Management
   "Data Management": "Gegevensbeheer",
