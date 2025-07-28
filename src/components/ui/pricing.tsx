@@ -152,24 +152,29 @@ export function Pricing({
               </p>
               <div className="mt-6 flex items-center justify-center gap-x-2">
                 <span className="text-5xl font-bold tracking-tight text-foreground">
-                  <NumberFlow
-                    value={
-                      isMonthly ? Number(plan.price) : Number(plan.yearlyPrice)
-                    }
-                    format={{
-                      style: "currency",
-                      currency: "EUR",
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    }}
-                    formatter={(value) => `€${value}`}
-                    transformTiming={{
-                      duration: 500,
-                      easing: "ease-out",
-                    }}
-                    willChange
-                    className="font-variant-numeric: tabular-nums"
-                  />
+                  {Number(plan.price) === 0 ? (
+                    "€0"
+                  ) : (
+                    <>
+                      €
+                      <NumberFlow
+                        value={
+                          isMonthly ? Number(plan.price) : Number(plan.yearlyPrice)
+                        }
+                        format={{
+                          style: "decimal",
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }}
+                        transformTiming={{
+                          duration: 500,
+                          easing: "ease-out",
+                        }}
+                        willChange
+                        className="font-variant-numeric: tabular-nums"
+                      />
+                    </>
+                  )}
                 </span>
                 {plan.period !== "Next 3 months" && (
                   <span className="text-sm font-semibold leading-6 tracking-wide text-muted-foreground">
