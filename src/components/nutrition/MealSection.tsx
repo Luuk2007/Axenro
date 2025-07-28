@@ -26,7 +26,8 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
   };
 
   const handleAddItem = () => {
-    onAddItem(id);
+    // Trigger the add food modal by dispatching a custom event
+    window.dispatchEvent(new CustomEvent('openAddFoodModal', { detail: { mealId: id } }));
   };
 
   return (

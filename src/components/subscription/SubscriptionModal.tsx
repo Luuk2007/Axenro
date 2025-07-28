@@ -108,7 +108,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
       return subscribed ? t('Downgrade') : t('Current Plan');
     }
     
-    if (subscribed && subscription_tier === plan.name) {
+    if (subscribed && subscription_tier === plan.name.replace(t(''), '')) {
       return t('Current Plan');
     }
     
@@ -121,7 +121,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   const isCurrentPlan = (plan: Plan) => {
     if (plan.id === 'free' && !subscribed) return true;
-    return subscribed && subscription_tier === plan.name;
+    return subscribed && subscription_tier === plan.name.replace(t(''), '');
   };
 
   const isDisabled = (plan: Plan) => {
