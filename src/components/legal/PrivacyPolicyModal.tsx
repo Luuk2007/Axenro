@@ -18,7 +18,7 @@ const PrivacyPolicyModal = ({ open, onOpenChange }: PrivacyPolicyModalProps) => 
   const { t, language } = useLanguage();
 
   const englishContent = (
-    <div className="space-y-4 text-sm px-4">
+    <div className="space-y-4 text-sm">
       <section>
         <h3 className="font-semibold mb-2">1. Information We Collect</h3>
         <p className="text-muted-foreground">
@@ -79,7 +79,7 @@ const PrivacyPolicyModal = ({ open, onOpenChange }: PrivacyPolicyModalProps) => 
   );
 
   const dutchContent = (
-    <div className="space-y-4 text-sm px-4">
+    <div className="space-y-4 text-sm">
       <section>
         <h3 className="font-semibold mb-2">1. Informatie die we verzamelen</h3>
         <p className="text-muted-foreground">
@@ -145,7 +145,7 @@ const PrivacyPolicyModal = ({ open, onOpenChange }: PrivacyPolicyModalProps) => 
         <DialogHeader>
           <DialogTitle>{language === 'dutch' ? 'Privacybeleid' : 'Privacy Policy'}</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="max-h-[60vh]">
+        <ScrollArea className="max-h-[60vh] px-4">
           {language === 'dutch' ? dutchContent : englishContent}
         </ScrollArea>
       </DialogContent>

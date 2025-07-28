@@ -18,7 +18,7 @@ const TermsConditionsModal = ({ open, onOpenChange }: TermsConditionsModalProps)
   const { t, language } = useLanguage();
 
   const englishContent = (
-    <div className="space-y-4 text-sm px-4">
+    <div className="space-y-4 text-sm">
       <section>
         <h3 className="font-semibold mb-2">1. Acceptance of Terms</h3>
         <p className="text-muted-foreground">
@@ -90,7 +90,7 @@ const TermsConditionsModal = ({ open, onOpenChange }: TermsConditionsModalProps)
   );
 
   const dutchContent = (
-    <div className="space-y-4 text-sm px-4">
+    <div className="space-y-4 text-sm">
       <section>
         <h3 className="font-semibold mb-2">1. Acceptatie van voorwaarden</h3>
         <p className="text-muted-foreground">
@@ -169,7 +169,7 @@ const TermsConditionsModal = ({ open, onOpenChange }: TermsConditionsModalProps)
         <DialogHeader>
           <DialogTitle>{language === 'dutch' ? 'Algemene voorwaarden' : 'Terms & Conditions'}</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="max-h-[60vh]">
+        <ScrollArea className="max-h-[60vh] px-4">
           {language === 'dutch' ? dutchContent : englishContent}
         </ScrollArea>
       </DialogContent>
