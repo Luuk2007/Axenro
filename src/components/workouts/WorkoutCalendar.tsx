@@ -92,8 +92,8 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="relative w-full h-full flex items-center justify-center">
-              <span>{date.getDate()}</span>
-              <Dumbbell className="absolute top-0 right-0 h-2 w-2 text-green-600" />
+              <span className="relative z-10">{date.getDate()}</span>
+              <Dumbbell className="absolute top-1 right-1 h-2 w-2 text-green-600" />
             </div>
           </TooltipTrigger>
           <TooltipContent>
