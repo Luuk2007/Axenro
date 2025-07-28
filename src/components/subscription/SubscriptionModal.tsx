@@ -52,8 +52,8 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     {
       id: 'pro',
       name: t('Pro'),
-      monthlyPrice: '€14.99',
-      annualPrice: '€149.99',
+      monthlyPrice: '€4.99',
+      annualPrice: '€49.99',
       tagline: t('Most Popular'),
       features: [
         t('Advanced fitness tracking'),
@@ -67,8 +67,8 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     {
       id: 'premium',
       name: t('Premium'),
-      monthlyPrice: '€24.99',
-      annualPrice: '€249.99',
+      monthlyPrice: '€7.99',
+      annualPrice: '€79.99',
       features: [
         t('Everything in Pro'),
         t('AI-powered recommendations'),
