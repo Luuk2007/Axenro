@@ -1,152 +1,121 @@
 
-import React from "react";
-import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Workout } from "@/types/workout";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek } from "date-fns";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { Dumbbell } from "lucide-react";
+import React, { useMemo } from 'react';
+import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import { nl, enUS } from 'date-fns/locale';
+import { Workout } from '@/types/workout';
 
 interface WorkoutCalendarProps {
   workouts: Workout[];
 }
 
-const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
-  const { t } = useLanguage();
-  const currentDate = new Date();
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(currentDate);
-  
-  // Get all workout dates in Date format
-  const workoutDates = workouts
-    .filter(workout => workout.completed)
-    .map(workout => {
-      // Parse the date from the format "yyyy-MM-dd"
-      return parse(workout.date, "yyyy-MM-dd", new Date());
-    })
-    .filter(date => isValid(date)); // Filter out invalid dates
-  
-  // Count workouts within current month
-  const currentMonthStart = startOfMonth(currentDate);
-  const currentMonthEnd = endOfMonth(currentDate);
-  
-  const workoutsThisMonth = workoutDates.filter(date => 
-    date >= currentMonthStart && date <= currentMonthEnd
-  ).length;
-  
-  // Count workouts within current week (last 7 days including today)
-  const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Start from Monday
-  const currentWeekEnd = endOfWeek(currentDate, { weekStartsOn: 1 }); // End on Sunday
-  
-  const workoutsThisWeek = workoutDates.filter(date => 
-    date >= currentWeekStart && date <= currentWeekEnd
-  ).length;
-  
-  // Get all days in current month for activity heatmap
-  const daysInMonth = eachDayOfInterval({
-    start: currentMonthStart,
-    end: currentMonthEnd
-  });
+const WorkoutCalendar = ({ workouts }: WorkoutCalendarProps) => {
+  const { t, language } = useLanguage();
 
-  // Function to determine if a date has workouts
-  const dateHasWorkout = (date: Date) => {
-    return workoutDates.some(workoutDate => 
-      date.getDate() === workoutDate.getDate() && 
-      date.getMonth() === workoutDate.getMonth() && 
-      date.getFullYear() === workoutDate.getFullYear()
-    );
-  };
-
-  // Function to get workouts for a specific date
-  const getWorkoutsForDate = (date: Date) => {
-    return workouts.filter(workout => {
-      const workoutDate = parse(workout.date, "yyyy-MM-dd", new Date());
-      return workout.completed && 
-        date.getDate() === workoutDate.getDate() && 
-        date.getMonth() === workoutDate.getMonth() && 
-        date.getFullYear() === workoutDate.getFullYear();
-    });
-  };
-
-  // Create a modifiers object for the calendar
-  const modifiersClassNames = {
-    workout: "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-800/30 dark:text-green-400"
-  };
-
-  // Create a modifiers object for the calendar
-  const modifiers = {
-    workout: workoutDates
-  };
-
-  // Custom day content with tooltip
-  const DayContent = ({ date }: { date: Date }) => {
-    const dayWorkouts = getWorkoutsForDate(date);
-    const hasWorkout = dayWorkouts.length > 0;
-
-    if (!hasWorkout) {
-      return <span>{date.getDate()}</span>;
+  const getLocale = () => {
+    switch (language) {
+      case 'dutch': return nl;
+      default: return enUS;
     }
-
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="relative w-full h-full flex items-center justify-center">
-              <span>{date.getDate()}</span>
-              <Dumbbell className="absolute top-0 right-0 h-2 w-2 text-green-600" />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <div className="max-w-48">
-              {dayWorkouts.map((workout, index) => (
-                <div key={workout.id} className="text-xs">
-                  <div className="font-medium">{workout.name}</div>
-                  <div className="text-muted-foreground">
-                    {workout.exercises.length} {t("exercises")}
-                    {index < dayWorkouts.length - 1 && <hr className="my-1" />}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
   };
-  
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("workoutCalendar")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-6">
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
-              <div className="text-sm text-muted-foreground">{t("workoutsThisWeek")}</div>
-              <div className="text-3xl font-bold mt-1">{workoutsThisWeek}</div>
-            </div>
-            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md">
-              <div className="text-sm text-muted-foreground">{t("workoutsThisMonth")}</div>
-              <div className="text-3xl font-bold mt-1">{workoutsThisMonth}</div>
-            </div>
-          </div>
-          
-          <Calendar 
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            className="p-0"
-            modifiers={modifiers}
-            modifiersClassNames={modifiersClassNames}
-            weekStartsOn={1}
-            components={{
-              Day: ({ date }) => <DayContent date={date} />
-            }}
-          />
+
+  const today = new Date();
+  const thisWeek = useMemo(() => {
+    const start = startOfWeek(today, { weekStartsOn: 1 });
+    const end = endOfWeek(today, { weekStartsOn: 1 });
+    return workouts.filter(workout => {
+      const workoutDate = new Date(workout.date);
+      return workoutDate >= start && workoutDate <= end;
+    });
+  }, [workouts, today]);
+
+  const thisMonth = useMemo(() => {
+    const start = startOfMonth(today);
+    const end = endOfMonth(today);
+    return workouts.filter(workout => {
+      const workoutDate = new Date(workout.date);
+      return workoutDate >= start && workoutDate <= end;
+    });
+  }, [workouts, today]);
+
+  const workoutDates = useMemo(() => {
+    return workouts.map(workout => new Date(workout.date));
+  }, [workouts]);
+
+  const modifiers = {
+    workout: workoutDates,
+  };
+
+  const modifiersStyles = {
+    workout: {
+      position: 'relative' as const,
+    },
+  };
+
+  const components = {
+    Day: ({ date, ...props }: any) => {
+      const hasWorkout = workoutDates.some(workoutDate => 
+        workoutDate.toDateString() === date.toDateString()
+      );
+      
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <button {...props} className={`${props.className} relative w-full h-full flex items-center justify-center`}>
+            {format(date, 'd')}
+            {hasWorkout && (
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
+            )}
+          </button>
         </div>
-      </CardContent>
-    </Card>
+      );
+    },
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{t('Workouts This Week')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-primary">
+              {thisWeek.length}
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{t('Workouts this month')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-primary">
+              {thisMonth.length}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('calendar')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Calendar
+            mode="single"
+            locale={getLocale()}
+            modifiers={modifiers}
+            modifiersStyles={modifiersStyles}
+            components={components}
+            className="rounded-md border"
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
