@@ -108,12 +108,12 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
       return subscribed ? t('Downgrade') : t('Current Plan');
     }
     
-    if (subscribed && subscription_tier === plan.name.replace(t(''), '')) {
+    if (subscribed && subscription_tier === plan.id) {
       return t('Current Plan');
     }
     
     if (subscribed) {
-      return subscription_tier === 'Pro' && plan.id === 'premium' ? t('Upgrade') : t('Switch Plan');
+      return subscription_tier === 'pro' && plan.id === 'premium' ? t('Upgrade') : t('Switch Plan');
     }
     
     return t('Select Plan');
@@ -121,7 +121,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   const isCurrentPlan = (plan: Plan) => {
     if (plan.id === 'free' && !subscribed) return true;
-    return subscribed && subscription_tier === plan.name.replace(t(''), '');
+    return subscribed && subscription_tier === plan.id;
   };
 
   const isDisabled = (plan: Plan) => {
