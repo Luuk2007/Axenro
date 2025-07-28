@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -111,7 +110,10 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           <img 
             src={isDarkTheme ? "/lovable-uploads/4df4b86d-bc17-46f1-ba5a-a9b628a52fbd.png" : "/lovable-uploads/a6bd449c-9a53-4c14-a15f-aee4b1ad983c.png"}
             alt="Axenro Logo" 
-            className="h-18 w-auto object-contain"
+            className={cn(
+              "w-auto object-contain",
+              isMobile ? "h-12" : "h-18"
+            )}
           />
         </div>
         
