@@ -140,7 +140,7 @@ const PrivacyPolicyModal = ({ open, onOpenChange }: PrivacyPolicyModalProps) => 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] w-[calc(100vw-2rem)] mx-4 sm:w-full sm:mx-0">
+      <DialogContent className="max-w-4xl max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>{language === 'dutch' ? 'Privacybeleid' : 'Privacy Policy'}</DialogTitle>
         </DialogHeader>
