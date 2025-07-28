@@ -1,4 +1,5 @@
-export const common = {
+
+export const commonTranslations = {
   "confirmDelete": "Weet je zeker dat je dit wilt verwijderen?",
   "yes": "Ja",
   "no": "Nee",
@@ -62,7 +63,6 @@ export const common = {
   "Appearance": "Weergave",
   "Notifications": "Notificaties",
   "Privacy": "Privacy",
-  "Terms & Conditions": "Algemene voorwaarden",
   "Contact": "Contact",
   "Update Profile": "Profiel bijwerken",
   "First Name": "Voornaam",
@@ -129,7 +129,6 @@ export const common = {
   "Opening settings...": "Instellingen openen...",
   "Failed to open settings": "Kan instellingen niet openen",
   "Privacy Policy": "Privacybeleid",
-  "Terms & Conditions": "Algemene voorwaarden",
   "Get started with the basics — track your progress for free": "Begin met de basis — volg je voortgang gratis",
   "Free Plan": "Gratis abonnement"
 };
