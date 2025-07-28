@@ -89,7 +89,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         t('Limited workout history'),
         t('Basic nutrition logging')
       ],
-      description: t('Perfect for getting started'),
+      description: '',
       buttonText: getButtonText('free'),
       href: '#',
       isPopular: false,
@@ -107,7 +107,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         t('Progress charts'),
         t('Export data')
       ],
-      description: t('Great for serious fitness enthusiasts'),
+      description: '',
       buttonText: loading === 'pro' ? t('Processing...') : getButtonText('pro'),
       href: '#',
       isPopular: true,
@@ -126,7 +126,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         t('Priority support'),
         t('Early access to new features')
       ],
-      description: t('For professionals and coaches'),
+      description: '',
       buttonText: loading === 'premium' ? t('Processing...') : getButtonText('premium'),
       href: '#',
       isPopular: false,
@@ -137,13 +137,6 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl sm:text-3xl font-bold text-center">{t('Choose Your Plan')}</DialogTitle>
-          <DialogDescription className="text-center text-muted-foreground text-base sm:text-lg">
-            {t('Unlock the full potential of your fitness journey with our premium features.')}
-          </DialogDescription>
-        </DialogHeader>
-        
         <Pricing 
           plans={plans}
           title={t('Choose Your Plan')}
