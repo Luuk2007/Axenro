@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -108,7 +109,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
       )}>
         <div className="flex h-20 items-center justify-start px-4 pt-2">
           <img 
-            src={isDarkTheme ? "/lovable-uploads/b94d76e9-30f7-400c-8294-58d72b2d16cf.png" : "/lovable-uploads/2622c944-7422-4825-b6cb-9803e827ef96.png"}
+            src={isDarkTheme ? "/lovable-uploads/4df4b86d-bc17-46f1-ba5a-a9b628a52fbd.png" : "/lovable-uploads/a6bd449c-9a53-4c14-a15f-aee4b1ad983c.png"}
             alt="Axenro Logo" 
             className="h-18 w-auto object-contain"
           />
