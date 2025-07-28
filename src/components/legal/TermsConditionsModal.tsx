@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Dialog,
@@ -165,7 +164,7 @@ const TermsConditionsModal = ({ open, onOpenChange }: TermsConditionsModalProps)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
+      <DialogContent className="max-w-4xl max-h-[80vh] w-[calc(100vw-2rem)] mx-4 sm:w-full sm:mx-0">
         <DialogHeader>
           <DialogTitle>{language === 'dutch' ? 'Algemene voorwaarden' : 'Terms & Conditions'}</DialogTitle>
         </DialogHeader>
