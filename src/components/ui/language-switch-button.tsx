@@ -23,8 +23,8 @@ export function LanguageSwitch({ className = '' }: LanguageSwitchProps) {
       title={language === 'english' ? 'Switch to Dutch' : 'Switch to English'}
     >
       {language === 'english' ? (
-        // British flag
-        <div className="h-5 w-5 rounded-sm overflow-hidden">
+        // British flag - circular
+        <div className="h-6 w-6 rounded-full overflow-hidden">
           <svg viewBox="0 0 60 30" className="h-full w-full">
             <clipPath id="t">
               <path d="m30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/>
@@ -37,8 +37,8 @@ export function LanguageSwitch({ className = '' }: LanguageSwitchProps) {
           </svg>
         </div>
       ) : (
-        // Dutch flag
-        <div className="h-5 w-5 rounded-sm overflow-hidden flex flex-col">
+        // Dutch flag - circular
+        <div className="h-6 w-6 rounded-full overflow-hidden flex flex-col">
           <div className="flex-1 bg-[#AE1C28]"></div>
           <div className="flex-1 bg-white"></div>
           <div className="flex-1 bg-[#21468B]"></div>

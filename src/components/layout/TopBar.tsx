@@ -89,8 +89,8 @@ export default function TopBar() {
         )}
       </div>
       <div className="flex items-center gap-4">
-        <ThemeSwitch />
         <LanguageSwitch />
+        <ThemeSwitch />
         
         {notificationsEnabled && (
           <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
