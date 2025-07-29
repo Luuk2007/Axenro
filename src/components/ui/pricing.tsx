@@ -108,7 +108,8 @@ export function PricingFrequencyToggle({
 						<motion.span
 							layoutId="frequency"
 							transition={{ type: 'spring', duration: 0.4 }}
-							className="bg-foreground absolute inset-0 z-10 rounded-full mix-blend-difference"
+							className="absolute inset-0 z-10 rounded-full mix-blend-difference"
+							style={{ backgroundColor: '#2663f2' }}
 						/>
 					)}
 				</button>

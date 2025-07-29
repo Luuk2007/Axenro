@@ -134,32 +134,34 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-auto">
-        <PricingSection 
-          plans={plans}
-          heading={t('Choose Your Plan')}
-          description={t('Unlock the full potential of your fitness journey with our premium features.')}
-        />
+      <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-hidden">
+        <div className="overflow-y-auto max-h-full">
+          <PricingSection 
+            plans={plans}
+            heading={t('Choose Your Plan')}
+            description={t('Unlock the full potential of your fitness journey with our premium features.')}
+          />
 
-        {subscribed && (
-          <div className="flex justify-center mt-4 sm:mt-6 pt-4 sm:pt-6 border-t">
-            <Button 
-              variant="outline" 
-              onClick={handleManageSubscription}
-              disabled={loading !== null}
-              className="text-xs sm:text-sm"
-            >
-              {loading === 'manage' ? (
-                <>
-                  <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                  {t('Opening...')}
-                </>
-              ) : (
-                t('Manage Subscription')
-              )}
-            </Button>
-          </div>
-        )}
+          {subscribed && (
+            <div className="flex justify-center mt-4 sm:mt-6 pt-4 sm:pt-6 border-t">
+              <Button 
+                variant="outline" 
+                onClick={handleManageSubscription}
+                disabled={loading !== null}
+                className="text-xs sm:text-sm"
+              >
+                {loading === 'manage' ? (
+                  <>
+                    <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                    {t('Opening...')}
+                  </>
+                ) : (
+                  t('Manage Subscription')
+                )}
+              </Button>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
