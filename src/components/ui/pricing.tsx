@@ -1,3 +1,4 @@
+
 'use client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -108,7 +109,7 @@ export function PricingFrequencyToggle({
 						<motion.span
 							layoutId="frequency"
 							transition={{ type: 'spring', duration: 0.4 }}
-							className="absolute inset-0 z-10 rounded-full mix-blend-difference"
+							className="absolute inset-0 z-10 rounded-full"
 							style={{ backgroundColor: '#2663f2' }}
 						/>
 					)}
@@ -129,6 +130,13 @@ export function PricingCard({
 	frequency = frequencies[0],
 	...props
 }: PricingCardProps) {
+	const showDiscountBadge = frequency === 'yearly' && plan.name !== 'Free' && plan.price.yearly > 0;
+	const discountPercentage = showDiscountBadge ? Math.round(
+		((plan.price.monthly * 12 - plan.price.yearly) /
+			(plan.price.monthly * 12)) *
+			100,
+	) : 0;
+
 	return (
 		<div
 			key={plan.name}
@@ -160,15 +168,9 @@ export function PricingCard({
 							Popular
 						</p>
 					)}
-					{frequency === 'yearly' && plan.name !== 'Free' && (
+					{showDiscountBadge && (
 						<p className="bg-primary text-primary-foreground flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs">
-							{Math.round(
-								((plan.price.monthly * 12 - plan.price.yearly) /
-									plan.price.monthly /
-									12) *
-									100,
-							)}
-							% off
+							{discountPercentage}% off
 						</p>
 					)}
 				</div>
