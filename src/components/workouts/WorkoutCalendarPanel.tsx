@@ -34,7 +34,7 @@ const WorkoutCalendarPanel: React.FC<WorkoutCalendarPanelProps> = ({ workouts })
 
   const totalWorkouts = thisWeekWorkouts.length;
   const muscleGroups = thisWeekWorkouts.flatMap(workout => 
-    workout.exercises.flatMap(exercise => exercise.muscleGroups || [])
+    workout.exercises.flatMap(exercise => exercise.muscleGroup ? [exercise.muscleGroup] : [])
   );
   const mostFocusedMuscleGroup = muscleGroups.reduce((acc, muscle) => {
     acc[muscle] = (acc[muscle] || 0) + 1;
