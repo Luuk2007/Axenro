@@ -104,7 +104,7 @@ export function PricingFrequencyToggle({
 					onClick={() => setFrequency(freq)}
 					className="relative px-4 py-1 text-sm capitalize"
 				>
-					<span className="relative z-10">{freq}</span>
+					<span className={cn("relative z-20", frequency === freq ? "text-white" : "text-foreground")}>{freq}</span>
 					{frequency === freq && (
 						<motion.span
 							layoutId="frequency"
@@ -229,7 +229,7 @@ export function PricingCard({
 			>
 				<Button
 					className="w-full"
-					variant={plan.highlighted ? 'default' : 'outline'}
+					variant={plan.name !== 'Free' ? 'default' : 'outline'}
 					onClick={plan.btn.onClick}
 				>
 					{plan.btn.text}
