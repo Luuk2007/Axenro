@@ -40,6 +40,9 @@ export function ThemeSwitch({ className }: ThemeSwitchProps) {
     }));
     
     document.documentElement.classList.toggle('dark', newTheme === 'dark')
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('settingsChanged'))
   }, [theme])
 
   const isDark = theme === 'dark'

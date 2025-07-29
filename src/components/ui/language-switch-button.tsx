@@ -11,18 +11,64 @@ interface LanguageSwitchProps {
 
 export function LanguageSwitch({ className }: LanguageSwitchProps) {
   const { language, setLanguage } = useLanguage()
+  const [isDark, setIsDark] = React.useState(false)
 
   const toggleLanguage = React.useCallback(() => {
     const newLanguage: Language = language === 'english' ? 'dutch' : 'english'
     setLanguage(newLanguage)
   }, [language, setLanguage])
 
+  // Check theme state from localStorage
+  React.useEffect(() => {
+    const checkTheme = () => {
+      const savedSettings = localStorage.getItem("userSettings")
+      let theme = 'light'
+      
+      if (savedSettings) {
+        try {
+          const settings = JSON.parse(savedSettings)
+          theme = settings.theme || 'light'
+        } catch (error) {
+          console.error("Error parsing theme settings:", error)
+        }
+      }
+      
+      setIsDark(theme === 'dark')
+    }
+
+    // Initial check
+    checkTheme()
+
+    // Listen for storage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "userSettings") {
+        checkTheme()
+      }
+    }
+
+    // Listen for settings changes in the same tab
+    const handleSettingsChange = () => {
+      checkTheme()
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('settingsChanged', handleSettingsChange)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('settingsChanged', handleSettingsChange)
+    }
+  }, [])
+
   const isDutch = language === 'dutch'
 
   return (
     <div
       className={cn(
-        "flex w-16 h-8 p-1 rounded-full cursor-pointer transition-all duration-300 bg-white border border-zinc-200",
+        "flex w-16 h-8 p-1 rounded-full cursor-pointer transition-all duration-300",
+        isDark 
+          ? "bg-zinc-950 border border-zinc-800" 
+          : "bg-white border border-zinc-200",
         className
       )}
       onClick={toggleLanguage}
@@ -35,31 +81,24 @@ export function LanguageSwitch({ className }: LanguageSwitchProps) {
           className={cn(
             "flex justify-center items-center w-6 h-6 rounded-full transition-transform duration-300 overflow-hidden",
             isDutch 
-              ? "transform translate-x-0 bg-gray-200" 
+              ? "transform translate-x-0 bg-zinc-800" 
               : "transform translate-x-8 bg-gray-200"
           )}
         >
           {isDutch ? (
             // Dutch flag
-            <div className="h-4 w-4 rounded-full overflow-hidden flex flex-col">
-              <div className="flex-1 bg-[#AE1C28]"></div>
-              <div className="flex-1 bg-white"></div>
-              <div className="flex-1 bg-[#21468B]"></div>
-            </div>
+            <img 
+              src="/lovable-uploads/e271aa66-8801-4936-b23f-c39df370e64b.png" 
+              alt="Dutch flag"
+              className="w-4 h-4 rounded-full object-cover"
+            />
           ) : (
             // British flag
-            <div className="h-4 w-4 rounded-full overflow-hidden">
-              <svg viewBox="0 0 60 30" className="h-full w-full">
-                <clipPath id="t">
-                  <path d="m30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/>
-                </clipPath>
-                <path d="m0,0 v30 h60 v-30 z" fill="#012169"/>
-                <path d="m0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6"/>
-                <path d="m0,0 L60,30 M60,0 L0,30" clipPath="url(#t)" stroke="#C8102E" strokeWidth="4"/>
-                <path d="m30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10"/>
-                <path d="m30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6"/>
-              </svg>
-            </div>
+            <img 
+              src="/lovable-uploads/bd239568-d6b9-4f84-90b5-f69c28780e46.png" 
+              alt="British flag"
+              className="w-4 h-4 rounded-full object-cover"
+            />
           )}
         </div>
         <div
@@ -72,25 +111,18 @@ export function LanguageSwitch({ className }: LanguageSwitchProps) {
         >
           {isDutch ? (
             // British flag (inactive)
-            <div className="h-4 w-4 rounded-full overflow-hidden opacity-50">
-              <svg viewBox="0 0 60 30" className="h-full w-full">
-                <clipPath id="t2">
-                  <path d="m30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/>
-                </clipPath>
-                <path d="m0,0 v30 h60 v-30 z" fill="#012169"/>
-                <path d="m0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6"/>
-                <path d="m0,0 L60,30 M60,0 L0,30" clipPath="url(#t2)" stroke="#C8102E" strokeWidth="4"/>
-                <path d="m30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10"/>
-                <path d="m30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6"/>
-              </svg>
-            </div>
+            <img 
+              src="/lovable-uploads/bd239568-d6b9-4f84-90b5-f69c28780e46.png" 
+              alt="British flag"
+              className="w-4 h-4 rounded-full object-cover opacity-50"
+            />
           ) : (
             // Dutch flag (inactive)
-            <div className="h-4 w-4 rounded-full overflow-hidden flex flex-col opacity-50">
-              <div className="flex-1 bg-[#AE1C28]"></div>
-              <div className="flex-1 bg-white"></div>
-              <div className="flex-1 bg-[#21468B]"></div>
-            </div>
+            <img 
+              src="/lovable-uploads/e271aa66-8801-4936-b23f-c39df370e64b.png" 
+              alt="Dutch flag"
+              className="w-4 h-4 rounded-full object-cover opacity-50"
+            />
           )}
         </div>
       </div>
