@@ -6,7 +6,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Workout } from "@/types/workout";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Dumbbell } from "lucide-react";
 
 interface WorkoutCalendarProps {
   workouts: Workout[];
@@ -48,15 +47,6 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     end: currentMonthEnd
   });
 
-  // Function to determine if a date has workouts
-  const dateHasWorkout = (date: Date) => {
-    return workoutDates.some(workoutDate => 
-      date.getDate() === workoutDate.getDate() && 
-      date.getMonth() === workoutDate.getMonth() && 
-      date.getFullYear() === workoutDate.getFullYear()
-    );
-  };
-
   // Function to get workouts for a specific date
   const getWorkoutsForDate = (date: Date) => {
     return workouts.filter(workout => {
@@ -78,7 +68,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     workout: workoutDates
   };
 
-  // Custom day content with tooltip
+  // Custom day content without the dumbbell icon
   const DayContent = ({ date }: { date: Date }) => {
     const dayWorkouts = getWorkoutsForDate(date);
     const hasWorkout = dayWorkouts.length > 0;
@@ -91,10 +81,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="relative w-full h-full flex items-center justify-center">
-              <span className="relative z-10">{date.getDate()}</span>
-              <Dumbbell className="absolute top-1 right-1 h-2 w-2 text-green-600" />
-            </div>
+            <span>{date.getDate()}</span>
           </TooltipTrigger>
           <TooltipContent>
             <div className="max-w-48">
