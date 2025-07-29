@@ -1,225 +1,283 @@
 
-"use client";
+'use client';
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import { CheckCircle, Star } from 'lucide-react';
+import { motion, Transition } from 'framer-motion';
 
-import { buttonVariants } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { Check, Star } from "lucide-react";
-import { useState, useRef } from "react";
-import confetti from "canvas-confetti";
-import NumberFlow from "@number-flow/react";
+type FREQUENCY = 'monthly' | 'yearly';
+const frequencies: FREQUENCY[] = ['monthly', 'yearly'];
 
-interface PricingPlan {
-  name: string;
-  price: string;
-  yearlyPrice: string;
-  period: string;
-  features: string[];
-  description: string;
-  buttonText: string;
-  href: string;
-  isPopular: boolean;
-  onSelect?: () => void;
+interface Plan {
+	name: string;
+	info: string;
+	price: {
+		monthly: number;
+		yearly: number;
+	};
+	features: {
+		text: string;
+		tooltip?: string;
+	}[];
+	btn: {
+		text: string;
+		onClick?: () => void;
+	};
+	highlighted?: boolean;
 }
 
-interface PricingProps {
-  plans: PricingPlan[];
-  title?: string;
-  description?: string;
+interface PricingSectionProps extends React.ComponentProps<'div'> {
+	plans: Plan[];
+	heading: string;
+	description?: string;
 }
 
-export function Pricing({
-  plans,
-  title = "Simple, Transparent Pricing",
-  description = "Choose the plan that works for you\nAll plans include access to our platform, lead generation tools, and dedicated support.",
-}: PricingProps) {
-  const [isMonthly, setIsMonthly] = useState(true);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
-  const switchRef = useRef<HTMLButtonElement>(null);
+export function PricingSection({
+	plans,
+	heading,
+	description,
+	...props
+}: PricingSectionProps) {
+	const [frequency, setFrequency] = React.useState<'monthly' | 'yearly'>(
+		'monthly',
+	);
 
-  const handleToggle = (checked: boolean) => {
-    setIsMonthly(!checked);
-    if (checked && switchRef.current) {
-      const rect = switchRef.current.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
+	return (
+		<div
+			className={cn(
+				'flex w-full flex-col items-center justify-center space-y-5 p-4',
+				props.className,
+			)}
+			{...props}
+		>
+			<div className="mx-auto max-w-xl space-y-2">
+				<h2 className="text-center text-2xl font-bold tracking-tight md:text-3xl lg:text-4xl">
+					{heading}
+				</h2>
+				{description && (
+					<p className="text-muted-foreground text-center text-sm md:text-base">
+						{description}
+					</p>
+				)}
+			</div>
+			<PricingFrequencyToggle
+				frequency={frequency}
+				setFrequency={setFrequency}
+			/>
+			<div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-4 md:grid-cols-3">
+				{plans.map((plan) => (
+					<PricingCard plan={plan} key={plan.name} frequency={frequency} />
+				))}
+			</div>
+		</div>
+	);
+}
 
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: {
-          x: x / window.innerWidth,
-          y: y / window.innerHeight,
-        },
-        colors: [
-          "hsl(var(--primary))",
-          "hsl(var(--accent))",
-          "hsl(var(--secondary))",
-          "hsl(var(--muted))",
-        ],
-        ticks: 200,
-        gravity: 1.2,
-        decay: 0.94,
-        startVelocity: 30,
-        shapes: ["circle"],
-      });
-    }
-  };
+type PricingFrequencyToggleProps = React.ComponentProps<'div'> & {
+	frequency: FREQUENCY;
+	setFrequency: React.Dispatch<React.SetStateAction<FREQUENCY>>;
+};
 
-  const handlePlanSelect = (plan: PricingPlan) => {
-    if (plan.onSelect) {
-      plan.onSelect();
-    }
+export function PricingFrequencyToggle({
+	frequency,
+	setFrequency,
+	...props
+}: PricingFrequencyToggleProps) {
+	return (
+		<div
+			className={cn(
+				'bg-muted/30 mx-auto flex w-fit rounded-full border p-1',
+				props.className,
+			)}
+			{...props}
+		>
+			{frequencies.map((freq) => (
+				<button
+					key={freq}
+					onClick={() => setFrequency(freq)}
+					className="relative px-4 py-1 text-sm capitalize"
+				>
+					<span className="relative z-10">{freq}</span>
+					{frequency === freq && (
+						<motion.span
+							layoutId="frequency"
+							transition={{ type: 'spring', duration: 0.4 }}
+							className="bg-foreground absolute inset-0 z-10 rounded-full mix-blend-difference"
+						/>
+					)}
+				</button>
+			))}
+		</div>
+	);
+}
+
+type PricingCardProps = React.ComponentProps<'div'> & {
+	plan: Plan;
+	frequency?: FREQUENCY;
+};
+
+export function PricingCard({
+	plan,
+	className,
+	frequency = frequencies[0],
+	...props
+}: PricingCardProps) {
+	return (
+		<div
+			key={plan.name}
+			className={cn(
+				'relative flex w-full flex-col rounded-lg border',
+				className,
+			)}
+			{...props}
+		>
+			{plan.highlighted && (
+				<BorderTrail
+					style={{
+						boxShadow:
+							'0px 0px 60px 30px rgb(255 255 255 / 50%), 0 0 100px 60px rgb(0 0 0 / 50%), 0 0 140px 90px rgb(0 0 0 / 50%)',
+					}}
+					size={100}
+				/>
+			)}
+			<div
+				className={cn(
+					'bg-muted/20 rounded-t-lg border-b p-4',
+					plan.highlighted && 'bg-muted/40',
+				)}
+			>
+				<div className="absolute top-2 right-2 z-10 flex items-center gap-2">
+					{plan.highlighted && (
+						<p className="bg-background flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs">
+							<Star className="h-3 w-3 fill-current" />
+							Popular
+						</p>
+					)}
+					{frequency === 'yearly' && plan.name !== 'Free' && (
+						<p className="bg-primary text-primary-foreground flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs">
+							{Math.round(
+								((plan.price.monthly * 12 - plan.price.yearly) /
+									plan.price.monthly /
+									12) *
+									100,
+							)}
+							% off
+						</p>
+					)}
+				</div>
+
+				<div className="text-lg font-medium">{plan.name}</div>
+				<p className="text-muted-foreground text-sm font-normal">{plan.info}</p>
+				<h3 className="mt-2 flex items-end gap-1">
+					{plan.name === 'Free' ? (
+						<span className="text-3xl font-bold">Free</span>
+					) : (
+						<>
+							<span className="text-3xl font-bold">€{plan.price[frequency]}</span>
+							<span className="text-muted-foreground">
+								/{frequency === 'monthly' ? 'month' : 'year'}
+							</span>
+						</>
+					)}
+				</h3>
+			</div>
+			<div
+				className={cn(
+					'text-muted-foreground space-y-4 px-4 py-6 text-sm',
+					plan.highlighted && 'bg-muted/10',
+				)}
+			>
+				{plan.features.map((feature, index) => (
+					<div key={index} className="flex items-center gap-2">
+						<CheckCircle className="text-foreground h-4 w-4" />
+						<TooltipProvider>
+							<Tooltip delayDuration={0}>
+								<TooltipTrigger asChild>
+									<p
+										className={cn(
+											feature.tooltip &&
+												'cursor-pointer border-b border-dashed',
+										)}
+									>
+										{feature.text}
+									</p>
+								</TooltipTrigger>
+								{feature.tooltip && (
+									<TooltipContent>
+										<p>{feature.tooltip}</p>
+									</TooltipContent>
+								)}
+							</Tooltip>
+						</TooltipProvider>
+					</div>
+				))}
+			</div>
+			<div
+				className={cn(
+					'mt-auto w-full border-t p-3',
+					plan.highlighted && 'bg-muted/40',
+				)}
+			>
+				<Button
+					className="w-full"
+					variant={plan.highlighted ? 'default' : 'outline'}
+					onClick={plan.btn.onClick}
+				>
+					{plan.btn.text}
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+type BorderTrailProps = {
+  className?: string;
+  size?: number;
+  transition?: Transition;
+  delay?: number;
+  onAnimationComplete?: () => void;
+  style?: React.CSSProperties;
+};
+
+export function BorderTrail({
+  className,
+  size = 60,
+  transition,
+  delay,
+  onAnimationComplete,
+  style,
+}: BorderTrailProps) {
+  const BASE_TRANSITION = {
+    repeat: Infinity,
+    duration: 5,
+    ease: 'linear',
   };
 
   return (
-    <div className="container py-8">
-      <div className="text-center space-y-4 mb-8">
-        <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          {title}
-        </h2>
-        <p className="text-muted-foreground text-lg whitespace-pre-line">
-          {description}
-        </p>
-      </div>
-
-      <div className="flex justify-center mb-10">
-        <label className="relative inline-flex items-center cursor-pointer">
-          <Label>
-            <Switch
-              ref={switchRef as any}
-              checked={!isMonthly}
-              onCheckedChange={handleToggle}
-              className="relative"
-            />
-          </Label>
-        </label>
-        <span className="ml-2 font-semibold">
-          Annual billing <span className="text-primary">(Save 20%)</span>
-        </span>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 sm:2 gap-4">
-        {plans.map((plan, index) => (
-          <motion.div
-            key={index}
-            initial={{ y: 50, opacity: 1 }}
-            whileInView={
-              isDesktop
-                ? {
-                    y: plan.isPopular ? -20 : 0,
-                    opacity: 1,
-                    x: index === 2 ? -30 : index === 0 ? 30 : 0,
-                    scale: index === 0 || index === 2 ? 0.94 : 1.0,
-                  }
-                : {}
-            }
-            viewport={{ once: true }}
-            transition={{
-              duration: 1.6,
-              type: "spring",
-              stiffness: 100,
-              damping: 30,
-              delay: 0.4,
-              opacity: { duration: 0.5 },
-            }}
-            className={cn(
-              `rounded-2xl border-[1px] p-6 bg-background text-center lg:flex lg:flex-col lg:justify-center relative`,
-              plan.isPopular ? "border-primary border-2" : "border-border",
-              "flex flex-col",
-              !plan.isPopular && "mt-5",
-              index === 0 || index === 2
-                ? "z-0 transform translate-x-0 translate-y-0 -translate-z-[50px] rotate-y-[10deg]"
-                : "z-10",
-              index === 0 && "origin-right",
-              index === 2 && "origin-left"
-            )}
-          >
-            {plan.isPopular && (
-              <div className="absolute top-0 right-0 bg-primary py-0.5 px-2 rounded-bl-xl rounded-tr-xl flex items-center">
-                <Star className="text-primary-foreground h-4 w-4 fill-current" />
-                <span className="text-primary-foreground ml-1 font-sans font-semibold">
-                  Popular
-                </span>
-              </div>
-            )}
-            <div className="flex-1 flex flex-col">
-              <p className="text-base font-semibold text-muted-foreground">
-                {plan.name}
-              </p>
-              <div className="mt-6 flex items-center justify-center gap-x-2">
-                <span className="text-5xl font-bold tracking-tight text-foreground">
-                  {Number(plan.price) === 0 ? (
-                    "€0"
-                  ) : (
-                    <>
-                      €
-                      <NumberFlow
-                        value={
-                          isMonthly ? Number(plan.price) : Number(plan.yearlyPrice)
-                        }
-                        format={{
-                          style: "decimal",
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }}
-                        transformTiming={{
-                          duration: 500,
-                          easing: "ease-out",
-                        }}
-                        willChange
-                        className="font-variant-numeric: tabular-nums"
-                      />
-                    </>
-                  )}
-                </span>
-                {plan.period !== "Next 3 months" && (
-                  <span className="text-sm font-semibold leading-6 tracking-wide text-muted-foreground">
-                    / {plan.period}
-                  </span>
-                )}
-              </div>
-
-              <p className="text-xs leading-5 text-muted-foreground">
-                {isMonthly ? "billed monthly" : "billed annually"}
-              </p>
-
-              <ul className="mt-5 gap-2 flex flex-col">
-                {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-1 flex-shrink-0" />
-                    <span className="text-left">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <hr className="w-full my-4" />
-
-              <button
-                onClick={() => handlePlanSelect(plan)}
-                className={cn(
-                  buttonVariants({
-                    variant: "outline",
-                  }),
-                  "group relative w-full gap-2 overflow-hidden text-lg font-semibold tracking-tighter",
-                  "transform-gpu ring-offset-current transition-all duration-300 ease-out hover:ring-2 hover:ring-primary hover:ring-offset-1 hover:bg-primary hover:text-primary-foreground",
-                  plan.isPopular
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-background text-foreground"
-                )}
-              >
-                {plan.buttonText}
-              </button>
-              <p className="mt-6 text-xs leading-5 text-muted-foreground">
-                {plan.description}
-              </p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+    <div className='pointer-events-none absolute inset-0 rounded-[inherit] border border-transparent [mask-clip:padding-box,border-box] [mask-composite:intersect] [mask-image:linear-gradient(transparent,transparent),linear-gradient(#000,#000)]'>
+      <motion.div
+        className={cn('absolute aspect-square bg-zinc-500', className)}
+        style={{
+          width: size,
+          offsetPath: `rect(0 auto auto 0 round ${size}px)`,
+          ...style,
+        }}
+        animate={{
+          offsetDistance: ['0%', '100%'],
+        }}
+        transition={{
+          ...(transition ?? BASE_TRANSITION),
+          delay: delay,
+        }}
+        onAnimationComplete={onAnimationComplete}
+      />
     </div>
   );
 }

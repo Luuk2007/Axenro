@@ -3,9 +3,6 @@ import React from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -14,7 +11,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { Pricing } from '@/components/ui/pricing';
+import { PricingSection } from '@/components/ui/pricing';
 
 interface SubscriptionModalProps {
   open: boolean;
@@ -24,15 +21,15 @@ interface SubscriptionModalProps {
 export default function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { subscribed, subscription_tier, createCheckout, openCustomerPortal } = useSubscription();
+  const { subscribed, subscription_tier, createCheckout } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
-  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annually'>('monthly');
 
   const handleSelectPlan = async (planId: string) => {
     if (planId === 'free') return;
     
     try {
       setLoading(planId);
+      const billingInterval = 'monthly'; // Default to monthly for now
       await createCheckout(planId, billingInterval);
       toast.success(t('Redirecting to Stripe checkout...'));
     } catch (error) {
@@ -73,73 +70,74 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     return t('Select Plan');
   };
 
-  const isCurrentPlan = (planId: string) => {
-    if (planId === 'free' && !subscribed) return true;
-    return subscribed && subscription_tier === planId;
-  };
-
   const plans = [
     {
-      name: t('FREE'),
-      price: '0',
-      yearlyPrice: '0',
-      period: 'month',
+      name: t('Free'),
+      info: t('Basic fitness tracking'),
+      price: {
+        monthly: 0,
+        yearly: 0,
+      },
       features: [
-        t('Basic fitness tracking'),
-        t('Limited workout history'),
-        t('Basic nutrition logging')
+        { text: t('Basic fitness tracking') },
+        { text: t('Limited workout history') },
+        { text: t('Basic nutrition logging') }
       ],
-      description: '',
-      buttonText: getButtonText('free'),
-      href: '#',
-      isPopular: false,
-      onSelect: () => handleSelectPlan('free')
+      btn: {
+        text: getButtonText('free'),
+        onClick: () => handleSelectPlan('free')
+      },
+      highlighted: false
     },
     {
-      name: t('PRO'),
-      price: '4.99',
-      yearlyPrice: '49.99',
-      period: 'month',
+      name: t('Pro'),
+      info: t('Advanced fitness tracking'),
+      price: {
+        monthly: 4.99,
+        yearly: 49.99,
+      },
       features: [
-        t('Advanced fitness tracking'),
-        t('Unlimited workout history'),
-        t('Detailed nutrition analysis'),
-        t('Progress charts'),
-        t('Export data')
+        { text: t('Advanced fitness tracking') },
+        { text: t('Unlimited workout history') },
+        { text: t('Detailed nutrition analysis') },
+        { text: t('Progress charts') },
+        { text: t('Export data') }
       ],
-      description: '',
-      buttonText: loading === 'pro' ? t('Processing...') : getButtonText('pro'),
-      href: '#',
-      isPopular: true,
-      onSelect: () => handleSelectPlan('pro')
+      btn: {
+        text: loading === 'pro' ? t('Processing...') : getButtonText('pro'),
+        onClick: () => handleSelectPlan('pro')
+      },
+      highlighted: true
     },
     {
-      name: t('PREMIUM'),
-      price: '7.99',
-      yearlyPrice: '79.99',
-      period: 'month',
+      name: t('Premium'),
+      info: t('Complete fitness solution'),
+      price: {
+        monthly: 7.99,
+        yearly: 79.99,
+      },
       features: [
-        t('Everything in Pro'),
-        t('AI-powered recommendations'),
-        t('Advanced analytics'),
-        t('Personalized meal plans'),
-        t('Priority support'),
-        t('Early access to new features')
+        { text: t('Everything in Pro') },
+        { text: t('AI-powered recommendations') },
+        { text: t('Advanced analytics') },
+        { text: t('Personalized meal plans') },
+        { text: t('Priority support') },
+        { text: t('Early access to new features') }
       ],
-      description: '',
-      buttonText: loading === 'premium' ? t('Processing...') : getButtonText('premium'),
-      href: '#',
-      isPopular: false,
-      onSelect: () => handleSelectPlan('premium')
+      btn: {
+        text: loading === 'premium' ? t('Processing...') : getButtonText('premium'),
+        onClick: () => handleSelectPlan('premium')
+      },
+      highlighted: false
     }
   ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-auto">
-        <Pricing 
+        <PricingSection 
           plans={plans}
-          title={t('Choose Your Plan')}
+          heading={t('Choose Your Plan')}
           description={t('Unlock the full potential of your fitness journey with our premium features.')}
         />
 
