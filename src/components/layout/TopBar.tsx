@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BellIcon, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import Sidebar from './Sidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import UserMenu from '@/components/auth/UserMenu';
 import NotificationsDialog from '@/components/auth/NotificationsDialog';
+import { ThemeSwitch } from '@/components/ui/theme-switch-button';
 
 export default function TopBar() {
   const isMobile = useIsMobile();
@@ -86,6 +88,8 @@ export default function TopBar() {
         )}
       </div>
       <div className="flex items-center gap-4">
+        <ThemeSwitch />
+        
         {notificationsEnabled && (
           <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
             <DialogTrigger asChild>
