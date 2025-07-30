@@ -1,4 +1,3 @@
-
 export const workoutTranslations = {
   title: "Trainingen",
   workouts: "Trainingen",
@@ -251,5 +250,15 @@ export const workoutTranslations = {
   changes: "Wijzigingen",
   changesContent: "We kunnen deze voorwaarden van tijd tot tijd bijwerken.",
   contactTerms: "Contact",
-  contactTermsContent: "Voor vragen over deze voorwaarden kunt u contact met ons opnemen."
+  contactTermsContent: "Voor vragen over deze voorwaarden kunt u contact met ons opnemen.",
+  planWorkout: "Training Plannen",
+  scheduledWorkouts: "Geplande Trainingen",
+  progressOverview: "Voortgangsoverzicht",
+  weeklyOverview: "Weekoverzicht",
+  noDataAvailable: "Nog geen data beschikbaar",
+  mostTrained: "Meest getrainde",
+  mostImproved: "Meest verbeterd",
+  completed: "Voltooid",
+  planned: "Gepland",
+  selectDate: "Selecteer datum"
 };

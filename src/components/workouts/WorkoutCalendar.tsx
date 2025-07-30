@@ -4,8 +4,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Workout } from "@/types/workout";
+import { PlannedWorkout, getPlannedWorkouts } from "@/types/plannedWorkout";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getMonthlyStats, getWeeklyStats } from "@/utils/workoutCalculations";
+import WorkoutProgressPanel from "./WorkoutProgressPanel";
 
 interface WorkoutCalendarProps {
   workouts: Workout[];
@@ -15,33 +18,28 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   const { t } = useLanguage();
   const currentDate = new Date();
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(currentDate);
+  const [plannedWorkouts, setPlannedWorkouts] = React.useState<PlannedWorkout[]>(getPlannedWorkouts());
   
   // Get all workout dates in Date format
   const workoutDates = workouts
     .filter(workout => workout.completed)
     .map(workout => {
-      // Parse the date from the format "yyyy-MM-dd"
       return parse(workout.date, "yyyy-MM-dd", new Date());
     })
-    .filter(date => isValid(date)); // Filter out invalid dates
+    .filter(date => isValid(date));
   
-  // Count workouts within current month
-  const currentMonthStart = startOfMonth(currentDate);
-  const currentMonthEnd = endOfMonth(currentDate);
+  // Get planned workout dates
+  const plannedDates = plannedWorkouts.map(workout => {
+    return parse(workout.date, "yyyy-MM-dd", new Date());
+  }).filter(date => isValid(date));
   
-  const workoutsThisMonth = workoutDates.filter(date => 
-    date >= currentMonthStart && date <= currentMonthEnd
-  ).length;
-  
-  // Count workouts within current week (last 7 days including today)
-  const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Start from Monday
-  const currentWeekEnd = endOfWeek(currentDate, { weekStartsOn: 1 }); // End on Sunday
-  
-  const workoutsThisWeek = workoutDates.filter(date => 
-    date >= currentWeekStart && date <= currentWeekEnd
-  ).length;
+  // Get statistics with comparisons
+  const weeklyStats = getWeeklyStats(workouts);
+  const monthlyStats = getMonthlyStats(workouts);
   
   // Get all days in current month for activity heatmap
+  const currentMonthStart = startOfMonth(currentDate);
+  const currentMonthEnd = endOfMonth(currentDate);
   const daysInMonth = eachDayOfInterval({
     start: currentMonthStart,
     end: currentMonthEnd
@@ -58,22 +56,35 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     });
   };
 
-  // Create a modifiers object for the calendar
+  // Function to get planned workouts for a specific date
+  const getPlannedWorkoutsForDate = (date: Date) => {
+    return plannedWorkouts.filter(workout => {
+      const workoutDate = parse(workout.date, "yyyy-MM-dd", new Date());
+      return date.getDate() === workoutDate.getDate() && 
+        date.getMonth() === workoutDate.getMonth() && 
+        date.getFullYear() === workoutDate.getFullYear();
+    });
+  };
+
+  // Create modifiers for the calendar
   const modifiersClassNames = {
-    workout: "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-800/30 dark:text-green-400"
+    completedWorkout: "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-800/30 dark:text-green-400",
+    plannedWorkout: "bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-800/30 dark:text-blue-400"
   };
 
-  // Create a modifiers object for the calendar
   const modifiers = {
-    workout: workoutDates
+    completedWorkout: workoutDates,
+    plannedWorkout: plannedDates
   };
 
-  // Custom day content without the dumbbell icon
+  // Custom day content with tooltips
   const DayContent = ({ date }: { date: Date }) => {
     const dayWorkouts = getWorkoutsForDate(date);
+    const dayPlannedWorkouts = getPlannedWorkoutsForDate(date);
     const hasWorkout = dayWorkouts.length > 0;
+    const hasPlannedWorkout = dayPlannedWorkouts.length > 0;
 
-    if (!hasWorkout) {
+    if (!hasWorkout && !hasPlannedWorkout) {
       return <span>{date.getDate()}</span>;
     }
 
@@ -85,20 +96,43 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
           </TooltipTrigger>
           <TooltipContent>
             <div className="max-w-48">
-              {dayWorkouts.map((workout, index) => (
-                <div key={workout.id} className="text-xs">
-                  <div className="font-medium">{workout.name}</div>
-                  <div className="text-muted-foreground">
-                    {workout.exercises.length} {t("exercises")}
-                    {index < dayWorkouts.length - 1 && <hr className="my-1" />}
-                  </div>
+              {hasWorkout && (
+                <div>
+                  <div className="font-medium text-green-600 mb-1">Voltooid:</div>
+                  {dayWorkouts.map((workout, index) => (
+                    <div key={workout.id} className="text-xs mb-1">
+                      <div className="font-medium">{workout.name}</div>
+                      <div className="text-muted-foreground">
+                        {workout.exercises.length} {t("exercises")}
+                      </div>
+                      {index < dayWorkouts.length - 1 && <hr className="my-1" />}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+              {hasPlannedWorkout && (
+                <div className={hasWorkout ? "mt-2 pt-2 border-t" : ""}>
+                  <div className="font-medium text-blue-600 mb-1">Gepland:</div>
+                  {dayPlannedWorkouts.map((workout, index) => (
+                    <div key={workout.id} className="text-xs mb-1">
+                      <div className="font-medium">{workout.name}</div>
+                      {workout.notes && (
+                        <div className="text-muted-foreground">{workout.notes}</div>
+                      )}
+                      {index < dayPlannedWorkouts.length - 1 && <hr className="my-1" />}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
+  };
+
+  const handlePlanWorkout = () => {
+    setPlannedWorkouts(getPlannedWorkouts());
   };
   
   return (
@@ -107,30 +141,49 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
         <CardTitle>{t("workoutCalendar")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mb-6">
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
-              <div className="text-sm text-muted-foreground">{t("workoutsThisWeek")}</div>
-              <div className="text-3xl font-bold mt-1">{workoutsThisWeek}</div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left side - Calendar and Stats */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Enhanced Statistics Cards */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
+                <div className="text-sm text-muted-foreground">{t("workoutsThisWeek")}</div>
+                <div className="text-3xl font-bold mt-1">{weeklyStats.totalWorkouts}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {weeklyStats.weekComparison}
+                </div>
+              </div>
+              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md">
+                <div className="text-sm text-muted-foreground">{t("workoutsThisMonth")}</div>
+                <div className="text-3xl font-bold mt-1">{monthlyStats.totalWorkouts}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {monthlyStats.monthComparison}
+                </div>
+              </div>
             </div>
-            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md">
-              <div className="text-sm text-muted-foreground">{t("workoutsThisMonth")}</div>
-              <div className="text-3xl font-bold mt-1">{workoutsThisMonth}</div>
-            </div>
+            
+            {/* Calendar */}
+            <Calendar 
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="p-0"
+              modifiers={modifiers}
+              modifiersClassNames={modifiersClassNames}
+              weekStartsOn={1}
+              components={{
+                Day: ({ date }) => <DayContent date={date} />
+              }}
+            />
           </div>
-          
-          <Calendar 
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            className="p-0"
-            modifiers={modifiers}
-            modifiersClassNames={modifiersClassNames}
-            weekStartsOn={1}
-            components={{
-              Day: ({ date }) => <DayContent date={date} />
-            }}
-          />
+
+          {/* Right side - Progress Panel */}
+          <div className="lg:col-span-1">
+            <WorkoutProgressPanel 
+              workouts={workouts} 
+              onPlanWorkout={handlePlanWorkout}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>
