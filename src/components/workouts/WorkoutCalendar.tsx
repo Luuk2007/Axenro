@@ -66,15 +66,40 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     });
   };
 
-  // Create modifiers for the calendar
+  // Create modifiers for the calendar with proper styling
   const modifiersClassNames = {
-    completedWorkout: "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-800/30 dark:text-green-400",
-    plannedWorkout: "bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-800/30 dark:text-blue-400"
+    completedWorkout: "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-800/30 dark:text-green-300 border-green-300 dark:border-green-700",
+    plannedWorkout: "bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-800/30 dark:text-blue-300 border-blue-300 dark:border-blue-700",
+    bothWorkouts: "bg-gradient-to-br from-green-100 to-blue-100 text-gray-800 hover:from-green-200 hover:to-blue-200 dark:from-green-800/30 dark:to-blue-800/30 dark:text-gray-300 border-purple-300 dark:border-purple-700"
+  };
+
+  // Check for dates that have both completed and planned workouts
+  const getBothWorkoutDates = () => {
+    return workoutDates.filter(workoutDate => 
+      plannedDates.some(plannedDate => 
+        workoutDate.getDate() === plannedDate.getDate() && 
+        workoutDate.getMonth() === plannedDate.getMonth() && 
+        workoutDate.getFullYear() === plannedDate.getFullYear()
+      )
+    );
   };
 
   const modifiers = {
-    completedWorkout: workoutDates,
-    plannedWorkout: plannedDates
+    completedWorkout: workoutDates.filter(workoutDate => 
+      !plannedDates.some(plannedDate => 
+        workoutDate.getDate() === plannedDate.getDate() && 
+        workoutDate.getMonth() === plannedDate.getMonth() && 
+        workoutDate.getFullYear() === plannedDate.getFullYear()
+      )
+    ),
+    plannedWorkout: plannedDates.filter(plannedDate => 
+      !workoutDates.some(workoutDate => 
+        workoutDate.getDate() === plannedDate.getDate() && 
+        workoutDate.getMonth() === plannedDate.getMonth() && 
+        workoutDate.getFullYear() === plannedDate.getFullYear()
+      )
+    ),
+    bothWorkouts: getBothWorkoutDates()
   };
 
   // Custom day content with tooltips
@@ -92,7 +117,11 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span>{date.getDate()}</span>
+            <span className="relative">
+              {date.getDate()}
+              {/* Small indicator dot */}
+              <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-current opacity-60"></div>
+            </span>
           </TooltipTrigger>
           <TooltipContent>
             <div className="max-w-48">
