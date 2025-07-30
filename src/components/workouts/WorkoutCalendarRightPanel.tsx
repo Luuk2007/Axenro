@@ -43,24 +43,24 @@ const WorkoutCalendarRightPanel: React.FC<WorkoutCalendarRightPanelProps> = ({ w
   const mostImprovedExercise = "Bench Press"; // Mock data
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
       {/* Progress Overview */}
-      <Card>
+      <Card className="h-fit">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Voortgangsoverzicht</CardTitle>
+          <CardTitle className="text-base">Voortgangsoverzicht</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {progressData.map((progress, index) => (
-            <div key={index} className="flex items-center justify-between text-sm">
+            <div key={index} className="flex items-center justify-between text-xs">
               <span className="font-medium">{progress.exercise}</span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <span className={progress.isImprovement ? "text-green-600" : "text-red-600"}>
                   {progress.change}
                 </span>
                 {progress.isImprovement ? (
-                  <TrendingUp className="h-4 w-4 text-green-600" />
+                  <TrendingUp className="h-3 w-3 text-green-600" />
                 ) : (
-                  <TrendingDown className="h-4 w-4 text-red-600" />
+                  <TrendingDown className="h-3 w-3 text-red-600" />
                 )}
               </div>
             </div>
@@ -69,11 +69,11 @@ const WorkoutCalendarRightPanel: React.FC<WorkoutCalendarRightPanelProps> = ({ w
       </Card>
 
       {/* Week Overview */}
-      <Card>
+      <Card className="h-fit">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Weekoverzicht</CardTitle>
+          <CardTitle className="text-base">Weekoverzicht</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm">
+        <CardContent className="space-y-2 text-xs">
           <div className="flex justify-between">
             <span>Totale trainingen:</span>
             <span className="font-medium">{currentWeekWorkouts.length}</span>
@@ -90,16 +90,16 @@ const WorkoutCalendarRightPanel: React.FC<WorkoutCalendarRightPanelProps> = ({ w
       </Card>
 
       {/* Planned Workouts */}
-      <Card>
+      <Card className="h-fit">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Geplande Trainingen</CardTitle>
+          <CardTitle className="text-base">Geplande Trainingen</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-2">
             {plannedWorkouts.map((workout) => (
               <div key={workout.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
                 <div>
-                  <div className="font-medium text-sm">{workout.name}</div>
+                  <div className="font-medium text-xs">{workout.name}</div>
                   <div className="text-xs text-muted-foreground">
                     {new Date(workout.date).toLocaleDateString('nl-NL', { 
                       weekday: 'short', 
@@ -111,8 +111,8 @@ const WorkoutCalendarRightPanel: React.FC<WorkoutCalendarRightPanelProps> = ({ w
               </div>
             ))}
           </div>
-          <Button variant="outline" size="sm" className="w-full">
-            <Plus className="h-4 w-4 mr-2" />
+          <Button variant="outline" size="sm" className="w-full text-xs">
+            <Plus className="h-3 w-3 mr-2" />
             Training Plannen
           </Button>
         </CardContent>
