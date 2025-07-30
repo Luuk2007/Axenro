@@ -6,7 +6,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Workout } from "@/types/workout";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
-import WorkoutCalendarRightPanel from "./WorkoutCalendarRightPanel";
 
 interface WorkoutCalendarProps {
   workouts: Workout[];
@@ -108,40 +107,30 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
         <CardTitle>{t("workoutCalendar")}</CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
-            <div className="text-sm text-muted-foreground">{t("workoutsThisWeek")}</div>
-            <div className="text-3xl font-bold mt-1">{workoutsThisWeek}</div>
-          </div>
-          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md">
-            <div className="text-sm text-muted-foreground">{t("workoutsThisMonth")}</div>
-            <div className="text-3xl font-bold mt-1">{workoutsThisMonth}</div>
-          </div>
-        </div>
-        
-        {/* Main Content: Calendar + Right Panel */}
-        <div className="flex gap-6">
-          {/* Calendar Section */}
-          <div className="flex-shrink-0">
-            <Calendar 
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="p-0"
-              modifiers={modifiers}
-              modifiersClassNames={modifiersClassNames}
-              weekStartsOn={1}
-              components={{
-                Day: ({ date }) => <DayContent date={date} />
-              }}
-            />
+        <div className="mb-6">
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
+              <div className="text-sm text-muted-foreground">{t("workoutsThisWeek")}</div>
+              <div className="text-3xl font-bold mt-1">{workoutsThisWeek}</div>
+            </div>
+            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md">
+              <div className="text-sm text-muted-foreground">{t("workoutsThisMonth")}</div>
+              <div className="text-3xl font-bold mt-1">{workoutsThisMonth}</div>
+            </div>
           </div>
           
-          {/* Right Panel */}
-          <div className="flex-1 min-w-0">
-            <WorkoutCalendarRightPanel workouts={workouts} />
-          </div>
+          <Calendar 
+            mode="single"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            className="p-0"
+            modifiers={modifiers}
+            modifiersClassNames={modifiersClassNames}
+            weekStartsOn={1}
+            components={{
+              Day: ({ date }) => <DayContent date={date} />
+            }}
+          />
         </div>
       </CardContent>
     </Card>
