@@ -1,3 +1,4 @@
+
 'use client'
 
 import * as React from 'react'
@@ -91,7 +92,7 @@ export function LanguageSwitch({ className }: LanguageSwitchProps) {
               alt="Dutch flag"
               className={cn(
                 "w-4 h-4 rounded-full object-cover border",
-                isDark ? "border-black" : "border-white"
+                isDark ? "border-white" : "border-black"
               )}
             />
           ) : (
@@ -101,7 +102,7 @@ export function LanguageSwitch({ className }: LanguageSwitchProps) {
               alt="British flag"
               className={cn(
                 "w-4 h-4 rounded-full object-cover border",
-                isDark ? "border-black" : "border-white"
+                isDark ? "border-white" : "border-black"
               )}
             />
           )}
