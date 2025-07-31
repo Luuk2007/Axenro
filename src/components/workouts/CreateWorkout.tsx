@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,26 +7,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Plus, X, Calendar, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AddExerciseDialog from './AddExerciseDialog';
-import { Workout } from '@/types/workout';
+import { Workout, Exercise, ExerciseSet } from '@/types/workout';
 
 interface CreateWorkoutProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaveWorkout: (name: string, exercises: any[], date: string) => void;
   editingWorkout?: Workout | null;
-}
-
-interface ExerciseSet {
-  id: string;
-  reps: number;
-  weight: number;
-  completed: boolean;
-}
-
-interface Exercise {
-  id: string;
-  name: string;
-  sets: ExerciseSet[];
 }
 
 const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: CreateWorkoutProps) => {
@@ -67,9 +55,9 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
       id: Date.now().toString(),
       name: exerciseData.name,
       sets: exerciseData.sets || [
-        { id: '1', reps: 12, weight: 0, completed: false },
-        { id: '2', reps: 12, weight: 0, completed: false },
-        { id: '3', reps: 12, weight: 0, completed: false }
+        { id: 1, reps: 12, weight: 0, completed: false },
+        { id: 2, reps: 12, weight: 0, completed: false },
+        { id: 3, reps: 12, weight: 0, completed: false }
       ]
     };
     
@@ -84,7 +72,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   const handleAddSet = (exerciseId: string) => {
     setExercises(prev => prev.map(exercise => {
       if (exercise.id === exerciseId) {
-        const newSetId = (exercise.sets.length + 1).toString();
+        const newSetId = exercise.sets.length + 1;
         const newSet: ExerciseSet = {
           id: newSetId,
           reps: 12,
@@ -97,7 +85,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }));
   };
 
-  const handleRemoveSet = (exerciseId: string, setId: string) => {
+  const handleRemoveSet = (exerciseId: string, setId: number) => {
     setExercises(prev => prev.map(exercise => {
       if (exercise.id === exerciseId) {
         return { ...exercise, sets: exercise.sets.filter(set => set.id !== setId) };
@@ -106,7 +94,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }));
   };
 
-  const handleUpdateSet = (exerciseId: string, setId: string, field: 'reps' | 'weight' | 'completed', value: number | boolean) => {
+  const handleUpdateSet = (exerciseId: string, setId: number, field: 'reps' | 'weight' | 'completed', value: number | boolean) => {
     setExercises(prev => prev.map(exercise => {
       if (exercise.id === exerciseId) {
         return {
