@@ -12,37 +12,43 @@ interface BMICalculatorProps {
 
 const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 70, initialHeight = 170 }) => {
   const { t } = useLanguage();
-  const [weight, setWeight] = useState<number>(initialWeight);
-  const [height, setHeight] = useState<number>(initialHeight);
+  const [weight, setWeight] = useState<string>(initialWeight.toString());
+  const [height, setHeight] = useState<string>(initialHeight.toString());
   const [bmi, setBMI] = useState<number | null>(null);
   const [weightDifference, setWeightDifference] = useState<number | null>(null);
 
   // Update BMI calculator values when the props change (sync with form)
   useEffect(() => {
     if (initialWeight && initialWeight > 0) {
-      setWeight(initialWeight);
+      setWeight(initialWeight.toString());
     }
     if (initialHeight && initialHeight > 0) {
-      setHeight(initialHeight);
+      setHeight(initialHeight.toString());
     }
   }, [initialWeight, initialHeight]);
 
   // Calculate BMI when weight or height changes
   useEffect(() => {
-    if (weight > 0 && height > 0) {
-      calculateBMI();
+    const weightNum = parseFloat(weight);
+    const heightNum = parseFloat(height);
+    if (weightNum > 0 && heightNum > 0) {
+      calculateBMI(weightNum, heightNum);
+    } else {
+      setBMI(null);
+      setWeightDifference(null);
     }
   }, [weight, height]);
 
-  const calculateBMI = () => {
-    if (weight <= 0 || height <= 0) {
-      toast.error("Please enter valid weight and height values");
+  const calculateBMI = (weightNum: number, heightNum: number) => {
+    if (weightNum <= 0 || heightNum <= 0) {
+      setBMI(null);
+      setWeightDifference(null);
       return;
     }
 
     // BMI formula: weight (kg) / (height (m))²
-    const heightInMeters = height / 100;
-    const bmiValue = weight / (heightInMeters * heightInMeters);
+    const heightInMeters = heightNum / 100;
+    const bmiValue = weightNum / (heightInMeters * heightInMeters);
     setBMI(parseFloat(bmiValue.toFixed(1)));
 
     // Calculate weight difference for healthy BMI range (18.5 - 24.9)
@@ -51,10 +57,10 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 70, initi
 
     if (bmiValue < 18.5) {
       // Underweight - how much to gain to reach BMI of 18.5
-      setWeightDifference(parseFloat((idealWeightLower - weight).toFixed(1)));
+      setWeightDifference(parseFloat((idealWeightLower - weightNum).toFixed(1)));
     } else if (bmiValue > 24.9) {
       // Overweight - how much to lose to reach BMI of 24.9
-      setWeightDifference(parseFloat((weight - idealWeightUpper).toFixed(1)));
+      setWeightDifference(parseFloat((weightNum - idealWeightUpper).toFixed(1)));
     } else {
       // Healthy weight
       setWeightDifference(null);
@@ -91,7 +97,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 70, initi
                 id="weight"
                 type="number"
                 value={weight}
-                onChange={(e) => setWeight(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setWeight(e.target.value)}
                 placeholder="70"
                 className="w-full"
               />
@@ -104,7 +110,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 70, initi
                 id="height"
                 type="number"
                 value={height}
-                onChange={(e) => setHeight(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setHeight(e.target.value)}
                 placeholder="170"
                 className="w-full"
               />

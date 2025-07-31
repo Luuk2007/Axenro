@@ -19,7 +19,7 @@ export default function WaterTracking() {
   const [totalWater, setTotalWater] = useState(0);
   const [waterLog, setWaterLog] = useState<WaterEntry[]>([]);
   const [waterGoal, setWaterGoal] = useState(2000); // Default 2 liters
-  const [bodyWeight, setBodyWeight] = useState(70); // Default 70kg
+  const [bodyWeight, setBodyWeight] = useState<string>('70'); // Default 70kg
 
   // Load water data and user weight on component mount
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function WaterTracking() {
       try {
         const profile = JSON.parse(savedProfile);
         if (profile.weight) {
-          setBodyWeight(profile.weight);
+          setBodyWeight(profile.weight.toString());
           // Calculate recommended water intake: 35ml * body weight in kg
           const recommendedIntake = Math.round(35 * profile.weight);
           setWaterGoal(recommendedIntake);
@@ -101,17 +101,20 @@ export default function WaterTracking() {
   };
 
   const calculateWaterIntake = () => {
+    const weightNum = parseFloat(bodyWeight);
+    if (isNaN(weightNum) || weightNum <= 0) {
+      toast.error("Please enter a valid body weight");
+      return;
+    }
+    
     // Formula: 35ml * body weight in kg
-    const recommendedIntake = Math.round(35 * bodyWeight);
+    const recommendedIntake = Math.round(35 * weightNum);
     setWaterGoal(recommendedIntake);
     toast.success(`Water goal updated to ${recommendedIntake}ml`);
   };
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const weight = parseFloat(e.target.value);
-    if (!isNaN(weight) && weight > 0) {
-      setBodyWeight(weight);
-    }
+    setBodyWeight(e.target.value);
   };
 
   return (
@@ -196,6 +199,7 @@ export default function WaterTracking() {
                       value={bodyWeight} 
                       onChange={handleWeightChange}
                       className="flex-1"
+                      placeholder="70"
                     />
                     <Button onClick={calculateWaterIntake}>
                       {t("calculate")}
@@ -208,7 +212,7 @@ export default function WaterTracking() {
                 <h4 className="font-medium mb-2">{t("recommendedWaterIntake")}</h4>
                 <p className="text-2xl font-bold text-blue-500">{waterGoal} ml</p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  {t("basedOnFormula")}: 35ml × {bodyWeight}kg
+                  {t("basedOnFormula")}: 35ml × {bodyWeight || '0'}kg
                 </p>
               </div>
             </div>

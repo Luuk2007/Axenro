@@ -94,13 +94,24 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }));
   };
 
-  const handleUpdateSet = (exerciseId: string, setId: number, field: 'reps' | 'weight' | 'completed', value: number | boolean) => {
+  const handleUpdateSet = (exerciseId: string, setId: number, field: 'reps' | 'weight' | 'completed', value: number | boolean | string) => {
     setExercises(prev => prev.map(exercise => {
       if (exercise.id === exerciseId) {
         return {
           ...exercise,
           sets: exercise.sets.map(set => {
             if (set.id === setId) {
+              if (field === 'reps' || field === 'weight') {
+                if (typeof value === 'string') {
+                  // Allow empty string values
+                  if (value === '') {
+                    return { ...set, [field]: 0 }; // Default to 0 for empty values in sets
+                  }
+                  const numValue = parseFloat(value);
+                  return { ...set, [field]: isNaN(numValue) ? 0 : numValue };
+                }
+                return { ...set, [field]: value };
+              }
               return { ...set, [field]: value };
             }
             return set;
@@ -188,8 +199,8 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                               <div className="flex items-center gap-1">
                                 <Input
                                   type="number"
-                                  value={set.reps}
-                                  onChange={(e) => handleUpdateSet(exercise.id, set.id, 'reps', parseInt(e.target.value) || 0)}
+                                  value={set.reps?.toString() || ''}
+                                  onChange={(e) => handleUpdateSet(exercise.id, set.id, 'reps', e.target.value)}
                                   className="w-16 h-8"
                                   placeholder="Reps"
                                 />
@@ -198,8 +209,8 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                               <div className="flex items-center gap-1">
                                 <Input
                                   type="number"
-                                  value={set.weight}
-                                  onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', parseFloat(e.target.value) || 0)}
+                                  value={set.weight?.toString() || ''}
+                                  onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
                                   className="w-16 h-8"
                                   placeholder="Weight"
                                 />

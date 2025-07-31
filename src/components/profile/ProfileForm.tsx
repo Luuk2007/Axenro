@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,8 +43,8 @@ export const defaultValues: ProfileFormValues = {
   weight: 75,
   activityLevel: "moderate",
   fitnessGoal: "maintain",
-  exerciseFrequency: "2-3", // Default exercise frequency
-  goal: "maintain" // Default goal
+  exerciseFrequency: "2-3",
+  goal: "maintain"
 };
 
 interface ProfileFormProps {
@@ -86,6 +87,17 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
 
   const watchFitnessGoal = form.watch("fitnessGoal");
   const showTargetWeight = watchFitnessGoal === "gain" || watchFitnessGoal === "lose";
+
+  const handleNumberChange = (field: any, value: string) => {
+    if (value === "") {
+      field.onChange(undefined);
+    } else {
+      const num = parseFloat(value);
+      if (!isNaN(num)) {
+        field.onChange(num);
+      }
+    }
+  };
 
   return (
     <Form {...form}>
@@ -141,8 +153,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                   <Input 
                     type="number" 
                     placeholder="30" 
-                    {...field} 
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    value={field.value?.toString() || ''}
+                    onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -162,8 +174,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                   <Input 
                     type="number" 
                     placeholder="175" 
-                    {...field} 
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    value={field.value?.toString() || ''}
+                    onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -181,8 +193,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                   <Input 
                     type="number" 
                     placeholder="75" 
-                    {...field} 
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    value={field.value?.toString() || ''}
+                    onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"
                   />
                 </FormControl>
@@ -272,8 +284,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                   <Input 
                     type="number" 
                     placeholder="70" 
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    value={field.value?.toString() || ''}
+                    onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"
                   />
                 </FormControl>

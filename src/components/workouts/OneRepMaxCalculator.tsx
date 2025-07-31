@@ -13,16 +13,19 @@ interface OneRepMaxCalculatorProps {
 
 const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
   const { t } = useLanguage();
-  const [weight, setWeight] = useState<number | ''>('');
-  const [reps, setReps] = useState<number | ''>('');
+  const [weight, setWeight] = useState<string>('');
+  const [reps, setReps] = useState<string>('');
   const [result, setResult] = useState<number | null>(null);
   
   // Calculate 1RM using Epley formula
   const calculateOneRM = () => {
-    if (weight === '' || reps === '' || reps < 1) return;
+    const weightNum = parseFloat(weight);
+    const repsNum = parseFloat(reps);
+    
+    if (isNaN(weightNum) || isNaN(repsNum) || weightNum <= 0 || repsNum < 1) return;
     
     // Epley formula: 1RM = weight × (1 + 0.0333 × reps)
-    const oneRM = weight * (1 + 0.0333 * reps);
+    const oneRM = weightNum * (1 + 0.0333 * repsNum);
     
     const roundedResult = Math.round(oneRM * 10) / 10;
     setResult(roundedResult);
@@ -51,7 +54,7 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
                 type="number"
                 min="0"
                 value={weight}
-                onChange={(e) => setWeight(e.target.value ? Number(e.target.value) : '')}
+                onChange={(e) => setWeight(e.target.value)}
                 placeholder="e.g., 100"
               />
             </div>
@@ -64,7 +67,7 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
                 min="1"
                 max="36"
                 value={reps}
-                onChange={(e) => setReps(e.target.value ? Number(e.target.value) : '')}
+                onChange={(e) => setReps(e.target.value)}
                 placeholder="e.g., 5"
               />
             </div>
@@ -73,7 +76,7 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
           <Button 
             onClick={calculateOneRM} 
             className="w-full mt-4"
-            disabled={weight === '' || reps === ''}
+            disabled={weight === '' || reps === '' || parseFloat(weight) <= 0 || parseFloat(reps) < 1}
           >
             <Calculator className="mr-2 h-4 w-4" />
             {t("calculate")}

@@ -1,9 +1,40 @@
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, onChange, ...props }, ref) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (type === "number") {
+        // Allow empty values and don't convert to 0
+        const value = e.target.value;
+        if (value === "") {
+          // For controlled components, we need to pass the empty string
+          if (onChange) {
+            const syntheticEvent = {
+              ...e,
+              target: {
+                ...e.target,
+                value: ""
+              }
+            };
+            onChange(syntheticEvent as React.ChangeEvent<HTMLInputElement>);
+          }
+          return;
+        }
+        
+        // Only allow numeric input (including decimal point)
+        if (!/^-?\d*\.?\d*$/.test(value)) {
+          return; // Don't update if invalid
+        }
+      }
+      
+      if (onChange) {
+        onChange(e);
+      }
+    };
+
     return (
       <input
         type={type}
@@ -12,6 +43,8 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className
         )}
         ref={ref}
+        onChange={handleChange}
+        inputMode={type === "number" ? "numeric" : undefined}
         {...props}
       />
     )
