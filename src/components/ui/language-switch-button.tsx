@@ -81,8 +81,12 @@ export function LanguageSwitch({ className }: LanguageSwitchProps) {
           className={cn(
             "flex justify-center items-center w-6 h-6 rounded-full transition-transform duration-300 overflow-hidden",
             isDutch 
-              ? "transform translate-x-0 bg-zinc-800" 
-              : "transform translate-x-8 bg-gray-200"
+              ? "transform translate-x-0" 
+              : "transform translate-x-8",
+            // Consistent background for active state based on theme
+            isDutch 
+              ? (isDark ? "bg-zinc-800" : "bg-gray-200")
+              : (isDark ? "bg-zinc-800" : "bg-gray-200")
           )}
         >
           {isDutch ? (
@@ -106,7 +110,11 @@ export function LanguageSwitch({ className }: LanguageSwitchProps) {
             "flex justify-center items-center w-6 h-6 rounded-full transition-transform duration-300 overflow-hidden",
             isDutch 
               ? "bg-transparent" 
-              : "transform -translate-x-8"
+              : "transform -translate-x-8",
+            // Consistent background for inactive state based on theme  
+            !isDutch 
+              ? (isDark ? "bg-zinc-800" : "bg-gray-200")
+              : "bg-transparent"
           )}
         >
           {isDutch ? (

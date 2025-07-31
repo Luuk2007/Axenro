@@ -97,22 +97,12 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     bothWorkouts: "!bg-gradient-to-br !from-green-500 !to-blue-500 !text-white hover:!from-green-600 hover:!to-blue-600 dark:!from-green-600 dark:!to-blue-600 dark:hover:!from-green-700 dark:hover:!to-blue-700"
   };
 
-  // Custom day content with tooltips
+  // Custom day content with tooltips for hover information
   const DayContent = ({ date, ...props }: { date: Date }) => {
     const dayWorkouts = getWorkoutsForDate(date);
     const dayPlannedWorkouts = getPlannedWorkoutsForDate(date);
     const hasWorkout = dayWorkouts.length > 0;
     const hasPlannedWorkout = dayPlannedWorkouts.length > 0;
-
-    // Determine the appropriate styling based on workout status
-    let dayClassName = "";
-    if (hasWorkout && hasPlannedWorkout) {
-      dayClassName = "!bg-gradient-to-br !from-green-500 !to-blue-500 !text-white hover:!from-green-600 hover:!to-blue-600 dark:!from-green-600 dark:!to-blue-600 dark:hover:!from-green-700 dark:hover:!to-blue-700";
-    } else if (hasWorkout) {
-      dayClassName = "!bg-green-500 !text-white hover:!bg-green-600 dark:!bg-green-600 dark:!text-white dark:hover:!bg-green-700";
-    } else if (hasPlannedWorkout) {
-      dayClassName = "!bg-blue-500 !text-white hover:!bg-blue-600 dark:!bg-blue-600 dark:!text-white dark:hover:!bg-blue-700";
-    }
 
     if (!hasWorkout && !hasPlannedWorkout) {
       return <span>{date.getDate()}</span>;
@@ -122,9 +112,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className={`block w-full h-full rounded-md ${dayClassName} flex items-center justify-center`}>
-              {date.getDate()}
-            </span>
+            <span>{date.getDate()}</span>
           </TooltipTrigger>
           <TooltipContent>
             <div className="max-w-48">
@@ -200,6 +188,8 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
               selected={selectedDate}
               onSelect={setSelectedDate}
               className="p-0"
+              modifiers={modifiers}
+              modifiersClassNames={modifiersClassNames}
               weekStartsOn={1}
               components={{
                 Day: ({ date }) => <DayContent date={date} />
