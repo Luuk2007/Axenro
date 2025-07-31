@@ -68,41 +68,36 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
 
   // Create modifiers for the calendar with full day highlighting
   const modifiersClassNames = {
-    completedWorkout: "bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:text-white dark:hover:bg-green-700",
-    plannedWorkout: "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700",
-    bothWorkouts: "bg-gradient-to-br from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 dark:from-green-600 dark:to-blue-600 dark:hover:from-green-700 dark:hover:to-blue-700"
+    completedWorkout: "!bg-green-500 !text-white hover:!bg-green-600 dark:!bg-green-600 dark:!text-white dark:hover:!bg-green-700",
+    plannedWorkout: "!bg-blue-500 !text-white hover:!bg-blue-600 dark:!bg-blue-600 dark:!text-white dark:hover:!bg-blue-700",
+    bothWorkouts: "!bg-gradient-to-br !from-green-500 !to-blue-500 !text-white hover:!from-green-600 hover:!to-blue-600 dark:!from-green-600 dark:!to-blue-600 dark:hover:!from-green-700 dark:hover:!to-blue-700"
+  };
+
+  // Helper function to check if two dates are the same day
+  const isSameDay = (date1: Date, date2: Date) => {
+    return date1.getDate() === date2.getDate() && 
+           date1.getMonth() === date2.getMonth() && 
+           date1.getFullYear() === date2.getFullYear();
   };
 
   // Check for dates that have both completed and planned workouts
   const getBothWorkoutDates = () => {
     return workoutDates.filter(workoutDate => 
-      plannedDates.some(plannedDate => 
-        workoutDate.getDate() === plannedDate.getDate() && 
-        workoutDate.getMonth() === plannedDate.getMonth() && 
-        workoutDate.getFullYear() === plannedDate.getFullYear()
-      )
+      plannedDates.some(plannedDate => isSameDay(workoutDate, plannedDate))
     );
   };
 
   const modifiers = {
     completedWorkout: workoutDates.filter(workoutDate => 
-      !plannedDates.some(plannedDate => 
-        workoutDate.getDate() === plannedDate.getDate() && 
-        workoutDate.getMonth() === plannedDate.getMonth() && 
-        workoutDate.getFullYear() === plannedDate.getFullYear()
-      )
+      !plannedDates.some(plannedDate => isSameDay(workoutDate, plannedDate))
     ),
     plannedWorkout: plannedDates.filter(plannedDate => 
-      !workoutDates.some(workoutDate => 
-        workoutDate.getDate() === plannedDate.getDate() && 
-        workoutDate.getMonth() === plannedDate.getMonth() && 
-        workoutDate.getFullYear() === plannedDate.getFullYear()
-      )
+      !workoutDates.some(workoutDate => isSameDay(workoutDate, plannedDate))
     ),
     bothWorkouts: getBothWorkoutDates()
   };
 
-  // Custom day content with tooltips (no indicator dots)
+  // Custom day content with tooltips
   const DayContent = ({ date }: { date: Date }) => {
     const dayWorkouts = getWorkoutsForDate(date);
     const dayPlannedWorkouts = getPlannedWorkoutsForDate(date);
