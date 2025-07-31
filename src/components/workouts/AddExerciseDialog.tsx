@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +25,7 @@ import { toast } from "sonner";
 interface AddExerciseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddExercise: (exerciseId: string) => void;
+  onAddExercise: (exerciseData: any) => void;
 }
 
 const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({ 
