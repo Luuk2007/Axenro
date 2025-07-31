@@ -66,11 +66,11 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     });
   };
 
-  // Create modifiers for the calendar with proper styling
+  // Create modifiers for the calendar with full day highlighting
   const modifiersClassNames = {
-    completedWorkout: "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-800/30 dark:text-green-300 border-green-300 dark:border-green-700",
-    plannedWorkout: "bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-800/30 dark:text-blue-300 border-blue-300 dark:border-blue-700",
-    bothWorkouts: "bg-gradient-to-br from-green-100 to-blue-100 text-gray-800 hover:from-green-200 hover:to-blue-200 dark:from-green-800/30 dark:to-blue-800/30 dark:text-gray-300 border-purple-300 dark:border-purple-700"
+    completedWorkout: "bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:text-white dark:hover:bg-green-700",
+    plannedWorkout: "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700",
+    bothWorkouts: "bg-gradient-to-br from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 dark:from-green-600 dark:to-blue-600 dark:hover:from-green-700 dark:hover:to-blue-700"
   };
 
   // Check for dates that have both completed and planned workouts
@@ -102,7 +102,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     bothWorkouts: getBothWorkoutDates()
   };
 
-  // Custom day content with tooltips
+  // Custom day content with tooltips (no indicator dots)
   const DayContent = ({ date }: { date: Date }) => {
     const dayWorkouts = getWorkoutsForDate(date);
     const dayPlannedWorkouts = getPlannedWorkoutsForDate(date);
@@ -117,11 +117,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="relative">
-              {date.getDate()}
-              {/* Small indicator dot */}
-              <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-current opacity-60"></div>
-            </span>
+            <span>{date.getDate()}</span>
           </TooltipTrigger>
           <TooltipContent>
             <div className="max-w-48">

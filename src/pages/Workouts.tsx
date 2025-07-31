@@ -22,6 +22,7 @@ const Workouts = () => {
   const [showWorkoutDetails, setShowWorkoutDetails] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
   const [workoutToDelete, setWorkoutToDelete] = useState<string | null>(null);
+  const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
 
   useEffect(() => {
     // Load workouts from localStorage
@@ -47,23 +48,48 @@ const Workouts = () => {
       sets: exercise.sets.map(set => ({ ...set, completed: true }))
     }));
 
-    const newWorkout: Workout = {
-      id: Date.now().toString(),
-      name: name,
-      date: date, // Use the passed date parameter instead of generating a new one
-      exercises: completedExercises,
-      completed: true // Mark workout as completed automatically
-    };
+    if (editingWorkout) {
+      // Update existing workout
+      const updatedWorkout: Workout = {
+        ...editingWorkout,
+        name: name,
+        date: date,
+        exercises: completedExercises,
+        completed: true
+      };
 
-    const updatedWorkouts = [...workouts, newWorkout];
-    saveWorkouts(updatedWorkouts);
-    toast.success(t("workoutSaved"));
+      const updatedWorkouts = workouts.map(workout => 
+        workout.id === editingWorkout.id ? updatedWorkout : workout
+      );
+      saveWorkouts(updatedWorkouts);
+      toast.success(t("workoutUpdated"));
+      setEditingWorkout(null);
+    } else {
+      // Create new workout
+      const newWorkout: Workout = {
+        id: Date.now().toString(),
+        name: name,
+        date: date,
+        exercises: completedExercises,
+        completed: true
+      };
+
+      const updatedWorkouts = [...workouts, newWorkout];
+      saveWorkouts(updatedWorkouts);
+      toast.success(t("workoutSaved"));
+    }
+    
     setShowWorkoutForm(false);
   };
 
   const handleViewWorkout = (workout: Workout) => {
     setCurrentWorkout(JSON.parse(JSON.stringify(workout)));
     setShowWorkoutDetails(true);
+  };
+
+  const handleEditWorkout = (workout: Workout) => {
+    setEditingWorkout(workout);
+    setShowWorkoutForm(true);
   };
 
   const handleDeleteWorkout = (workoutId: string) => {
@@ -77,6 +103,11 @@ const Workouts = () => {
     saveWorkouts(updatedWorkouts);
     toast.success(t("workoutDeleted"));
     setWorkoutToDelete(null);
+  };
+
+  const handleCloseWorkoutForm = () => {
+    setShowWorkoutForm(false);
+    setEditingWorkout(null);
   };
 
   return (
@@ -109,6 +140,7 @@ const Workouts = () => {
           <WorkoutList 
             workouts={workouts}
             onViewWorkout={handleViewWorkout}
+            onEditWorkout={handleEditWorkout}
             onDeleteWorkout={handleDeleteWorkout}
           />
         </TabsContent>
@@ -125,8 +157,9 @@ const Workouts = () => {
       {/* Component dialogs */}
       <CreateWorkout 
         open={showWorkoutForm}
-        onOpenChange={setShowWorkoutForm}
+        onOpenChange={handleCloseWorkoutForm}
         onSaveWorkout={handleCreateWorkout}
+        editingWorkout={editingWorkout}
       />
 
       {currentWorkout && (
