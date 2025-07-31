@@ -90,14 +90,20 @@ export function LanguageSwitch({ className }: LanguageSwitchProps) {
             <img 
               src="/lovable-uploads/e271aa66-8801-4936-b23f-c39df370e64b.png" 
               alt="Dutch flag"
-              className="w-4 h-4 rounded-full object-cover"
+              className={cn(
+                "w-4 h-4 rounded-full object-cover border",
+                isDark ? "border-zinc-600" : "border-zinc-300"
+              )}
             />
           ) : (
             // British flag
             <img 
               src="/lovable-uploads/bd239568-d6b9-4f84-90b5-f69c28780e46.png" 
               alt="British flag"
-              className="w-4 h-4 rounded-full object-cover"
+              className={cn(
+                "w-4 h-4 rounded-full object-cover border",
+                isDark ? "border-zinc-600" : "border-zinc-300"
+              )}
             />
           )}
         </div>
@@ -114,14 +120,20 @@ export function LanguageSwitch({ className }: LanguageSwitchProps) {
             <img 
               src="/lovable-uploads/bd239568-d6b9-4f84-90b5-f69c28780e46.png" 
               alt="British flag"
-              className="w-4 h-4 rounded-full object-cover opacity-50"
+              className={cn(
+                "w-4 h-4 rounded-full object-cover opacity-50 border",
+                isDark ? "border-zinc-600" : "border-zinc-300"
+              )}
             />
           ) : (
             // Dutch flag (inactive)
             <img 
               src="/lovable-uploads/e271aa66-8801-4936-b23f-c39df370e64b.png" 
               alt="Dutch flag"
-              className="w-4 h-4 rounded-full object-cover opacity-50"
+              className={cn(
+                "w-4 h-4 rounded-full object-cover opacity-50 border",
+                isDark ? "border-zinc-600" : "border-zinc-300"
+              )}
             />
           )}
         </div>
