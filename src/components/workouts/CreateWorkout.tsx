@@ -101,7 +101,10 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
           ...exercise,
           sets: exercise.sets.map(set => {
             if (set.id === setId) {
-              if (field === 'reps' || field === 'weight') {
+              if (field === 'completed') {
+                // Ensure completed is always a boolean
+                return { ...set, completed: Boolean(value) };
+              } else if (field === 'reps' || field === 'weight') {
                 if (typeof value === 'string') {
                   // Allow empty string values
                   if (value === '') {
@@ -110,9 +113,9 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                   const numValue = parseFloat(value);
                   return { ...set, [field]: isNaN(numValue) ? 0 : numValue };
                 }
-                return { ...set, [field]: value };
+                return { ...set, [field]: Number(value) };
               }
-              return { ...set, [field]: value };
+              return set;
             }
             return set;
           })
