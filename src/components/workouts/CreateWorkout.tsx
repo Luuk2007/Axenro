@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,11 +6,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Plus, X, Calendar, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AddExerciseDialog from './AddExerciseDialog';
+import { Workout } from '@/types/workout';
 
 interface CreateWorkoutProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaveWorkout: (name: string, exercises: any[], date: string) => void;
+  editingWorkout?: Workout | null;
 }
 
 interface ExerciseSet {
@@ -27,22 +28,38 @@ interface Exercise {
   sets: ExerciseSet[];
 }
 
-const CreateWorkout = ({ open, onOpenChange, onSaveWorkout }: CreateWorkoutProps) => {
+const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: CreateWorkoutProps) => {
   const { t } = useLanguage();
   const [workoutName, setWorkoutName] = useState('');
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
 
+  // Load editing workout data when editingWorkout changes
+  useEffect(() => {
+    if (editingWorkout) {
+      setWorkoutName(editingWorkout.name);
+      setWorkoutDate(editingWorkout.date);
+      setExercises(editingWorkout.exercises);
+    } else {
+      // Reset form when not editing
+      setWorkoutName('');
+      setWorkoutDate(new Date().toISOString().split('T')[0]);
+      setExercises([]);
+    }
+  }, [editingWorkout]);
+
   const handleSaveWorkout = () => {
     if (!workoutName.trim()) return;
     
     onSaveWorkout(workoutName, exercises, workoutDate);
     
-    // Reset form
-    setWorkoutName('');
-    setWorkoutDate(new Date().toISOString().split('T')[0]);
-    setExercises([]);
+    // Reset form only if not editing (will be handled by parent component)
+    if (!editingWorkout) {
+      setWorkoutName('');
+      setWorkoutDate(new Date().toISOString().split('T')[0]);
+      setExercises([]);
+    }
   };
 
   const handleAddExercise = (exerciseData: any) => {
@@ -111,9 +128,11 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout }: CreateWorkoutProps
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md mx-auto max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t("createWorkout")}</DialogTitle>
+            <DialogTitle>
+              {editingWorkout ? t("editWorkout") : t("createWorkout")}
+            </DialogTitle>
             <DialogDescription>
-              {t("Create a new workout routine")}
+              {editingWorkout ? t("Edit your workout routine") : t("Create a new workout routine")}
             </DialogDescription>
           </DialogHeader>
           
@@ -240,7 +259,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout }: CreateWorkoutProps
                 disabled={!workoutName.trim()}
                 className="flex-1"
               >
-                {t("saveWorkout")}
+                {editingWorkout ? t("updateWorkout") : t("saveWorkout")}
               </Button>
             </div>
           </div>

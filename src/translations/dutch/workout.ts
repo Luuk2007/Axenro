@@ -2,6 +2,9 @@ export const workoutTranslations = {
   title: "Trainingen",
   workouts: "Trainingen",
   createWorkout: "Training Aanmaken",
+  editWorkout: "Training Bewerken",
+  updateWorkout: "Training Bijwerken",
+  workoutUpdated: "Training bijgewerkt",
   workoutName: "Training Naam",
   exercises: "Oefeningen",
   addExercise: "Oefening Toevoegen",
@@ -219,6 +222,7 @@ export const workoutTranslations = {
   viewWorkout: "Bekijk training",
   calendar: "Kalender",
   startTracking: "Begin met bijhouden",
+  noExercisesAdded: "Geen oefeningen toegevoegd",
   // Privacy Policy translations
   privacyPolicyTitle: "Privacybeleid",
   privacyPolicyContent: "Uw privacy is belangrijk voor ons. Dit privacybeleid legt uit hoe we uw persoonlijke informatie verzamelen, gebruiken en beschermen.",
