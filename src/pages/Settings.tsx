@@ -18,7 +18,6 @@ import { useLocation } from "react-router-dom";
 interface UserSettings {
   theme: "light" | "dark" | "system";
   language: Language;
-  notifications: boolean;
   dataBackup: boolean;
 }
 
@@ -29,11 +28,9 @@ const Settings = () => {
   const [settings, setSettings] = useState<UserSettings>({
     theme: "light",
     language: language, // Initialize with current language from context
-    notifications: true,
     dataBackup: false,
   });
   const [appearanceOpen, setAppearanceOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [dataManagementOpen, setDataManagementOpen] = useState(false);
   const [subscriptionOpen, setSubscriptionOpen] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
@@ -63,6 +60,31 @@ const Settings = () => {
       setSettings(prev => ({ ...prev, language }));
     }
   }, [language]);
+
+  // Listen for theme changes from top bar buttons
+  useEffect(() => {
+    const handleSettingsChange = () => {
+      const savedSettings = localStorage.getItem("userSettings");
+      if (savedSettings) {
+        try {
+          const parsedSettings = JSON.parse(savedSettings);
+          setSettings(prev => ({
+            ...prev,
+            theme: parsedSettings.theme || "light"
+          }));
+        } catch (error) {
+          console.error("Error parsing settings:", error);
+        }
+      }
+    };
+
+    // Listen for custom events when settings change
+    window.addEventListener('settingsChanged', handleSettingsChange);
+
+    return () => {
+      window.removeEventListener('settingsChanged', handleSettingsChange);
+    };
+  }, []);
 
   // Save settings to localStorage and dispatch custom event
   const saveSettings = (newSettings: UserSettings) => {
@@ -101,13 +123,6 @@ const Settings = () => {
     const newSettings = { ...settings, language: newLanguage };
     saveSettings(newSettings);
     setLanguage(newLanguage);
-    toast.success(t("Settings saved"));
-  };
-
-  // Handle notifications toggle
-  const handleNotificationsChange = (notifications: boolean) => {
-    const newSettings = { ...settings, notifications };
-    saveSettings(newSettings);
     toast.success(t("Settings saved"));
   };
 
@@ -242,32 +257,6 @@ const Settings = () => {
 
         {/* Exercises Settings */}
         <ExercisesSettings />
-
-        {/* Notification Settings */}
-        <Card>
-          <Collapsible open={notificationsOpen} onOpenChange={setNotificationsOpen}>
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{t("notifications")}</CardTitle>
-                  {notificationsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                </div>
-              </CardHeader>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="space-y-3 py-3">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="notifications">{t("Enable Notifications")}</Label>
-                  <Switch
-                    id="notifications"
-                    checked={settings.notifications}
-                    onCheckedChange={handleNotificationsChange}
-                  />
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
 
         {/* Subscription Management */}
         <Card>

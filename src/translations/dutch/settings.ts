@@ -14,10 +14,6 @@ export const settingsTranslations: Translations = {
   dark: "Donker",
   system: "Systeem",
   
-  // Notifications
-  notifications: "Meldingen",
-  "Enable Notifications": "Meldingen Inschakelen",
-  
   // Subscription
   "Subscription Management": "Abonnement Beheer",
   "Current subscription": "Huidig abonnement",
