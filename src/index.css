@@ -76,12 +76,33 @@
 
   html, body {
     @apply bg-background text-foreground font-sans;
-    overflow: hidden; /* Prevent body scrolling */
     height: 100%;
+  }
+  
+  /* Desktop: Prevent body scrolling to use controlled layout */
+  @media (min-width: 768px) {
+    html, body {
+      overflow: hidden;
+    }
+  }
+  
+  /* Mobile: Allow natural scrolling */
+  @media (max-width: 767px) {
+    html, body {
+      overflow: visible;
+    }
   }
   
   #root {
     height: 100%;
+  }
+  
+  /* Mobile: Allow root to expand naturally */
+  @media (max-width: 767px) {
+    #root {
+      height: auto;
+      min-height: 100%;
+    }
   }
 }
 
