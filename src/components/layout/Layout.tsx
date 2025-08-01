@@ -14,16 +14,22 @@ export default function Layout() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-background">
-      <div className="flex h-full w-full">
+    <div className={isMobile ? "min-h-screen bg-background" : "h-screen w-screen overflow-hidden bg-background"}>
+      <div className={isMobile ? "w-full" : "flex h-full w-full"}>
         {!isMobile && <Sidebar />}
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main className={isMobile ? "w-full" : "flex-1 flex flex-col overflow-hidden"}>
           <TopBar />
-          <ScrollArea className="flex-1">
+          {isMobile ? (
             <div className="container py-6 px-4 md:px-6 animate-fade-in">
               <Outlet />
             </div>
-          </ScrollArea>
+          ) : (
+            <ScrollArea className="flex-1">
+              <div className="container py-6 px-4 md:px-6 animate-fade-in">
+                <Outlet />
+              </div>
+            </ScrollArea>
+          )}
         </main>
       </div>
     </div>
