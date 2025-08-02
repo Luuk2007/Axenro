@@ -1,14 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils } from 'lucide-react';
 import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SubscriptionModal from '@/components/subscription/SubscriptionModal';
 import { useSubscription } from '@/hooks/useSubscription';
-import PrivacyPolicyModal from '@/components/legal/PrivacyPolicyModal';
-import TermsConditionsModal from '@/components/legal/TermsConditionsModal';
 
 type NavItem = {
   titleKey: TranslationKeys;
@@ -56,10 +53,9 @@ interface SidebarProps {
 export default function Sidebar({ onNavigate }: SidebarProps) {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
-  const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
-  const [termsModalOpen, setTermsModalOpen] = useState(false);
   const { subscribed, subscription_tier, loading } = useSubscription();
   
   // Monitor theme changes
@@ -99,6 +95,16 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
     if (isMobile && onNavigate) {
       onNavigate();
     }
+  };
+
+  const handlePrivacyPolicyClick = () => {
+    navigate('/privacypolicy');
+    handleNavClick();
+  };
+
+  const handleTermsClick = () => {
+    navigate('/termsandconditions');
+    handleNavClick();
   };
   
   return (
@@ -159,14 +165,14 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
             <div className="px-4 pb-2">
               <div className="flex items-center justify-center gap-4">
                 <button
-                  onClick={() => setPrivacyModalOpen(true)}
+                  onClick={handlePrivacyPolicyClick}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
                 >
                   {t('Privacy Policy')}
                 </button>
                 <span className="text-xs text-muted-foreground">•</span>
                 <button
-                  onClick={() => setTermsModalOpen(true)}
+                  onClick={handleTermsClick}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
                 >
                   {t('Terms & Conditions')}
@@ -191,16 +197,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
       <SubscriptionModal 
         open={subscriptionModalOpen} 
         onOpenChange={setSubscriptionModalOpen} 
-      />
-      
-      <PrivacyPolicyModal 
-        open={privacyModalOpen} 
-        onOpenChange={setPrivacyModalOpen} 
-      />
-      
-      <TermsConditionsModal 
-        open={termsModalOpen} 
-        onOpenChange={setTermsModalOpen} 
       />
     </>
   );

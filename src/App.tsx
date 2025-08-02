@@ -13,6 +13,8 @@ import Progress from "@/pages/Progress";
 import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
+import TermsConditionsPage from "@/pages/TermsConditionsPage";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import PasswordResetModal from "@/components/auth/PasswordResetModal";
@@ -65,6 +67,8 @@ function App() {
                   <Route path="progress" element={<Progress />} />
                   <Route path="profile" element={<Profile />} />
                   <Route path="settings" element={<Settings />} />
+                  <Route path="privacypolicy" element={<PrivacyPolicyPage />} />
+                  <Route path="termsandconditions" element={<TermsConditionsPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
