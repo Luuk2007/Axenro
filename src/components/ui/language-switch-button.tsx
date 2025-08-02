@@ -86,52 +86,38 @@ export function LanguageSwitch({ className }: LanguageSwitchProps) {
             // Only show background when Dutch is selected
             isDutch 
               ? (isDark ? "bg-zinc-800" : "bg-gray-200")
-              : "bg-transparent"
+              : ""
           )}
         >
-          {isDutch ? (
-            // Dutch flag (active)
-            <img 
-              src="/lovable-uploads/e271aa66-8801-4936-b23f-c39df370e64b.png" 
-              alt="Dutch flag"
-              className="w-4 h-4 rounded-full object-cover"
-            />
-          ) : (
-            // British flag (active)
-            <img 
-              src="/lovable-uploads/bd239568-d6b9-4f84-90b5-f69c28780e46.png" 
-              alt="British flag"
-              className="w-4 h-4 rounded-full object-cover"
-            />
-          )}
+          <img 
+            src="/lovable-uploads/e271aa66-8801-4936-b23f-c39df370e64b.png" 
+            alt="Dutch flag"
+            className={cn(
+              "w-4 h-4 rounded-full object-cover",
+              !isDutch && "opacity-50"
+            )}
+          />
         </div>
         <div
           className={cn(
             "flex justify-center items-center w-6 h-6 rounded-full transition-transform duration-300 overflow-hidden",
             isDutch 
-              ? "bg-transparent" 
+              ? "" 
               : "transform -translate-x-8",
             // Only show background when English is selected (when not Dutch)
             !isDutch 
               ? (isDark ? "bg-zinc-800" : "bg-gray-200")
-              : "bg-transparent"
+              : ""
           )}
         >
-          {isDutch ? (
-            // British flag (inactive)
-            <img 
-              src="/lovable-uploads/bd239568-d6b9-4f84-90b5-f69c28780e46.png" 
-              alt="British flag"
-              className="w-4 h-4 rounded-full object-cover opacity-50"
-            />
-          ) : (
-            // Dutch flag (inactive)
-            <img 
-              src="/lovable-uploads/e271aa66-8801-4936-b23f-c39df370e64b.png" 
-              alt="Dutch flag"
-              className="w-4 h-4 rounded-full object-cover opacity-50"
-            />
-          )}
+          <img 
+            src="/lovable-uploads/bd239568-d6b9-4f84-90b5-f69c28780e46.png" 
+            alt="British flag"
+            className={cn(
+              "w-4 h-4 rounded-full object-cover",
+              isDutch && "opacity-50"
+            )}
+          />
         </div>
       </div>
     </div>
