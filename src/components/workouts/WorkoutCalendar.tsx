@@ -20,13 +20,27 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(currentDate);
   const [plannedWorkouts, setPlannedWorkouts] = React.useState<PlannedWorkout[]>(getPlannedWorkouts());
   
+  console.log("All workouts:", workouts);
+  console.log("Completed workouts:", workouts.filter(w => w.completed));
+  
   // Get all workout dates in Date format
   const workoutDates = workouts
-    .filter(workout => workout.completed)
-    .map(workout => {
-      return parse(workout.date, "yyyy-MM-dd", new Date());
+    .filter(workout => {
+      console.log(`Workout ${workout.name} on ${workout.date}: completed=${workout.completed}`);
+      return workout.completed;
     })
-    .filter(date => isValid(date));
+    .map(workout => {
+      const parsedDate = parse(workout.date, "yyyy-MM-dd", new Date());
+      console.log(`Parsing ${workout.date} -> ${parsedDate}`);
+      return parsedDate;
+    })
+    .filter(date => {
+      const valid = isValid(date);
+      console.log(`Date validity check: ${date} -> ${valid}`);
+      return valid;
+    });
+  
+  console.log("Final workout dates:", workoutDates);
   
   // Get planned workout dates
   const plannedDates = plannedWorkouts.map(workout => {
@@ -90,11 +104,13 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     bothWorkouts: getBothWorkoutDates()
   };
 
-  // Create modifiers for the calendar with full day highlighting that maintains position
+  console.log("Calendar modifiers:", modifiers);
+
+  // Create modifiers for the calendar - using more specific selectors
   const modifiersClassNames = {
-    completedWorkout: "!bg-green-500 !text-white hover:!bg-green-600 dark:!bg-green-600 dark:!text-white dark:hover:!bg-green-700 !rounded-md !w-full !h-full !flex !items-center !justify-center",
-    plannedWorkout: "!bg-blue-500 !text-white hover:!bg-blue-600 dark:!bg-blue-600 dark:!text-white dark:hover:!bg-blue-700 !rounded-md !w-full !h-full !flex !items-center !justify-center",
-    bothWorkouts: "!bg-gradient-to-br !from-green-500 !to-blue-500 !text-white hover:!from-green-600 hover:!to-blue-600 dark:!from-green-600 dark:!to-blue-600 dark:hover:!from-green-700 dark:hover:!to-blue-700 !rounded-md !w-full !h-full !flex !items-center !justify-center"
+    completedWorkout: "bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:text-white dark:hover:bg-green-700",
+    plannedWorkout: "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700", 
+    bothWorkouts: "bg-gradient-to-br from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 dark:from-green-600 dark:to-blue-600 dark:hover:from-green-700 dark:hover:to-blue-700"
   };
 
   // Custom day content with tooltips for hover information
@@ -182,19 +198,31 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
               </div>
             </div>
             
-            {/* Calendar */}
-            <Calendar 
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="p-0"
-              modifiers={modifiers}
-              modifiersClassNames={modifiersClassNames}
-              weekStartsOn={1}
-              components={{
-                Day: ({ date }) => <DayContent date={date} />
-              }}
-            />
+            {/* Calendar with custom styling for workout days */}
+            <div className="workout-calendar">
+              <style jsx>{`
+                .workout-calendar [data-selected="true"] {
+                  background-color: rgb(34 197 94) !important;
+                  color: white !important;
+                }
+                .workout-calendar .rdp-day_button[aria-pressed="true"] {
+                  background-color: rgb(34 197 94) !important;
+                  color: white !important;
+                }
+              `}</style>
+              <Calendar 
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                className="p-0"
+                modifiers={modifiers}
+                modifiersClassNames={modifiersClassNames}
+                weekStartsOn={1}
+                components={{
+                  Day: ({ date }) => <DayContent date={date} />
+                }}
+              />
+            </div>
           </div>
 
           {/* Right side - Progress Panel */}
