@@ -92,9 +92,9 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
 
   // Create modifiers for the calendar with full day highlighting that maintains position
   const modifiersClassNames = {
-    completedWorkout: "!bg-green-500 !text-white hover:!bg-green-600 dark:!bg-green-600 dark:!text-white dark:hover:!bg-green-700 rounded-md",
-    plannedWorkout: "!bg-blue-500 !text-white hover:!bg-blue-600 dark:!bg-blue-600 dark:!text-white dark:hover:!bg-blue-700 rounded-md",
-    bothWorkouts: "!bg-gradient-to-br !from-green-500 !to-blue-500 !text-white hover:!from-green-600 hover:!to-blue-600 dark:!from-green-600 dark:!to-blue-600 dark:hover:!from-green-700 dark:hover:!to-blue-700 rounded-md"
+    completedWorkout: "!bg-green-500 !text-white hover:!bg-green-600 dark:!bg-green-600 dark:!text-white dark:hover:!bg-green-700 !rounded-md !w-full !h-full !flex !items-center !justify-center",
+    plannedWorkout: "!bg-blue-500 !text-white hover:!bg-blue-600 dark:!bg-blue-600 dark:!text-white dark:hover:!bg-blue-700 !rounded-md !w-full !h-full !flex !items-center !justify-center",
+    bothWorkouts: "!bg-gradient-to-br !from-green-500 !to-blue-500 !text-white hover:!from-green-600 hover:!to-blue-600 dark:!from-green-600 dark:!to-blue-600 dark:hover:!from-green-700 dark:hover:!to-blue-700 !rounded-md !w-full !h-full !flex !items-center !justify-center"
   };
 
   // Custom day content with tooltips for hover information
