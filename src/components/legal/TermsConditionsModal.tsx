@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogOverlay,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -165,6 +166,7 @@ const TermsConditionsModal = ({ open, onOpenChange }: TermsConditionsModalProps)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogOverlay className="bg-black/20 backdrop-blur-none" />
       <DialogContent className="sm:max-w-4xl max-h-[85vh]">
         <DialogHeader>
           <DialogTitle>{language === 'dutch' ? 'Algemene voorwaarden' : 'Terms & Conditions'}</DialogTitle>
