@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TermsConditionsModal from '@/components/legal/TermsConditionsModal';
+import Index from '@/pages/Index';
 
 const TermsConditionsPage = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -21,6 +22,8 @@ const TermsConditionsPage = () => {
 
   return (
     <div>
+      {/* Render the dashboard content behind the modal */}
+      <Index />
       <TermsConditionsModal open={isOpen} onOpenChange={handleOpenChange} />
     </div>
   );

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PrivacyPolicyModal from '@/components/legal/PrivacyPolicyModal';
+import Index from '@/pages/Index';
 
 const PrivacyPolicyPage = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -21,6 +22,8 @@ const PrivacyPolicyPage = () => {
 
   return (
     <div>
+      {/* Render the dashboard content behind the modal */}
+      <Index />
       <PrivacyPolicyModal open={isOpen} onOpenChange={handleOpenChange} />
     </div>
   );
