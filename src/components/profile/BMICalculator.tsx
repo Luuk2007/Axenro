@@ -3,19 +3,23 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
 
 interface BMICalculatorProps {
   initialWeight?: number;
   initialHeight?: number;
 }
 
-const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 70, initialHeight = 170 }) => {
+const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 0, initialHeight = 0 }) => {
   const { t } = useLanguage();
-  const [weight, setWeight] = useState<string>(initialWeight.toString());
-  const [height, setHeight] = useState<string>(initialHeight.toString());
+  const [weight, setWeight] = useState<string>(initialWeight > 0 ? initialWeight.toString() : '');
+  const [height, setHeight] = useState<string>(initialHeight > 0 ? initialHeight.toString() : '');
   const [bmi, setBMI] = useState<number | null>(null);
   const [weightDifference, setWeightDifference] = useState<number | null>(null);
+
+  // Don't render if no valid initial values
+  if (initialWeight <= 0 || initialHeight <= 0) {
+    return null;
+  }
 
   // Update BMI calculator values when the props change (sync with form)
   useEffect(() => {

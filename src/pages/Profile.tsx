@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import BMICalculator from "@/components/profile/BMICalculator";
-import ProfileForm, { ProfileFormValues, defaultValues } from "@/components/profile/ProfileForm";
+import ProfileForm, { ProfileFormValues, defaultValues, emptyValues } from "@/components/profile/ProfileForm";
 import UserStatsDisplay from "@/components/profile/UserStatsDisplay";
 import NutritionCalculator from "@/components/profile/NutritionCalculator";
 
 const Profile = () => {
   const { t } = useLanguage();
   const [profile, setProfile] = useState<ProfileFormValues | null>(null);
+  const [isNewUser, setIsNewUser] = useState(true);
   
   useEffect(() => {
     const savedProfile = localStorage.getItem("userProfile");
@@ -25,24 +26,38 @@ const Profile = () => {
       try {
         const parsedProfile = JSON.parse(savedProfile);
         setProfile(parsedProfile);
+        setIsNewUser(false);
       } catch (error) {
         console.error("Error parsing profile:", error);
+        setIsNewUser(true);
       }
+    } else {
+      setIsNewUser(true);
     }
   }, []);
   
-  // Load saved profile from localStorage if available
+  // Load saved profile from localStorage if available, otherwise return empty values for new users
   const getSavedProfile = () => {
     const savedProfile = localStorage.getItem("userProfile");
-    return savedProfile ? JSON.parse(savedProfile) : defaultValues;
+    if (savedProfile) {
+      try {
+        const parsed = JSON.parse(savedProfile);
+        setIsNewUser(false);
+        return parsed;
+      } catch (error) {
+        setIsNewUser(true);
+        return emptyValues;
+      }
+    }
+    setIsNewUser(true);
+    return emptyValues;
   };
 
   const handleSubmit = (data: ProfileFormValues) => {
-    // The target weight calculation logic has been moved to ProfileForm component
-    
     // Save to localStorage
     localStorage.setItem("userProfile", JSON.stringify(data));
     setProfile(data);
+    setIsNewUser(false);
     toast.success(t("profileUpdated"));
     
     // Save initial weight to weightData array if it doesn't exist yet
@@ -60,10 +75,9 @@ const Profile = () => {
     }
   };
 
-  // Get initial values for BMI calculator
+  // Get initial values for BMI calculator - only if user has valid data
   const initialValues = getSavedProfile();
-  const currentWeight = initialValues.weight;
-  const currentHeight = initialValues.height;
+  const hasValidWeightHeight = initialValues.weight > 0 && initialValues.height > 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -86,15 +100,18 @@ const Profile = () => {
               <ProfileForm 
                 onSubmit={handleSubmit} 
                 initialValues={getSavedProfile()}
+                isNewUser={isNewUser}
               />
             </CardContent>
           </Card>
           
-          {/* BMI Calculator */}
-          <BMICalculator 
-            initialWeight={currentWeight} 
-            initialHeight={currentHeight} 
-          />
+          {/* BMI Calculator - only show if user has valid weight and height */}
+          {hasValidWeightHeight && (
+            <BMICalculator 
+              initialWeight={initialValues.weight} 
+              initialHeight={initialValues.height} 
+            />
+          )}
         </TabsContent>
         
         <TabsContent value="nutrition" className="space-y-6">

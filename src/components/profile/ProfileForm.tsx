@@ -47,12 +47,30 @@ export const defaultValues: ProfileFormValues = {
   goal: "maintain"
 };
 
+// Empty values for new users
+export const emptyValues: ProfileFormValues = {
+  name: "",
+  gender: "male",
+  age: 0,
+  height: 0,
+  weight: 0,
+  activityLevel: "moderate",
+  fitnessGoal: "maintain",
+  exerciseFrequency: "2-3",
+  goal: "maintain"
+};
+
 interface ProfileFormProps {
   onSubmit: (data: ProfileFormValues) => void;
   initialValues?: ProfileFormValues;
+  isNewUser?: boolean;
 }
 
-const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = defaultValues }) => {
+const ProfileForm: React.FC<ProfileFormProps> = ({ 
+  onSubmit, 
+  initialValues = defaultValues, 
+  isNewUser = false 
+}) => {
   const { t } = useLanguage();
   
   const formSchema = z.object({
@@ -82,7 +100,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialValues,
+    defaultValues: isNewUser ? emptyValues : initialValues,
   });
 
   const watchFitnessGoal = form.watch("fitnessGoal");
@@ -90,7 +108,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
 
   const handleNumberChange = (field: any, value: string) => {
     if (value === "") {
-      field.onChange(undefined);
+      field.onChange(0);
     } else {
       const num = parseFloat(value);
       if (!isNaN(num)) {
@@ -153,7 +171,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                   <Input 
                     type="number" 
                     placeholder="30" 
-                    value={field.value?.toString() || ''}
+                    value={field.value === 0 ? '' : field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
                 </FormControl>
@@ -174,7 +192,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                   <Input 
                     type="number" 
                     placeholder="175" 
-                    value={field.value?.toString() || ''}
+                    value={field.value === 0 ? '' : field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
                 </FormControl>
@@ -193,7 +211,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                   <Input 
                     type="number" 
                     placeholder="75" 
-                    value={field.value?.toString() || ''}
+                    value={field.value === 0 ? '' : field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"
                   />

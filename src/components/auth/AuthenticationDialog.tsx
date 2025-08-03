@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import PasswordRequirements from './PasswordRequirements';
 
 interface AuthenticationDialogProps {
   open: boolean;
@@ -40,6 +41,16 @@ export default function AuthenticationDialog({
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [activeTab, setActiveTab] = useState("signin");
+  const [showPasswordReqs, setShowPasswordReqs] = useState(false);
+
+  // Password validation function
+  const isPasswordValid = (pwd: string) => {
+    return pwd.length >= 8 &&
+           /[a-z]/.test(pwd) &&
+           /[A-Z]/.test(pwd) &&
+           /\d/.test(pwd) &&
+           /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,9 +104,9 @@ export default function AuthenticationDialog({
       return;
     }
     
-    // Password strength validation
-    if (password.length < 8) {
-      toast.error(t("passwordTooShort"));
+    // Password strength validation with detailed requirements
+    if (!isPasswordValid(password)) {
+      toast.error("Password must meet all requirements");
       return;
     }
     
@@ -321,6 +332,8 @@ export default function AuthenticationDialog({
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        onFocus={() => setShowPasswordReqs(true)}
+                        onBlur={() => setShowPasswordReqs(false)}
                         required
                       />
                       <button
@@ -335,6 +348,7 @@ export default function AuthenticationDialog({
                         )}
                       </button>
                     </div>
+                    <PasswordRequirements password={password} show={showPasswordReqs} />
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="confirm-password" className="text-sm font-medium">{t("confirmPassword")}</label>
