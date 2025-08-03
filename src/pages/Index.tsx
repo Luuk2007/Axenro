@@ -44,10 +44,10 @@ export default function Index() {
   // Format weight display value
   const getWeightDisplayValue = () => {
     if (!weightData) {
-      return t("No data");
+      return t("noData");
     }
     if (weightData.value === 0 && weightData.target) {
-      return t("Set target weight");
+      return t("setTargetWeight");
     }
     return `${weightData.value} kg`;
   };
@@ -58,6 +58,26 @@ export default function Index() {
     }
     return undefined;
   };
+
+  // Sample workout data for WorkoutsList
+  const sampleWorkouts = [
+    {
+      id: '1',
+      name: 'Push Day',
+      date: 'Today',
+      muscleGroups: ['Chest', 'Shoulders'],
+      exerciseCount: 4,
+      completed: true
+    },
+    {
+      id: '2', 
+      name: 'Pull Day',
+      date: 'Yesterday',
+      muscleGroups: ['Back', 'Biceps'],
+      exerciseCount: 5,
+      completed: true
+    }
+  ];
 
   return (
     <Layout>
@@ -133,8 +153,13 @@ export default function Index() {
 
           {/* Right Column - Lists */}
           <div className="space-y-6">
-            <WorkoutsList />
-            <MealsList />
+            <WorkoutsList 
+              workouts={sampleWorkouts}
+              title={t("recentWorkouts")}
+            />
+            <MealsList 
+              title={t("todayMeals")}
+            />
           </div>
         </div>
       </div>
