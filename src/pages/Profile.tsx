@@ -19,6 +19,7 @@ const Profile = () => {
   const { t } = useLanguage();
   const [profile, setProfile] = useState<ProfileFormValues | null>(null);
   const [isNewUser, setIsNewUser] = useState(true);
+  const [initialFormValues, setInitialFormValues] = useState<ProfileFormValues>(emptyValues);
   
   useEffect(() => {
     const savedProfile = localStorage.getItem("userProfile");
@@ -26,37 +27,26 @@ const Profile = () => {
       try {
         const parsedProfile = JSON.parse(savedProfile);
         setProfile(parsedProfile);
+        setInitialFormValues(parsedProfile);
         setIsNewUser(false);
       } catch (error) {
         console.error("Error parsing profile:", error);
+        setProfile(null);
+        setInitialFormValues(emptyValues);
         setIsNewUser(true);
       }
     } else {
+      setProfile(null);
+      setInitialFormValues(emptyValues);
       setIsNewUser(true);
     }
   }, []);
-  
-  // Load saved profile from localStorage if available, otherwise return empty values for new users
-  const getSavedProfile = () => {
-    const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      try {
-        const parsed = JSON.parse(savedProfile);
-        setIsNewUser(false);
-        return parsed;
-      } catch (error) {
-        setIsNewUser(true);
-        return emptyValues;
-      }
-    }
-    setIsNewUser(true);
-    return emptyValues;
-  };
 
   const handleSubmit = (data: ProfileFormValues) => {
     // Save to localStorage
     localStorage.setItem("userProfile", JSON.stringify(data));
     setProfile(data);
+    setInitialFormValues(data);
     setIsNewUser(false);
     toast.success(t("profileUpdated"));
     
@@ -75,9 +65,8 @@ const Profile = () => {
     }
   };
 
-  // Get initial values for BMI calculator - only if user has valid data
-  const initialValues = getSavedProfile();
-  const hasValidWeightHeight = initialValues.weight > 0 && initialValues.height > 0;
+  // Check if user has valid weight and height for BMI calculator
+  const hasValidWeightHeight = initialFormValues.weight > 0 && initialFormValues.height > 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -99,7 +88,7 @@ const Profile = () => {
             <CardContent>
               <ProfileForm 
                 onSubmit={handleSubmit} 
-                initialValues={getSavedProfile()}
+                initialValues={initialFormValues}
                 isNewUser={isNewUser}
               />
             </CardContent>
@@ -108,8 +97,8 @@ const Profile = () => {
           {/* BMI Calculator - only show if user has valid weight and height */}
           {hasValidWeightHeight && (
             <BMICalculator 
-              initialWeight={initialValues.weight} 
-              initialHeight={initialValues.height} 
+              initialWeight={initialFormValues.weight} 
+              initialHeight={initialFormValues.height} 
             />
           )}
         </TabsContent>
@@ -127,7 +116,7 @@ const Profile = () => {
                   {t("completeYourProfile")}
                 </p>
                 <Button
-                  onClick={() => handleSubmit(getSavedProfile())}
+                  onClick={() => handleSubmit(initialFormValues)}
                   className="mt-4"
                   variant="outline"
                 >
