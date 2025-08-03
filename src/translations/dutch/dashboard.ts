@@ -16,8 +16,4 @@ export const dashboardTranslations: Translations = {
   targetWeight: "Streefgewicht",
   meals: "Maaltijden",
   addActivity: "Activiteit toevoegen",
-  
-  // Weight card translations
-  "No data": "Geen data",
-  "Set target weight": "Stel streefgewicht in",
 };

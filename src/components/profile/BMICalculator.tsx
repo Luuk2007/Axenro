@@ -10,10 +10,10 @@ interface BMICalculatorProps {
   initialHeight?: number;
 }
 
-const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHeight }) => {
+const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 70, initialHeight = 170 }) => {
   const { t } = useLanguage();
-  const [weight, setWeight] = useState<string>('');
-  const [height, setHeight] = useState<string>('');
+  const [weight, setWeight] = useState<string>(initialWeight.toString());
+  const [height, setHeight] = useState<string>(initialHeight.toString());
   const [bmi, setBMI] = useState<number | null>(null);
   const [weightDifference, setWeightDifference] = useState<number | null>(null);
 
@@ -21,13 +21,9 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
   useEffect(() => {
     if (initialWeight && initialWeight > 0) {
       setWeight(initialWeight.toString());
-    } else {
-      setWeight('');
     }
     if (initialHeight && initialHeight > 0) {
       setHeight(initialHeight.toString());
-    } else {
-      setHeight('');
     }
   }, [initialWeight, initialHeight]);
 
@@ -84,13 +80,6 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
     if (bmiValue > 24.9 && bmiValue <= 29.9) return "text-yellow-500";
     return "text-red-500";
   };
-
-  // Only show the BMI calculator if we have initial values from the profile
-  const hasProfileData = initialWeight && initialWeight > 0 && initialHeight && initialHeight > 0;
-
-  if (!hasProfileData) {
-    return null; // Don't render anything if no profile data
-  }
 
   return (
     <Card className="mt-6">

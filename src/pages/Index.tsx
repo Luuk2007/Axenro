@@ -1,166 +1,330 @@
-
 import React, { useState, useEffect } from 'react';
-import Layout from '@/components/layout/Layout';
+import { Calendar, Dumbbell, Flame, Footprints, Plus, Weight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import StatsCard from '@/components/dashboard/StatsCard';
-import ProgressChart from '@/components/dashboard/ProgressChart';
-import WorkoutsList from '@/components/dashboard/WorkoutsList';
-import MealsList from '@/components/dashboard/MealsList';
 import MacroProgressTracker from '@/components/dashboard/MacroProgressTracker';
-import { Weight, Target, Activity, Utensils, TrendingUp } from 'lucide-react';
+import MealsList from '@/components/dashboard/MealsList';
+import ProgressChart from '@/components/dashboard/ProgressChart';
+import StepsConnectionModal from '@/components/dashboard/StepsConnectionModal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { format, parse, isValid, startOfWeek, endOfWeek } from 'date-fns';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { Workout } from '@/types/workout';
 
-export default function Index() {
+const meals = [
+  {
+    id: '1',
+    name: 'Protein Oatmeal',
+    time: 'Today, 8:00 AM',
+    calories: 450,
+    protein: 32,
+  },
+  {
+    id: '2',
+    name: 'Chicken Salad',
+    time: 'Today, 1:00 PM',
+    calories: 550,
+    protein: 45,
+  },
+  {
+    id: '3',
+    name: 'Protein Shake',
+    time: 'Today, 4:30 PM',
+    calories: 220,
+    protein: 25,
+  },
+];
+
+const getActivityOptions = (t: (key: string) => string) => [
+  { id: '1', name: t('running'), icon: Flame },
+  { id: '2', name: t('strengthTraining'), icon: Dumbbell },
+  { id: '3', name: t('cycling'), icon: Flame },
+  { id: '4', name: t('swimming'), icon: Flame },
+  { id: '5', name: t('yoga'), icon: Flame },
+  { id: '6', name: t('walking'), icon: Flame },
+];
+
+const Dashboard = () => {
   const { t } = useLanguage();
-  const [weightData, setWeightData] = useState<{value: number, target?: number} | null>(null);
+  const navigate = useNavigate();
+  const [date, setDate] = useState<Date>(new Date());
+  const [showAddActivity, setShowAddActivity] = useState(false);
+  const [showStepsConnection, setShowStepsConnection] = useState(false);
+  const [weightData, setWeightData] = useState<Array<{date: string, value: number}>>([]);
+  const [userWeight, setUserWeight] = useState<number | null>(null);
+  const [userTargetWeight, setUserTargetWeight] = useState<number | null>(null);
+  const [userCalories, setUserCalories] = useState<number>(2200);
+  const [dailySteps, setDailySteps] = useState<number>(8546);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [totalWorkoutsPlanned, setTotalWorkoutsPlanned] = useState(5);
+  const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
 
   useEffect(() => {
-    // Load weight data from localStorage
+    // Get weight data from localStorage (same source as WeightTracker)
     const savedWeightHistory = localStorage.getItem('weightHistory');
-    const savedTargetWeight = localStorage.getItem('targetWeight');
-    
     if (savedWeightHistory) {
       try {
-        const history = JSON.parse(savedWeightHistory);
-        if (history.length > 0) {
-          const sortedHistory = history.sort((a: any, b: any) => {
+        const parsedHistory = JSON.parse(savedWeightHistory);
+        // Convert to chart data format and get the latest weight
+        const chartData = parsedHistory
+          .sort((a: any, b: any) => {
             const dateA = new Date(a.originalDate || a.date);
             const dateB = new Date(b.originalDate || b.date);
-            return dateB.getTime() - dateA.getTime();
-          });
-          const latestWeight = sortedHistory[0].value;
-          const target = savedTargetWeight ? parseFloat(savedTargetWeight) : undefined;
-          setWeightData({ value: latestWeight, target });
-        } else if (savedTargetWeight) {
-          setWeightData({ value: 0, target: parseFloat(savedTargetWeight) });
+            return dateA.getTime() - dateB.getTime();
+          })
+          .map((entry: any) => ({
+            date: entry.date,
+            value: entry.value,
+            originalDate: entry.originalDate
+          }));
+        
+        setWeightData(chartData);
+        
+        // Set current weight from the latest entry
+        if (parsedHistory.length > 0) {
+          const latestWeight = parsedHistory[parsedHistory.length - 1].value;
+          setUserWeight(latestWeight);
         }
       } catch (error) {
-        console.error('Error parsing weight data:', error);
+        console.error("Error parsing weight history:", error);
+        setWeightData([]);
       }
-    } else if (savedTargetWeight) {
-      setWeightData({ value: 0, target: parseFloat(savedTargetWeight) });
+    }
+
+    // Get target weight from localStorage
+    const savedTargetWeight = localStorage.getItem('targetWeight');
+    if (savedTargetWeight) {
+      setUserTargetWeight(parseFloat(savedTargetWeight));
+    }
+
+    // Get user profile from localStorage for calories calculation
+    const savedProfile = localStorage.getItem("userProfile");
+    if (savedProfile) {
+      try {
+        const profileData = JSON.parse(savedProfile);
+        
+        // Calculate calories
+        const bmr = calculateBMR(profileData);
+        const calories = calculateDailyCalories(profileData, bmr);
+        setUserCalories(calories);
+      } catch (error) {
+        console.error("Error parsing profile data:", error);
+      }
+    }
+
+    // Load workouts from localStorage
+    const storedWorkouts = localStorage.getItem("workouts");
+    if (storedWorkouts) {
+      try {
+        const parsedWorkouts = JSON.parse(storedWorkouts);
+        setWorkouts(parsedWorkouts);
+        
+        // Calculate workouts this week
+        const currentDate = new Date();
+        const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Start from Monday
+        const currentWeekEnd = endOfWeek(currentDate, { weekStartsOn: 1 }); // End on Sunday
+        
+        const workoutDates = parsedWorkouts
+          .filter((workout: Workout) => workout.completed)
+          .map((workout: Workout) => parse(workout.date, "yyyy-MM-dd", new Date()))
+          .filter((date: Date) => isValid(date));
+        
+        const weeklyWorkouts = workoutDates.filter((date: Date) => 
+          date >= currentWeekStart && date <= currentWeekEnd
+        ).length;
+        
+        setWorkoutsThisWeek(weeklyWorkouts);
+      } catch (error) {
+        console.error("Error loading workouts:", error);
+      }
     }
   }, []);
 
-  // Format weight display value
-  const getWeightDisplayValue = () => {
-    if (!weightData) {
-      return t("noData");
+  // Calculate BMR using Mifflin-St Jeor formula (same as in Profile.tsx)
+  const calculateBMR = (data: any) => {
+    const { weight, height, age, gender } = data;
+    
+    if (gender === "male") {
+      return 10 * weight + 6.25 * height - 5 * age + 5;
+    } else if (gender === "female") {
+      return 10 * weight + 6.25 * height - 5 * age - 161;
+    } else {
+      // For "other" gender, use an average of male and female formulas
+      return 10 * weight + 6.25 * height - 5 * age - 78;
     }
-    if (weightData.value === 0 && weightData.target) {
-      return t("setTargetWeight");
-    }
-    return `${weightData.value} kg`;
   };
 
-  const getWeightDescription = () => {
-    if (weightData?.target) {
-      return `${t("targetWeight")}: ${weightData.target} kg`;
+  // Calculate daily calorie needs (same as in Profile.tsx)
+  const calculateDailyCalories = (data: any, bmr: number) => {
+    // Apply activity multiplier
+    let activityMultiplier = 1.2; // Sedentary
+    switch (data.exerciseFrequency) {
+      case "0-2":
+        activityMultiplier = 1.375; // Light activity
+        break;
+      case "3-5":
+        activityMultiplier = 1.55; // Moderate activity
+        break;
+      case "6+":
+        activityMultiplier = 1.725; // Very active
+        break;
     }
-    return undefined;
+    
+    let calories = Math.round(bmr * activityMultiplier);
+    
+    // Adjust based on goal
+    switch (data.goal) {
+      case "gain":
+        calories += 500;
+        break;
+      case "lose":
+        calories -= 500;
+        break;
+      case "maintain":
+        // No adjustment needed
+        break;
+    }
+    
+    return calories;
   };
 
-  // Sample workout data for WorkoutsList
-  const sampleWorkouts = [
-    {
-      id: '1',
-      name: 'Push Day',
-      date: 'Today',
-      muscleGroups: ['Chest', 'Shoulders'],
-      exerciseCount: 4,
-      completed: true
-    },
-    {
-      id: '2', 
-      name: 'Pull Day',
-      date: 'Yesterday',
-      muscleGroups: ['Back', 'Biceps'],
-      exerciseCount: 5,
-      completed: true
-    }
-  ];
+  const navigateToNutrition = () => {
+    navigate('/nutrition');
+  };
+
+  const navigateToProgress = () => {
+    navigate('/progress');
+  };
+
+  const navigateToWorkouts = () => {
+    navigate('/workouts');
+  };
+
+  const navigateToWeightProgress = () => {
+    navigate('/progress');
+  };
+
+  const handleOpenStepsConnection = () => {
+    setShowStepsConnection(true);
+  };
+
+  const handleAddActivity = (activityId: string) => {
+    toast.success(`Activity added to your plan`);
+    setShowAddActivity(false);
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2">
-          {t("welcome")}
-        </h1>
-        <p className="text-muted-foreground">
-          {t("weeklyActivitySummary")}
-        </p>
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard")}</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="hidden md:flex">
+                <Calendar className="mr-2 h-4 w-4" />
+                {format(date, 'PPP')}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <CalendarComponent
+                mode="single"
+                selected={date}
+                onSelect={(date) => date && setDate(date)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          
+          <Dialog open={showAddActivity} onOpenChange={setShowAddActivity}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>{t("addActivity")}</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-4 py-4">
+                {getActivityOptions(t).map((activity) => (
+                  <Button
+                    key={activity.id}
+                    variant="outline"
+                    className="h-24 flex flex-col items-center justify-center gap-2"
+                    onClick={() => handleAddActivity(activity.id)}
+                  >
+                    <activity.icon className="h-8 w-8" />
+                    <span>{activity.name}</span>
+                  </Button>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatsCard
-          title={t("targetWeight")}
-          value={getWeightDisplayValue()}
-          icon={Weight}
-          description={getWeightDescription()}
-        />
-        <StatsCard
-          title={t("dailySteps")}
-          value="8,420"
-          icon={Activity}
-          description={t("dailyGoals")}
-        />
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title={t("dailyCalories")}
-          value="1,847"
-          icon={Target}
-          description="2,200 kcal goal"
+          value={userCalories ? userCalories.toString() : "1,840"}
+          icon={Flame}
+          description={`${t("target")}: ${userCalories ? userCalories : 2200}`}
+          onClick={navigateToNutrition}
         />
         <StatsCard
-          title={t("meals")}
-          value="3/4"
-          icon={Utensils}
-          description={t("dailyGoals")}
+          title={`${t("dailySteps")}`}
+          value={dailySteps.toLocaleString()}
+          icon={Footprints}
+          description={`${t("target")}: 10,000`}
+          onClick={handleOpenStepsConnection}
+        />
+        <StatsCard
+          title={`${t("workouts")}`}
+          value={`${workoutsThisWeek}/${totalWorkoutsPlanned}`}
+          icon={Dumbbell}
+          description={`${Math.round((workoutsThisWeek / totalWorkoutsPlanned) * 100)}% ${t("completed")}`}
+          onClick={navigateToWorkouts}
+        />
+        <StatsCard
+          title={t("weight")}
+          value={userWeight ? `${userWeight} kg` : "No data"}
+          icon={Weight}
+          description={userTargetWeight ? `${t("target")}: ${userTargetWeight} kg` : "Set target weight"}
+          onClick={navigateToWeightProgress}
         />
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left Column - Charts */}
-        <div className="lg:col-span-2 space-y-6">
-          <MacroProgressTracker />
-          
-          <div className="glassy-card rounded-xl overflow-hidden card-shadow">
-            <div className="px-5 py-4 border-b border-border">
-              <h3 className="font-medium tracking-tight">{t("progressOverview")}</h3>
-            </div>
-            <div className="p-5">
-              <div className="h-[300px]">
-                <ProgressChart 
-                  data={[
-                    { date: 'Mon', value: 2100 },
-                    { date: 'Tue', value: 2200 },
-                    { date: 'Wed', value: 1900 },
-                    { date: 'Thu', value: 2400 },
-                    { date: 'Fri', value: 2000 },
-                    { date: 'Sat', value: 2300 },
-                    { date: 'Sun', value: 2100 }
-                  ]}
-                  title={t("dailyCalories")}
-                  label="kcal"
-                  color="#4F46E5"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+      <MacroProgressTracker />
 
-        {/* Right Column - Lists */}
-        <div className="space-y-6">
-          <WorkoutsList 
-            workouts={sampleWorkouts}
-            title={t("recentWorkouts")}
+      <div className="grid gap-6 md:grid-cols-2 items-start">
+        <div className="h-[400px]">
+          <ProgressChart
+            title={t("weight")}
+            data={weightData}
+            label="kg"
+            color="#4F46E5"
+            onViewAll={navigateToProgress}
+            targetValue={userTargetWeight || undefined}
           />
-          <MealsList 
+        </div>
+        
+        <div className="max-h-[400px]">
+          <MealsList
             title={t("todayMeals")}
+            meals={meals}
+            onViewAll={navigateToNutrition}
           />
         </div>
       </div>
+
+      {/* Steps Connection Modal */}
+      <StepsConnectionModal 
+        open={showStepsConnection} 
+        onOpenChange={setShowStepsConnection} 
+      />
     </div>
   );
-}
+};
+
+export default Dashboard;

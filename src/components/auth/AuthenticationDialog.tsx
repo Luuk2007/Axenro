@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import PasswordRequirements from './PasswordRequirements';
 import {
   Dialog,
   DialogContent,
@@ -41,20 +40,6 @@ export default function AuthenticationDialog({
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [activeTab, setActiveTab] = useState("signin");
-  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
-
-  const validatePassword = (password: string) => {
-    const requirements = [
-      { test: password.length >= 8, message: "Password must be at least 8 characters" },
-      { test: /[a-z]/.test(password), message: "Password must contain at least one lowercase letter" },
-      { test: /[A-Z]/.test(password), message: "Password must contain at least one uppercase letter" },
-      { test: /\d/.test(password), message: "Password must contain at least one number" },
-      { test: /[!@#$%^&*(),.?":{}|<>]/.test(password), message: "Password must contain at least one special character" }
-    ];
-
-    const failedRequirement = requirements.find(req => !req.test);
-    return failedRequirement ? failedRequirement.message : null;
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,9 +94,8 @@ export default function AuthenticationDialog({
     }
     
     // Password strength validation
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      toast.error(passwordError);
+    if (password.length < 8) {
+      toast.error(t("passwordTooShort"));
       return;
     }
     
@@ -163,7 +147,6 @@ export default function AuthenticationDialog({
     setConfirmPassword('');
     setShowPassword(false);
     setShowConfirmPassword(false);
-    setShowPasswordRequirements(false);
   };
   
   // Switch to sign in tab
@@ -338,7 +321,6 @@ export default function AuthenticationDialog({
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        onFocus={() => setShowPasswordRequirements(true)}
                         required
                       />
                       <button
@@ -353,10 +335,6 @@ export default function AuthenticationDialog({
                         )}
                       </button>
                     </div>
-                    <PasswordRequirements 
-                      password={password} 
-                      showRequirements={showPasswordRequirements} 
-                    />
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="confirm-password" className="text-sm font-medium">{t("confirmPassword")}</label>

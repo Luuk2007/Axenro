@@ -47,30 +47,12 @@ export const defaultValues: ProfileFormValues = {
   goal: "maintain"
 };
 
-// Empty values for new users
-export const emptyValues: Partial<ProfileFormValues> = {
-  name: "",
-  gender: undefined,
-  age: undefined,
-  height: undefined,
-  weight: undefined,
-  activityLevel: undefined,
-  fitnessGoal: undefined,
-  exerciseFrequency: undefined,
-  goal: undefined
-};
-
 interface ProfileFormProps {
   onSubmit: (data: ProfileFormValues) => void;
   initialValues?: ProfileFormValues;
-  isNewUser?: boolean;
 }
 
-const ProfileForm: React.FC<ProfileFormProps> = ({ 
-  onSubmit, 
-  initialValues = defaultValues,
-  isNewUser = false 
-}) => {
+const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = defaultValues }) => {
   const { t } = useLanguage();
   
   const formSchema = z.object({
@@ -98,12 +80,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     goal: z.enum(["lose", "maintain", "gain"]).optional(),
   });
 
-  // Use empty values for new users, saved values for existing users
-  const formValues = isNewUser ? { ...defaultValues, ...emptyValues } : initialValues;
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: formValues,
+    defaultValues: initialValues,
   });
 
   const watchFitnessGoal = form.watch("fitnessGoal");
@@ -146,7 +125,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormLabel>{t("gender")}</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  value={field.value}
+                  defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -173,7 +152,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder={isNewUser ? "" : "30"}
+                    placeholder="30" 
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
@@ -194,7 +173,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder={isNewUser ? "" : "175"}
+                    placeholder="175" 
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
@@ -213,7 +192,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder={isNewUser ? "" : "75"}
+                    placeholder="75" 
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"
@@ -245,7 +224,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                     form.setValue("activityLevel", "active");
                   }
                 }} 
-                value={field.value}
+                defaultValue={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -276,7 +255,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   // Also update the goal to keep in sync with fitnessGoal
                   form.setValue("goal", value);
                 }}
-                value={field.value}
+                defaultValue={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -304,7 +283,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder={isNewUser ? "" : "70"}
+                    placeholder="70" 
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"

@@ -37,12 +37,6 @@ const Profile = () => {
     return savedProfile ? JSON.parse(savedProfile) : defaultValues;
   };
 
-  // Check if user has a saved profile
-  const hasExistingProfile = () => {
-    const savedProfile = localStorage.getItem("userProfile");
-    return !!savedProfile;
-  };
-
   const handleSubmit = (data: ProfileFormValues) => {
     // The target weight calculation logic has been moved to ProfileForm component
     
@@ -66,10 +60,10 @@ const Profile = () => {
     }
   };
 
-  // Get initial values for BMI calculator - only pass valid values
-  const savedProfile = getSavedProfile();
-  const currentWeight = hasExistingProfile() && savedProfile.weight > 0 ? savedProfile.weight : undefined;
-  const currentHeight = hasExistingProfile() && savedProfile.height > 0 ? savedProfile.height : undefined;
+  // Get initial values for BMI calculator
+  const initialValues = getSavedProfile();
+  const currentWeight = initialValues.weight;
+  const currentHeight = initialValues.height;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -92,12 +86,11 @@ const Profile = () => {
               <ProfileForm 
                 onSubmit={handleSubmit} 
                 initialValues={getSavedProfile()}
-                isNewUser={!hasExistingProfile()}
               />
             </CardContent>
           </Card>
           
-          {/* BMI Calculator - only show if user has entered weight and height */}
+          {/* BMI Calculator */}
           <BMICalculator 
             initialWeight={currentWeight} 
             initialHeight={currentHeight} 
