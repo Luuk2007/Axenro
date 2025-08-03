@@ -37,6 +37,12 @@ const Profile = () => {
     return savedProfile ? JSON.parse(savedProfile) : defaultValues;
   };
 
+  // Check if user has a saved profile
+  const hasExistingProfile = () => {
+    const savedProfile = localStorage.getItem("userProfile");
+    return !!savedProfile;
+  };
+
   const handleSubmit = (data: ProfileFormValues) => {
     // The target weight calculation logic has been moved to ProfileForm component
     
@@ -86,6 +92,7 @@ const Profile = () => {
               <ProfileForm 
                 onSubmit={handleSubmit} 
                 initialValues={getSavedProfile()}
+                isNewUser={!hasExistingProfile()}
               />
             </CardContent>
           </Card>
