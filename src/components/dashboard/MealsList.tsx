@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Utensils } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,6 @@ interface MealItemData {
 }
 
 interface MealsListProps {
-  meals: MealItemData[];
   title: string;
   className?: string;
   onViewAll?: () => void;

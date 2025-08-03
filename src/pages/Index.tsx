@@ -80,89 +80,87 @@ export default function Index() {
   ];
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2">
-            {t("welcome")}
-          </h1>
-          <p className="text-muted-foreground">
-            {t("weeklyActivitySummary")}
-          </p>
-        </div>
+    <div className="space-y-6">
+      {/* Welcome Section */}
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2">
+          {t("welcome")}
+        </h1>
+        <p className="text-muted-foreground">
+          {t("weeklyActivitySummary")}
+        </p>
+      </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <StatsCard
-            title={t("targetWeight")}
-            value={getWeightDisplayValue()}
-            icon={Weight}
-            description={getWeightDescription()}
-          />
-          <StatsCard
-            title={t("dailySteps")}
-            value="8,420"
-            icon={Activity}
-            description={t("dailyGoals")}
-          />
-          <StatsCard
-            title={t("dailyCalories")}
-            value="1,847"
-            icon={Target}
-            description="2,200 kcal goal"
-          />
-          <StatsCard
-            title={t("meals")}
-            value="3/4"
-            icon={Utensils}
-            description={t("dailyGoals")}
-          />
-        </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <StatsCard
+          title={t("targetWeight")}
+          value={getWeightDisplayValue()}
+          icon={Weight}
+          description={getWeightDescription()}
+        />
+        <StatsCard
+          title={t("dailySteps")}
+          value="8,420"
+          icon={Activity}
+          description={t("dailyGoals")}
+        />
+        <StatsCard
+          title={t("dailyCalories")}
+          value="1,847"
+          icon={Target}
+          description="2,200 kcal goal"
+        />
+        <StatsCard
+          title={t("meals")}
+          value="3/4"
+          icon={Utensils}
+          description={t("dailyGoals")}
+        />
+      </div>
 
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Column - Charts */}
-          <div className="lg:col-span-2 space-y-6">
-            <MacroProgressTracker />
-            
-            <div className="glassy-card rounded-xl overflow-hidden card-shadow">
-              <div className="px-5 py-4 border-b border-border">
-                <h3 className="font-medium tracking-tight">{t("progressOverview")}</h3>
-              </div>
-              <div className="p-5">
-                <div className="h-[300px]">
-                  <ProgressChart 
-                    data={[
-                      { date: 'Mon', value: 2100 },
-                      { date: 'Tue', value: 2200 },
-                      { date: 'Wed', value: 1900 },
-                      { date: 'Thu', value: 2400 },
-                      { date: 'Fri', value: 2000 },
-                      { date: 'Sat', value: 2300 },
-                      { date: 'Sun', value: 2100 }
-                    ]}
-                    title={t("dailyCalories")}
-                    label="kcal"
-                    color="#4F46E5"
-                  />
-                </div>
+      {/* Main Content Grid */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Left Column - Charts */}
+        <div className="lg:col-span-2 space-y-6">
+          <MacroProgressTracker />
+          
+          <div className="glassy-card rounded-xl overflow-hidden card-shadow">
+            <div className="px-5 py-4 border-b border-border">
+              <h3 className="font-medium tracking-tight">{t("progressOverview")}</h3>
+            </div>
+            <div className="p-5">
+              <div className="h-[300px]">
+                <ProgressChart 
+                  data={[
+                    { date: 'Mon', value: 2100 },
+                    { date: 'Tue', value: 2200 },
+                    { date: 'Wed', value: 1900 },
+                    { date: 'Thu', value: 2400 },
+                    { date: 'Fri', value: 2000 },
+                    { date: 'Sat', value: 2300 },
+                    { date: 'Sun', value: 2100 }
+                  ]}
+                  title={t("dailyCalories")}
+                  label="kcal"
+                  color="#4F46E5"
+                />
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Right Column - Lists */}
-          <div className="space-y-6">
-            <WorkoutsList 
-              workouts={sampleWorkouts}
-              title={t("recentWorkouts")}
-            />
-            <MealsList 
-              title={t("todayMeals")}
-            />
-          </div>
+        {/* Right Column - Lists */}
+        <div className="space-y-6">
+          <WorkoutsList 
+            workouts={sampleWorkouts}
+            title={t("recentWorkouts")}
+          />
+          <MealsList 
+            title={t("todayMeals")}
+          />
         </div>
       </div>
-    </Layout>
+    </div>
   );
 }
