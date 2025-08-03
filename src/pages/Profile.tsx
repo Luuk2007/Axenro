@@ -66,10 +66,10 @@ const Profile = () => {
     }
   };
 
-  // Get initial values for BMI calculator
-  const initialValues = getSavedProfile();
-  const currentWeight = initialValues.weight;
-  const currentHeight = initialValues.height;
+  // Get initial values for BMI calculator - only pass valid values
+  const savedProfile = getSavedProfile();
+  const currentWeight = hasExistingProfile() && savedProfile.weight > 0 ? savedProfile.weight : undefined;
+  const currentHeight = hasExistingProfile() && savedProfile.height > 0 ? savedProfile.height : undefined;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -97,7 +97,7 @@ const Profile = () => {
             </CardContent>
           </Card>
           
-          {/* BMI Calculator */}
+          {/* BMI Calculator - only show if user has entered weight and height */}
           <BMICalculator 
             initialWeight={currentWeight} 
             initialHeight={currentHeight} 
