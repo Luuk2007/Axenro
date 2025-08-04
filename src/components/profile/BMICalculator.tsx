@@ -10,10 +10,10 @@ interface BMICalculatorProps {
   initialHeight?: number;
 }
 
-const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 70, initialHeight = 170 }) => {
+const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHeight }) => {
   const { t } = useLanguage();
-  const [weight, setWeight] = useState<string>(initialWeight.toString());
-  const [height, setHeight] = useState<string>(initialHeight.toString());
+  const [weight, setWeight] = useState<string>(initialWeight?.toString() || '');
+  const [height, setHeight] = useState<string>(initialHeight?.toString() || '');
   const [bmi, setBMI] = useState<number | null>(null);
   const [weightDifference, setWeightDifference] = useState<number | null>(null);
 
@@ -98,7 +98,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 70, initi
                 type="number"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
-                placeholder="70"
+                placeholder="Enter your weight"
                 className="w-full"
               />
             </div>
@@ -111,7 +111,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight = 70, initi
                 type="number"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
-                placeholder="170"
+                placeholder="Enter your height"
                 className="w-full"
               />
             </div>
