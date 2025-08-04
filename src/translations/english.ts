@@ -1,8 +1,6 @@
 import { Translations } from "./types";
 
 const english: Translations = {
-  // ... keep existing code (translations for other UI elements)
-  
   progress: "Progress",
   addMeasurement: "Add Measurement",
   add: "Add",
@@ -299,7 +297,6 @@ const english: Translations = {
   loggedOut: "Successfully logged out",
   resetEmailSent: "Password reset email sent",
   send: "Send",
-  cancel: "Cancel",
 };
 
 export default english;
