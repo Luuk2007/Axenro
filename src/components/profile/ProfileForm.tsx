@@ -47,30 +47,12 @@ export const defaultValues: ProfileFormValues = {
   goal: "maintain"
 };
 
-// Empty values for new users
-export const emptyValues: ProfileFormValues = {
-  name: "",
-  gender: "male",
-  age: 0,
-  height: 0,
-  weight: 0,
-  activityLevel: "moderate",
-  fitnessGoal: "maintain",
-  exerciseFrequency: "2-3",
-  goal: "maintain"
-};
-
 interface ProfileFormProps {
   onSubmit: (data: ProfileFormValues) => void;
   initialValues?: ProfileFormValues;
-  isNewUser?: boolean;
 }
 
-const ProfileForm: React.FC<ProfileFormProps> = ({ 
-  onSubmit, 
-  initialValues = defaultValues, 
-  isNewUser = false 
-}) => {
+const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = defaultValues }) => {
   const { t } = useLanguage();
   
   const formSchema = z.object({
@@ -100,7 +82,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: isNewUser ? emptyValues : initialValues,
+    defaultValues: initialValues,
   });
 
   const watchFitnessGoal = form.watch("fitnessGoal");
@@ -108,7 +90,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
 
   const handleNumberChange = (field: any, value: string) => {
     if (value === "") {
-      field.onChange(0);
+      field.onChange(undefined);
     } else {
       const num = parseFloat(value);
       if (!isNaN(num)) {
@@ -171,7 +153,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   <Input 
                     type="number" 
                     placeholder="30" 
-                    value={field.value === 0 ? '' : field.value?.toString() || ''}
+                    value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
                 </FormControl>
@@ -192,7 +174,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   <Input 
                     type="number" 
                     placeholder="175" 
-                    value={field.value === 0 ? '' : field.value?.toString() || ''}
+                    value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
                 </FormControl>
@@ -211,7 +193,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   <Input 
                     type="number" 
                     placeholder="75" 
-                    value={field.value === 0 ? '' : field.value?.toString() || ''}
+                    value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"
                   />
