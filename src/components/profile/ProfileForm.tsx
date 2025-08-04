@@ -99,12 +99,19 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     goal: z.enum(["lose", "maintain", "gain"]).optional(),
   });
 
-  // Use empty values for new users, saved values for existing users
-  const formDefaults = isNewUser ? emptyDefaultValues : initialValues;
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: formDefaults,
+    defaultValues: isNewUser ? {
+      name: "",
+      gender: undefined,
+      age: undefined,
+      height: undefined,
+      weight: undefined,
+      activityLevel: undefined,
+      fitnessGoal: undefined,
+      exerciseFrequency: undefined,
+      goal: undefined
+    } : initialValues,
   });
 
   const watchFitnessGoal = form.watch("fitnessGoal");
@@ -131,7 +138,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             <FormItem>
               <FormLabel>{t("fullName")}</FormLabel>
               <FormControl>
-                <Input placeholder={isNewUser ? "Enter your full name" : ""} {...field} />
+                <Input placeholder="Enter your full name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -174,7 +181,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder={isNewUser ? "Enter your age" : "30"} 
+                    placeholder="Enter your age"
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
@@ -195,7 +202,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder={isNewUser ? "Enter your height" : "175"} 
+                    placeholder="Enter your height"
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
@@ -214,7 +221,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder={isNewUser ? "Enter your weight" : "75"} 
+                    placeholder="Enter your weight"
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"
@@ -250,7 +257,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder={t("selectActivityLevel")} />
+                    <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -281,7 +288,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder={t("selectGoal")} />
+                    <SelectValue placeholder="Select goal" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -305,7 +312,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder={isNewUser ? "Enter target weight" : "70"} 
+                    placeholder="Enter target weight"
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"
