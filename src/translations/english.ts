@@ -1,4 +1,3 @@
-
 import { Translations } from "./types";
 
 const english: Translations = {
@@ -218,6 +217,14 @@ const english: Translations = {
   noAccount: "Don't have an account?",
   or: "OR",
   
+  // Password requirements
+  passwordRequirements: "Password requirements:",
+  minLength: "At least 8 characters",
+  lowercase: "Lowercase letters",
+  uppercase: "Uppercase letters",
+  digits: "Digits", 
+  symbols: "Symbols",
+  
   // Translations from workout creation screenshot
   workoutName: "Workout Name",
   saveWorkout: "Save Workout",
@@ -279,6 +286,20 @@ const english: Translations = {
   addToMeal: "Add to Meal",
   portionSize: "Portion Size",
   nutritionSummary: "Nutrition Summary",
+  
+  // Validation messages
+  fillAllFields: "Please fill in all fields",
+  invalidEmail: "Please enter a valid email address",
+  passwordTooShort: "Password must be at least 8 characters long",
+  passwordsDoNotMatch: "Passwords do not match",
+  invalidName: "Please enter a valid name (2-50 characters, letters only)",
+  loginSuccess: "Successfully logged in",
+  signupSuccess: "Registration successful",
+  checkEmailConfirmation: "Please check your email for confirmation",
+  loggedOut: "Successfully logged out",
+  resetEmailSent: "Password reset email sent",
+  send: "Send",
+  cancel: "Cancel",
 };
 
 export default english;

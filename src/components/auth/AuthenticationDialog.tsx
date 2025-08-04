@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import PasswordRequirements from './PasswordRequirements';
 import {
   Dialog,
   DialogContent,
@@ -335,6 +336,7 @@ export default function AuthenticationDialog({
                         )}
                       </button>
                     </div>
+                    <PasswordRequirements password={password} />
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="confirm-password" className="text-sm font-medium">{t("confirmPassword")}</label>

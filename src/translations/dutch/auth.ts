@@ -17,4 +17,12 @@ export const authTranslations: Translations = {
   signUp: "Aanmelden", 
   signInWithGoogle: "Inloggen met Google",
   enterEmail: "Voer e-mailadres in",
+  
+  // Password requirements
+  passwordRequirements: "Wachtwoord vereisten:",
+  minLength: "Minimaal 8 tekens",
+  lowercase: "Kleine letters",
+  uppercase: "Hoofdletters", 
+  digits: "Cijfers",
+  symbols: "Symbolen",
 };
