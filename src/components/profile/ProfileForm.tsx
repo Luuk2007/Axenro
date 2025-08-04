@@ -35,6 +35,20 @@ export interface ProfileFormValues {
   goal?: "lose" | "maintain" | "gain";
 }
 
+// Empty default values for new users
+export const emptyDefaultValues: Partial<ProfileFormValues> = {
+  name: "",
+  gender: undefined,
+  age: undefined,
+  height: undefined,
+  weight: undefined,
+  activityLevel: undefined,
+  fitnessGoal: undefined,
+  exerciseFrequency: undefined,
+  goal: undefined
+};
+
+// Default values for fallback when creating profiles
 export const defaultValues: ProfileFormValues = {
   name: "",
   gender: "male",
@@ -49,10 +63,15 @@ export const defaultValues: ProfileFormValues = {
 
 interface ProfileFormProps {
   onSubmit: (data: ProfileFormValues) => void;
-  initialValues?: ProfileFormValues;
+  initialValues?: Partial<ProfileFormValues>;
+  isNewUser?: boolean;
 }
 
-const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = defaultValues }) => {
+const ProfileForm: React.FC<ProfileFormProps> = ({ 
+  onSubmit, 
+  initialValues = emptyDefaultValues,
+  isNewUser = false 
+}) => {
   const { t } = useLanguage();
   
   const formSchema = z.object({
@@ -80,9 +99,12 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
     goal: z.enum(["lose", "maintain", "gain"]).optional(),
   });
 
+  // Use empty values for new users, saved values for existing users
+  const formDefaults = isNewUser ? emptyDefaultValues : initialValues;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialValues,
+    defaultValues: formDefaults,
   });
 
   const watchFitnessGoal = form.watch("fitnessGoal");
@@ -109,7 +131,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
             <FormItem>
               <FormLabel>{t("fullName")}</FormLabel>
               <FormControl>
-                <Input placeholder="" {...field} />
+                <Input placeholder={isNewUser ? "Enter your full name" : ""} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -125,7 +147,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                 <FormLabel>{t("gender")}</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  defaultValue={field.value}
+                  value={field.value || ""}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -152,7 +174,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="30" 
+                    placeholder={isNewUser ? "Enter your age" : "30"} 
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
@@ -173,7 +195,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="175" 
+                    placeholder={isNewUser ? "Enter your height" : "175"} 
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
@@ -192,7 +214,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="75" 
+                    placeholder={isNewUser ? "Enter your weight" : "75"} 
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"
@@ -224,7 +246,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                     form.setValue("activityLevel", "active");
                   }
                 }} 
-                defaultValue={field.value}
+                value={field.value || ""}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -255,7 +277,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                   // Also update the goal to keep in sync with fitnessGoal
                   form.setValue("goal", value);
                 }}
-                defaultValue={field.value}
+                value={field.value || ""}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -283,7 +305,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSubmit, initialValues = def
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="70" 
+                    placeholder={isNewUser ? "Enter target weight" : "70"} 
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"
