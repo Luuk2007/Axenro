@@ -63,7 +63,7 @@ const Profile = () => {
     }
   };
 
-  // Show BMI calculator if user has valid weight and height in their saved profile
+  // Only show BMI calculator if user has a saved profile with valid weight and height
   const showBMICalculator = profile && profile.weight > 0 && profile.height > 0;
 
   return (
@@ -92,11 +92,13 @@ const Profile = () => {
             </CardContent>
           </Card>
           
-          {/* Show BMI Calculator always, but it will only calculate when valid weight/height are entered */}
-          <BMICalculator 
-            initialWeight={profile?.weight} 
-            initialHeight={profile?.height} 
-          />
+          {/* BMI Calculator - only show if user has saved profile with valid weight and height */}
+          {showBMICalculator && (
+            <BMICalculator 
+              initialWeight={profile.weight} 
+              initialHeight={profile.height} 
+            />
+          )}
         </TabsContent>
         
         <TabsContent value="nutrition" className="space-y-6">
