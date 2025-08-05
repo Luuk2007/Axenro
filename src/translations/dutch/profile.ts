@@ -1,4 +1,3 @@
-
 import { Translations } from "../types";
 
 export const profileTranslations: Translations = {
@@ -40,4 +39,7 @@ export const profileTranslations: Translations = {
   yourCoach: "Jouw coach",
   coachMessages: "Berichten van coach",
   contactCoach: "Coach contacteren",
+  
+  // Add missing translation
+  "Please login to save your profile": "Log in om je profiel op te slaan",
 };

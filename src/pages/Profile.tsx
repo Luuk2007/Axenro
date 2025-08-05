@@ -10,6 +10,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import BMICalculator from "@/components/profile/BMICalculator";
 import ProfileForm, { ProfileFormValues, defaultValues, emptyDefaultValues } from "@/components/profile/ProfileForm";
 import UserStatsDisplay from "@/components/profile/UserStatsDisplay";
@@ -17,56 +18,75 @@ import NutritionCalculator from "@/components/profile/NutritionCalculator";
 
 const Profile = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileFormValues | null>(null);
   const [isNewUser, setIsNewUser] = useState(true);
   const [initialValues, setInitialValues] = useState<Partial<ProfileFormValues>>(emptyDefaultValues);
   const [hasValidSavedProfile, setHasValidSavedProfile] = useState(false);
   
   useEffect(() => {
-    const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      try {
-        const parsedProfile = JSON.parse(savedProfile);
-        setProfile(parsedProfile);
-        setInitialValues(parsedProfile);
-        setIsNewUser(false);
-        // Only show BMI calculator if we have valid saved weight and height
-        setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
-      } catch (error) {
-        console.error("Error parsing profile:", error);
+    // Only load from localStorage if user is authenticated
+    if (user) {
+      const savedProfile = localStorage.getItem("userProfile");
+      if (savedProfile) {
+        try {
+          const parsedProfile = JSON.parse(savedProfile);
+          setProfile(parsedProfile);
+          setInitialValues(parsedProfile);
+          setIsNewUser(false);
+          // Only show BMI calculator if we have valid saved weight and height
+          setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
+        } catch (error) {
+          console.error("Error parsing profile:", error);
+          setIsNewUser(true);
+          setInitialValues(emptyDefaultValues);
+          setHasValidSavedProfile(false);
+        }
+      } else {
         setIsNewUser(true);
         setInitialValues(emptyDefaultValues);
         setHasValidSavedProfile(false);
       }
     } else {
+      // If not authenticated, always start with empty values
+      setProfile(null);
       setIsNewUser(true);
       setInitialValues(emptyDefaultValues);
       setHasValidSavedProfile(false);
     }
-  }, []);
+  }, [user]);
 
   const handleSubmit = (data: ProfileFormValues) => {
-    // Save to localStorage
-    localStorage.setItem("userProfile", JSON.stringify(data));
-    setProfile(data);
-    setIsNewUser(false);
-    setInitialValues(data);
-    // Set flag to show BMI calculator after saving
-    setHasValidSavedProfile(data.weight > 0 && data.height > 0);
-    toast.success(t("profileUpdated"));
-    
-    // Save initial weight to weightData array if it doesn't exist yet
-    const savedWeightData = localStorage.getItem("weightData");
-    if (!savedWeightData || JSON.parse(savedWeightData).length === 0) {
-      const today = new Date();
-      const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-      const initialWeightData = [
-        {
-          date: formattedDate,
-          value: data.weight
-        }
-      ];
-      localStorage.setItem("weightData", JSON.stringify(initialWeightData));
+    // Only save to localStorage if user is authenticated
+    if (user) {
+      localStorage.setItem("userProfile", JSON.stringify(data));
+      setProfile(data);
+      setIsNewUser(false);
+      setInitialValues(data);
+      // Set flag to show BMI calculator after saving
+      setHasValidSavedProfile(data.weight > 0 && data.height > 0);
+      toast.success(t("profileUpdated"));
+      
+      // Save initial weight to weightData array if it doesn't exist yet
+      const savedWeightData = localStorage.getItem("weightData");
+      if (!savedWeightData || JSON.parse(savedWeightData).length === 0) {
+        const today = new Date();
+        const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+        const initialWeightData = [
+          {
+            date: formattedDate,
+            value: data.weight
+          }
+        ];
+        localStorage.setItem("weightData", JSON.stringify(initialWeightData));
+      }
+    } else {
+      // If not authenticated, just update the local state without saving
+      setProfile(data);
+      setIsNewUser(false);
+      setInitialValues(data);
+      setHasValidSavedProfile(data.weight > 0 && data.height > 0);
+      toast.info(t("Please login to save your profile"));
     }
   };
 
