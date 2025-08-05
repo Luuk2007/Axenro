@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,20 @@ const MealsSettings = () => {
   });
   const [newMealName, setNewMealName] = useState('');
   const [mealsOpen, setMealsOpen] = useState(false);
+  const [availableMeals, setAvailableMeals] = useState(() => getAvailableMeals());
+
+  // Listen for meals changes and refresh available meals
+  useEffect(() => {
+    const handleMealsChanged = () => {
+      setAvailableMeals(getAvailableMeals());
+    };
+
+    window.addEventListener('mealsChanged', handleMealsChanged);
+    
+    return () => {
+      window.removeEventListener('mealsChanged', handleMealsChanged);
+    };
+  }, []);
 
   // Check if there are deleted default meals
   const hasDeletedDefaultMeals = () => {
@@ -53,9 +67,6 @@ const MealsSettings = () => {
     }
     return false;
   };
-
-  // Get all meals including default ones
-  const allMeals = getAvailableMeals();
 
   const addCustomMeal = () => {
     if (!newMealName.trim()) {
@@ -73,6 +84,9 @@ const MealsSettings = () => {
     localStorage.setItem('customMeals', JSON.stringify(updatedMeals));
     setNewMealName('');
     toast.success(t("Meal added successfully"));
+    
+    // Refresh available meals
+    setAvailableMeals(getAvailableMeals());
   };
 
   const removeCustomMeal = (index: number) => {
@@ -80,6 +94,9 @@ const MealsSettings = () => {
     setCustomMeals(updatedMeals);
     localStorage.setItem('customMeals', JSON.stringify(updatedMeals));
     toast.success(t("Meal removed successfully"));
+    
+    // Refresh available meals
+    setAvailableMeals(getAvailableMeals());
   };
 
   const removeDefaultMeal = (mealId: string) => {
@@ -99,6 +116,9 @@ const MealsSettings = () => {
     deletedMealIds.push(mealId);
     localStorage.setItem('deletedMeals', JSON.stringify(deletedMealIds));
     
+    // Immediately update available meals
+    setAvailableMeals(getAvailableMeals());
+    
     // Trigger meals change event
     window.dispatchEvent(new Event('mealsChanged'));
     toast.success(t("Meal removed successfully"));
@@ -107,6 +127,9 @@ const MealsSettings = () => {
   const restoreDefaultMeals = () => {
     // Clear the deleted meals list
     localStorage.removeItem('deletedMeals');
+    
+    // Immediately update available meals
+    setAvailableMeals(getAvailableMeals());
     
     // Trigger meals change event
     window.dispatchEvent(new Event('mealsChanged'));
@@ -129,7 +152,7 @@ const MealsSettings = () => {
             <div className="space-y-2">
               <h3 className="font-medium text-sm">{t("Available meals")}</h3>
               <div className="space-y-2">
-                {allMeals.map((meal, index) => (
+                {availableMeals.map((meal, index) => (
                   <div key={meal.id || index} className="flex items-center justify-between p-2 border rounded">
                     <div className="flex items-center gap-2">
                       <span className="text-sm">{meal.name}</span>
