@@ -20,6 +20,7 @@ const Profile = () => {
   const [profile, setProfile] = useState<ProfileFormValues | null>(null);
   const [isNewUser, setIsNewUser] = useState(true);
   const [initialValues, setInitialValues] = useState<Partial<ProfileFormValues>>(emptyDefaultValues);
+  const [hasValidSavedProfile, setHasValidSavedProfile] = useState(false);
   
   useEffect(() => {
     const savedProfile = localStorage.getItem("userProfile");
@@ -29,14 +30,18 @@ const Profile = () => {
         setProfile(parsedProfile);
         setInitialValues(parsedProfile);
         setIsNewUser(false);
+        // Only show BMI calculator if we have valid saved weight and height
+        setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
       } catch (error) {
         console.error("Error parsing profile:", error);
         setIsNewUser(true);
         setInitialValues(emptyDefaultValues);
+        setHasValidSavedProfile(false);
       }
     } else {
       setIsNewUser(true);
       setInitialValues(emptyDefaultValues);
+      setHasValidSavedProfile(false);
     }
   }, []);
 
@@ -46,6 +51,8 @@ const Profile = () => {
     setProfile(data);
     setIsNewUser(false);
     setInitialValues(data);
+    // Set flag to show BMI calculator after saving
+    setHasValidSavedProfile(data.weight > 0 && data.height > 0);
     toast.success(t("profileUpdated"));
     
     // Save initial weight to weightData array if it doesn't exist yet
@@ -62,9 +69,6 @@ const Profile = () => {
       localStorage.setItem("weightData", JSON.stringify(initialWeightData));
     }
   };
-
-  // Only show BMI calculator if user has a saved profile with valid weight and height
-  const showBMICalculator = profile && profile.weight > 0 && profile.height > 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -92,8 +96,8 @@ const Profile = () => {
             </CardContent>
           </Card>
           
-          {/* BMI Calculator - only show if user has saved profile with valid weight and height */}
-          {showBMICalculator && (
+          {/* BMI Calculator - only show after user has saved valid weight and height */}
+          {hasValidSavedProfile && profile && (
             <BMICalculator 
               initialWeight={profile.weight} 
               initialHeight={profile.height} 
