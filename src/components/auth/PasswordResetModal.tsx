@@ -8,6 +8,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import PasswordRequirements from './PasswordRequirements';
 
 interface PasswordResetModalProps {
   open: boolean;
@@ -35,8 +36,8 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({ open, onOpenCha
       return;
     }
     
-    if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters long');
+    if (newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters long');
       return;
     }
 
@@ -122,6 +123,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({ open, onOpenCha
                 )}
               </Button>
             </div>
+            <PasswordRequirements password={newPassword} />
           </div>
           
           <div className="space-y-2">
