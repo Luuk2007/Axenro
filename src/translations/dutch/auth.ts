@@ -25,4 +25,23 @@ export const authTranslations: Translations = {
   uppercase: "Hoofdletters", 
   digits: "Cijfers",
   symbols: "Symbolen",
+
+  // Missing auth translations
+  fillAllFields: "Vul alle velden in",
+  invalidEmail: "Voer een geldig e-mailadres in",
+  passwordTooShort: "Wachtwoord moet minimaal 8 tekens lang zijn",
+  passwordsDoNotMatch: "Wachtwoorden komen niet overeen",
+  alreadyHaveAccount: "Heb je al een account?",
+  invalidName: "Voer een geldige naam in",
+  or: "of",
+  send: "Versturen",
+  login: "Inloggen",
+  logOut: "Uitloggen",
+  logout: "Uitloggen",
+  signup: "Aanmelden",
+  fullName: "Volledige naam",
+  signupSuccess: "Aanmelden succesvol! Controleer je e-mail voor bevestiging.",
+  loggedOut: "Uitgelogd",
+  resetEmailSent: "Wachtwoord reset e-mail verzonden!",
+  checkEmailConfirmation: "Controleer je e-mail om je account te bevestigen.",
 };

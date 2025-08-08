@@ -1,5 +1,45 @@
-
 export const commonTranslations = {
+  // Auth related missing translations
+  "fillAllFields": "Vul alle velden in",
+  "invalidEmail": "Voer een geldig e-mailadres in",
+  "passwordTooShort": "Wachtwoord moet minimaal 8 tekens lang zijn",
+  "passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
+  "alreadyHaveAccount": "Heb je al een account?",
+  "invalidName": "Voer een geldige naam in",
+  "or": "of",
+  "send": "Versturen",
+  "login": "Inloggen",
+  "logOut": "Uitloggen",
+
+  // Common UI translations
+  "viewAll": "Bekijk alles",
+  "remaining": "resterend",
+  "startTracking": "Begin met bijhouden",
+  "noMealsTracked": "Geen maaltijden bijgehouden vandaag",
+  "noWorkoutsFound": "Geen workouts gevonden",
+  "addItem": "Item toevoegen",
+  "close": "Sluiten",
+  "back": "Terug",
+  "loading": "Laden...",
+  "tryAgain": "Probeer opnieuw",
+
+  // Dashboard translations
+  "dailyNutritionTracker": "Dagelijkse Voedingstracker",
+  "remainingToday": "resterend vandaag",
+  "kcal": "kcal",
+  "dailyMacroRecommendations": "Dagelijkse Macro Aanbevelingen",
+  "welcome": "Welkom",
+  "dailyGoals": "Dagelijkse doelen",
+  "recentWorkouts": "Recente workouts",
+  "upcomingWorkouts": "Aankomende workouts",
+  "progressOverview": "Voortgangsoverzicht",
+  "weeklyActivitySummary": "Wekelijkse activiteitssamenvatting",
+  "dailyCalories": "Dagelijkse calorieën",
+  "dailySteps": "Dagelijkse stappen",
+  "exerciseFrequency": "Trainingsfrequentie",
+  "addActivity": "Activiteit toevoegen",
+
+  // Existing translations
   "confirmDelete": "Weet je zeker dat je dit wilt verwijderen?",
   "yes": "Ja",
   "no": "Nee",
@@ -130,5 +170,20 @@ export const commonTranslations = {
   "Failed to open settings": "Kan instellingen niet openen",
   "Privacy Policy": "Privacybeleid",
   "Get started with the basics — track your progress for free": "Begin met de basis — volg je voortgang gratis",
-  "Free Plan": "Gratis abonnement"
+  "Free Plan": "Gratis abonnement",
+
+  // Workout specific missing translations
+  "noWorkoutsYet": "Nog geen workouts",
+  "createYourFirstWorkout": "Maak je eerste workout",
+  "workoutName": "Workout naam",
+  "exercise": "Oefening",
+  "duration": "Duur",
+  "completed": "Voltooid",
+  "planned": "Gepland",
+
+  // Progress and measurements
+  "measurements": "Metingen",
+  "photos": "Foto's",
+  "goals": "Doelen",
+  "stats": "Statistieken",
 };

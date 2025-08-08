@@ -16,4 +16,15 @@ export const dashboardTranslations: Translations = {
   targetWeight: "Streefgewicht",
   meals: "Maaltijden",
   addActivity: "Activiteit toevoegen",
+  
+  // Missing dashboard specific translations
+  dailyNutritionTracker: "Dagelijkse Voedingstracker",
+  remainingToday: "resterend vandaag",
+  kcal: "kcal",
+  dailyMacroRecommendations: "Dagelijkse Macro Aanbevelingen",
+  viewAll: "Bekijk alles",
+  remaining: "resterend",
+  startTracking: "Begin met bijhouden",
+  noMealsTracked: "Geen maaltijden bijgehouden vandaag",
+  noWorkoutsFound: "Geen workouts gevonden",
 };

@@ -142,11 +142,12 @@ export const englishTranslations = {
   workoutDeletedSuccessfully: "Workout deleted successfully",
   exerciseUpdatedSuccessfully: "Exercise updated successfully",
   exerciseDeletedSuccessfully: "Exercise deleted successfully",
-  
-  // Auth
+
+  // Missing Auth translations
   login: "Login",
   signup: "Sign up",
   logout: "Logout",
+  logOut: "Log Out",
   email: "Email",
   password: "Password",
   fullName: "Full Name",
@@ -156,8 +157,77 @@ export const englishTranslations = {
   resetPassword: "Reset Password",
   resetEmailSent: "Password reset email sent!",
   checkEmailConfirmation: "Please check your email to confirm your account.",
-  
-  // Profile
+  fillAllFields: "Please fill in all fields",
+  invalidEmail: "Please enter a valid email address",
+  passwordTooShort: "Password must be at least 8 characters long",
+  passwordsDoNotMatch: "Passwords do not match",
+  alreadyHaveAccount: "Already have an account?",
+  invalidName: "Please enter a valid name",
+  or: "or",
+  send: "Send",
+
+  // Missing Common UI translations
+  viewAll: "View All",
+  remaining: "remaining",
+  startTracking: "Start Tracking",
+  noMealsTracked: "No meals tracked today",
+  noWorkoutsFound: "No workouts found",
+  addItem: "Add item",
+  close: "Close",
+  back: "Back",
+  loading: "Loading...",
+  tryAgain: "Try Again",
+
+  // Missing Dashboard translations
+  dailyNutritionTracker: "Daily Nutrition Tracker",
+  remainingToday: "remaining today",
+  kcal: "kcal",
+  dailyMacroRecommendations: "Daily Macro Recommendations",
+  welcome: "Welcome",
+  dailyGoals: "Daily Goals",
+  recentWorkouts: "Recent Workouts",
+  upcomingWorkouts: "Upcoming Workouts",
+  progressOverview: "Progress Overview",
+  weeklyActivitySummary: "Weekly Activity Summary",
+  dailyCalories: "Daily Calories",
+  dailySteps: "Daily Steps",
+  exerciseFrequency: "Exercise Frequency",
+  addActivity: "Add Activity",
+
+  // Missing Nutrition translations
+  todayMeals: "Today's Meals",
+  todaysMeals: "Today's Meals",
+  addMeal: "Add Meal",
+  scanBarcode: "Scan Barcode",
+  nutritionInfo: "Nutrition Info",
+  fiber: "Fiber",
+  sugar: "Sugar",
+  salt: "Salt",
+  water: "Water",
+  mealTime: "Meal Time",
+  servingSize: "Serving Size",
+  portions: "Portions",
+  dailyIntake: "Daily Intake",
+  dailyTarget: "Daily Target",
+  remainingCalories: "Remaining Calories",
+  dailyCalorieNeeds: "Daily Calorie Needs",
+  macroBreakdown: "Macro Breakdown",
+  breakfast: "Breakfast",
+  lunch: "Lunch",
+  dinner: "Dinner",
+  snack: "Snack",
+  searchFood: "Search Food",
+  searchFoods: "Search foods...",
+  addFood: "Add Food",
+  addWater: "Add Water",
+  foodName: "Food Name",
+  brand: "Brand",
+  quantity: "Quantity",
+  confirmDeleteFood: "Are you sure you want to delete this food item?",
+  foodItemRemoved: "Food item removed",
+  noFoodItemsYet: "No food items yet",
+
+  // Missing Profile translations
   personalInfo: "Personal Information",
   gender: "Gender",
   male: "Male",
@@ -186,11 +256,26 @@ export const englishTranslations = {
   selectGoal: "Select Goal",
   saveChanges: "Save Changes",
   pleaseLoginToSaveProfile: "Please login to save your profile",
-  
+
   // Coaching
   coach: "Coach",
   findCoach: "Find a Coach",
   yourCoach: "Your Coach",
   coachMessages: "Messages from Coach",
   contactCoach: "Contact Coach",
+
+  // Missing workout translations
+  noWorkoutsYet: "No workouts yet",
+  createYourFirstWorkout: "Create your first workout",
+  workoutName: "Workout Name",
+  exercise: "Exercise",
+  duration: "Duration",
+  completed: "Completed",
+  planned: "Planned",
+
+  // Missing measurements and progress
+  measurements: "Measurements",
+  photos: "Photos",
+  goals: "Goals",
+  stats: "Stats",
 };
