@@ -134,16 +134,18 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-6xl h-[90vh] flex flex-col p-0">
-        <div className="flex-1 overflow-y-auto p-6">
+      <DialogContent className="sm:max-w-6xl max-h-[90vh] p-0 flex flex-col">
+        <div className="flex-1 overflow-y-auto p-6 pb-4">
           <PricingSection 
             plans={plans}
             heading={t('Choose Your Plan')}
             description={t('Unlock the full potential of your fitness journey with our premium features.')}
           />
+        </div>
 
-          {subscribed && (
-            <div className="flex justify-center mt-4 sm:mt-6 pt-4 sm:pt-6 border-t">
+        {subscribed && (
+          <div className="border-t px-6 py-4 bg-muted/10">
+            <div className="flex justify-center">
               <Button 
                 variant="outline" 
                 onClick={handleManageSubscription}
@@ -160,8 +162,8 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
                 )}
               </Button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
