@@ -13,57 +13,76 @@ export const useMeasurementSystem = () => {
 
   // Load user's measurement preference
   useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
     const loadPreference = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('user_preferences')
-          .select('measurement_system')
-          .eq('user_id', user.id)
-          .single();
+      if (user) {
+        try {
+          // Try to load from Supabase using a direct query
+          const { data, error } = await supabase
+            .from('user_preferences' as any)
+            .select('measurement_system')
+            .eq('user_id', user.id)
+            .single();
 
-        if (error && error.code !== 'PGRST116') {
+          if (error && error.code !== 'PGRST116') {
+            console.error('Error loading measurement preference:', error);
+            // Fallback to localStorage
+            const saved = localStorage.getItem('measurementSystem') as MeasurementSystem;
+            if (saved) {
+              setMeasurementSystem(saved);
+            }
+          } else if (data) {
+            setMeasurementSystem(data.measurement_system as MeasurementSystem);
+            // Also save to localStorage as backup
+            localStorage.setItem('measurementSystem', data.measurement_system);
+          }
+        } catch (error) {
           console.error('Error loading measurement preference:', error);
-        } else if (data) {
-          setMeasurementSystem(data.measurement_system as MeasurementSystem);
+          // Fallback to localStorage
+          const saved = localStorage.getItem('measurementSystem') as MeasurementSystem;
+          if (saved) {
+            setMeasurementSystem(saved);
+          }
         }
-      } catch (error) {
-        console.error('Error loading measurement preference:', error);
-      } finally {
-        setLoading(false);
+      } else {
+        // For non-authenticated users, use localStorage
+        const saved = localStorage.getItem('measurementSystem') as MeasurementSystem;
+        if (saved) {
+          setMeasurementSystem(saved);
+        }
       }
+      setLoading(false);
     };
 
     loadPreference();
   }, [user]);
 
   const updateMeasurementSystem = async (newSystem: MeasurementSystem) => {
-    if (!user) return;
+    setMeasurementSystem(newSystem);
+    localStorage.setItem('measurementSystem', newSystem);
 
-    try {
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert({
-          user_id: user.id,
-          measurement_system: newSystem,
-        }, {
-          onConflict: 'user_id'
-        });
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('user_preferences' as any)
+          .upsert({
+            user_id: user.id,
+            measurement_system: newSystem,
+          }, {
+            onConflict: 'user_id'
+          });
 
-      if (error) {
+        if (error) {
+          console.error('Error updating measurement system:', error);
+          toast.error('Failed to sync measurement system to cloud, but saved locally');
+        } else {
+          toast.success('Measurement system updated');
+        }
+      } catch (error) {
         console.error('Error updating measurement system:', error);
-        toast.error('Failed to update measurement system');
-      } else {
-        setMeasurementSystem(newSystem);
-        toast.success('Measurement system updated');
+        toast.error('Failed to sync measurement system to cloud, but saved locally');
       }
-    } catch (error) {
-      console.error('Error updating measurement system:', error);
-      toast.error('Failed to update measurement system');
+    } else {
+      toast.success('Measurement system updated');
     }
   };
 
