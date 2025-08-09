@@ -14,6 +14,15 @@ export const settingsTranslations: Translations = {
   dark: "Donker",
   system: "Systeem",
   
+  // Measurement System
+  measurementSystem: "Meetsysteem",
+  chooseMeasurementSystemDesc: "Kies welk meetsysteem je wilt gebruiken voor gewicht, lengte en afstand.",
+  system: "Systeem",
+  selectSystem: "Selecteer systeem",
+  metric: "Metrisch",
+  imperial: "Imperiaal",
+  measurementSystemNote: "Dit beïnvloedt alle gewichts-, lengte- en afstandsmetingen in de app.",
+  
   // Subscription
   "Subscription Management": "Abonnement Beheer",
   "Current subscription": "Huidig abonnement",

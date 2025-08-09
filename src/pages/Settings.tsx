@@ -12,6 +12,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import MealsSettings from "@/components/settings/MealsSettings";
 import ExercisesSettings from "@/components/settings/ExercisesSettings";
 import BodyMeasurementsSettings from "@/components/settings/BodyMeasurementsSettings";
+import MeasurementSystemSettings from "@/components/settings/MeasurementSystemSettings";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionModal from "@/components/subscription/SubscriptionModal";
 import { useLocation } from "react-router-dom";
@@ -252,6 +253,9 @@ const Settings = () => {
             </CollapsibleContent>
           </Collapsible>
         </Card>
+
+        {/* Measurement System Settings */}
+        <MeasurementSystemSettings />
 
         {/* Meals Settings */}
         <MealsSettings />
