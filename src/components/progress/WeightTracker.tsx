@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format, parse, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import ProgressChart from '@/components/dashboard/ProgressChart';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { ArrowUp, ArrowDown, Plus, Weight, Trash2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
 import { toast } from 'sonner';
 import { Progress as ProgressBar } from '@/components/ui/progress';
 import { 
@@ -17,24 +17,43 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { 
+  convertWeight, 
+  getWeightUnit, 
+  formatWeight 
+} from '@/utils/unitConversions';
 
 interface WeightEntry {
   date: string;
-  value: number;
+  value: number; // Always stored in kg (metric)
   originalDate?: string;
-  id: string; // Add unique ID for deletion
+  id: string;
 }
 
 export function WeightTracker() {
   const { t } = useLanguage();
+  const { measurementSystem } = useMeasurementSystem();
   const [weightHistory, setWeightHistory] = useState<WeightEntry[]>([]);
   const [newWeight, setNewWeight] = useState('');
-  const [startingWeight, setStartingWeight] = useState<number | null>(null);
-  const [targetWeight, setTargetWeight] = useState<number | null>(null);
+  const [startingWeight, setStartingWeight] = useState<number | null>(null); // Always stored in kg
+  const [targetWeight, setTargetWeight] = useState<number | null>(null); // Always stored in kg
   const [showAddWeightDialog, setShowAddWeightDialog] = useState(false);
   const [showTargetDialog, setShowTargetDialog] = useState(false);
   const [newTargetWeight, setNewTargetWeight] = useState('');
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+
+  const weightUnit = getWeightUnit(measurementSystem);
+
+  // Convert metric weight to display weight
+  const getDisplayWeight = (metricWeight: number) => {
+    const converted = convertWeight(metricWeight, 'metric', measurementSystem);
+    return formatWeight(converted, measurementSystem);
+  };
+
+  // Convert display weight to metric for storage
+  const convertToMetricWeight = (displayWeight: number) => {
+    return convertWeight(displayWeight, measurementSystem, 'metric');
+  };
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -45,7 +64,6 @@ export function WeightTracker() {
     if (savedWeightHistory) {
       try {
         const parsedHistory = JSON.parse(savedWeightHistory);
-        // Ensure all entries have IDs for delete functionality
         const historyWithIds = parsedHistory.map((entry: WeightEntry, index: number) => ({
           ...entry,
           id: entry.id || `weight-${Date.now()}-${index}`
@@ -121,18 +139,21 @@ export function WeightTracker() {
       return;
     }
 
+    // Convert display weight to metric for storage
+    const metricWeight = convertToMetricWeight(weightValue);
+
     // Check if this is the first weight entry
     if (weightHistory.length === 0 && startingWeight === null) {
-      setStartingWeight(weightValue);
+      setStartingWeight(metricWeight);
     }
     
-    // Create new entry with unique ID
+    // Create new entry with unique ID (store in metric)
     const dateObj = parseISO(selectedDate);
     const originalDate = selectedDate;
     const formattedDate = format(dateObj, 'MMM d');
     const newEntry: WeightEntry = { 
       date: formattedDate, 
-      value: weightValue,
+      value: metricWeight, // Store in kg
       originalDate,
       id: `weight-${Date.now()}-${Math.random()}`
     };
@@ -181,7 +202,9 @@ export function WeightTracker() {
       return;
     }
     
-    setTargetWeight(parsedTarget);
+    // Convert display weight to metric for storage
+    const metricTarget = convertToMetricWeight(parsedTarget);
+    setTargetWeight(metricTarget);
     setNewTargetWeight('');
     setShowTargetDialog(false);
     toast.success(t("targetUpdated"));
@@ -201,13 +224,16 @@ export function WeightTracker() {
     const previous = sortedHistory[sortedHistory.length - 2].value;
     const change = latest - previous;
     
+    // Convert change to display units
+    const displayChange = convertWeight(Math.abs(change), 'metric', measurementSystem);
+    
     return {
-      value: Math.abs(change).toFixed(1),
+      value: formatWeight(displayChange, measurementSystem),
       isGain: change > 0,
     };
   };
 
-  // Prepare chart data - ensure proper formatting
+  // Prepare chart data - convert to display units
   const chartData = React.useMemo(() => {
     console.log('WeightTracker chartData - raw weightHistory:', weightHistory);
     
@@ -224,13 +250,13 @@ export function WeightTracker() {
       })
       .map(entry => ({
         date: entry.date,
-        value: entry.value,
+        value: convertWeight(entry.value, 'metric', measurementSystem), // Convert for display
         originalDate: entry.originalDate
       }));
     
     console.log('WeightTracker chartData - sorted and formatted:', sortedData);
     return sortedData;
-  }, [weightHistory]);
+  }, [weightHistory, measurementSystem]);
 
   const weightChange = getWeightChange();
   const currentWeight = weightHistory.length > 0 
@@ -240,6 +266,9 @@ export function WeightTracker() {
         return dateB.getTime() - dateA.getTime();
       })[0].value
     : null;
+
+  // Convert target weight for chart display
+  const displayTargetWeight = targetWeight ? convertWeight(targetWeight, 'metric', measurementSystem) : undefined;
 
   console.log('WeightTracker render - weightHistory length:', weightHistory.length);
   console.log('WeightTracker render - chartData length:', chartData.length);
@@ -265,13 +294,13 @@ export function WeightTracker() {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{t("weight")} (kg)</label>
+                  <label className="text-sm font-medium">{t("weight")} ({weightUnit})</label>
                   <Input 
                     type="number" 
                     value={newWeight}
                     onChange={(e) => setNewWeight(e.target.value)}
-                    step="0.1"
-                    placeholder="70.5"
+                    step={measurementSystem === 'imperial' ? '0.1' : '0.1'}
+                    placeholder={measurementSystem === 'imperial' ? '155.0' : '70.5'}
                   />
                 </div>
                 <div className="space-y-2">
@@ -295,12 +324,12 @@ export function WeightTracker() {
             <>
               <div className="flex items-baseline mb-4">
                 <span className="text-2xl font-semibold tracking-tight mr-2">
-                  {currentWeight} kg
+                  {currentWeight ? getDisplayWeight(currentWeight) : '0'} {weightUnit}
                 </span>
                 {weightChange && (
                   <span className={`text-xs font-medium ${weightChange.isGain ? 'text-red-500' : 'text-green-500'}`}>
                     {weightChange.isGain ? <ArrowUp className="h-3 w-3 inline" /> : <ArrowDown className="h-3 w-3 inline" />}
-                    {weightChange.value} kg
+                    {weightChange.value} {weightUnit}
                   </span>
                 )}
               </div>
@@ -310,9 +339,9 @@ export function WeightTracker() {
                 <ProgressChart
                   data={chartData}
                   title=""
-                  label="kg"
+                  label={weightUnit}
                   color="#4F46E5"
-                  targetValue={targetWeight || undefined}
+                  targetValue={displayTargetWeight}
                 />
               </div>
             </>
@@ -360,7 +389,9 @@ export function WeightTracker() {
                         <TableCell className="py-3">
                           {entry.originalDate ? format(parseISO(entry.originalDate), 'MMM d, yyyy') : entry.date}
                         </TableCell>
-                        <TableCell className="py-3 text-right">{entry.value} kg</TableCell>
+                        <TableCell className="py-3 text-right">
+                          {getDisplayWeight(entry.value)} {weightUnit}
+                        </TableCell>
                         <TableCell className="py-3">
                           <Button 
                             variant="ghost" 
@@ -399,8 +430,8 @@ export function WeightTracker() {
                 <ProgressBar value={progressPercentage} className="h-2 mb-4" />
                 
                 <div className="flex justify-between text-sm text-muted-foreground">
-                  <div>{t("startingWeight")}: <span className="font-medium">{startingWeight} kg</span></div>
-                  <div>{t("targetWeight")}: <span className="font-medium">{targetWeight} kg</span></div>
+                  <div>{t("startingWeight")}: <span className="font-medium">{getDisplayWeight(startingWeight)} {weightUnit}</span></div>
+                  <div>{t("targetWeight")}: <span className="font-medium">{getDisplayWeight(targetWeight)} {weightUnit}</span></div>
                 </div>
                 
                 <div className="mt-4">
@@ -419,13 +450,13 @@ export function WeightTracker() {
                       </DialogHeader>
                       <form onSubmit={handleUpdateTarget} className="space-y-4 py-2">
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">{t("targetWeight")} (kg)</label>
+                          <label className="text-sm font-medium">{t("targetWeight")} ({weightUnit})</label>
                           <Input 
                             type="number"
                             value={newTargetWeight}
                             onChange={(e) => setNewTargetWeight(e.target.value)}
-                            step="0.1"
-                            placeholder={targetWeight?.toString() || ''}
+                            step={measurementSystem === 'imperial' ? '0.1' : '0.1'}
+                            placeholder={targetWeight ? getDisplayWeight(targetWeight) : ''}
                           />
                         </div>
                         <DialogFooter>
@@ -441,13 +472,13 @@ export function WeightTracker() {
                 <p className="text-muted-foreground">{t("setWeightGoal")}</p>
                 <form onSubmit={handleUpdateTarget} className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium">{t("targetWeight")} (kg)</label>
+                    <label className="text-sm font-medium">{t("targetWeight")} ({weightUnit})</label>
                     <Input 
                       type="number"
                       value={newTargetWeight}
                       onChange={(e) => setNewTargetWeight(e.target.value)}
-                      step="0.1"
-                      placeholder="65.0"
+                      step={measurementSystem === 'imperial' ? '0.1' : '0.1'}
+                      placeholder={measurementSystem === 'imperial' ? '143.0' : '65.0'}
                       className="mt-1"
                     />
                   </div>
