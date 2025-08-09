@@ -12,7 +12,6 @@ export const settingsTranslations: Translations = {
   language: "Taal",
   light: "Licht",
   dark: "Donker",
-  system: "Systeem",
   
   // Measurement System
   measurementSystem: "Meetsysteem",
