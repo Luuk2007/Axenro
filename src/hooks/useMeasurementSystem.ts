@@ -16,9 +16,9 @@ export const useMeasurementSystem = () => {
     const loadPreference = async () => {
       if (user) {
         try {
-          // Try to load from Supabase using a direct query
+          // Try to load from Supabase
           const { data, error } = await supabase
-            .from('user_preferences' as any)
+            .from('user_preferences')
             .select('measurement_system')
             .eq('user_id', user.id)
             .single();
@@ -63,7 +63,7 @@ export const useMeasurementSystem = () => {
     if (user) {
       try {
         const { error } = await supabase
-          .from('user_preferences' as any)
+          .from('user_preferences')
           .upsert({
             user_id: user.id,
             measurement_system: newSystem,

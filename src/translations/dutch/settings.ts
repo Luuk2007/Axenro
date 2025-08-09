@@ -66,7 +66,4 @@ export const settingsTranslations: Translations = {
   "personalDetails": "Persoonlijke gegevens",
   "profileSettings": "Profiel instellingen",
   "nutritionPlan": "Voedingsplan",
-  
-  // Meals
-  meals: "Maaltijden",
 };
