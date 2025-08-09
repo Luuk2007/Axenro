@@ -266,7 +266,7 @@ const Dashboard = () => {
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title={t("dailyCalories")}
+          title={t("Daily calories")}
           value={userCalories ? userCalories.toString() : "1,840"}
           icon={Flame}
           description={`${t("target")}: ${userCalories ? userCalories : 2200}`}
