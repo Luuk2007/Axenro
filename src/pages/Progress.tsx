@@ -19,17 +19,13 @@ import {
   TableRow 
 } from "@/components/ui/table";
 
-// Measurement types with capitalized names
-const measurementTypes = [
-  { id: 'weight', name: 'Weight', unit: 'kg' },
-  { id: 'chest', name: 'Chest', unit: 'cm' },
-  { id: 'waist', name: 'Waist', unit: 'cm' },
-  { id: 'hips', name: 'Hips', unit: 'cm' },
-  { id: 'biceps', name: 'Biceps', unit: 'cm' },
-  { id: 'thighs', name: 'Thighs', unit: 'cm' },
-  { id: 'calves', name: 'Calves', unit: 'cm' },
-  { id: 'bodyfat', name: 'Body Fat', unit: '%' },
-];
+interface MeasurementType {
+  id: string;
+  name: string;
+  unit: string;
+  enabled: boolean;
+  isCustom?: boolean;
+}
 
 interface MeasurementEntry {
   id: string;
@@ -55,11 +51,46 @@ export default function Progress() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [measurements, setMeasurements] = useState<MeasurementEntry[]>([]);
   const [progressPhotos, setProgressPhotos] = useState<ProgressPhoto[]>([]);
+  const [measurementTypes, setMeasurementTypes] = useState<MeasurementType[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Default measurement types (fallback if none are saved)
+  const defaultMeasurementTypes: MeasurementType[] = [
+    { id: 'chest', name: 'Chest', unit: 'cm', enabled: true },
+    { id: 'waist', name: 'Waist', unit: 'cm', enabled: true },
+    { id: 'hips', name: 'Hips', unit: 'cm', enabled: true },
+    { id: 'biceps', name: 'Biceps', unit: 'cm', enabled: true },
+    { id: 'thighs', name: 'Thighs', unit: 'cm', enabled: true },
+    { id: 'calves', name: 'Calves', unit: 'cm', enabled: false },
+    { id: 'bodyfat', name: 'Body Fat', unit: '%', enabled: false },
+  ];
+
+  // Load measurement types from localStorage
+  const loadMeasurementTypes = () => {
+    const savedTypes = localStorage.getItem('measurementTypes');
+    if (savedTypes) {
+      try {
+        const types = JSON.parse(savedTypes);
+        setMeasurementTypes(types);
+        // Set default measurement type to the first enabled one
+        const firstEnabled = types.find((type: MeasurementType) => type.enabled);
+        if (firstEnabled) {
+          setMeasurementType(firstEnabled.id);
+        }
+      } catch (error) {
+        console.error('Error loading measurement types:', error);
+        setMeasurementTypes(defaultMeasurementTypes);
+      }
+    } else {
+      setMeasurementTypes(defaultMeasurementTypes);
+    }
+  };
   
   // Load measurements and photos from localStorage on initial render
   useEffect(() => {
+    loadMeasurementTypes();
+    
     const savedMeasurements = localStorage.getItem('bodyMeasurements');
     const savedPhotos = localStorage.getItem('progressPhotos');
     
@@ -86,6 +117,18 @@ export default function Progress() {
       setProgressPhotos(demoPhotos);
       localStorage.setItem('progressPhotos', JSON.stringify(demoPhotos));
     }
+  }, []);
+
+  // Listen for measurement types changes from settings
+  useEffect(() => {
+    const handleMeasurementTypesChange = () => {
+      loadMeasurementTypes();
+    };
+
+    window.addEventListener('measurementTypesChanged', handleMeasurementTypesChange);
+    return () => {
+      window.removeEventListener('measurementTypesChanged', handleMeasurementTypesChange);
+    };
   }, []);
   
   // Save measurements to localStorage whenever they change
@@ -271,7 +314,10 @@ export default function Progress() {
     console.log(`prepareMeasurementDataForChart(${type}) - formatted chart data:`, chartData);
     return chartData;
   };
-  
+
+  // Get enabled measurement types only
+  const enabledMeasurementTypes = measurementTypes.filter(type => type.enabled);
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -299,8 +345,10 @@ export default function Progress() {
                     value={measurementType}
                     onChange={(e) => setMeasurementType(e.target.value)}
                   >
-                    {measurementTypes.filter(type => type.id !== 'weight').map(type => (
-                      <option key={type.id} value={type.id}>{t(type.id)}</option>
+                    {enabledMeasurementTypes.map(type => (
+                      <option key={type.id} value={type.id}>
+                        {t(type.id) || type.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -353,18 +401,29 @@ export default function Progress() {
                 <h3 className="font-medium tracking-tight">{t("bodyMeasurements")}</h3>
               </div>
               <div className="p-5 space-y-4">
-                {measurementTypes.filter(type => type.id !== 'weight').map(type => {
+                {enabledMeasurementTypes.map(type => {
                   const latestMeasurement = getLatestMeasurement(type.id);
                   
                   return (
                     <div key={type.id} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{t(type.id)}</span>
+                      <span className="text-sm font-medium">{t(type.id) || type.name}</span>
                       <span className="text-sm">
                         {latestMeasurement ? `${latestMeasurement.value} ${type.unit}` : '—'}
                       </span>
                     </div>
                   );
                 })}
+                
+                {enabledMeasurementTypes.length === 0 && (
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground text-sm">
+                      {t("No measurements enabled")}
+                    </p>
+                    <p className="text-muted-foreground text-xs mt-1">
+                      {t("Enable measurements in Settings")}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -387,23 +446,28 @@ export default function Progress() {
                       <TableBody>
                         {[...measurements]
                           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                          .map(measurement => (
-                            <TableRow key={measurement.id} className="border-b border-border">
-                              <TableCell className="py-3">{format(parseISO(measurement.date), 'MMM d, yyyy')}</TableCell>
-                              <TableCell className="py-3">{t(measurement.type)}</TableCell>
-                              <TableCell className="py-3 text-right">{measurement.value} {measurement.unit}</TableCell>
-                              <TableCell className="py-3">
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon"
-                                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                  onClick={() => handleDeleteMeasurement(measurement.id)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))
+                          .map(measurement => {
+                            const measurementTypeInfo = measurementTypes.find(type => type.id === measurement.type);
+                            return (
+                              <TableRow key={measurement.id} className="border-b border-border">
+                                <TableCell className="py-3">{format(parseISO(measurement.date), 'MMM d, yyyy')}</TableCell>
+                                <TableCell className="py-3">
+                                  {t(measurement.type) || measurementTypeInfo?.name || measurement.type}
+                                </TableCell>
+                                <TableCell className="py-3 text-right">{measurement.value} {measurement.unit}</TableCell>
+                                <TableCell className="py-3">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                    onClick={() => handleDeleteMeasurement(measurement.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
                         }
                       </TableBody>
                     </Table>
@@ -423,26 +487,26 @@ export default function Progress() {
             </div>
             
             {/* Show measurement chart if we have data */}
-            {measurements.length > 0 && (
+            {measurements.length > 0 && enabledMeasurementTypes.length > 0 && (
               <div className="col-span-2">
                 <div className="glassy-card rounded-xl overflow-hidden card-shadow">
                   <div className="px-5 py-4 border-b border-border">
                     <h3 className="font-medium tracking-tight">{t("Measurement Trends")}</h3>
                   </div>
                   <div className="p-5">
-                    <Tabs defaultValue="waist" className="w-full">
+                    <Tabs defaultValue={enabledMeasurementTypes[0]?.id} className="w-full">
                       <TabsList className="mb-4 flex flex-wrap">
-                        {measurementTypes.filter(type => type.id !== 'weight').map(type => {
+                        {enabledMeasurementTypes.map(type => {
                           const hasData = getMeasurementsByType(type.id).length > 0;
                           return (
                             <TabsTrigger key={type.id} value={type.id} disabled={!hasData}>
-                              {t(type.id)} {hasData && `(${getMeasurementsByType(type.id).length})`}
+                              {t(type.id) || type.name} {hasData && `(${getMeasurementsByType(type.id).length})`}
                             </TabsTrigger>
                           );
                         })}
                       </TabsList>
                       
-                      {measurementTypes.filter(type => type.id !== 'weight').map(type => (
+                      {enabledMeasurementTypes.map(type => (
                         <TabsContent key={type.id} value={type.id}>
                           {getMeasurementsByType(type.id).length > 0 ? (
                             <div className="h-[300px]">

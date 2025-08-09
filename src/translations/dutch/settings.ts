@@ -41,6 +41,14 @@ export const settingsTranslations: Translations = {
   "dataExported": "Gegevens geëxporteerd",
   "dataCleared": "Gegevens gewist",
   
+  // Body Measurements
+  "Body Measurements": "Lichaamsmetingen",
+  "Choose which body measurements to track in your progress": "Kies welke lichaamsmetingen je wilt bijhouden in je voortgang",
+  "Add Custom Measurement": "Aangepaste meting toevoegen",
+  "Measurement Name": "Naam meting",
+  "Enter measurement name": "Voer naam meting in",
+  "Unit": "Eenheid",
+  
   // Profile
   "Settings saved": "Instellingen opgeslagen",
   "profileUpdated": "Profiel bijgewerkt",

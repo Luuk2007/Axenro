@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import MealsSettings from "@/components/settings/MealsSettings";
 import ExercisesSettings from "@/components/settings/ExercisesSettings";
+import BodyMeasurementsSettings from "@/components/settings/BodyMeasurementsSettings";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionModal from "@/components/subscription/SubscriptionModal";
 import { useLocation } from "react-router-dom";
@@ -257,6 +258,9 @@ const Settings = () => {
 
         {/* Exercises Settings */}
         <ExercisesSettings />
+
+        {/* Body Measurements Settings */}
+        <BodyMeasurementsSettings />
 
         {/* Subscription Management */}
         <Card>
