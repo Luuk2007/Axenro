@@ -105,7 +105,7 @@ const BodyMeasurementsSettings = () => {
               {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </div>
           </CardHeader>
-        </CollibibleTrigger>
+        </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="space-y-4 py-3">
             <p className="text-sm text-muted-foreground">
