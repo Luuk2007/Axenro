@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -16,16 +17,13 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { SearchOnline } from "./SearchOnline";
-import { SearchLocal } from "./SearchLocal";
-import { Food } from "@/types/nutrition";
+import { FoodItem } from "@/types/nutrition";
 
 interface AddFoodDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddFood: (food: Food, meal: string, servings: number) => void;
+  onAddFood: (food: FoodItem, meal: string, servings: number) => void;
   selectedMeal?: string;
 }
 
@@ -38,9 +36,8 @@ export default function AddFoodDialog({
   const { t } = useLanguage();
   const [meal, setMeal] = useState(selectedMeal);
   const [servings, setServings] = useState(1);
-  const [selectedFood, setSelectedFood] = useState<Food | null>(null);
+  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("online");
 
   useEffect(() => {
     setMeal(selectedMeal);
@@ -60,31 +57,20 @@ export default function AddFoodDialog({
           <DialogTitle>{t("addFood")}</DialogTitle>
         </DialogHeader>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-          <TabsList>
-            <TabsTrigger value="online">{t("onlineResults")}</TabsTrigger>
-            <TabsTrigger value="local">{t("localDatabase")}</TabsTrigger>
-          </TabsList>
-          <TabsContent value="online">
-            <SearchOnline 
-              searchQuery={searchQuery} 
-              setSearchQuery={setSearchQuery} 
-              setSelectedFood={setSelectedFood} 
-            />
-          </TabsContent>
-          <TabsContent value="local">
-            <SearchLocal 
-              searchQuery={searchQuery} 
-              setSearchQuery={setSearchQuery} 
-              setSelectedFood={setSelectedFood} 
-            />
-          </TabsContent>
-        </Tabs>
+        <div className="mt-4">
+          <Label htmlFor="search">{t("searchFood")}</Label>
+          <Input
+            id="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t("searchForFood")}
+          />
+        </div>
 
         {selectedFood && (
           <Card className="mt-4">
             <CardHeader>
-              <CardTitle>{selectedFood.product_name || selectedFood.name}</CardTitle>
+              <CardTitle>{selectedFood.name}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
