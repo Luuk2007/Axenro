@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
+import { convertWeight, convertHeight, getWeightUnit, getHeightUnit } from "@/utils/unitConversions";
 
 export interface ProfileFormValues {
   name: string;
@@ -73,6 +75,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   isNewUser = false 
 }) => {
   const { t } = useLanguage();
+  const { measurementSystem } = useMeasurementSystem();
   
   const formSchema = z.object({
     name: z.string()
@@ -99,6 +102,18 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     goal: z.enum(["lose", "maintain", "gain"]).optional(),
   });
 
+  // Convert stored metric values to display values
+  const getDisplayValues = (values: Partial<ProfileFormValues>) => {
+    if (!values) return {};
+    
+    return {
+      ...values,
+      height: values.height ? convertHeight(values.height, 'metric', measurementSystem) : undefined,
+      weight: values.weight ? convertWeight(values.weight, 'metric', measurementSystem) : undefined,
+      targetWeight: values.targetWeight ? convertWeight(values.targetWeight, 'metric', measurementSystem) : undefined,
+    };
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: isNewUser ? {
@@ -111,7 +126,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
       fitnessGoal: undefined,
       exerciseFrequency: undefined,
       goal: undefined
-    } : initialValues,
+    } : getDisplayValues(initialValues),
   });
 
   const watchFitnessGoal = form.watch("fitnessGoal");
@@ -128,9 +143,21 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     }
   };
 
+  const handleFormSubmit = (data: ProfileFormValues) => {
+    // Convert display values back to metric for storage
+    const metricData = {
+      ...data,
+      height: convertHeight(data.height, measurementSystem, 'metric'),
+      weight: convertWeight(data.weight, measurementSystem, 'metric'),
+      targetWeight: data.targetWeight ? convertWeight(data.targetWeight, measurementSystem, 'metric') : undefined,
+    };
+    
+    onSubmit(metricData);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="name"
@@ -198,7 +225,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             name="height"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("height")} ({t("cm")})</FormLabel>
+                <FormLabel>{t("height")} ({getHeightUnit(measurementSystem)})</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
@@ -217,7 +244,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             name="weight"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("weight")} ({t("kg")})</FormLabel>
+                <FormLabel>{t("weight")} ({getWeightUnit(measurementSystem)})</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
@@ -308,7 +335,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             name="targetWeight"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("targetWeight")} ({t("kg")})</FormLabel>
+                <FormLabel>{t("targetWeight")} ({getWeightUnit(measurementSystem)})</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 

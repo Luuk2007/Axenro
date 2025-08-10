@@ -4,6 +4,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
+import { convertWeight, convertHeight, getWeightUnit, getHeightUnit } from '@/utils/unitConversions';
 
 interface BMICalculatorProps {
   initialWeight?: number;
@@ -12,32 +14,38 @@ interface BMICalculatorProps {
 
 const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHeight }) => {
   const { t } = useLanguage();
-  const [weight, setWeight] = useState<string>(initialWeight?.toString() || '');
-  const [height, setHeight] = useState<string>(initialHeight?.toString() || '');
+  const { measurementSystem } = useMeasurementSystem();
+  const [weight, setWeight] = useState<string>('');
+  const [height, setHeight] = useState<string>('');
   const [bmi, setBMI] = useState<number | null>(null);
   const [weightDifference, setWeightDifference] = useState<number | null>(null);
 
   // Update BMI calculator values when the props change (sync with form)
   useEffect(() => {
     if (initialWeight && initialWeight > 0) {
-      setWeight(initialWeight.toString());
+      const displayWeight = convertWeight(initialWeight, 'metric', measurementSystem);
+      setWeight(displayWeight.toString());
     }
     if (initialHeight && initialHeight > 0) {
-      setHeight(initialHeight.toString());
+      const displayHeight = convertHeight(initialHeight, 'metric', measurementSystem);
+      setHeight(displayHeight.toString());
     }
-  }, [initialWeight, initialHeight]);
+  }, [initialWeight, initialHeight, measurementSystem]);
 
   // Calculate BMI when weight or height changes
   useEffect(() => {
     const weightNum = parseFloat(weight);
     const heightNum = parseFloat(height);
     if (weightNum > 0 && heightNum > 0) {
-      calculateBMI(weightNum, heightNum);
+      // Convert input values to metric for calculation
+      const metricWeight = convertWeight(weightNum, measurementSystem, 'metric');
+      const metricHeight = convertHeight(heightNum, measurementSystem, 'metric');
+      calculateBMI(metricWeight, metricHeight);
     } else {
       setBMI(null);
       setWeightDifference(null);
     }
-  }, [weight, height]);
+  }, [weight, height, measurementSystem]);
 
   const calculateBMI = (weightNum: number, heightNum: number) => {
     if (weightNum <= 0 || heightNum <= 0) {
@@ -57,10 +65,14 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
 
     if (bmiValue < 18.5) {
       // Underweight - how much to gain to reach BMI of 18.5
-      setWeightDifference(parseFloat((idealWeightLower - weightNum).toFixed(1)));
+      const metricDifference = idealWeightLower - weightNum;
+      const displayDifference = convertWeight(metricDifference, 'metric', measurementSystem);
+      setWeightDifference(parseFloat(displayDifference.toFixed(1)));
     } else if (bmiValue > 24.9) {
       // Overweight - how much to lose to reach BMI of 24.9
-      setWeightDifference(parseFloat((weightNum - idealWeightUpper).toFixed(1)));
+      const metricDifference = weightNum - idealWeightUpper;
+      const displayDifference = convertWeight(metricDifference, 'metric', measurementSystem);
+      setWeightDifference(parseFloat(displayDifference.toFixed(1)));
     } else {
       // Healthy weight
       setWeightDifference(null);
@@ -91,7 +103,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
           <div className="space-y-4">
             <div>
               <label htmlFor="weight" className="block text-sm font-medium mb-1">
-                {t("weight")} ({t("kg")})
+                {t("weight")} ({getWeightUnit(measurementSystem)})
               </label>
               <Input
                 id="weight"
@@ -104,7 +116,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
             </div>
             <div>
               <label htmlFor="height" className="block text-sm font-medium mb-1">
-                {t("height")} ({t("cm")})
+                {t("height")} ({getHeightUnit(measurementSystem)})
               </label>
               <Input
                 id="height"
@@ -128,9 +140,9 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
               {weightDifference !== null && (
                 <div className="text-sm">
                   {bmi < 18.5 ? (
-                    <p>{t("weightToGain")} <strong>{Math.abs(weightDifference)} {t("kg")}</strong></p>
+                    <p>{t("weightToGain")} <strong>{Math.abs(weightDifference)} {getWeightUnit(measurementSystem)}</strong></p>
                   ) : bmi > 24.9 ? (
-                    <p>{t("weightToLose")} <strong>{Math.abs(weightDifference)} {t("kg")}</strong></p>
+                    <p>{t("weightToLose")} <strong>{Math.abs(weightDifference)} {getWeightUnit(measurementSystem)}</strong></p>
                   ) : null}
                 </div>
               )}

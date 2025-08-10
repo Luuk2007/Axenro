@@ -12,6 +12,8 @@ import {
 import { Calendar, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
+import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
+import { convertWeight, getWeightUnit, formatWeight } from "@/utils/unitConversions";
 
 interface TrackWorkoutProps {
   open: boolean;
@@ -25,6 +27,7 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
   workout
 }) => {
   const { t } = useLanguage();
+  const { measurementSystem } = useMeasurementSystem();
 
   if (!workout) return null;
 
@@ -45,31 +48,36 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
               <div key={`${exercise.id}-${exerciseIndex}`} className="border rounded-md p-4">
                 <h4 className="font-medium mb-4">{exercise.name}</h4>
                 
-                {exercise.sets.map((set, setIndex) => (
-                  <div 
-                    key={set.id} 
-                    className="flex items-center justify-between p-2 mb-2 rounded bg-green-50 border border-green-100"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="font-medium">Set {setIndex + 1}</div>
-                      <div>
-                        {isCardio ? 
-                          `${set.reps} ${t("minutes")}` : 
-                          `${set.reps} ${t("reps")}`}
-                      </div>
-                      {!isCardio && (
+                {exercise.sets.map((set, setIndex) => {
+                  // Convert weight from metric (stored) to display system
+                  const displayWeight = set.weight ? convertWeight(set.weight, 'metric', measurementSystem) : 0;
+                  
+                  return (
+                    <div 
+                      key={set.id} 
+                      className="flex items-center justify-between p-2 mb-2 rounded bg-green-50 border border-green-100"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="font-medium">Set {setIndex + 1}</div>
                         <div>
-                          {`${set.weight} ${t("kg")}`}
+                          {isCardio ? 
+                            `${set.reps} ${t("minutes")}` : 
+                            `${set.reps} ${t("reps")}`}
                         </div>
-                      )}
+                        {!isCardio && (
+                          <div>
+                            {`${formatWeight(displayWeight, measurementSystem)} ${getWeightUnit(measurementSystem)}`}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="text-green-600 flex items-center">
+                        <Check className="h-4 w-4 mr-1" />
+                        {t("completed")}
+                      </div>
                     </div>
-                    
-                    <div className="text-green-600 flex items-center">
-                      <Check className="h-4 w-4 mr-1" />
-                      {t("completed")}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             );
           })}

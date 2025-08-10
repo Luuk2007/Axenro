@@ -18,16 +18,19 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
+import { convertWeight, getWeightUnit, formatWeight } from '@/utils/unitConversions';
 
 type PersonalRecord = {
   id: string;
   exerciseName: string;
-  weight: number;
+  weight: number; // Always stored in kg (metric)
   date: string;
 };
 
 const PersonalRecords = () => {
   const { t } = useLanguage();
+  const { measurementSystem } = useMeasurementSystem();
   const [records, setRecords] = useState<PersonalRecord[]>([]);
   const [calculatedWeight, setCalculatedWeight] = useState<number | null>(null);
   const [exerciseName, setExerciseName] = useState('');
@@ -51,9 +54,9 @@ const PersonalRecords = () => {
     localStorage.setItem('personalRecords', JSON.stringify(records));
   }, [records]);
 
-  // Handler for weight calculation from OneRepMaxCalculator
-  const handleWeightCalculated = (weight: number) => {
-    setCalculatedWeight(weight);
+  // Handler for weight calculation from OneRepMaxCalculator (receives metric weight)
+  const handleWeightCalculated = (metricWeight: number) => {
+    setCalculatedWeight(metricWeight);
   };
 
   // Save record handler
@@ -65,7 +68,7 @@ const PersonalRecords = () => {
     const newRecord: PersonalRecord = {
       id: Date.now().toString(),
       exerciseName: exerciseName.trim(),
-      weight: calculatedWeight,
+      weight: calculatedWeight, // Store in metric
       date: new Date().toISOString().split('T')[0]
     };
     
@@ -82,6 +85,10 @@ const PersonalRecords = () => {
   const deleteRecord = (id: string) => {
     setRecords(prev => prev.filter(record => record.id !== id));
     toast.success(t('recordDeleted'));
+  };
+
+  const getDisplayWeight = (metricWeight: number) => {
+    return convertWeight(metricWeight, 'metric', measurementSystem);
   };
 
   return (
@@ -108,7 +115,7 @@ const PersonalRecords = () => {
                   <DialogHeader>
                     <DialogTitle>{t('Save Record')}</DialogTitle>
                     <DialogDescription>
-                      {t('Estimated One Rep Max')}: {calculatedWeight} kg
+                      {t('Estimated One Rep Max')}: {formatWeight(getDisplayWeight(calculatedWeight), measurementSystem)} {getWeightUnit(measurementSystem)}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
@@ -161,23 +168,26 @@ const PersonalRecords = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {records.map((record) => (
-                    <div key={record.id} className="flex items-center justify-between p-3 border rounded-md">
-                      <div>
-                        <div className="font-medium">{record.exerciseName}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {record.weight} kg • {record.date}
+                  {records.map((record) => {
+                    const displayWeight = getDisplayWeight(record.weight);
+                    return (
+                      <div key={record.id} className="flex items-center justify-between p-3 border rounded-md">
+                        <div>
+                          <div className="font-medium">{record.exerciseName}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {formatWeight(displayWeight, measurementSystem)} {getWeightUnit(measurementSystem)} • {record.date}
+                          </div>
                         </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => deleteRecord(record.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => deleteRecord(record.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>

@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
 
 interface MeasurementType {
   id: string;
@@ -32,6 +33,7 @@ const defaultMeasurements: MeasurementType[] = [
 
 const BodyMeasurementsSettings = () => {
   const { t } = useLanguage();
+  const { measurementSystem } = useMeasurementSystem();
   const [measurementTypes, setMeasurementTypes] = useState<MeasurementType[]>(defaultMeasurements);
   const [isOpen, setIsOpen] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -95,6 +97,14 @@ const BodyMeasurementsSettings = () => {
     toast.success(t('measurementDeleted'));
   };
 
+  // Get display unit based on measurement system
+  const getDisplayUnit = (baseUnit: string) => {
+    if (baseUnit === 'cm' && measurementSystem === 'imperial') {
+      return 'in';
+    }
+    return baseUnit;
+  };
+
   return (
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -119,7 +129,7 @@ const BodyMeasurementsSettings = () => {
                     <Label htmlFor={measurement.id} className="font-medium">
                       {t(measurement.id) || measurement.name}
                     </Label>
-                    <span className="text-sm text-muted-foreground">({measurement.unit})</span>
+                    <span className="text-sm text-muted-foreground">({getDisplayUnit(measurement.unit)})</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch

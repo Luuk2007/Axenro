@@ -4,6 +4,8 @@ import { Activity, Weight, Ruler, Heart, Calendar, User2, Target } from "lucide-
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileFormValues } from './ProfileForm';
+import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
+import { convertWeight, convertHeight, getWeightUnit, getHeightUnit, formatWeight, formatHeight } from "@/utils/unitConversions";
 
 interface UserStatsDisplayProps {
   profile: ProfileFormValues;
@@ -11,6 +13,7 @@ interface UserStatsDisplayProps {
 
 const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
   const { t } = useLanguage();
+  const { measurementSystem } = useMeasurementSystem();
   
   // Safely access property with optional chaining to prevent errors
   const showTargetWeight = profile?.goal !== "maintain";
@@ -20,6 +23,11 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
+
+  // Convert values for display
+  const displayWeight = convertWeight(profile.weight, 'metric', measurementSystem);
+  const displayHeight = convertHeight(profile.height, 'metric', measurementSystem);
+  const displayTargetWeight = profile.targetWeight ? convertWeight(profile.targetWeight, 'metric', measurementSystem) : undefined;
 
   return (
     <Card>
@@ -45,13 +53,13 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
           <div className="flex items-center gap-2">
             <Weight className="h-4 w-4 text-muted-foreground" />
             <dt className="font-medium">{t("weight")}:</dt>
-            <dd>{profile.weight} {t("kg")}</dd>
+            <dd>{formatWeight(displayWeight, measurementSystem)} {getWeightUnit(measurementSystem)}</dd>
           </div>
           
           <div className="flex items-center gap-2">
             <Ruler className="h-4 w-4 text-muted-foreground" />
             <dt className="font-medium">{t("height")}:</dt>
-            <dd>{profile.height} {t("cm")}</dd>
+            <dd>{formatHeight(displayHeight, measurementSystem)} {getHeightUnit(measurementSystem)}</dd>
           </div>
           
           <div className="flex items-center gap-2">
@@ -80,11 +88,11 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
             </dd>
           </div>
           
-          {showTargetWeight && (
+          {showTargetWeight && displayTargetWeight && (
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4 text-muted-foreground" />
               <dt className="font-medium">{t("targetWeight")}:</dt>
-              <dd>{profile.targetWeight} {t("kg")}</dd>
+              <dd>{formatWeight(displayTargetWeight, measurementSystem)} {getWeightUnit(measurementSystem)}</dd>
             </div>
           )}
         </dl>

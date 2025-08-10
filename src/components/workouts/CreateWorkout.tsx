@@ -8,6 +8,8 @@ import { Plus, X, Calendar, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AddExerciseDialog from './AddExerciseDialog';
 import { Workout, Exercise, ExerciseSet } from '@/types/workout';
+import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
+import { convertWeight, getWeightUnit } from '@/utils/unitConversions';
 
 interface CreateWorkoutProps {
   open: boolean;
@@ -18,29 +20,55 @@ interface CreateWorkoutProps {
 
 const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: CreateWorkoutProps) => {
   const { t } = useLanguage();
+  const { measurementSystem } = useMeasurementSystem();
   const [workoutName, setWorkoutName] = useState('');
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
+
+  // Convert stored metric weights to display weights for editing
+  const convertExercisesForDisplay = (exerciseList: Exercise[]) => {
+    return exerciseList.map(exercise => ({
+      ...exercise,
+      sets: exercise.sets.map(set => ({
+        ...set,
+        weight: set.weight ? convertWeight(set.weight, 'metric', measurementSystem) : 0
+      }))
+    }));
+  };
+
+  // Convert display weights back to metric for storage
+  const convertExercisesForStorage = (exerciseList: Exercise[]) => {
+    return exerciseList.map(exercise => ({
+      ...exercise,
+      sets: exercise.sets.map(set => ({
+        ...set,
+        weight: set.weight ? convertWeight(set.weight, measurementSystem, 'metric') : 0
+      }))
+    }));
+  };
 
   // Load editing workout data when editingWorkout changes
   useEffect(() => {
     if (editingWorkout) {
       setWorkoutName(editingWorkout.name);
       setWorkoutDate(editingWorkout.date);
-      setExercises(editingWorkout.exercises);
+      // Convert weights for display
+      setExercises(convertExercisesForDisplay(editingWorkout.exercises));
     } else {
       // Reset form when not editing
       setWorkoutName('');
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
     }
-  }, [editingWorkout]);
+  }, [editingWorkout, measurementSystem]);
 
   const handleSaveWorkout = () => {
     if (!workoutName.trim()) return;
     
-    onSaveWorkout(workoutName, exercises, workoutDate);
+    // Convert weights back to metric for storage
+    const exercisesForStorage = convertExercisesForStorage(exercises);
+    onSaveWorkout(workoutName, exercisesForStorage, workoutDate);
     
     // Reset form only if not editing (will be handled by parent component)
     if (!editingWorkout) {
@@ -217,7 +245,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                   className="w-16 h-8"
                                   placeholder="Weight"
                                 />
-                                <span className="text-xs text-muted-foreground">kg</span>
+                                <span className="text-xs text-muted-foreground">{getWeightUnit(measurementSystem)}</span>
                               </div>
                               <Button
                                 variant="ghost"

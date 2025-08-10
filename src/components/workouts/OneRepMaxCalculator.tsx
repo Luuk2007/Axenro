@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calculator, Dumbbell } from 'lucide-react';
+import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
+import { convertWeight, getWeightUnit, formatWeight } from '@/utils/unitConversions';
 
 interface OneRepMaxCalculatorProps {
   onCalculate?: (weight: number) => void;
@@ -13,6 +15,7 @@ interface OneRepMaxCalculatorProps {
 
 const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
   const { t } = useLanguage();
+  const { measurementSystem } = useMeasurementSystem();
   const [weight, setWeight] = useState<string>('');
   const [reps, setReps] = useState<string>('');
   const [result, setResult] = useState<number | null>(null);
@@ -24,15 +27,20 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
     
     if (isNaN(weightNum) || isNaN(repsNum) || weightNum <= 0 || repsNum < 1) return;
     
-    // Epley formula: 1RM = weight × (1 + 0.0333 × reps)
-    const oneRM = weightNum * (1 + 0.0333 * repsNum);
+    // Convert weight to metric for calculation
+    const metricWeight = convertWeight(weightNum, measurementSystem, 'metric');
     
-    const roundedResult = Math.round(oneRM * 10) / 10;
+    // Epley formula: 1RM = weight × (1 + 0.0333 × reps)
+    const oneRMMetric = metricWeight * (1 + 0.0333 * repsNum);
+    
+    // Convert result back to user's preferred system
+    const oneRMDisplay = convertWeight(oneRMMetric, 'metric', measurementSystem);
+    const roundedResult = Math.round(oneRMDisplay * 10) / 10;
     setResult(roundedResult);
     
-    // Call the callback if provided
+    // Call the callback if provided (pass metric value for storage)
     if (onCalculate) {
-      onCalculate(roundedResult);
+      onCalculate(oneRMMetric);
     }
   };
   
@@ -48,7 +56,7 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="weight">{t("weight")} (kg)</Label>
+              <Label htmlFor="weight">{t("weight")} ({getWeightUnit(measurementSystem)})</Label>
               <Input
                 id="weight"
                 type="number"
@@ -85,7 +93,7 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
           {result !== null && (
             <div className="mt-4 p-4 bg-muted rounded-md text-center">
               <p className="text-sm text-muted-foreground">{t("Estimated One Rep Max")}</p>
-              <p className="text-2xl font-bold">{result} kg</p>
+              <p className="text-2xl font-bold">{formatWeight(result, measurementSystem)} {getWeightUnit(measurementSystem)}</p>
               <p className="text-xs text-muted-foreground mt-1">Using Epley Formula</p>
             </div>
           )}
