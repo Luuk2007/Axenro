@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { Progress as ProgressBar } from '@/components/ui/progress';
-import { WeightTracker } from '@/components/progress/WeightTracker';
+import WeightTracker from '@/components/progress/WeightTracker';
 import { 
   Table, 
   TableBody, 
@@ -55,7 +55,6 @@ export default function Progress() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Default measurement types (fallback if none are saved)
   const defaultMeasurementTypes: MeasurementType[] = [
     { id: 'chest', name: 'Chest', unit: 'cm', enabled: true },
     { id: 'waist', name: 'Waist', unit: 'cm', enabled: true },
@@ -66,14 +65,12 @@ export default function Progress() {
     { id: 'bodyfat', name: 'Body Fat', unit: '%', enabled: false },
   ];
 
-  // Load measurement types from localStorage
   const loadMeasurementTypes = () => {
     const savedTypes = localStorage.getItem('measurementTypes');
     if (savedTypes) {
       try {
         const types = JSON.parse(savedTypes);
         setMeasurementTypes(types);
-        // Set default measurement type to the first enabled one
         const firstEnabled = types.find((type: MeasurementType) => type.enabled);
         if (firstEnabled) {
           setMeasurementType(firstEnabled.id);
@@ -87,7 +84,6 @@ export default function Progress() {
     }
   };
   
-  // Load measurements and photos from localStorage on initial render
   useEffect(() => {
     loadMeasurementTypes();
     
@@ -109,7 +105,6 @@ export default function Progress() {
         console.error("Error loading progress photos:", error);
       }
     } else {
-      // If no photos exist, set some examples
       const demoPhotos = [
         { id: '1', date: 'Jun 1, 2023', url: '/placeholder.svg' },
         { id: '2', date: 'Jul 1, 2023', url: '/placeholder.svg' },
@@ -119,7 +114,6 @@ export default function Progress() {
     }
   }, []);
 
-  // Listen for measurement types changes from settings
   useEffect(() => {
     const handleMeasurementTypesChange = () => {
       loadMeasurementTypes();
@@ -131,16 +125,13 @@ export default function Progress() {
     };
   }, []);
   
-  // Save measurements to localStorage whenever they change
   useEffect(() => {
     if (measurements.length > 0) {
       localStorage.setItem('bodyMeasurements', JSON.stringify(measurements));
     }
   }, [measurements]);
   
-  // Save progress photos to localStorage whenever they change
   useEffect(() => {
-    // Always save photos, even if the array is empty (this fixes the deletion persistence bug)
     localStorage.setItem('progressPhotos', JSON.stringify(progressPhotos));
   }, [progressPhotos]);
   
@@ -164,7 +155,6 @@ export default function Progress() {
       return;
     }
     
-    // Create new measurement entry
     const newMeasurement = {
       id: `${measurementType}-${Date.now()}`,
       type: measurementType,
@@ -173,7 +163,6 @@ export default function Progress() {
       unit: selectedType.unit
     };
     
-    // Add to measurements array
     setMeasurements(prev => [...prev, newMeasurement]);
     
     toast.success(`${selectedType.name} ${t('measurementAdded')}`);
@@ -223,7 +212,6 @@ export default function Progress() {
         const imageData = canvasRef.current.toDataURL('image/png');
         setCapturedImage(imageData);
         
-        // Stop the video stream
         if (videoRef.current.srcObject) {
           const stream = videoRef.current.srcObject as MediaStream;
           const tracks = stream.getTracks();
@@ -239,7 +227,6 @@ export default function Progress() {
   const savePhoto = () => {
     if (capturedImage) {
       const today = format(new Date(), 'MMM d, yyyy');
-      // Add the new photo to our state
       const newPhoto = {
         id: `photo-${Date.now()}`,
         date: today,
@@ -254,7 +241,6 @@ export default function Progress() {
   };
 
   const handleSelectFromGallery = () => {
-    // Simulate selecting from gallery using file input
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
@@ -266,7 +252,6 @@ export default function Progress() {
         const reader = new FileReader();
         reader.onload = (loadEvent) => {
           const result = loadEvent.target?.result as string;
-          // Save directly when file is selected
           const today = format(new Date(), 'MMM d, yyyy');
           const newPhoto = {
             id: `photo-${Date.now()}`,
@@ -305,7 +290,6 @@ export default function Progress() {
       value: m.value,
       originalDate: m.date
     })).sort((a, b) => {
-      // Sort by original date
       const dateA = new Date(a.originalDate || a.date);
       const dateB = new Date(b.originalDate || b.date);
       return dateA.getTime() - dateB.getTime();
@@ -315,7 +299,6 @@ export default function Progress() {
     return chartData;
   };
 
-  // Get enabled measurement types only
   const enabledMeasurementTypes = measurementTypes.filter(type => type.enabled);
 
   return (
@@ -486,7 +469,6 @@ export default function Progress() {
               </div>
             </div>
             
-            {/* Show measurement chart if we have data */}
             {measurements.length > 0 && enabledMeasurementTypes.length > 0 && (
               <div className="col-span-2">
                 <div className="glassy-card rounded-xl overflow-hidden card-shadow">
@@ -627,7 +609,6 @@ export default function Progress() {
                   </div>
                 </div>
                 
-                {/* Button to remove photo */}
                 <Button 
                   variant="destructive" 
                   size="icon" 
