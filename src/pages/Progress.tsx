@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -379,11 +380,11 @@ export default function Progress() {
         
         <TabsContent value="measurements" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="glassy-card rounded-xl overflow-hidden card-shadow">
-              <div className="px-5 py-4 border-b border-border">
-                <h3 className="font-medium tracking-tight">{t("bodyMeasurements")}</h3>
-              </div>
-              <div className="p-5 space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("bodyMeasurements")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 {enabledMeasurementTypes.map(type => {
                   const latestMeasurement = getLatestMeasurement(type.id);
                   
@@ -407,14 +408,14 @@ export default function Progress() {
                     </p>
                   </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
             
-            <div className="glassy-card rounded-xl overflow-hidden card-shadow">
-              <div className="px-5 py-4 border-b border-border">
-                <h3 className="font-medium tracking-tight">{t("measurementHistory")}</h3>
-              </div>
-              <div className="p-5">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("measurementHistory")}</CardTitle>
+              </CardHeader>
+              <CardContent>
                 {measurements.length > 0 ? (
                   <div className="max-h-72 overflow-y-auto">
                     <Table className="w-full text-sm">
@@ -466,16 +467,16 @@ export default function Progress() {
                     </Button>
                   </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
             
             {measurements.length > 0 && enabledMeasurementTypes.length > 0 && (
               <div className="col-span-2">
-                <div className="glassy-card rounded-xl overflow-hidden card-shadow">
-                  <div className="px-5 py-4 border-b border-border">
-                    <h3 className="font-medium tracking-tight">{t("Measurement Trends")}</h3>
-                  </div>
-                  <div className="p-5">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t("Measurement Trends")}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <Tabs defaultValue={enabledMeasurementTypes[0]?.id} className="w-full">
                       <TabsList className="mb-4 flex flex-wrap">
                         {enabledMeasurementTypes.map(type => {
@@ -507,8 +508,8 @@ export default function Progress() {
                         </TabsContent>
                       ))}
                     </Tabs>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </div>
@@ -586,57 +587,60 @@ export default function Progress() {
             </DialogContent>
           </Dialog>
           
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">{t("progressPhotos")}</h3>
-            <Button variant="outline" onClick={() => setShowAddPhoto(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t("addPhoto")}
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {progressPhotos.map((photo) => (
-              <div key={photo.id} className="group relative aspect-square rounded-lg overflow-hidden border border-border">
-                <img 
-                  src={photo.url} 
-                  alt={`Progress from ${photo.date}`} 
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <Calendar className="h-6 w-6 mx-auto mb-2" />
-                    <p className="text-sm">{photo.date}</p>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+              <CardTitle>{t("progressPhotos")}</CardTitle>
+              <Button variant="outline" onClick={() => setShowAddPhoto(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                {t("addPhoto")}
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {progressPhotos.map((photo) => (
+                  <div key={photo.id} className="group relative aspect-square rounded-lg overflow-hidden border border-border">
+                    <img 
+                      src={photo.url} 
+                      alt={`Progress from ${photo.date}`} 
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
+                      <div className="text-center text-white">
+                        <Calendar className="h-6 w-6 mx-auto mb-2" />
+                        <p className="text-sm">{photo.date}</p>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      variant="destructive" 
+                      size="icon" 
+                      className="h-6 w-6 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => {
+                        setProgressPhotos(photos => photos.filter(p => p.id !== photo.id));
+                        toast.success(t("photoRemoved"));
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
                   </div>
-                </div>
+                ))}
                 
-                <Button 
-                  variant="destructive" 
-                  size="icon" 
-                  className="h-6 w-6 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => {
-                    setProgressPhotos(photos => photos.filter(p => p.id !== photo.id));
-                    toast.success(t("photoRemoved"));
-                  }}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
+                {progressPhotos.length === 0 && (
+                  <div className="col-span-2 md:col-span-4 flex flex-col items-center justify-center py-12 text-center">
+                    <Camera className="h-12 w-12 text-muted-foreground mb-3" />
+                    <h3 className="text-lg font-medium mb-1">{t("noProgressPhotos")}</h3>
+                    <p className="text-muted-foreground mb-6">
+                      {t("startTrackingVisualProgress")}
+                    </p>
+                    <Button onClick={() => setShowAddPhoto(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      {t("addFirstPhoto")}
+                    </Button>
+                  </div>
+                )}
               </div>
-            ))}
-            
-            {progressPhotos.length === 0 && (
-              <div className="col-span-2 md:col-span-4 flex flex-col items-center justify-center py-12 text-center">
-                <Camera className="h-12 w-12 text-muted-foreground mb-3" />
-                <h3 className="text-lg font-medium mb-1">{t("noProgressPhotos")}</h3>
-                <p className="text-muted-foreground mb-6">
-                  {t("startTrackingVisualProgress")}
-                </p>
-                <Button onClick={() => setShowAddPhoto(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t("addFirstPhoto")}
-                </Button>
-              </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
