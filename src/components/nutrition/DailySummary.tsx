@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
@@ -122,15 +121,10 @@ export default function DailySummary({ className, meals = [], selectedDate = new
     }
   }, []);
 
-  // Calculate macros from provided meals - simplified and more reliable approach
+  // Calculate macros from provided meals or from localStorage if not provided
   useEffect(() => {
-    console.log('DailySummary: Calculating macros from meals:', meals);
-    
-    // Always prioritize meals prop if provided and not empty
-    if (meals && meals.length > 0) {
-      const allFoodItems = meals.flatMap(meal => meal.items || []);
-      console.log('DailySummary: All food items from meals:', allFoodItems);
-      
+    // Function to calculate consumed macros from food items
+    const calculateConsumedMacros = (allFoodItems: any[]) => {
       const consumed = allFoodItems.reduce((total: any, item: any) => {
         return {
           calories: total.calories + (item.calories || 0),
@@ -140,8 +134,6 @@ export default function DailySummary({ className, meals = [], selectedDate = new
         };
       }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
       
-      console.log('DailySummary: Calculated consumed macros:', consumed);
-      
       // Update state with consumed values
       setMacroTargets(prevState => ({
         calories: { ...prevState.calories, consumed: consumed.calories },
@@ -149,40 +141,25 @@ export default function DailySummary({ className, meals = [], selectedDate = new
         carbs: { ...prevState.carbs, consumed: consumed.carbs },
         fat: { ...prevState.fat, consumed: consumed.fat },
       }));
+    };
+
+    if (meals && meals.length > 0) {
+      // If meals are provided, extract all food items
+      const allFoodItems = meals.flatMap(meal => meal.items || []);
+      calculateConsumedMacros(allFoodItems);
     } else {
-      // Fallback to localStorage only if no meals provided
+      // Otherwise load from localStorage
       const dateStr = selectedDate.toISOString().split('T')[0];
       const savedFoodLog = localStorage.getItem(`foodLog_${dateStr}`);
-      
-      console.log('DailySummary: No meals provided, checking localStorage for date:', dateStr);
       
       if (savedFoodLog) {
         try {
           const foodLog = JSON.parse(savedFoodLog);
-          console.log('DailySummary: Found food log in localStorage:', foodLog);
-          
-          const consumed = foodLog.reduce((total: any, item: any) => {
-            return {
-              calories: total.calories + (item.calories || 0),
-              protein: total.protein + (item.protein || 0),
-              carbs: total.carbs + (item.carbs || 0),
-              fat: total.fat + (item.fat || 0),
-            };
-          }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
-          
-          console.log('DailySummary: Calculated consumed macros from localStorage:', consumed);
-          
-          setMacroTargets(prevState => ({
-            calories: { ...prevState.calories, consumed: consumed.calories },
-            protein: { ...prevState.protein, consumed: consumed.protein },
-            carbs: { ...prevState.carbs, consumed: consumed.carbs },
-            fat: { ...prevState.fat, consumed: consumed.fat },
-          }));
+          calculateConsumedMacros(foodLog);
         } catch (error) {
           console.error("Error loading food log:", error);
         }
       } else {
-        console.log('DailySummary: No food log found, resetting consumed values');
         // Reset consumed values if no food log found
         setMacroTargets(prevState => ({
           calories: { ...prevState.calories, consumed: 0 },
@@ -204,7 +181,7 @@ export default function DailySummary({ className, meals = [], selectedDate = new
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-medium">{t("calories")}</div>
           <div className="text-sm text-muted-foreground">
-            {Math.round(macroTargets.calories.consumed)} / {macroTargets.calories.goal}
+            {macroTargets.calories.consumed} / {macroTargets.calories.goal}
           </div>
         </div>
         <Progress 
@@ -216,7 +193,7 @@ export default function DailySummary({ className, meals = [], selectedDate = new
       <div className="grid grid-cols-3 gap-3">
         <div className="border rounded-lg p-3 shadow-sm">
           <div className="text-xs text-muted-foreground">{t("protein")}</div>
-          <div className="text-sm font-medium">{Math.round(macroTargets.protein.consumed)}g / {macroTargets.protein.goal}g</div>
+          <div className="text-sm font-medium">{macroTargets.protein.consumed}g / {macroTargets.protein.goal}g</div>
           <Progress 
             value={calculatePercentage(macroTargets.protein.consumed, macroTargets.protein.goal)} 
             className="h-1.5 mt-1" 
@@ -225,7 +202,7 @@ export default function DailySummary({ className, meals = [], selectedDate = new
         
         <div className="border rounded-lg p-3 shadow-sm">
           <div className="text-xs text-muted-foreground">{t("carbs")}</div>
-          <div className="text-sm font-medium">{Math.round(macroTargets.carbs.consumed)}g / {macroTargets.carbs.goal}g</div>
+          <div className="text-sm font-medium">{macroTargets.carbs.consumed}g / {macroTargets.carbs.goal}g</div>
           <Progress 
             value={calculatePercentage(macroTargets.carbs.consumed, macroTargets.carbs.goal)} 
             className="h-1.5 mt-1" 
@@ -234,7 +211,7 @@ export default function DailySummary({ className, meals = [], selectedDate = new
         
         <div className="border rounded-lg p-3 shadow-sm">
           <div className="text-xs text-muted-foreground">{t("fat")}</div>
-          <div className="text-sm font-medium">{Math.round(macroTargets.fat.consumed)}g / {macroTargets.fat.goal}g</div>
+          <div className="text-sm font-medium">{macroTargets.fat.consumed}g / {macroTargets.fat.goal}g</div>
           <Progress 
             value={calculatePercentage(macroTargets.fat.consumed, macroTargets.fat.goal)} 
             className="h-1.5 mt-1" 
