@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -47,11 +46,13 @@ const Nutrition = () => {
   useEffect(() => {
     const initializeMeals = () => {
       const availableMeals = getAvailableMeals();
-      setMeals(availableMeals.map(meal => ({
+      const initializedMeals = availableMeals.map(meal => ({
         id: meal.id,
         name: meal.name,
         items: []
-      })));
+      }));
+      console.log('Initializing meals:', initializedMeals);
+      setMeals(initializedMeals);
     };
 
     initializeMeals();
@@ -102,56 +103,18 @@ const Nutrition = () => {
     });
   }, [language]);
 
-  // Load food logs for the selected date
-  useEffect(() => {
-    if (!isAuthenticated || !userId) {
-      // If not authenticated, load from local storage for demo
-      loadFoodLogsFromLocalStorage();
-      return;
-    }
-    
-    // Format date as YYYY-MM-DD for consistency
-    const dateStr = selectedDate.toISOString().split('T')[0];
-    
-    const loadFoodLogs = async () => {
-      setIsLoading(true);
-      try {
-        const logs = await getFoodLogs(dateStr);
-        
-        // Reset meal items
-        const updatedMeals = meals.map(meal => ({
-          ...meal,
-          items: []
-        }));
-        
-        // Add food items to appropriate meals
-        logs.forEach((log: FoodLogEntry) => {
-          const mealIndex = updatedMeals.findIndex(meal => meal.id === log.meal_id);
-          
-          if (mealIndex >= 0) {
-            updatedMeals[mealIndex].items.push({
-              ...log.food_item,
-              logId: log.id // Store the log ID for deletion
-            });
-          }
-        });
-        
-        setMeals(updatedMeals);
-      } catch (error) {
-        console.error('Error loading food logs:', error);
-        toast.error(t('errorLoadingData') || 'Error loading food data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadFoodLogs();
-  }, [selectedDate, isAuthenticated, userId, refreshTrigger, t]);
-
   // Fallback to localStorage for demo or when not logged in
   const loadFoodLogsFromLocalStorage = () => {
+    // Safety check: only proceed if meals are initialized
+    if (!meals || meals.length === 0) {
+      console.log('Meals not yet initialized, skipping localStorage load');
+      return;
+    }
+
     const dateStr = selectedDate.toISOString().split('T')[0];
     const savedData = localStorage.getItem(`foodLog_${dateStr}`);
+    
+    console.log('Loading from localStorage for date:', dateStr, 'Data:', savedData);
     
     if (savedData) {
       try {
@@ -173,12 +136,70 @@ const Nutrition = () => {
           }
         });
         
+        console.log('Updated meals with localStorage data:', updatedMeals);
         setMeals(updatedMeals);
       } catch (error) {
         console.error('Error parsing local food data:', error);
       }
+    } else {
+      console.log('No localStorage data found for date:', dateStr);
     }
   };
+
+  // Load food logs for the selected date - now includes meals as dependency
+  useEffect(() => {
+    // Don't load if meals are not yet initialized
+    if (!meals || meals.length === 0) {
+      console.log('Meals not initialized yet, waiting...');
+      return;
+    }
+
+    if (!isAuthenticated || !userId) {
+      // If not authenticated, load from local storage for demo
+      console.log('Not authenticated, loading from localStorage');
+      loadFoodLogsFromLocalStorage();
+      return;
+    }
+    
+    // Format date as YYYY-MM-DD for consistency
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    
+    const loadFoodLogs = async () => {
+      setIsLoading(true);
+      try {
+        console.log('Loading food logs from database for date:', dateStr);
+        const logs = await getFoodLogs(dateStr);
+        
+        // Reset meal items
+        const updatedMeals = meals.map(meal => ({
+          ...meal,
+          items: []
+        }));
+        
+        // Add food items to appropriate meals
+        logs.forEach((log: FoodLogEntry) => {
+          const mealIndex = updatedMeals.findIndex(meal => meal.id === log.meal_id);
+          
+          if (mealIndex >= 0) {
+            updatedMeals[mealIndex].items.push({
+              ...log.food_item,
+              logId: log.id // Store the log ID for deletion
+            });
+          }
+        });
+        
+        console.log('Updated meals with database data:', updatedMeals);
+        setMeals(updatedMeals);
+      } catch (error) {
+        console.error('Error loading food logs:', error);
+        toast.error(t('errorLoadingData') || 'Error loading food data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadFoodLogs();
+  }, [selectedDate, isAuthenticated, userId, refreshTrigger, t, meals]); // Added meals as dependency
 
   // Save food logs to localStorage for demo
   const saveFoodLogsToLocalStorage = (updatedMeals: Meal[]) => {
@@ -193,6 +214,7 @@ const Nutrition = () => {
     );
     
     localStorage.setItem(`foodLog_${dateStr}`, JSON.stringify(allItems));
+    console.log('Saved to localStorage:', allItems);
   };
 
   const handleAddItem = (mealId: string) => {
@@ -371,7 +393,6 @@ const Nutrition = () => {
       <Dialog open={showAddFood} onOpenChange={setShowAddFood}>
         <DialogContent className="p-0">
           <AddFoodDialog 
-            meals={meals}
             selectedMeal={selectedMeal}
             onClose={() => setShowAddFood(false)}
             onAddFood={handleAddFood}
