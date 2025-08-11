@@ -74,11 +74,4 @@ export const commonTranslations: Translations = {
   // Measurements
   "No measurements enabled": "Geen metingen ingeschakeld",
   "Enable measurements in Settings": "Schakel metingen in via Instellingen",
-  
-  // Additional user-friendly translations
-  bodyMeasurements: "Lichaamsmetingen",
-  progressPhotos: "Voortgangsfoto's",
-  addWeight: "Gewicht toevoegen",
-  noExercisesAdded: "Geen oefeningen toegevoegd",
-  addSet: "Set toevoegen",
 };
