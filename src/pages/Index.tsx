@@ -273,7 +273,7 @@ const Dashboard = () => {
           onClick={navigateToNutrition}
         />
         <StatsCard
-          title={`${t("dailySteps")}`}
+          title={`${t("Daily steps")}`}
           value={dailySteps.toLocaleString()}
           icon={Footprints}
           description={`${t("target")}: 10,000`}
