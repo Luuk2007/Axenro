@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -61,7 +60,16 @@ export default function AIMealPlanner() {
         .limit(10);
 
       if (error) throw error;
-      setSavedPlans(data || []);
+      
+      // Transform the data to match our interface
+      const transformedData: SavedMealPlan[] = (data || []).map(plan => ({
+        ...plan,
+        meal_plan: typeof plan.meal_plan === 'string' 
+          ? { content: plan.meal_plan }
+          : plan.meal_plan as { content: string }
+      }));
+      
+      setSavedPlans(transformedData);
     } catch (error) {
       console.error('Error loading saved plans:', error);
       toast.error('Failed to load saved plans');

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -187,9 +186,9 @@ export default function AIChat() {
               <div className="flex items-start gap-2">
                 <Bot className="h-5 w-5 mt-1 text-muted-foreground flex-shrink-0" />
                 <div className="flex-1 bg-muted rounded-lg p-3">
-                  <ReactMarkdown className="text-sm prose prose-sm max-w-none">
-                    {chat.response}
-                  </ReactMarkdown>
+                  <div className="text-sm prose prose-sm max-w-none">
+                    <ReactMarkdown>{chat.response}</ReactMarkdown>
+                  </div>
                 </div>
               </div>
             </div>

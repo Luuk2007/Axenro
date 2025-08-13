@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -61,7 +60,16 @@ export default function AIWorkoutCoach() {
         .limit(10);
 
       if (error) throw error;
-      setSavedPlans(data || []);
+      
+      // Transform the data to match our interface
+      const transformedData: SavedPlan[] = (data || []).map(plan => ({
+        ...plan,
+        workout_plan: typeof plan.workout_plan === 'string' 
+          ? { content: plan.workout_plan }
+          : plan.workout_plan as { content: string }
+      }));
+      
+      setSavedPlans(transformedData);
     } catch (error) {
       console.error('Error loading saved plans:', error);
       toast.error('Failed to load saved plans');
