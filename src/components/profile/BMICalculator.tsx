@@ -96,7 +96,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
   return (
     <Card className="mt-6">
       <CardHeader>
-        <CardTitle>{t("bmiCalculator")}</CardTitle>
+        <CardTitle>{t("BMI calculator")}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -116,7 +116,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
             </div>
             <div>
               <label htmlFor="height" className="block text-sm font-medium mb-1">
-                {t("height")} ({getHeightUnit(measurementSystem)})
+                {t("Height")} ({getHeightUnit(measurementSystem)})
               </label>
               <Input
                 id="height"
@@ -131,9 +131,9 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
           
           {bmi !== null && (
             <div className="bg-card/50 p-6 rounded-lg border border-border">
-              <h3 className="text-lg font-medium mb-3">{t("bmiResult")}</h3>
+              <h3 className="text-lg font-medium mb-3">{t("BMI result")}</h3>
               <p className="text-3xl font-bold mb-2">
-                {t("bmiValue")} <span className={getStatusColor(bmi)}>{bmi}</span>
+                {t("BMI value")} <span className={getStatusColor(bmi)}>{bmi}</span>
               </p>
               <p className="mb-4">{t(getBMICategory(bmi))}</p>
               
