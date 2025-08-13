@@ -375,7 +375,7 @@ export default function Progress() {
           <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>{t("bodyMeasurements")}</CardTitle>
+                <CardTitle>{t("Body measurements")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {enabledMeasurementTypes.map(type => {
