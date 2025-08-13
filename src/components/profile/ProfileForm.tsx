@@ -204,7 +204,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             name="age"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("age")}</FormLabel>
+                <FormLabel>{t("Age")}</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
@@ -244,7 +244,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             name="weight"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("weight")} ({getWeightUnit(measurementSystem)})</FormLabel>
+                <FormLabel>{t("Weight")} ({getWeightUnit(measurementSystem)})</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
