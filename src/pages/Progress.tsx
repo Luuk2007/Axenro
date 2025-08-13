@@ -406,7 +406,7 @@ export default function Progress() {
             
             <Card>
               <CardHeader>
-                <CardTitle>{t("measurementHistory")}</CardTitle>
+                <CardTitle>{t("Measurement history")}</CardTitle>
               </CardHeader>
               <CardContent>
                 {measurements.length > 0 ? (
@@ -452,11 +452,11 @@ export default function Progress() {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <p className="text-muted-foreground mb-4">
-                      {t("noMeasurementsYet")}
+                      {t("No measurements yet")}
                     </p>
                     <Button onClick={() => document.querySelector<HTMLButtonElement>('[data-dialog-trigger="true"]')?.click()}>
                       <Plus className="h-4 w-4 mr-1" />
-                      {t("addFirstMeasurement")}
+                      {t("Add first measurement")}
                     </Button>
                   </div>
                 )}
