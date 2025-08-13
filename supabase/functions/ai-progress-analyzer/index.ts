@@ -16,15 +16,30 @@ serve(async (req) => {
   try {
     const { images, measurements, analysisTitle } = await req.json();
 
-    const authHeader = req.headers.get('Authorization')!;
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    // Create Supabase client with proper auth handling
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+    // Get the authorization header and set it for the supabase client
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Missing authorization header');
+    }
+
+    // Extract the JWT token from the Authorization header
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Set the auth token for this request
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      console.error('Auth error:', userError);
+      throw new Error('Authentication failed');
+    }
+
+    console.log('Authenticated user:', user.id);
 
     // Store images in Supabase Storage
     const imageUrls: string[] = [];
@@ -33,21 +48,28 @@ serve(async (req) => {
       const image = images[i];
       const fileName = `${user.id}/${Date.now()}_${i}.jpg`;
       
-      // Convert base64 to blob
-      const response = await fetch(image);
-      const blob = await response.blob();
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('progress-images')
-        .upload(fileName, blob);
+      try {
+        // Convert base64 to blob
+        const response = await fetch(image);
+        const blob = await response.blob();
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('progress-images')
+          .upload(fileName, blob);
 
-      if (uploadError) throw uploadError;
-      
-      const { data: urlData } = supabase.storage
-        .from('progress-images')
-        .getPublicUrl(fileName);
-      
-      imageUrls.push(urlData.publicUrl);
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          continue;
+        }
+        
+        const { data: urlData } = supabase.storage
+          .from('progress-images')
+          .getPublicUrl(fileName);
+        
+        imageUrls.push(urlData.publicUrl);
+      } catch (uploadError) {
+        console.error('Error processing image:', uploadError);
+      }
     }
 
     // Analyze images with OpenAI Vision
@@ -73,7 +95,7 @@ serve(async (req) => {
         role: 'user',
         content: [
           { type: 'text', text: analysisPrompt },
-          ...images.map((image: string) => ({
+          ...images.slice(0, 3).map((image: string) => ({
             type: 'image_url',
             image_url: { url: image }
           }))
@@ -94,6 +116,12 @@ serve(async (req) => {
       }),
     });
 
+    if (!openAIResponse.ok) {
+      const errorText = await openAIResponse.text();
+      console.error('OpenAI API error:', errorText);
+      throw new Error('Failed to get AI response');
+    }
+
     const aiData = await openAIResponse.json();
     const analysis = aiData.choices[0].message.content;
 
@@ -110,7 +138,9 @@ serve(async (req) => {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error saving analysis:', error);
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 

@@ -16,15 +16,30 @@ serve(async (req) => {
   try {
     const { message, messageType = 'fitness' } = await req.json();
 
-    const authHeader = req.headers.get('Authorization')!;
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    // Create Supabase client with proper auth handling
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+    // Get the authorization header and set it for the supabase client
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Missing authorization header');
+    }
+
+    // Extract the JWT token from the Authorization header
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Set the auth token for this request
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      console.error('Auth error:', userError);
+      throw new Error('Authentication failed');
+    }
+
+    console.log('Authenticated user:', user.id);
 
     // Get recent chat history for context
     const { data: recentChats } = await supabase
@@ -64,6 +79,12 @@ serve(async (req) => {
       }),
     });
 
+    if (!openAIResponse.ok) {
+      const errorText = await openAIResponse.text();
+      console.error('OpenAI API error:', errorText);
+      throw new Error('Failed to get AI response');
+    }
+
     const aiData = await openAIResponse.json();
     const response = aiData.choices[0].message.content;
 
@@ -77,7 +98,9 @@ serve(async (req) => {
         message_type: messageType
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error saving chat history:', error);
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 

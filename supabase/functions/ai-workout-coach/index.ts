@@ -23,15 +23,30 @@ serve(async (req) => {
       injuries 
     } = await req.json();
 
-    const authHeader = req.headers.get('Authorization')!;
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    // Create Supabase client with proper auth handling
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+    // Get the authorization header and set it for the supabase client
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Missing authorization header');
+    }
+
+    // Extract the JWT token from the Authorization header
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Set the auth token for this request
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      console.error('Auth error:', userError);
+      throw new Error('Authentication failed');
+    }
+
+    console.log('Authenticated user:', user.id);
 
     const prompt = `Create a comprehensive workout plan based on:
     - Goals: ${goals}
@@ -48,7 +63,7 @@ serve(async (req) => {
     4. Progression guidelines
     5. Tips and modifications
 
-    Format as a structured JSON object with days, exercises, and instructions.`;
+    Format as a structured, readable text with clear sections and bullet points.`;
 
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -61,13 +76,20 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert personal trainer. Create detailed, safe, and effective workout plans in JSON format.' 
+            content: 'You are an expert personal trainer. Create detailed, safe, and effective workout plans with clear structure and formatting.' 
           },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
+        max_tokens: 1500,
       }),
     });
+
+    if (!openAIResponse.ok) {
+      const errorText = await openAIResponse.text();
+      console.error('OpenAI API error:', errorText);
+      throw new Error('Failed to get AI response');
+    }
 
     const aiData = await openAIResponse.json();
     const workoutPlan = aiData.choices[0].message.content;
@@ -90,7 +112,9 @@ serve(async (req) => {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error saving workout plan:', error);
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 
