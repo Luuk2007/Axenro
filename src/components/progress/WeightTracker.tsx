@@ -99,7 +99,7 @@ const WeightTracker = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t("addWeight")}</CardTitle>
+          <CardTitle>{t("Add weight")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4 items-end">
