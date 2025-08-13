@@ -1,29 +1,67 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, Upload, X } from 'lucide-react';
+import { Loader2, Upload, X, Trash2, Eye } from 'lucide-react';
+
+interface SavedAnalysis {
+  id: string;
+  title: string;
+  created_at: string;
+  analysis_text: string;
+}
 
 export default function AIProgressAnalyzer() {
   const { t } = useLanguage();
+  const { session } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [savedAnalyses, setSavedAnalyses] = useState<SavedAnalysis[]>([]);
+  const [loadingAnalyses, setLoadingAnalyses] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [measurements, setMeasurements] = useState({
     weight: '',
     bodyFat: '',
-    muscle: '',
     chest: '',
     waist: '',
     arms: ''
   });
   const [analysisTitle, setAnalysisTitle] = useState('');
   const [analysis, setAnalysis] = useState('');
+  const [selectedAnalysis, setSelectedAnalysis] = useState<SavedAnalysis | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (session) {
+      loadSavedAnalyses();
+    }
+  }, [session]);
+
+  const loadSavedAnalyses = async () => {
+    if (!session) return;
+    
+    setLoadingAnalyses(true);
+    try {
+      const { data, error } = await supabase
+        .from('ai_progress_analysis')
+        .select('id, title, created_at, analysis_text')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setSavedAnalyses(data || []);
+    } catch (error) {
+      console.error('Error loading saved analyses:', error);
+      toast.error('Failed to load saved analyses');
+    } finally {
+      setLoadingAnalyses(false);
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -46,6 +84,11 @@ export default function AIProgressAnalyzer() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!session) {
+      toast.error('Please sign in to use AI features');
+      return;
+    }
+
     if (images.length === 0) {
       toast.error(t('Please upload at least one progress photo'));
       return;
@@ -58,13 +101,20 @@ export default function AIProgressAnalyzer() {
           images: images,
           measurements: measurements,
           analysisTitle: analysisTitle || 'Progress Analysis'
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
         }
       });
 
       if (error) throw error;
 
       setAnalysis(data.analysis);
+      setSelectedAnalysis(null);
       toast.success(t('Progress analysis completed!'));
+      
+      // Reload saved analyses to show the new one
+      await loadSavedAnalyses();
     } catch (error) {
       console.error('Error analyzing progress:', error);
       toast.error(t('Failed to analyze progress'));
@@ -73,8 +123,96 @@ export default function AIProgressAnalyzer() {
     }
   };
 
+  const deleteAnalysis = async (analysisId: string) => {
+    if (!session) return;
+
+    try {
+      const { error } = await supabase
+        .from('ai_progress_analysis')
+        .delete()
+        .eq('id', analysisId);
+
+      if (error) throw error;
+
+      setSavedAnalyses(prev => prev.filter(analysis => analysis.id !== analysisId));
+      if (selectedAnalysis?.id === analysisId) {
+        setSelectedAnalysis(null);
+        setAnalysis('');
+      }
+      toast.success('Analysis deleted successfully');
+    } catch (error) {
+      console.error('Error deleting analysis:', error);
+      toast.error('Failed to delete analysis');
+    }
+  };
+
+  const viewAnalysis = (analysisData: SavedAnalysis) => {
+    setSelectedAnalysis(analysisData);
+    setAnalysis(analysisData.analysis_text);
+  };
+
+  if (!session) {
+    return (
+      <div className="text-center py-8">
+        <Upload className="mx-auto h-12 w-12 mb-4 text-muted-foreground" />
+        <p className="text-muted-foreground">{t('Please sign in to access AI progress analysis')}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Saved Analyses Section */}
+      <Card className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">My Progress Analyses</h3>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadSavedAnalyses}
+            disabled={loadingAnalyses}
+          >
+            {loadingAnalyses ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Refresh'}
+          </Button>
+        </div>
+        
+        {savedAnalyses.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {savedAnalyses.map((analysisData) => (
+              <div key={analysisData.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex-1">
+                  <h4 className="font-medium">{analysisData.title}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(analysisData.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => viewAnalysis(analysisData)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => deleteAnalysis(analysisData.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-center py-4">
+            No progress analyses yet. Create your first analysis below!
+          </p>
+        )}
+      </Card>
+
+      {/* Form Section */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="title">{t('Analysis Title')}</Label>
@@ -199,11 +337,21 @@ export default function AIProgressAnalyzer() {
         </Button>
       </form>
 
+      {/* Analysis Display */}
       {analysis && (
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">{t('AI Progress Analysis')}</h3>
-          <div className="bg-muted p-4 rounded-lg whitespace-pre-wrap">
-            {analysis}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">
+              {selectedAnalysis ? selectedAnalysis.title : t('AI Progress Analysis')}
+            </h3>
+            {selectedAnalysis && (
+              <div className="text-sm text-muted-foreground">
+                Created: {new Date(selectedAnalysis.created_at).toLocaleDateString()}
+              </div>
+            )}
+          </div>
+          <div className="bg-muted p-4 rounded-lg">
+            <pre className="whitespace-pre-wrap font-sans">{analysis}</pre>
           </div>
         </Card>
       )}
