@@ -131,14 +131,14 @@ export default function Progress() {
   
   const handleAddMeasurement = () => {
     if (!measurementValue) {
-      toast.error(t('pleaseEnterValue'));
+      toast.error(t('Please enter value'));
       return;
     }
     
     const value = parseFloat(measurementValue);
     
     if (isNaN(value)) {
-      toast.error(t('pleaseEnterValidNumber'));
+      toast.error(t('Please enter valid number'));
       return;
     }
     
