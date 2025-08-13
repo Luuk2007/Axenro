@@ -54,7 +54,7 @@ export default function Progress() {
   const [progressPhotos, setProgressPhotos] = useState<ProgressPhoto[]>([]);
   const [measurementTypes, setMeasurementTypes] = useState<MeasurementType[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasRef>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const defaultMeasurementTypes: MeasurementType[] = [
     { id: 'chest', name: 'Chest', unit: 'cm', enabled: true },
