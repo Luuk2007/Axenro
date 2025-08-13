@@ -59,10 +59,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <LanguageProvider>
-          <CookieProvider>
-            <Toaster />
-            <BrowserRouter>
-              <AuthProvider>
+          <Toaster />
+          <BrowserRouter>
+            <AuthProvider>
+              <CookieProvider>
                 <Routes>
                   <Route path="/" element={<Layout />}>
                     <Route index element={<Index />} />
@@ -83,9 +83,9 @@ function App() {
                   open={showPasswordReset}
                   onOpenChange={setShowPasswordReset}
                 />
-              </AuthProvider>
-            </BrowserRouter>
-          </CookieProvider>
+              </CookieProvider>
+            </AuthProvider>
+          </BrowserRouter>
         </LanguageProvider>
       </TooltipProvider>
     </QueryClientProvider>
