@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dumbbell, Utensils, BarChart3, MessageCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import AIWorkoutCoach from '@/components/ai/AIWorkoutCoach';
 import AIMealPlanner from '@/components/ai/AIMealPlanner';
 import AIProgressAnalyzer from '@/components/ai/AIProgressAnalyzer';
@@ -14,6 +15,7 @@ import AuthenticationDialog from '@/components/auth/AuthenticationDialog';
 export default function AxenroAI() {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   if (!user) {
     return (
@@ -23,7 +25,13 @@ export default function AxenroAI() {
           <p className="text-muted-foreground mb-6">
             {t('Please sign in to access AI features')}
           </p>
-          <AuthenticationDialog />
+          <Button onClick={() => setShowAuthDialog(true)}>
+            {t('auth.login')}
+          </Button>
+          <AuthenticationDialog 
+            open={showAuthDialog} 
+            onOpenChange={setShowAuthDialog}
+          />
         </div>
       </div>
     );
