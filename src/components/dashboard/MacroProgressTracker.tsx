@@ -144,7 +144,7 @@ export default function MacroProgressTracker() {
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">{t("protein")}</span>
+            <span className="text-sm font-medium">{t("Protein")}</span>
             <span className="text-sm font-medium">0 / {macroTargets.protein.goal}g</span>
           </div>
           <Progress value={0} className="h-2 bg-blue-100 [&>div]:bg-blue-500" />
@@ -155,7 +155,7 @@ export default function MacroProgressTracker() {
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">{t("carbs")}</span>
+            <span className="text-sm font-medium">{t("Carbs")}</span>
             <span className="text-sm font-medium">0 / {macroTargets.carbs.goal}g</span>
           </div>
           <Progress value={0} className="h-2 bg-green-100 [&>div]:bg-green-500" />
@@ -166,7 +166,7 @@ export default function MacroProgressTracker() {
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">{t("fat")}</span>
+            <span className="text-sm font-medium">{t("Fat")}</span>
             <span className="text-sm font-medium">0 / {macroTargets.fat.goal}g</span>
           </div>
           <Progress value={0} className="h-2 bg-yellow-100 [&>div]:bg-yellow-500" />
