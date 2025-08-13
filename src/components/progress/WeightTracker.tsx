@@ -71,7 +71,7 @@ const WeightTracker = () => {
     } else {
       // Add new entry
       updatedData = [...weightData, newEntry].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      toast.success(t("weightAdded"));
+      toast.success(t("Weight added"));
     }
 
     saveWeightData(updatedData);
@@ -134,7 +134,7 @@ const WeightTracker = () => {
       {weightData.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>{t("weightProgress")}</CardTitle>
+            <CardTitle>{t("Weight progress")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-64 w-full mb-6">
@@ -159,7 +159,7 @@ const WeightTracker = () => {
             </div>
             
             <div className="space-y-2">
-              <h4 className="font-medium mb-3">{t("weightEntries")}</h4>
+              <h4 className="font-medium mb-3">{t("Weight entries")}</h4>
               {weightData.map((entry, index) => {
                 const displayWeight = convertWeight(entry.value, 'metric', measurementSystem);
                 return (
