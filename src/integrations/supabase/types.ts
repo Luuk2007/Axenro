@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      cookie_consent: {
+        Row: {
+          analytics_cookies: boolean
+          consent_timestamp: string
+          created_at: string
+          essential_cookies: boolean
+          id: string
+          marketing_cookies: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analytics_cookies?: boolean
+          consent_timestamp?: string
+          created_at?: string
+          essential_cookies?: boolean
+          id?: string
+          marketing_cookies?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analytics_cookies?: boolean
+          consent_timestamp?: string
+          created_at?: string
+          essential_cookies?: boolean
+          id?: string
+          marketing_cookies?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_steps: {
         Row: {
           created_at: string

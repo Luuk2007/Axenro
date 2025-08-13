@@ -13,6 +13,7 @@ import MealsSettings from "@/components/settings/MealsSettings";
 import ExercisesSettings from "@/components/settings/ExercisesSettings";
 import BodyMeasurementsSettings from "@/components/settings/BodyMeasurementsSettings";
 import MeasurementSystemSettings from "@/components/settings/MeasurementSystemSettings";
+import CookieSettings from "@/components/settings/CookieSettings";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionModal from "@/components/subscription/SubscriptionModal";
 import { useLocation } from "react-router-dom";
@@ -29,7 +30,7 @@ const Settings = () => {
   const location = useLocation();
   const [settings, setSettings] = useState<UserSettings>({
     theme: "light",
-    language: language, // Initialize with current language from context
+    language: language,
     dataBackup: false,
   });
   const [appearanceOpen, setAppearanceOpen] = useState(false);
@@ -51,14 +52,12 @@ const Settings = () => {
     const savedSettings = localStorage.getItem("userSettings");
     if (savedSettings) {
       const parsedSettings = JSON.parse(savedSettings);
-      // Ensure language matches current context language
       const updatedSettings = {
         ...parsedSettings,
-        language: language // Always use the current language from context
+        language: language
       };
       setSettings(updatedSettings);
     } else {
-      // If no saved settings, use current language from context
       setSettings(prev => ({ ...prev, language }));
     }
   }, [language]);
@@ -80,7 +79,6 @@ const Settings = () => {
       }
     };
 
-    // Listen for custom events when settings change
     window.addEventListener('settingsChanged', handleSettingsChange);
 
     return () => {
@@ -93,7 +91,6 @@ const Settings = () => {
     localStorage.setItem("userSettings", JSON.stringify(newSettings));
     setSettings(newSettings);
     
-    // Dispatch custom event to notify other components about settings change
     window.dispatchEvent(new CustomEvent('settingsChanged'));
   };
 
@@ -102,13 +99,11 @@ const Settings = () => {
     const newSettings = { ...settings, theme };
     saveSettings(newSettings);
 
-    // Apply theme to document
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
     } else if (theme === "light") {
       document.documentElement.classList.remove("dark");
     } else {
-      // System theme
       const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       if (systemPrefersDark) {
         document.documentElement.classList.add("dark");
@@ -256,6 +251,9 @@ const Settings = () => {
 
         {/* Measurement System Settings */}
         <MeasurementSystemSettings />
+
+        {/* Cookie Settings */}
+        <CookieSettings />
 
         {/* Meals Settings */}
         <MealsSettings />

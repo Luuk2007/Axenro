@@ -12,6 +12,7 @@ export const settingsTranslations: Translations = {
   language: "Taal",
   light: "Licht",
   dark: "Donker",
+  system: "Systeem",
   
   // Measurement System
   measurementSystem: "Meetsysteem",
@@ -36,9 +37,11 @@ export const settingsTranslations: Translations = {
   "Annual": "Jaarlijks",
   "Save 20%": "Bespaar 20%",
   "per year": "per jaar",
+  "per month": "per maand",
   "Free Plan": "Gratis Plan",
   "Plan": "Plan",
   "Upgrade": "Upgraden",
+  "Loading...": "Laden...",
   
   // Data Management
   "Data Management": "Gegevensbeheer",
@@ -48,6 +51,38 @@ export const settingsTranslations: Translations = {
   "confirmClearData": "Weet je zeker dat je alle gegevens wilt wissen?",
   "dataExported": "Gegevens geëxporteerd",
   "dataCleared": "Gegevens gewist",
+  
+  // Cookie Settings
+  "cookiePreferences": "Cookie Voorkeuren",
+  "cookieSettingsDescription": "Beheer je cookie voorkeuren. Je kunt deze instellingen op elk moment wijzigen.",
+  "lastUpdated": "Laatst bijgewerkt",
+  "notSet": "Niet ingesteld",
+  "cookiePreferencesSaved": "Cookie voorkeuren opgeslagen",
+  
+  // Cookie Consent Modal
+  "cookieConsentTitle": "Cookie Voorkeuren",
+  "cookieConsentDescription": "We gebruiken cookies om je ervaring te verbeteren en onze website te analyseren.",
+  "cookieExplanation": "Cookies zijn kleine tekstbestanden die op je apparaat worden opgeslagen om de functionaliteit van de website te verbeteren. Je kunt kiezen welke cookies je wilt accepteren.",
+  "essentialCookies": "Essentiële Cookies",
+  "essentialCookiesDescription": "Deze cookies zijn nodig voor de basisfunctionaliteit van de website, zoals inloggen en navigatie. Ze kunnen niet worden uitgeschakeld.",
+  "essentialCookiesShort": "Nodig voor basisfunctionaliteit",
+  "analyticsCookies": "Analytische Cookies",
+  "analyticsCookiesDescription": "Deze cookies helpen ons begrijpen hoe bezoekers onze website gebruiken door anoniem informatie te verzamelen over paginabezoeken en gebruikersgedrag.",
+  "analyticsCookiesShort": "Voor website analyse en verbetering",
+  "marketingCookies": "Marketing Cookies",
+  "marketingCookiesDescription": "Deze cookies worden gebruikt om advertenties relevanter voor jou en je interesses te maken. Ze kunnen ook worden gebruikt om het aantal keer dat je een advertentie ziet te beperken.",
+  "marketingCookiesShort": "Voor gepersonaliseerde advertenties",
+  "acceptAllCookies": "Alle Cookies Accepteren",
+  "rejectAllCookies": "Alleen Essentiële Cookies",
+  "customizeCookies": "Voorkeuren Aanpassen",
+  "savePreferences": "Voorkeuren Opslaan",
+  "alwaysActive": "Altijd Actief",
+  "enableAnalytics": "Analytische cookies inschakelen",
+  "enableMarketing": "Marketing cookies inschakelen",
+  "cookiePolicyText": "Voor meer informatie, lees onze",
+  "privacyPolicy": "Privacybeleid",
+  "cookiePolicy": "Cookie Beleid",
+  "and": "en",
   
   // Body Measurements
   "Body Measurements": "Lichaamsmetingen",
@@ -65,4 +100,5 @@ export const settingsTranslations: Translations = {
   "personalDetails": "Persoonlijke gegevens",
   "profileSettings": "Profiel instellingen",
   "nutritionPlan": "Voedingsplan",
+  "back": "Terug",
 };
