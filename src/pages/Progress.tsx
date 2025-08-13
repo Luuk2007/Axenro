@@ -54,7 +54,7 @@ export default function Progress() {
   const [progressPhotos, setProgressPhotos] = useState<ProgressPhoto[]>([]);
   const [measurementTypes, setMeasurementTypes] = useState<MeasurementType[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasRef>(null);
 
   const defaultMeasurementTypes: MeasurementType[] = [
     { id: 'chest', name: 'Chest', unit: 'cm', enabled: true },
@@ -105,13 +105,6 @@ export default function Progress() {
       } catch (error) {
         console.error("Error loading progress photos:", error);
       }
-    } else {
-      const demoPhotos = [
-        { id: '1', date: 'Jun 1, 2023', url: '/placeholder.svg' },
-        { id: '2', date: 'Jul 1, 2023', url: '/placeholder.svg' },
-      ];
-      setProgressPhotos(demoPhotos);
-      localStorage.setItem('progressPhotos', JSON.stringify(demoPhotos));
     }
   }, []);
 
