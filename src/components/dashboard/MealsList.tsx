@@ -205,7 +205,7 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
                     (addFoodBtn as HTMLElement).click();
                   }
                 }, 100);
-              }}>{t("addMeal")}</Button>
+              }}>{t("Add meal")}</Button>
             </div>
           )}
         </div>
