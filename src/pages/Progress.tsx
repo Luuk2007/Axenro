@@ -306,7 +306,7 @@ export default function Progress() {
             <DialogTrigger asChild>
               <Button data-dialog-trigger="true">
                 <Plus className="mr-2 h-4 w-4" />
-                {t("addMeasurement")}
+                {t("Add measurement")}
               </Button>
             </DialogTrigger>
             <DialogContent>
