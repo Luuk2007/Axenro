@@ -80,10 +80,10 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
   };
 
   const getBMICategory = (bmiValue: number) => {
-    if (bmiValue < 18.5) return "underweight";
-    if (bmiValue >= 18.5 && bmiValue <= 24.9) return "healthyWeight";
-    if (bmiValue > 24.9 && bmiValue <= 29.9) return "overweight";
-    return "obesity";
+    if (bmiValue < 18.5) return "Underweight";
+    if (bmiValue >= 18.5 && bmiValue <= 24.9) return "Healthy weight";
+    if (bmiValue > 24.9 && bmiValue <= 29.9) return "Overweight";
+    return "Obesity";
   };
 
   const getStatusColor = (bmiValue: number) => {
