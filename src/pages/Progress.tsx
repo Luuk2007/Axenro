@@ -159,13 +159,13 @@ export default function Progress() {
     
     setMeasurements(prev => [...prev, newMeasurement]);
     
-    toast.success(`${selectedType.name} ${t('measurementAdded')}`);
+    toast.success(`${selectedType.name} ${t('Measurement added')}`);
     setMeasurementValue('');
   };
   
   const handleDeleteMeasurement = (id: string) => {
     setMeasurements(prev => prev.filter(measurement => measurement.id !== id));
-    toast.success(t('measurementDeleted'));
+    toast.success(t('Measurement deleted'));
   };
   
   const handleCapturePhoto = async () => {
