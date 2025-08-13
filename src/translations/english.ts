@@ -1,3 +1,4 @@
+
 export const english = {
   "dashboard": "Dashboard",
   "nutrition": "Nutrition",
@@ -75,7 +76,7 @@ export const english = {
     "resetYourPassword": "Reset your password",
     "enterNewPassword": "Enter your new password",
   },
-  "dashboard": {
+  "dashboardSection": {
     "welcome": "Welcome back!",
     "dailyQuote": "Your daily inspiration:",
     "todayOverview": "Today's Overview",
@@ -83,9 +84,9 @@ export const english = {
     "workoutSummary": "Workout Summary",
     "latestWorkouts": "Latest Workouts",
     "noWorkouts": "No workouts logged yet.",
-    "startTracking": "Start tracking your fitness journey today!",
+    "startTrackingWorkouts": "Start tracking your fitness journey today!",
   },
-  "nutrition": {
+  "nutritionSection": {
     "title": "Nutrition Dashboard",
     "dailyIntake": "Daily Caloric Intake",
     "macronutrients": "Macronutrient Breakdown",
@@ -98,7 +99,7 @@ export const english = {
     "noFoodLogged": "No food logged today.",
     "trackYourMeals": "Track your meals to stay on top of your nutrition!",
   },
-  "workout": {
+  "workoutSection": {
     "title": "Workout Tracker",
     "startNewWorkout": "Start New Workout",
     "workoutHistory": "Workout History",
@@ -107,7 +108,7 @@ export const english = {
     "noWorkoutsLogged": "No workouts logged yet.",
     "beginYourJourney": "Begin your fitness journey today!",
   },
-  "progress": {
+  "progressSection": {
     "title": "Progress Tracker",
     "weightProgress": "Weight Progress",
     "bodyMeasurements": "Body Measurements",
@@ -117,7 +118,7 @@ export const english = {
     "noMeasurements": "No measurements recorded yet.",
     "startTrackingProgress": "Start tracking your progress to see results!",
   },
-  "profile": {
+  "profileSection": {
     "title": "Your Profile",
     "personalInfo": "Personal Information",
     "editProfile": "Edit Profile",
@@ -127,7 +128,7 @@ export const english = {
     "subscriptionDetails": "Subscription Details",
     "manageSubscription": "Manage Subscription",
   },
-  "settings": {
+  "settingsSection": {
     "title": "Settings",
     "general": "General Settings",
     "language": "Language",
@@ -148,7 +149,6 @@ export const english = {
   "Meal Planner": "Meal Planner",
   "Meals": "Meals",
   "Progress Analyzer": "Progress Analyzer",
-  "Progress": "Progress",
   "Knowledge Hub": "Knowledge Hub",
   "Chat": "Chat",
   "AI Workout Coach": "AI Workout Coach",
@@ -243,7 +243,6 @@ export const english = {
   "AI is thinking...": "AI is thinking...",
   
   // Success/Error Messages
-  "Please fill in all required fields": "Please fill in all required fields",
   "Workout plan generated successfully!": "Workout plan generated successfully!",
   "Failed to generate workout plan": "Failed to generate workout plan",
   "Meal plan generated successfully!": "Meal plan generated successfully!",
