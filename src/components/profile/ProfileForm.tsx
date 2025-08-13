@@ -178,14 +178,14 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("gender")}</FormLabel>
+                <FormLabel>{t("Gender")}</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
                   value={field.value || ""}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("selectGender")} />
+                      <SelectValue placeholder={t("Select gender")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -304,7 +304,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           name="fitnessGoal"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("goal")}</FormLabel>
+              <FormLabel>{t("Goal")}</FormLabel>
               <Select 
                 onValueChange={(value: "lose" | "maintain" | "gain") => {
                   field.onChange(value);
