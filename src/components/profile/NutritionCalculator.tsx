@@ -128,15 +128,15 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">{t("Protein")}</p>
-                  <p className="text-xl font-bold">{macros.protein}{t("grams")}</p>
+                  <p className="text-xl font-bold">{macros.protein} {t("grams")}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">{t("Carbs")}</p>
-                  <p className="text-xl font-bold">{macros.carbs}{t("grams")}</p>
+                  <p className="text-xl font-bold">{macros.carbs} {t("grams")}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">{t("Fat")}</p>
-                  <p className="text-xl font-bold">{macros.fats}{t("grams")}</p>
+                  <p className="text-xl font-bold">{macros.fats} {t("grams")}</p>
                 </div>
               </div>
             </div>
