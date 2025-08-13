@@ -1,10 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { englishTranslations } from '../translations/english';
+import { english } from '../translations/english';
 import { dutch } from '../translations/dutch';
 import { Translations } from '../translations/types';
-
-// Use the named import for english
-const english = englishTranslations;
 
 // Define the type for translations
 export type TranslationKeys = string;

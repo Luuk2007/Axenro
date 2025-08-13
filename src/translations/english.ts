@@ -148,10 +148,8 @@ export const english = {
   
   // Settings continued
   settingsSaved: "Settings saved",
-  "Settings saved": "Settings saved",
   "Appearance": "Appearance",
   chooseMeasurementSystemDesc: "Choose which measurement system to use for weight, height and distance.",
-  system: "System",
   selectSystem: "Select system",
   measurementSystemNote: "This affects all weight, height, and distance measurements in the app.",
   
