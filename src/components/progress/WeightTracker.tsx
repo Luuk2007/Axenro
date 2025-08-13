@@ -67,7 +67,7 @@ const WeightTracker = () => {
       // Update existing entry
       updatedData = [...weightData];
       updatedData[existingIndex] = newEntry;
-      toast.success(t("weightUpdated"));
+      toast.success(t("Weight updated"));
     } else {
       // Add new entry
       updatedData = [...weightData, newEntry].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -82,7 +82,7 @@ const WeightTracker = () => {
   const deleteWeight = (date: string) => {
     const updatedData = weightData.filter(entry => entry.date !== date);
     saveWeightData(updatedData);
-    toast.success(t("weightEntryDeleted"));
+    toast.success(t("Weight deleted"));
   };
 
   // Convert data for chart display
