@@ -105,7 +105,7 @@ const Profile = () => {
         <TabsContent value="profile" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>{t("personalDetails")}</CardTitle>
+              <CardTitle>{t("Personal details")}</CardTitle>
             </CardHeader>
             <CardContent>
               <ProfileForm 
