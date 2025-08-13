@@ -311,7 +311,7 @@ const Dashboard = () => {
         
         <div className="max-h-[400px]">
           <MealsList
-            title={t("todayMeals")}
+            title={t("Today meals")}
             meals={meals}
             onViewAll={navigateToNutrition}
           />
