@@ -582,10 +582,10 @@ export default function Progress() {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
-              <CardTitle>{t("progressPhotos")}</CardTitle>
+              <CardTitle>{t("Progress photos")}</CardTitle>
               <Button variant="outline" onClick={() => setShowAddPhoto(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                {t("addPhoto")}
+                {t("Add photo")}
               </Button>
             </CardHeader>
             <CardContent>
@@ -621,13 +621,13 @@ export default function Progress() {
                 {progressPhotos.length === 0 && (
                   <div className="col-span-2 md:col-span-4 flex flex-col items-center justify-center py-12 text-center">
                     <Camera className="h-12 w-12 text-muted-foreground mb-3" />
-                    <h3 className="text-lg font-medium mb-1">{t("noProgressPhotos")}</h3>
+                    <h3 className="text-lg font-medium mb-1">{t("No progress photos")}</h3>
                     <p className="text-muted-foreground mb-6">
-                      {t("startTrackingVisualProgress")}
+                      {t("Start tracking visual progress")}
                     </p>
                     <Button onClick={() => setShowAddPhoto(true)}>
                       <Plus className="mr-2 h-4 w-4" />
-                      {t("addFirstPhoto")}
+                      {t("Add first photo")}
                     </Button>
                   </div>
                 )}
