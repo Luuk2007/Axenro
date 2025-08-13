@@ -311,8 +311,8 @@ export default function Progress() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{t("addMeasurement")}</DialogTitle>
-                <DialogDescription>{t("trackYourBodyMeasurements")}</DialogDescription>
+                <DialogTitle>{t("Add measurement")}</DialogTitle>
+                <DialogDescription>{t("Track your body measurements")}</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
