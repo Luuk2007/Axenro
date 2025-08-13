@@ -265,7 +265,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           name="exerciseFrequency"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("exerciseFrequency")}</FormLabel>
+              <FormLabel>{t("Exercise frequency")}</FormLabel>
               <Select 
                 onValueChange={(value) => {
                   field.onChange(value);
