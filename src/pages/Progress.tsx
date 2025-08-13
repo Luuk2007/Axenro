@@ -371,7 +371,7 @@ export default function Progress() {
           </div>
         </TabsContent>
         
-        <TabsContent value="measurements" className="space-y-6">
+        <TabsContent value="Measurements" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
