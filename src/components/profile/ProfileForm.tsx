@@ -225,7 +225,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             name="height"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("height")} ({getHeightUnit(measurementSystem)})</FormLabel>
+                <FormLabel>{t("Height")} ({getHeightUnit(measurementSystem)})</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
