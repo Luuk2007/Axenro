@@ -98,8 +98,8 @@ const Profile = () => {
 
       <Tabs defaultValue="profile" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="profile">{t("profileSettings")}</TabsTrigger>
-          <TabsTrigger value="nutrition">{t("nutritionPlan")}</TabsTrigger>
+          <TabsTrigger value="profile">{t("Profile settings")}</TabsTrigger>
+          <TabsTrigger value="nutrition">{t("Nutrition plan")}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile" className="space-y-6">
