@@ -219,7 +219,7 @@ export const english = {
   
   // Progress Analyzer
   "Analysis Title": "Analysis Title",
-  "e.g., 3 Month Transformation": "e.g., Build muscle, lose weight, increase strength...": "e.g., 3 Month Transformation",
+  "e.g., 3 Month Transformation": "e.g., 3 Month Transformation",
   "Progress Photos": "Progress Photos",
   "Upload Photos": "Upload Photos",
   "Upload multiple progress photos for comparison": "Upload multiple progress photos for comparison",
