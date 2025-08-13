@@ -192,7 +192,7 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
               <div className="rounded-full bg-secondary p-3 mb-3">
                 <Utensils className="h-6 w-6 text-secondary-foreground" />
               </div>
-              <h4 className="text-sm font-medium mb-1">{t("noMealsTracked")}</h4>
+              <h4 className="text-sm font-medium mb-1">{t("No meals tracked")}</h4>
               <p className="text-xs text-muted-foreground mb-4">
                 {t("startTracking")}
               </p>
