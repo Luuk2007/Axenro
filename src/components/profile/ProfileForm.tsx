@@ -163,7 +163,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("fullName")}</FormLabel>
+              <FormLabel>{t("Full name")}</FormLabel>
               <FormControl>
                 <Input placeholder="Enter your full name" {...field} />
               </FormControl>
