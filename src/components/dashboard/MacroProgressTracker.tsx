@@ -133,7 +133,7 @@ export default function MacroProgressTracker() {
       <div className="p-5 space-y-6">
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
-            <span className="text-sm font-medium">{t("calories")}</span>
+            <span className="text-sm font-medium">{t("Calories")}</span>
             <span className="text-sm font-medium">0 / {macroTargets.calories.goal} {t("kcal")}</span>
           </div>
           <Progress value={0} className="h-2" />
