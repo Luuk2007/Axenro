@@ -19,9 +19,11 @@ export default function AxenroAI() {
 
   if (!user) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="animate-fade-in">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold tracking-tight">{t('Axenro AI')}</h1>
+        </div>
         <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">{t('Axenro AI')}</h1>
           <p className="text-muted-foreground mb-6">
             {t('Please sign in to access AI features')}
           </p>
@@ -38,14 +40,9 @@ export default function AxenroAI() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-2">
-          {t('Axenro AI')}
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          {t('Your personal AI-powered fitness and nutrition assistant. Get customized workout plans, meal planning, progress analysis, and expert guidance.')}
-        </p>
+    <div className="animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">{t('Axenro AI')}</h1>
       </div>
 
       <Tabs defaultValue="workout" className="w-full">
