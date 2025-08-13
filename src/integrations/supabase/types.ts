@@ -14,6 +14,165 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_chat_history: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          message_type: string
+          response: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          message_type?: string
+          response: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          message_type?: string
+          response?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_meal_plans: {
+        Row: {
+          allergies: string[] | null
+          calorie_goal: number | null
+          carb_goal: number | null
+          created_at: string
+          diet_type: string | null
+          fat_goal: number | null
+          id: string
+          meal_plan: Json
+          meals_per_day: number | null
+          protein_goal: number | null
+          shopping_list: Json | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allergies?: string[] | null
+          calorie_goal?: number | null
+          carb_goal?: number | null
+          created_at?: string
+          diet_type?: string | null
+          fat_goal?: number | null
+          id?: string
+          meal_plan: Json
+          meals_per_day?: number | null
+          protein_goal?: number | null
+          shopping_list?: Json | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allergies?: string[] | null
+          calorie_goal?: number | null
+          carb_goal?: number | null
+          created_at?: string
+          diet_type?: string | null
+          fat_goal?: number | null
+          id?: string
+          meal_plan?: Json
+          meals_per_day?: number | null
+          protein_goal?: number | null
+          shopping_list?: Json | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_progress_analysis: {
+        Row: {
+          analysis_text: string
+          created_at: string
+          id: string
+          measurements: Json | null
+          progress_images: string[] | null
+          recommendations: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          analysis_text: string
+          created_at?: string
+          id?: string
+          measurements?: Json | null
+          progress_images?: string[] | null
+          recommendations?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          analysis_text?: string
+          created_at?: string
+          id?: string
+          measurements?: Json | null
+          progress_images?: string[] | null
+          recommendations?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_workout_plans: {
+        Row: {
+          available_equipment: string[] | null
+          created_at: string
+          description: string | null
+          experience_level: string | null
+          goals: string | null
+          id: string
+          injuries: string | null
+          session_length: number | null
+          title: string
+          training_days: number | null
+          updated_at: string
+          user_id: string
+          workout_plan: Json
+        }
+        Insert: {
+          available_equipment?: string[] | null
+          created_at?: string
+          description?: string | null
+          experience_level?: string | null
+          goals?: string | null
+          id?: string
+          injuries?: string | null
+          session_length?: number | null
+          title: string
+          training_days?: number | null
+          updated_at?: string
+          user_id: string
+          workout_plan: Json
+        }
+        Update: {
+          available_equipment?: string[] | null
+          created_at?: string
+          description?: string | null
+          experience_level?: string | null
+          goals?: string | null
+          id?: string
+          injuries?: string | null
+          session_length?: number | null
+          title?: string
+          training_days?: number | null
+          updated_at?: string
+          user_id?: string
+          workout_plan?: Json
+        }
+        Relationships: []
+      }
       cookie_consent: {
         Row: {
           analytics_cookies: boolean

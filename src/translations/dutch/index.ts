@@ -7,10 +7,11 @@ import { workoutTranslations } from './workout';
 import { progressTranslations } from './progress';
 import { profileTranslations } from './profile';
 import { settingsTranslations } from './settings';
+import { aiTranslations } from './ai';
 import { DomainTranslations, Translations } from '../types';
 
 // Combine all domain-specific translations into a single object
-const domainTranslations: DomainTranslations = {
+const domainTranslations: DomainTranslations & { ai: Translations } = {
   common: commonTranslations,
   auth: authTranslations,
   dashboard: dashboardTranslations,
@@ -18,7 +19,8 @@ const domainTranslations: DomainTranslations = {
   workout: workoutTranslations,
   progress: progressTranslations,
   profile: profileTranslations,
-  settings: settingsTranslations
+  settings: settingsTranslations,
+  ai: aiTranslations
 };
 
 // Flatten the translations for backward compatibility

@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CookieProvider } from "@/contexts/CookieContext";
 import Layout from "@/components/layout/Layout";
 import Index from "@/pages/Index";
+import AxenroAI from "@/pages/AxenroAI";
 import Nutrition from "@/pages/Nutrition";
 import Workouts from "@/pages/Workouts";
 import Progress from "@/pages/Progress";
@@ -66,6 +67,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Layout />}>
                     <Route index element={<Index />} />
+                    <Route path="axenro-ai" element={<AxenroAI />} />
                     <Route path="nutrition" element={<Nutrition />} />
                     <Route path="workouts" element={<Workouts />} />
                     <Route path="progress" element={<Progress />} />
