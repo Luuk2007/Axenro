@@ -68,7 +68,7 @@ const PlanWorkoutDialog = ({ open, onOpenChange, onWorkoutPlanned }: PlanWorkout
         
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="workout-name">{t("workoutName")}</Label>
+            <Label htmlFor="workout-name">{t("Workout name")}</Label>
             <Input
               id="workout-name"
               placeholder="e.g., Push Day, Pull Day, Legs"
@@ -112,7 +112,7 @@ const PlanWorkoutDialog = ({ open, onOpenChange, onWorkoutPlanned }: PlanWorkout
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button variant="outline" onClick={handleCancel}>
-              {t("cancel")}
+              {t("Cancel")}
             </Button>
             <Button onClick={handleSave}>
               Plannen
