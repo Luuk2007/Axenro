@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -39,11 +38,9 @@ const Nutrition = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  
-  // Initialize meals from available meals including custom ones
   const [meals, setMeals] = useState<Meal[]>([]);
 
-  // Initialize meals when component mounts
+  // Initialize meals when component mounts or language changes
   useEffect(() => {
     const initializeMeals = () => {
       const availableMeals = getAvailableMeals();
@@ -68,7 +65,7 @@ const Nutrition = () => {
     return () => {
       window.removeEventListener('mealsChanged', handleMealsChanged);
     };
-  }, []);
+  }, [language]); // Only depend on language, not meals
 
   // Check if user is authenticated
   useEffect(() => {
@@ -89,29 +86,8 @@ const Nutrition = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Update meal names when language changes
-  useEffect(() => {
-    const availableMeals = getAvailableMeals();
-    setMeals(currentMeals => {
-      return availableMeals.map(availableMeal => {
-        const existingMeal = currentMeals.find(meal => meal.id === availableMeal.id);
-        return {
-          id: availableMeal.id,
-          name: availableMeal.name,
-          items: existingMeal?.items || []
-        };
-      });
-    });
-  }, [language]);
-
   // Fallback to localStorage for demo or when not logged in
-  const loadFoodLogsFromLocalStorage = () => {
-    // Safety check: only proceed if meals are initialized
-    if (!meals || meals.length === 0) {
-      console.log('Meals not yet initialized, skipping localStorage load');
-      return;
-    }
-
+  const loadFoodLogsFromLocalStorage = (mealsToUpdate: Meal[]) => {
     const dateStr = selectedDate.toISOString().split('T')[0];
     const savedData = localStorage.getItem(`foodLog_${dateStr}`);
     
@@ -122,7 +98,7 @@ const Nutrition = () => {
         const parsedData = JSON.parse(savedData);
         
         // Reset meal items
-        const updatedMeals = meals.map(meal => ({
+        const updatedMeals = mealsToUpdate.map(meal => ({
           ...meal,
           items: []
         }));
@@ -144,30 +120,32 @@ const Nutrition = () => {
       }
     } else {
       console.log('No localStorage data found for date:', dateStr);
+      setMeals(mealsToUpdate);
     }
   };
 
-  // Load food logs for the selected date - now includes meals as dependency
+  // Load food logs for the selected date - removed meals dependency to prevent infinite loop
   useEffect(() => {
-    // Don't load if meals are not yet initialized
-    if (!meals || meals.length === 0) {
-      console.log('Meals not initialized yet, waiting...');
-      return;
-    }
-
-    if (!isAuthenticated || !userId) {
-      // If not authenticated, load from local storage for demo
-      console.log('Not authenticated, loading from localStorage');
-      loadFoodLogsFromLocalStorage();
-      return;
-    }
-    
-    // Format date as YYYY-MM-DD for consistency
-    const dateStr = selectedDate.toISOString().split('T')[0];
-    
     const loadFoodLogs = async () => {
+      // Don't load if meals are not yet initialized
+      if (!meals || meals.length === 0) {
+        console.log('Meals not initialized yet, waiting...');
+        return;
+      }
+
       setIsLoading(true);
+      
       try {
+        if (!isAuthenticated || !userId) {
+          // If not authenticated, load from local storage for demo
+          console.log('Not authenticated, loading from localStorage');
+          loadFoodLogsFromLocalStorage(meals);
+          return;
+        }
+        
+        // Format date as YYYY-MM-DD for consistency
+        const dateStr = selectedDate.toISOString().split('T')[0];
+        
         console.log('Loading food logs from database for date:', dateStr);
         const logs = await getFoodLogs(dateStr);
         
@@ -198,9 +176,12 @@ const Nutrition = () => {
         setIsLoading(false);
       }
     };
-    
-    loadFoodLogs();
-  }, [selectedDate, isAuthenticated, userId, refreshTrigger, t, meals]); // Added meals as dependency
+
+    // Only run if we have meals initialized
+    if (meals.length > 0) {
+      loadFoodLogs();
+    }
+  }, [selectedDate, isAuthenticated, userId, refreshTrigger, t]); // Removed meals dependency
 
   // Save food logs to localStorage for demo
   const saveFoodLogsToLocalStorage = (updatedMeals: Meal[]) => {
