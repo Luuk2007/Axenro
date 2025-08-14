@@ -142,7 +142,7 @@ const MealsSettings = () => {
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">{t("meals")}</CardTitle>
+              <CardTitle className="text-base">{t("Meals")}</CardTitle>
               {mealsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </div>
           </CardHeader>
