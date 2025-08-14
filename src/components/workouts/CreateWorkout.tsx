@@ -168,7 +168,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
           
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium block mb-2">{t("workoutName")}</label>
+              <label className="text-sm font-medium block mb-2">{t("Workout name")}</label>
               <Input
                 value={workoutName}
                 onChange={(e) => setWorkoutName(e.target.value)}
@@ -177,7 +177,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
             </div>
             
             <div>
-              <label className="text-sm font-medium block mb-2">{t("date")}</label>
+              <label className="text-sm font-medium block mb-2">{t("Date")}</label>
               <div className="relative">
                 <Input
                   type="date"
@@ -191,14 +191,14 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
             
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium">{t("exercises")}</label>
+                <label className="text-sm font-medium">{t("Exercises")}</label>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowAddExercise(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  {t("addExercise")}
+                  {t("Add exercise")}
                 </Button>
               </div>
               
@@ -289,7 +289,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                 disabled={!workoutName.trim()}
                 className="flex-1"
               >
-                {editingWorkout ? t("updateWorkout") : t("saveWorkout")}
+                {editingWorkout ? t("Update workout") : t("saveWorkout")}
               </Button>
             </div>
           </div>
