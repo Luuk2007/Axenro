@@ -159,7 +159,7 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md mx-auto">
         <DialogHeader>
-          <DialogTitle>{t("addExercise")}</DialogTitle>
+          <DialogTitle>{t("Add exercise")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
@@ -180,10 +180,10 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t("exercises")}</label>
+            <label className="text-sm font-medium">{t("Exercises")}</label>
             <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
               <SelectTrigger>
-                <SelectValue placeholder={t("selectExercises")} />
+                <SelectValue placeholder={t("Select exercises")} />
               </SelectTrigger>
               <SelectContent className="max-h-80">
                 {selectedMuscleGroup !== "all" ? (
@@ -248,7 +248,7 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
             onClick={handleAddExercise}
             disabled={!selectedExerciseId}
           >
-            {t("addExercise")}
+            {t("Add exercise")}
           </Button>
         </DialogFooter>
       </DialogContent>
