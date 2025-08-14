@@ -95,7 +95,7 @@ const PersonalRecords = () => {
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="calculator">{t('oneRepMaxCalculator')}</TabsTrigger>
+          <TabsTrigger value="calculator">{t('One rep max calculator')}</TabsTrigger>
           <TabsTrigger value="records">{t('personalRecords')}</TabsTrigger>
         </TabsList>
         
