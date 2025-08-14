@@ -45,7 +45,7 @@ const CookieSettings = () => {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Cookie className="h-4 w-4" />
-                {t('cookiePreferences')}
+                {t('Cookie preferences')}
               </CardTitle>
               {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </div>
@@ -54,9 +54,9 @@ const CookieSettings = () => {
         <CollapsibleContent>
           <CardContent className="space-y-4 py-3">
             <div className="text-sm text-muted-foreground">
-              <p>{t('cookieSettingsDescription')}</p>
+              <p>{t('')}</p>
               <p className="mt-2">
-                <span className="font-medium">{t('lastUpdated')}: </span>
+                <span className="font-medium">{t('Last updated')}: </span>
                 {formatConsentDate()}
               </p>
             </div>
@@ -104,7 +104,7 @@ const CookieSettings = () => {
 
             <div className="flex justify-end pt-2">
               <Button onClick={handleSavePreferences}>
-                {t('savePreferences')}
+                {t('Save preferences')}
               </Button>
             </div>
           </CardContent>
