@@ -159,7 +159,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
         <DialogContent className="sm:max-w-md mx-auto max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingWorkout ? t("editWorkout") : t("createWorkout")}
+              {editingWorkout ? t("Edit workout") : t("createWorkout")}
             </DialogTitle>
             <DialogDescription>
               {editingWorkout ? t("Edit your workout routine") : t("Create a new workout routine")}
@@ -282,7 +282,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                 onClick={() => onOpenChange(false)}
                 className="flex-1"
               >
-                {t("cancel")}
+                {t("Cancel")}
               </Button>
               <Button
                 onClick={handleSaveWorkout}
