@@ -49,7 +49,7 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Dumbbell className="h-5 w-5" />
-          {t("oneRepMaxCalculator")}
+          {t("One rep max calculator")}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -99,7 +99,7 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
           )}
           
           <div className="mt-4 text-xs text-muted-foreground">
-            <p>{t("oneRepMaxDisclaimer")}</p>
+            <p>{t("")}</p>
           </div>
         </div>
       </CardContent>
