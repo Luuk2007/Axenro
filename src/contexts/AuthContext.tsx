@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +18,51 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Rate limiting for auth attempts
+const AUTH_RATE_LIMIT = 5; // max attempts
+const AUTH_WINDOW = 15 * 60 * 1000; // 15 minutes
+
+const getAuthAttempts = (): { count: number; timestamp: number } => {
+  const stored = localStorage.getItem('auth_attempts');
+  if (!stored) return { count: 0, timestamp: Date.now() };
+  
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return { count: 0, timestamp: Date.now() };
+  }
+};
+
+const incrementAuthAttempts = () => {
+  const current = getAuthAttempts();
+  const now = Date.now();
+  
+  // Reset if window expired
+  if (now - current.timestamp > AUTH_WINDOW) {
+    localStorage.setItem('auth_attempts', JSON.stringify({ count: 1, timestamp: now }));
+    return 1;
+  }
+  
+  const newCount = current.count + 1;
+  localStorage.setItem('auth_attempts', JSON.stringify({ count: newCount, timestamp: current.timestamp }));
+  return newCount;
+};
+
+const resetAuthAttempts = () => {
+  localStorage.removeItem('auth_attempts');
+};
+
+const isRateLimited = (): boolean => {
+  const attempts = getAuthAttempts();
+  const now = Date.now();
+  
+  if (now - attempts.timestamp > AUTH_WINDOW) {
+    return false;
+  }
+  
+  return attempts.count >= AUTH_RATE_LIMIT;
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -65,22 +111,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    // Check rate limiting
+    if (isRateLimited()) {
+      const error = new Error('Too many login attempts. Please try again in 15 minutes.');
+      toast.error(error.message);
+      return { error };
+    }
+
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
+        incrementAuthAttempts();
         toast.error(error.message);
         return { error };
       }
+      
+      resetAuthAttempts();
       toast.success(t("loginSuccess"));
       navigate('/');
       return { error: null };
     } catch (error: any) {
+      incrementAuthAttempts();
       toast.error(error.message);
       return { error };
     }
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    // Check rate limiting
+    if (isRateLimited()) {
+      const error = new Error('Too many signup attempts. Please try again in 15 minutes.');
+      toast.error(error.message);
+      return { error };
+    }
+
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -89,18 +153,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             full_name: fullName,
           },
+          emailRedirectTo: `${window.location.origin}/`,
         },
       });
       
       if (error) {
+        incrementAuthAttempts();
         toast.error(error.message);
         return { error };
       }
       
+      resetAuthAttempts();
       toast.success(t("signupSuccess"));
       toast.info(t("checkEmailConfirmation"));
       return { error: null };
     } catch (error: any) {
+      incrementAuthAttempts();
       toast.error(error.message);
       return { error };
     }
@@ -108,6 +176,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
+      // Clear sensitive data from localStorage
+      const keysToRemove = ['auth_attempts', 'health_token_cache'];
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
       await supabase.auth.signOut();
       toast.success(t("loggedOut"));
       navigate('/');

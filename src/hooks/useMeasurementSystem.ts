@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { secureStorage } from '@/utils/securityUtils';
 
 export type MeasurementSystem = 'metric' | 'imperial';
 
@@ -25,27 +26,27 @@ export const useMeasurementSystem = () => {
 
           if (error && error.code !== 'PGRST116') {
             console.error('Error loading measurement preference:', error);
-            // Fallback to localStorage
-            const saved = localStorage.getItem('measurementSystem') as MeasurementSystem;
+            // Fallback to secure localStorage
+            const saved = secureStorage.getItem('measurementSystem') as MeasurementSystem;
             if (saved) {
               setMeasurementSystem(saved);
             }
           } else if (data) {
             setMeasurementSystem(data.measurement_system as MeasurementSystem);
-            // Also save to localStorage as backup
-            localStorage.setItem('measurementSystem', data.measurement_system);
+            // Also save to secure localStorage as backup
+            secureStorage.setItem('measurementSystem', data.measurement_system);
           }
         } catch (error) {
           console.error('Error loading measurement preference:', error);
-          // Fallback to localStorage
-          const saved = localStorage.getItem('measurementSystem') as MeasurementSystem;
+          // Fallback to secure localStorage
+          const saved = secureStorage.getItem('measurementSystem') as MeasurementSystem;
           if (saved) {
             setMeasurementSystem(saved);
           }
         }
       } else {
-        // For non-authenticated users, use localStorage
-        const saved = localStorage.getItem('measurementSystem') as MeasurementSystem;
+        // For non-authenticated users, use secure localStorage
+        const saved = secureStorage.getItem('measurementSystem') as MeasurementSystem;
         if (saved) {
           setMeasurementSystem(saved);
         }
@@ -58,7 +59,7 @@ export const useMeasurementSystem = () => {
 
   const updateMeasurementSystem = async (newSystem: MeasurementSystem) => {
     setMeasurementSystem(newSystem);
-    localStorage.setItem('measurementSystem', newSystem);
+    secureStorage.setItem('measurementSystem', newSystem);
 
     if (user) {
       try {
