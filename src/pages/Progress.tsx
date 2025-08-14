@@ -421,7 +421,7 @@ export default function Progress() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {[...Measurements]
+                        {[...measurements]
                           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                           .map(measurement => {
                             const measurementTypeInfo = measurementTypes.find(type => type.id === measurement.type);
