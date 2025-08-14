@@ -360,8 +360,8 @@ export default function Progress() {
 
       <Tabs defaultValue="weight" className="w-full">
         <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="weight">{t("weight")}</TabsTrigger>
-          <TabsTrigger value="measurements">{t("measurements")}</TabsTrigger>
+          <TabsTrigger value="weight">{t("Weight")}</TabsTrigger>
+          <TabsTrigger value="measurements">{t("Measurements")}</TabsTrigger>
           <TabsTrigger value="photos">{t("Photos")}</TabsTrigger>
         </TabsList>
         
