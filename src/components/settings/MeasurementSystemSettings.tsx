@@ -35,7 +35,7 @@ const MeasurementSystemSettings = () => {
             </p>
             
             <div className="flex items-center justify-between">
-              <Label htmlFor="measurement-system">{t("system")}</Label>
+              <Label htmlFor="measurement-system">{t("System")}</Label>
               <Select
                 value={measurementSystem}
                 onValueChange={handleSystemChange}
