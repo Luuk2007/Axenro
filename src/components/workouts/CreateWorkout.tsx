@@ -204,7 +204,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
               
               {exercises.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p className="text-sm">{t("noExercisesAdded")}</p>
+                  <p className="text-sm">{t("No exercises added")}</p>
                 </div>
               ) : (
                 <div className="space-y-4 max-h-64 overflow-y-auto">
