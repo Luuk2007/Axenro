@@ -174,7 +174,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("workoutCalendar")}</CardTitle>
+        <CardTitle>{t("Workout calendar")}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -183,14 +183,14 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
             {/* Enhanced Statistics Cards */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
-                <div className="text-sm text-muted-foreground">{t("workoutsThisWeek")}</div>
+                <div className="text-sm text-muted-foreground">{t("Workouts this week")}</div>
                 <div className="text-3xl font-bold mt-1">{weeklyStats.totalWorkouts}</div>
                 <div className="text-xs text-muted-foreground mt-1">
                   {weeklyStats.weekComparison}
                 </div>
               </div>
               <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md">
-                <div className="text-sm text-muted-foreground">{t("workoutsThisMonth")}</div>
+                <div className="text-sm text-muted-foreground">{t("Workouts this month")}</div>
                 <div className="text-3xl font-bold mt-1">{monthlyStats.totalWorkouts}</div>
                 <div className="text-xs text-muted-foreground mt-1">
                   {monthlyStats.monthComparison}
