@@ -362,7 +362,7 @@ export default function Progress() {
         <TabsList className="grid grid-cols-3 mb-4">
           <TabsTrigger value="weight">{t("weight")}</TabsTrigger>
           <TabsTrigger value="measurements">{t("measurements")}</TabsTrigger>
-          <TabsTrigger value="photos">{t("photos")}</TabsTrigger>
+          <TabsTrigger value="photos">{t("Photos")}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="weight" className="space-y-6">
