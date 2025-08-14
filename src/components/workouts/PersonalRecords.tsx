@@ -96,7 +96,7 @@ const PersonalRecords = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="calculator">{t('One rep max calculator')}</TabsTrigger>
-          <TabsTrigger value="records">{t('personalRecords')}</TabsTrigger>
+          <TabsTrigger value="records">{t('Personal records')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="calculator">
@@ -151,7 +151,7 @@ const PersonalRecords = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Trophy className="h-5 w-5" />
-                {t('personalRecords')}
+                {t('Personal records')}
               </CardTitle>
             </CardHeader>
             <CardContent>
