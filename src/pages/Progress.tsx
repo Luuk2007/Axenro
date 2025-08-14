@@ -581,7 +581,7 @@ export default function Progress() {
           </Dialog>
           
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle>{t("Progress photos")}</CardTitle>
               <Button variant="outline" onClick={() => setShowAddPhoto(true)}>
                 <Plus className="mr-2 h-4 w-4" />
