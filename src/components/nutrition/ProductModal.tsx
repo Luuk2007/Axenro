@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Check, Minus, Plus, Package } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ProductDetails } from '@/services/openFoodFactsService';
+import { calculateNutritionForUnit } from '@/services/foodTypeAnalyzer';
 
 interface Meal {
   id: string;
@@ -36,12 +37,36 @@ const ProductModal = ({
   const [amount, setAmount] = useState<number>(100);
   const [unit, setUnit] = useState<string>("gram");
 
-  const calculateAdjustedValue = (value: number): number => {
-    if (unit === "gram" || unit === "milliliter") {
-      return (value * amount) / 100;
-    } else {
-      return value * servings;
+  // Set smart defaults based on food analysis
+  useEffect(() => {
+    if (product.foodAnalysis) {
+      const { defaultUnit, defaultAmount } = product.foodAnalysis;
+      setUnit(defaultUnit);
+      setAmount(defaultAmount);
     }
+  }, [product]);
+
+  const calculateAdjustedValue = (value: number): number => {
+    const isLiquid = product.foodAnalysis?.category === 'liquid';
+    const adjustedNutrition = calculateNutritionForUnit(
+      { calories: value, protein: value, carbs: value, fat: value },
+      amount,
+      unit,
+      servings,
+      isLiquid
+    );
+    return adjustedNutrition.calories; // This represents the adjusted value for any nutrient
+  };
+
+  const calculateAdjustedNutrition = () => {
+    const isLiquid = product.foodAnalysis?.category === 'liquid';
+    return calculateNutritionForUnit(
+      product.nutrition,
+      amount,
+      unit,
+      servings,
+      isLiquid
+    );
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,20 +77,26 @@ const ProductModal = ({
   };
 
   const handleConfirmProduct = () => {
+    const adjustedNutrition = calculateAdjustedNutrition();
+    
     const adjustedProduct = {
       ...product,
       servings,
       amount,
       unit,
-      nutrition: {
-        calories: calculateAdjustedValue(product.nutrition.calories),
-        protein: calculateAdjustedValue(product.nutrition.protein),
-        carbs: calculateAdjustedValue(product.nutrition.carbs),
-        fat: calculateAdjustedValue(product.nutrition.fat)
-      }
+      nutrition: adjustedNutrition
     };
     onAddProduct(adjustedProduct);
   };
+
+  const getAvailableUnits = () => {
+    if (!product.foodAnalysis) {
+      return ['gram', 'milliliter', 'piece', 'slice', 'cup', 'tablespoon', 'teaspoon'];
+    }
+    return product.foodAnalysis.appropriateUnits;
+  };
+
+  const adjustedNutrition = calculateAdjustedNutrition();
 
   return (
     <DialogContent className="sm:max-w-md mx-auto p-0 overflow-hidden">
@@ -109,6 +140,13 @@ const ProductModal = ({
             {product.description && (
               <p className="text-gray-600 text-sm mt-1 line-clamp-2">{product.description}</p>
             )}
+            {product.foodAnalysis && (
+              <p className="text-xs text-muted-foreground mt-2">
+                {product.foodAnalysis.category === 'liquid' ? '🥛 Liquid Food' :
+                 product.foodAnalysis.category === 'countable' ? '🍎 Countable Item' :
+                 product.foodAnalysis.category === 'powder' ? '🥄 Powder/Granular' : '🥗 Solid Food'}
+              </p>
+            )}
           </div>
           
           {product.imageUrl && (
@@ -139,7 +177,8 @@ const ProductModal = ({
                     type="number"
                     value={amount}
                     onChange={handleAmountChange}
-                    min="1"
+                    min="0.1"
+                    step="0.1"
                     className="w-full"
                   />
                 </div>
@@ -151,13 +190,11 @@ const ProductModal = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="gram">Gram</SelectItem>
-                      <SelectItem value="milliliter">mL</SelectItem>
-                      <SelectItem value="piece">Piece</SelectItem>
-                      <SelectItem value="slice">Slice</SelectItem>
-                      <SelectItem value="cup">Cup</SelectItem>
-                      <SelectItem value="tablespoon">Tbsp</SelectItem>
-                      <SelectItem value="teaspoon">Tsp</SelectItem>
+                      {getAvailableUnits().map(unitOption => (
+                        <SelectItem key={unitOption} value={unitOption}>
+                          {unitOption.charAt(0).toUpperCase() + unitOption.slice(1)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -213,7 +250,7 @@ const ProductModal = ({
             <div className="flex items-stretch space-x-4">
               <div className="bg-white rounded-full w-24 h-24 flex-shrink-0 flex flex-col items-center justify-center shadow-sm border border-gray-200">
                 <span className="text-2xl font-bold">
-                  {Math.round(calculateAdjustedValue(product.nutrition.calories))}
+                  {Math.round(adjustedNutrition.calories)}
                 </span>
                 <span className="text-xs text-gray-500">cal</span>
               </div>
@@ -221,34 +258,34 @@ const ProductModal = ({
               <div className="flex-1 flex flex-col justify-around">
                 <div className="flex justify-between">
                   <span className="text-green-500 text-sm">
-                    {Math.round((product.nutrition.carbs / (product.nutrition.carbs + product.nutrition.fat + product.nutrition.protein)) * 100 || 0)}%
+                    {Math.round((adjustedNutrition.carbs / (adjustedNutrition.carbs + adjustedNutrition.fat + adjustedNutrition.protein)) * 100 || 0)}%
                   </span>
                   <span className="text-blue-500 text-sm">
-                    {Math.round((product.nutrition.fat / (product.nutrition.carbs + product.nutrition.fat + product.nutrition.protein)) * 100 || 0)}%
+                    {Math.round((adjustedNutrition.fat / (adjustedNutrition.carbs + adjustedNutrition.fat + adjustedNutrition.protein)) * 100 || 0)}%
                   </span>
                   <span className="text-purple-500 text-sm">
-                    {Math.round((product.nutrition.protein / (product.nutrition.carbs + product.nutrition.fat + product.nutrition.protein)) * 100 || 0)}%
+                    {Math.round((adjustedNutrition.protein / (adjustedNutrition.carbs + adjustedNutrition.fat + adjustedNutrition.protein)) * 100 || 0)}%
                   </span>
                 </div>
                 
                 <div className="flex justify-between">
                   <div className="text-center">
                     <div className="text-xl font-semibold">
-                      {Math.round(calculateAdjustedValue(product.nutrition.carbs) * 10) / 10}g
+                      {Math.round(adjustedNutrition.carbs * 10) / 10}g
                     </div>
                     <div className="text-xs text-gray-500">Carbs</div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-xl font-semibold">
-                      {Math.round(calculateAdjustedValue(product.nutrition.fat) * 10) / 10}g
+                      {Math.round(adjustedNutrition.fat * 10) / 10}g
                     </div>
                     <div className="text-xs text-gray-500">Fat</div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-xl font-semibold">
-                      {Math.round(calculateAdjustedValue(product.nutrition.protein) * 10) / 10}g
+                      {Math.round(adjustedNutrition.protein * 10) / 10}g
                     </div>
                     <div className="text-xs text-gray-500">Protein</div>
                   </div>

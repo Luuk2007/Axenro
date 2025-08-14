@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { FoodItem, FoodLogEntry } from "@/types/nutrition";
 import { Json } from "@/integrations/supabase/types";
+import { analyzeFoodType, FoodAnalysis } from "./foodTypeAnalyzer";
 
 export interface NutritionInfo {
   calories: number;
@@ -21,6 +22,8 @@ export interface ProductDetails {
   amount?: number;
   unit?: string;
   nutrition: NutritionInfo;
+  foodAnalysis?: FoodAnalysis;
+  categories?: string[];
 }
 
 // Cache API responses to reduce repeated network requests
@@ -72,6 +75,12 @@ export const fetchProductByBarcode = async (barcode: string, lang = 'nl'): Promi
     // Get product name in the requested language or default to generic name
     const productName = product[`product_name_${lang}`] || product.product_name || 'Unknown Product';
     
+    // Extract categories for better food analysis
+    const categories = product.categories ? product.categories.split(',').map((cat: string) => cat.trim()) : [];
+    
+    // Analyze food type for appropriate units
+    const foodAnalysis = analyzeFoodType(productName, categories, product.serving_size);
+    
     const productDetails: ProductDetails = {
       id: barcode,
       name: productName,
@@ -80,7 +89,9 @@ export const fetchProductByBarcode = async (barcode: string, lang = 'nl'): Promi
       imageUrl: product.image_front_url || null,
       servingSize: product.serving_size || '100g',
       servings: 1,
-      nutrition
+      nutrition,
+      foodAnalysis,
+      categories
     };
 
     // Save to cache
@@ -130,6 +141,12 @@ export const searchProductsByName = async (query: string, lang = 'nl'): Promise<
 
       const productName = product[`product_name_${lang}`] || product.product_name || 'Unknown Product';
       
+      // Extract categories for better food analysis
+      const categories = product.categories ? product.categories.split(',').map((cat: string) => cat.trim()) : [];
+      
+      // Analyze food type for appropriate units
+      const foodAnalysis = analyzeFoodType(productName, categories, product.serving_size);
+      
       return {
         id: product.code || String(Date.now()),
         name: productName,
@@ -138,7 +155,9 @@ export const searchProductsByName = async (query: string, lang = 'nl'): Promise<
         imageUrl: product.image_front_url || null,
         servingSize: product.serving_size || '100g',
         servings: 1,
-        nutrition
+        nutrition,
+        foodAnalysis,
+        categories
       };
     });
   } catch (error) {

@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Loader2, X, Minus } from 'lucide-react';
+import { Plus, Search, Loader2, Minus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { searchProductsByName, ProductDetails } from '@/services/openFoodFactsService';
+import { calculateNutritionForUnit } from '@/services/foodTypeAnalyzer';
 
 interface Meal {
   id: string;
@@ -31,6 +31,15 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
   const [servings, setServings] = useState(1);
   const [amount, setAmount] = useState<number>(100);
   const [unit, setUnit] = useState<string>("gram");
+
+  // Update unit options and defaults when a product is selected
+  useEffect(() => {
+    if (selectedProduct?.foodAnalysis) {
+      const { defaultUnit, defaultAmount } = selectedProduct.foodAnalysis;
+      setUnit(defaultUnit);
+      setAmount(defaultAmount);
+    }
+  }, [selectedProduct]);
 
   // Handle API search - debounced with rate limiting
   useEffect(() => {
@@ -84,24 +93,31 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
     }
   };
 
-  const calculateAdjustedValue = (value: number): number => {
-    if (unit === "gram" || unit === "milliliter") {
-      return (value * amount * servings) / 100;
-    } else {
-      return value * servings;
-    }
+  const calculateAdjustedNutrition = () => {
+    if (!selectedProduct) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    
+    const isLiquid = selectedProduct.foodAnalysis?.category === 'liquid';
+    return calculateNutritionForUnit(
+      selectedProduct.nutrition,
+      amount,
+      unit,
+      servings,
+      isLiquid
+    );
   };
 
   const handleAddProduct = () => {
     if (selectedProduct) {
+      const adjustedNutrition = calculateAdjustedNutrition();
+      
       const foodItem = {
         id: `${selectedMealId}-${Date.now()}`,
         name: selectedProduct.name,
         brand: selectedProduct.brand,
-        calories: Math.round(calculateAdjustedValue(selectedProduct.nutrition.calories)),
-        protein: Math.round(calculateAdjustedValue(selectedProduct.nutrition.protein) * 10) / 10,
-        carbs: Math.round(calculateAdjustedValue(selectedProduct.nutrition.carbs) * 10) / 10,
-        fat: Math.round(calculateAdjustedValue(selectedProduct.nutrition.fat) * 10) / 10,
+        calories: Math.round(adjustedNutrition.calories),
+        protein: Math.round(adjustedNutrition.protein * 10) / 10,
+        carbs: Math.round(adjustedNutrition.carbs * 10) / 10,
+        fat: Math.round(adjustedNutrition.fat * 10) / 10,
         servingSize: `${amount} ${t(unit)}`,
         servings,
         amount,
@@ -114,8 +130,11 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
     }
   };
 
-  const handleBackToSearch = () => {
-    setSelectedProduct(null);
+  const getAvailableUnits = () => {
+    if (!selectedProduct?.foodAnalysis) {
+      return ['gram', 'milliliter', 'piece', 'slice', 'cup', 'tablespoon', 'teaspoon'];
+    }
+    return selectedProduct.foodAnalysis.appropriateUnits;
   };
 
   return (
@@ -144,6 +163,13 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
             {selectedProduct.brand && (
               <p className="text-sm text-muted-foreground">{selectedProduct.brand}</p>
             )}
+            {selectedProduct.foodAnalysis && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {selectedProduct.foodAnalysis.category === 'liquid' ? '🥛 Liquid' :
+                 selectedProduct.foodAnalysis.category === 'countable' ? '🍎 Countable' :
+                 selectedProduct.foodAnalysis.category === 'powder' ? '🥄 Powder' : '🥗 Solid'}
+              </p>
+            )}
           </div>
 
           {/* Portion Size */}
@@ -156,7 +182,8 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
                   type="number"
                   value={amount}
                   onChange={handleAmountChange}
-                  min="1"
+                  min="0.1"
+                  step="0.1"
                   className="text-center h-10"
                 />
               </div>
@@ -167,13 +194,11 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
                     <SelectValue>{t(unit) || unit}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="gram">{t("gram")}</SelectItem>
-                    <SelectItem value="milliliter">{t("milliliter")}</SelectItem>
-                    <SelectItem value="piece">{t("piece")}</SelectItem>
-                    <SelectItem value="slice">{t("slice")}</SelectItem>
-                    <SelectItem value="cup">{t("cup")}</SelectItem>
-                    <SelectItem value="tablespoon">{t("tablespoon")}</SelectItem>
-                    <SelectItem value="teaspoon">{t("teaspoon")}</SelectItem>
+                    {getAvailableUnits().map(unitOption => (
+                      <SelectItem key={unitOption} value={unitOption}>
+                        {t(unitOption) || unitOption}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -226,28 +251,28 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
             <div className="grid grid-cols-4 gap-2 text-center">
               <div>
                 <div className="text-lg font-bold text-green-600">
-                  {Math.round(calculateAdjustedValue(selectedProduct.nutrition.carbs) * 10) / 10}g
+                  {Math.round(calculateAdjustedNutrition().carbs * 10) / 10}g
                 </div>
                 <div className="text-xs text-muted-foreground">{t("carbs")}</div>
               </div>
               
               <div>
                 <div className="text-lg font-bold text-orange-500">
-                  {Math.round(calculateAdjustedValue(selectedProduct.nutrition.fat) * 10) / 10}g
+                  {Math.round(calculateAdjustedNutrition().fat * 10) / 10}g
                 </div>
                 <div className="text-xs text-muted-foreground">{t("fat")}</div>
               </div>
               
               <div>
                 <div className="text-lg font-bold text-blue-600">
-                  {Math.round(calculateAdjustedValue(selectedProduct.nutrition.protein) * 10) / 10}g
+                  {Math.round(calculateAdjustedNutrition().protein * 10) / 10}g
                 </div>
                 <div className="text-xs text-muted-foreground">{t("protein")}</div>
               </div>
               
               <div>
                 <div className="text-lg font-bold text-blue-500">
-                  {Math.round(calculateAdjustedValue(selectedProduct.nutrition.calories))} cal
+                  {Math.round(calculateAdjustedNutrition().calories)} cal
                 </div>
                 <div className="text-xs text-muted-foreground">cal</div>
               </div>
