@@ -124,11 +124,11 @@ const Workouts = () => {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="workouts">
             <Dumbbell className="h-4 w-4 mr-2" />
-            {t("workouts")}
+            {t("Workouts")}
           </TabsTrigger>
           <TabsTrigger value="calendar">
             <Dumbbell className="h-4 w-4 mr-2" />
-            {t("calendar")}
+            {t("Calendar")}
           </TabsTrigger>
           <TabsTrigger value="personal-records">
             <Trophy className="h-4 w-4 mr-2" />
