@@ -23,7 +23,7 @@ const MeasurementSystemSettings = () => {
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">{t("measurementSystem")}</CardTitle>
+              <CardTitle className="text-base">{t("Measurement system")}</CardTitle>
               {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </div>
           </CardHeader>
@@ -31,7 +31,7 @@ const MeasurementSystemSettings = () => {
         <CollapsibleContent>
           <CardContent className="space-y-3 py-3">
             <p className="text-sm text-muted-foreground">
-              {t("chooseMeasurementSystemDesc")}
+              {t("Choose measurement system")}
             </p>
             
             <div className="flex items-center justify-between">
