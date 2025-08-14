@@ -56,7 +56,7 @@ const MeasurementSystemSettings = () => {
             </div>
 
             <div className="text-xs text-muted-foreground mt-2">
-              <p>{t("measurementSystemNote")}</p>
+              <p>{t("")}</p>
             </div>
           </CardContent>
         </CollapsibleContent>
