@@ -289,7 +289,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                 disabled={!workoutName.trim()}
                 className="flex-1"
               >
-                {editingWorkout ? t("Update workout") : t("saveWorkout")}
+                {editingWorkout ? t("Update workout") : t("Save workout")}
               </Button>
             </div>
           </div>
