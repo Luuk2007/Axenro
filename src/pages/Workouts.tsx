@@ -132,7 +132,7 @@ const Workouts = () => {
           </TabsTrigger>
           <TabsTrigger value="personal-records">
             <Trophy className="h-4 w-4 mr-2" />
-            {isMobile ? "PR's" : t("personalRecords")}
+            {isMobile ? "PR's" : t("Personal records")}
           </TabsTrigger>
         </TabsList>
         
