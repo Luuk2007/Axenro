@@ -76,7 +76,7 @@ const Workouts = () => {
 
       const updatedWorkouts = [...workouts, newWorkout];
       saveWorkouts(updatedWorkouts);
-      toast.success(t("workoutSaved"));
+      toast.success(t("Workout saved"));
     }
     
     setShowWorkoutForm(false);
@@ -101,7 +101,7 @@ const Workouts = () => {
     
     const updatedWorkouts = workouts.filter(workout => workout.id !== workoutToDelete);
     saveWorkouts(updatedWorkouts);
-    toast.success(t("workoutDeleted"));
+    toast.success(t("Workout deleted"));
     setWorkoutToDelete(null);
   };
 
