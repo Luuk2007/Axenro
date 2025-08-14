@@ -75,7 +75,7 @@ const PersonalRecords = () => {
     setRecords(prev => [...prev, newRecord]);
     setExerciseName('');
     setDialogOpen(false);
-    toast.success(t('recordSaved'));
+    toast.success(t('Record saved'));
     
     // Switch to the records tab after saving
     setActiveTab('records');
@@ -84,7 +84,7 @@ const PersonalRecords = () => {
   // Delete record handler
   const deleteRecord = (id: string) => {
     setRecords(prev => prev.filter(record => record.id !== id));
-    toast.success(t('recordDeleted'));
+    toast.success(t('Record deleted'));
   };
 
   const getDisplayWeight = (metricWeight: number) => {
