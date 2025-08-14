@@ -29,7 +29,7 @@ const CookieSettings = () => {
 
   const handleSavePreferences = async () => {
     await updateConsent(localConsent);
-    toast.success(t('cookiePreferencesSaved'));
+    toast.success(t('Cookie preferences saved'));
   };
 
   const formatConsentDate = () => {
@@ -66,8 +66,8 @@ const CookieSettings = () => {
                 <div className="flex items-center gap-3">
                   <Shield className="h-4 w-4 text-green-600" />
                   <div>
-                    <Label className="text-sm font-medium">{t('essentialCookies')}</Label>
-                    <p className="text-xs text-muted-foreground">{t('essentialCookiesShort')}</p>
+                    <Label className="text-sm font-medium">{t('Essential cookies')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('Essential cookies short')}</p>
                   </div>
                 </div>
                 <Switch checked disabled />
@@ -77,8 +77,8 @@ const CookieSettings = () => {
                 <div className="flex items-center gap-3">
                   <BarChart3 className="h-4 w-4 text-blue-600" />
                   <div>
-                    <Label className="text-sm font-medium">{t('analyticsCookies')}</Label>
-                    <p className="text-xs text-muted-foreground">{t('analyticsCookiesShort')}</p>
+                    <Label className="text-sm font-medium">{t('Analytics cookies')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('Analytics cookies short')}</p>
                   </div>
                 </div>
                 <Switch 
@@ -91,8 +91,8 @@ const CookieSettings = () => {
                 <div className="flex items-center gap-3">
                   <Target className="h-4 w-4 text-purple-600" />
                   <div>
-                    <Label className="text-sm font-medium">{t('marketingCookies')}</Label>
-                    <p className="text-xs text-muted-foreground">{t('marketingCookiesShort')}</p>
+                    <Label className="text-sm font-medium">{t('Marketing cookies')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('Marketing cookies short')}</p>
                   </div>
                 </div>
                 <Switch 
