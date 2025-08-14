@@ -157,13 +157,13 @@ const PersonalRecords = () => {
             <CardContent>
               {records.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p>{t('noPersonalRecords')}</p>
+                  <p>{t('No personal records')}</p>
                   <Button 
                     variant="outline"
                     onClick={() => setActiveTab('calculator')}
                     className="mt-2"
                   >
-                    {t('addPersonalRecord')}
+                    {t('Add personal record')}
                   </Button>
                 </div>
               ) : (
