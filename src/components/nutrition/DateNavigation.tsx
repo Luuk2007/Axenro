@@ -28,11 +28,11 @@ const DateNavigation = ({ selectedDate, onDateChange, className }: DateNavigatio
 
   const formatDateDisplay = (date: Date) => {
     if (isToday(date)) {
-      return t('today');
+      return t('Today');
     } else if (isYesterday(date)) {
-      return t('yesterday');
+      return t('Yesterday');
     } else if (isTomorrow(date)) {
-      return t('tomorrow');
+      return t('Tomorrow');
     } else {
       return format(date, 'EEEE, MMM d', { locale: getLocale() });
     }
@@ -72,7 +72,7 @@ const DateNavigation = ({ selectedDate, onDateChange, className }: DateNavigatio
           />
           <div className="p-3 border-t border-border">
             <Button variant="outline" size="sm" onClick={goToToday} className="w-full">
-              {t('today')}
+              {t('Today')}
             </Button>
           </div>
         </PopoverContent>
