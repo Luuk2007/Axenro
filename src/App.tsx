@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { QueryClient } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { CookieProvider } from './contexts/CookieContext';
-import Layout from './components/Layout';
+import Layout from './components/layout/Layout';
 import Index from './pages/Index';
 import Profile from './pages/Profile';
 import Progress from './pages/Progress';
@@ -20,9 +21,11 @@ import CookieConsentModal from './components/cookies/CookieConsentModal';
 import { Toaster } from 'sonner';
 import CookieSettingsPage from './pages/CookieSettingsPage';
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <QueryClient>
+    <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <LanguageProvider>
           <CookieProvider>
@@ -49,7 +52,7 @@ function App() {
           </CookieProvider>
         </LanguageProvider>
       </AuthProvider>
-    </QueryClient>
+    </QueryClientProvider>
   );
 }
 
