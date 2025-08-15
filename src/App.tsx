@@ -26,10 +26,10 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <LanguageProvider>
-          <CookieProvider>
-            <BrowserRouter>
+      <LanguageProvider>
+        <CookieProvider>
+          <BrowserRouter>
+            <AuthProvider>
               <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Index />} />
@@ -48,10 +48,10 @@ function App() {
               </Routes>
               <CookieConsentModal />
               <Toaster />
-            </BrowserRouter>
-          </CookieProvider>
-        </LanguageProvider>
-      </AuthProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </CookieProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }
