@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,7 @@ import CookieSettings from "@/components/settings/CookieSettings";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionModal from "@/components/subscription/SubscriptionModal";
 import { useLocation } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 interface UserSettings {
   theme: "light" | "dark" | "system";
@@ -253,7 +253,23 @@ const Settings = () => {
         <MeasurementSystemSettings />
 
         {/* Cookie Settings */}
-        <CookieSettings />
+        <Card>
+          <CardHeader className="py-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">{t("cookiePreferences")}</CardTitle>
+              <Link to="/cookie-settings">
+                <Button variant="outline" size="sm">
+                  {t("cookiePreferences")}
+                </Button>
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent className="py-3">
+            <p className="text-sm text-muted-foreground">
+              {t("cookieSettingsDescription")}
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Meals Settings */}
         <MealsSettings />

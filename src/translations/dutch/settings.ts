@@ -53,7 +53,7 @@ export const settingsTranslations: Translations = {
   
   // Cookie Settings
   cookiePreferences: "Cookie Voorkeuren",
-  cookieSettingsDescription: "Beheer je cookie voorkeuren. Je kunt deze instellingen op elk moment wijzigen.",
+  cookieSettingsDescription: "Beheer je cookie voorkeuren en privacy instellingen. Je kunt deze instellingen op elk moment wijzigen.",
   lastUpdated: "Laatst bijgewerkt",
   notSet: "Niet ingesteld",
   cookiePreferencesSaved: "Cookie voorkeuren opgeslagen",
