@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -212,10 +213,7 @@ const CookieConsentModal = () => {
               <Link to="/termsandconditions" className="text-primary underline hover:no-underline">
                 {t('cookiePolicy')}
               </Link>
-              .{' '}
-              <Link to="/cookie-settings" className="text-primary underline hover:no-underline">
-                {t('cookiePreferences')}
-              </Link>
+              .
             </p>
           </div>
         </div>
