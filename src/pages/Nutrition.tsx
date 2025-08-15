@@ -332,18 +332,18 @@ const Nutrition = () => {
             <DialogTrigger asChild>
               <Button data-testid="add-food-trigger">
                 <Plus className="mr-2 h-4 w-4" />
-                {t("addFood")}
+                {t("Add food")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{t("addFood")}</DialogTitle>
+                <DialogTitle>{t("Add food")}</DialogTitle>
                 <DialogDescription>Search for a product or scan to add</DialogDescription>
               </DialogHeader>
               <div className="flex items-center gap-4 py-4">
                 <Button className="flex-1" onClick={() => setShowAddFood(true)}>
                   <Apple className="mr-2 h-4 w-4" />
-                  {t("addFood")}
+                  {t("Add food")}
                 </Button>
                 <Button className="flex-1" onClick={handleScanBarcode}>
                   <Camera className="mr-2 h-4 w-4" />
