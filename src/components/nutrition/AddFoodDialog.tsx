@@ -140,7 +140,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
   return (
     <DialogContent className="sm:max-w-md mx-auto p-0 gap-0">
       <DialogHeader className="p-4 pb-3 text-center">
-        <DialogTitle className="text-xl font-semibold">{t("addFood")}</DialogTitle>
+        <DialogTitle className="text-xl font-semibold">{t("Add food")}</DialogTitle>
         <DialogDescription className="sr-only">
           {t("Search foods")}
         </DialogDescription>
@@ -380,7 +380,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
           </div>
           
           <div className="flex justify-end pt-2">
-            <Button variant="outline" onClick={onClose} size="sm">{t("cancel")}</Button>
+            <Button variant="outline" onClick={onClose} size="sm">{t("Cancel")}</Button>
           </div>
         </div>
       )}
