@@ -101,9 +101,17 @@ export default function Progress() {
     
     if (savedPhotos) {
       try {
-        setProgressPhotos(JSON.parse(savedPhotos));
+        const photos = JSON.parse(savedPhotos);
+        // Filter out any default progress photos that might exist
+        const userPhotos = photos.filter((photo: ProgressPhoto) => 
+          !photo.id.includes('default') && 
+          !photo.date.includes('Jun 1, 2023') && 
+          !photo.date.includes('Jul 1, 2023')
+        );
+        setProgressPhotos(userPhotos);
       } catch (error) {
         console.error("Error loading progress photos:", error);
+        setProgressPhotos([]);
       }
     }
   }, []);
@@ -126,7 +134,13 @@ export default function Progress() {
   }, [measurements]);
   
   useEffect(() => {
-    localStorage.setItem('progressPhotos', JSON.stringify(progressPhotos));
+    // Filter out any default photos before saving
+    const userPhotos = progressPhotos.filter(photo => 
+      !photo.id.includes('default') && 
+      !photo.date.includes('Jun 1, 2023') && 
+      !photo.date.includes('Jul 1, 2023')
+    );
+    localStorage.setItem('progressPhotos', JSON.stringify(userPhotos));
   }, [progressPhotos]);
   
   const handleAddMeasurement = () => {
