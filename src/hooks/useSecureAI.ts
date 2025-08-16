@@ -6,7 +6,7 @@ import { validateChatInput, checkRateLimit } from '@/utils/securityUtils';
 import { toast } from 'sonner';
 
 interface AIFunctionParams {
-  functionName: 'ai-chat' | 'ai-meal-planner' | 'ai-workout-coach' | 'ai-progress-analyzer';
+  functionName: 'ai-chat' | 'ai-meal-planner' | 'ai-workout-coach' | 'ai-progress-analyzer' | 'ai-meal-analyzer';
   body: any;
   onSuccess?: (data: any) => void;
   onError?: (error: any) => void;
@@ -30,6 +30,16 @@ export const useSecureAI = () => {
         const validation = validateChatInput(body.message);
         if (!validation.isValid) {
           toast.error(validation.error || 'Invalid input');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Validate meal description for meal analyzer
+      if (functionName === 'ai-meal-analyzer' && body.mealDescription) {
+        const validation = validateChatInput(body.mealDescription);
+        if (!validation.isValid) {
+          toast.error(validation.error || 'Invalid meal description');
           setLoading(false);
           return;
         }

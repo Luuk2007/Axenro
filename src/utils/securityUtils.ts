@@ -33,6 +33,7 @@ const AI_RATE_LIMITS = {
   'ai-meal-planner': { maxRequests: 10, windowMs: 60 * 60 * 1000 }, // 10 per hour
   'ai-workout-coach': { maxRequests: 10, windowMs: 60 * 60 * 1000 }, // 10 per hour
   'ai-progress-analyzer': { maxRequests: 5, windowMs: 60 * 60 * 1000 }, // 5 per hour
+  'ai-meal-analyzer': { maxRequests: 20, windowMs: 60 * 60 * 1000 }, // 20 per hour
 };
 
 export const checkRateLimit = async (

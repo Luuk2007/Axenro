@@ -1,4 +1,3 @@
-
 import { Translations } from "../types";
 
 export const nutritionTranslations: Translations = {
@@ -106,4 +105,26 @@ export const nutritionTranslations: Translations = {
   remainingToday: "resterend vandaag",
   kcal: "kcal",
   dailyMacroRecommendations: "Dagelijkse Macro Aanbevelingen",
+  
+  // New AI Meal Analyzer translations
+  "AI Meal Analyzer": "AI Maaltijdanalyse",
+  "Describe what you ate and get AI-powered nutritional analysis": "Beschrijf wat je hebt gegeten en krijg AI-aangedreven voedingsanalyse",
+  "What did you eat?": "Wat heb je gegeten?",
+  "Portion Size": "Portiegrootte",
+  "Analyze with AI": "Analyseer met AI",
+  "Analyzing with AI...": "Analyseren met AI...",
+  "Nutrition Analysis": "Voedingsanalyse",
+  "Confidence": "Betrouwbaarheid",
+  "Custom Meal Name": "Aangepaste Maaltijdnaam",
+  "Enter a name for this meal": "Voer een naam in voor deze maaltijd",
+  "Add to Meal": "Toevoegen aan Maaltijd",
+  "Save to Today's Meals": "Opslaan bij Vandaag Maaltijden",
+  "Please describe what you ate": "Beschrijf alsjeblieft wat je hebt gegeten",
+  "Please analyze the meal first": "Analyseer eerst de maaltijd",
+  "Please enter a custom meal name": "Voer een aangepaste maaltijdnaam in",
+  "Failed to analyze meal. Please try again.": "Kon maaltijd niet analyseren. Probeer opnieuw.",
+  "An error occurred while analyzing the meal": "Er is een fout opgetreden bij het analyseren van de maaltijd",
+  "high": "hoog",
+  "medium": "gemiddeld",
+  "low": "laag",
 };

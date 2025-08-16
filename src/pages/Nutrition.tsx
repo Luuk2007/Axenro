@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Apple, Camera } from 'lucide-react';
+import { Plus, Apple, Camera, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,6 +15,7 @@ import BarcodeScanner from '@/components/nutrition/BarcodeScanner';
 import ProductModal from '@/components/nutrition/ProductModal';
 import NutritionTabs from '@/components/nutrition/NutritionTabs';
 import WaterTracking from '@/components/nutrition/WaterTracking';
+import AIMealAnalyzer from '@/components/nutrition/AIMealAnalyzer';
 import { saveFoodLog, getFoodLogs, deleteFoodLog, ProductDetails } from '@/services/openFoodFactsService';
 import { FoodItem, FoodLogEntry, getAvailableMeals } from '@/types/nutrition';
 
@@ -29,6 +30,7 @@ const Nutrition = () => {
   const { t, language } = useLanguage();
   const [showAddFood, setShowAddFood] = useState(false);
   const [showScanBarcode, setShowScanBarcode] = useState(false);
+  const [showAIMealAnalyzer, setShowAIMealAnalyzer] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<ProductDetails | null>(null);
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
@@ -321,6 +323,10 @@ const Nutrition = () => {
     setShowScanBarcode(true);
   };
 
+  const handleAIMealAnalyzer = () => {
+    setShowAIMealAnalyzer(true);
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -338,9 +344,9 @@ const Nutrition = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t("Add food")}</DialogTitle>
-                <DialogDescription>Search for a product or scan to add</DialogDescription>
+                <DialogDescription>Search for a product, scan, or analyze with AI</DialogDescription>
               </DialogHeader>
-              <div className="flex items-center gap-4 py-4">
+              <div className="flex flex-col gap-3 py-4">
                 <Button className="flex-1" onClick={() => setShowAddFood(true)}>
                   <Apple className="mr-2 h-4 w-4" />
                   {t("Add food")}
@@ -348,6 +354,10 @@ const Nutrition = () => {
                 <Button className="flex-1" onClick={handleScanBarcode}>
                   <Camera className="mr-2 h-4 w-4" />
                   Scan Barcode
+                </Button>
+                <Button className="flex-1" onClick={handleAIMealAnalyzer}>
+                  <Bot className="mr-2 h-4 w-4" />
+                  AI Meal Analyzer
                 </Button>
               </div>
             </DialogContent>
@@ -378,6 +388,17 @@ const Nutrition = () => {
             meals={meals}
             selectedMeal={selectedMeal}
             onClose={() => setShowAddFood(false)}
+            onAddFood={handleAddFood}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Meal Analyzer Dialog */}
+      <Dialog open={showAIMealAnalyzer} onOpenChange={setShowAIMealAnalyzer}>
+        <DialogContent className="p-0">
+          <AIMealAnalyzer
+            meals={meals}
+            onClose={() => setShowAIMealAnalyzer(false)}
             onAddFood={handleAddFood}
           />
         </DialogContent>
