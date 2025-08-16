@@ -174,7 +174,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
 
           {/* Portion Size */}
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-foreground mb-2">{t("portionSize")}</h3>
+            <h3 className="text-sm font-medium text-foreground mb-2">{t("Portion size")}</h3>
             
             <div className="flex gap-2 mb-3">
               <div className="flex-1">
@@ -207,7 +207,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
 
           {/* Number of Servings */}
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-foreground mb-2">{t("Number Of Servings")}</h3>
+            <h3 className="text-sm font-medium text-foreground mb-2">{t("Number of servings")}</h3>
             <div className="flex items-center justify-center gap-3">
               <Button 
                 variant="outline"
@@ -246,7 +246,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
 
           {/* Nutrition Summary */}
           <div className="mb-4">
-            <h3 className="text-center text-lg font-semibold mb-3">{t("nutritionSummary")}</h3>
+            <h3 className="text-center text-lg font-semibold mb-3">{t("Nutrition summary")}</h3>
             
             <div className="grid grid-cols-4 gap-2 text-center">
               <div>
@@ -285,7 +285,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
             onClick={handleAddProduct}
           >
             <Plus className="mr-2 h-4 w-4" />
-            {t("Add To Meal Plan")}
+            {t("Add to meal plan")}
           </Button>
         </div>
       ) : (
