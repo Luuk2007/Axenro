@@ -87,7 +87,7 @@ const OneRepMaxCalculator = ({ onCalculate }: OneRepMaxCalculatorProps) => {
             disabled={weight === '' || reps === '' || parseFloat(weight) <= 0 || parseFloat(reps) < 1}
           >
             <Calculator className="mr-2 h-4 w-4" />
-            {t("calculate")}
+            {t("Calculate")}
           </Button>
           
           {result !== null && (
