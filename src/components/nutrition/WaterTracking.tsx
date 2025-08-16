@@ -123,17 +123,17 @@ export default function WaterTracking() {
         <TabsList className="grid grid-cols-2 mb-4">
           <TabsTrigger value="tracking">
             <Droplet className="mr-2 h-4 w-4" />
-            {t("waterTracking")}
+            {t("Water tracking")}
           </TabsTrigger>
           <TabsTrigger value="calculator">
             <Calculator className="mr-2 h-4 w-4" />
-            {t("waterCalculator")}
+            {t("Water calculator")}
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="tracking" className="space-y-4">
           <div className="mb-4">
-            <h3 className="text-lg font-medium mb-2">{t("waterIntake")}</h3>
+            <h3 className="text-lg font-medium mb-2">{t("Water intake")}</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>{totalWater}ml</span>
