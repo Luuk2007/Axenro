@@ -240,7 +240,7 @@ const Nutrition = () => {
         setMeals(updatedMeals);
         // Trigger a refresh of the summary
         setRefreshTrigger(prev => prev + 1);
-        toast.success(`${foodItem.name} ${t('addedToMealPlan')}`);
+        toast.success(`${foodItem.name} ${t('added to meal plan')}`);
       } catch (error) {
         console.error('Error saving food log:', error);
         toast.error(t('errorSavingData'));
