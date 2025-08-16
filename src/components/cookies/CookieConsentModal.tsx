@@ -49,7 +49,6 @@ const CookieConsentModal = () => {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <Cookie className="h-5 w-5" />
             {t('Cookie preferences')}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
@@ -122,7 +121,7 @@ const CookieConsentModal = () => {
                   </Button>
                 </div>
                 <Button onClick={handleCustomizeClick} variant="ghost" className="w-full sm:w-auto">
-                  {t('Customize cookies')}
+                  {t('Customize')}
                 </Button>
               </div>
             </div>
@@ -141,7 +140,7 @@ const CookieConsentModal = () => {
                       {t('These cookies are required for the website to function properly and cannot be disabled')}
                     </p>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="essential-custom">{t('alwaysActive')}</Label>
+                      <Label htmlFor="essential-custom">{t('Always active')}</Label>
                       <Switch id="essential-custom" checked disabled />
                     </div>
                   </CardContent>
@@ -159,7 +158,7 @@ const CookieConsentModal = () => {
                       {t('These cookies help us understand how visitors interact with the website, so we can improve performance and user experience')}
                     </p>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="analytics-custom">{t('enableAnalytics')}</Label>
+                      <Label htmlFor="analytics-custom">{t('Enable analytics')}</Label>
                       <Switch 
                         id="analytics-custom" 
                         checked={customConsent.analytics}
@@ -181,7 +180,7 @@ const CookieConsentModal = () => {
                       {t('These cookies are used to deliver relevant ads and measure the effectiveness of our marketing campaigns')}
                     </p>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="marketing-custom">{t('enableMarketing')}</Label>
+                      <Label htmlFor="marketing-custom">{t('Enable marketing')}</Label>
                       <Switch 
                         id="marketing-custom" 
                         checked={customConsent.marketing}
