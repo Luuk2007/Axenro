@@ -17,11 +17,11 @@ const NutritionTabs = ({ activeTab, onTabChange }: NutritionTabsProps) => {
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="meals" className="flex items-center">
           <Utensils className="mr-2 h-4 w-4" />
-          {t("meals")}
+          {t("Meals")}
         </TabsTrigger>
         <TabsTrigger value="water" className="flex items-center">
           <GlassWater className="mr-2 h-4 w-4" />
-          {t("water")}
+          {t("Water")}
         </TabsTrigger>
       </TabsList>
     </Tabs>
