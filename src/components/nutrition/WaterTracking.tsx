@@ -144,11 +144,11 @@ export default function WaterTracking() {
           </div>
           
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => addWater(100)} variant="outline" size="sm">{t("add100ml")}</Button>
-            <Button onClick={() => addWater(250)} variant="outline" size="sm">{t("add250ml")}</Button>
-            <Button onClick={() => addWater(500)} variant="outline" size="sm">{t("add500ml")}</Button>
-            <Button onClick={() => addWater(750)} variant="outline" size="sm">{t("add750ml")}</Button>
-            <Button onClick={() => addWater(1000)} variant="outline" size="sm">{t("add1l")}</Button>
+            <Button onClick={() => addWater(100)} variant="outline" size="sm">{t("Add 100ml")}</Button>
+            <Button onClick={() => addWater(250)} variant="outline" size="sm">{t("Add 250ml")}</Button>
+            <Button onClick={() => addWater(500)} variant="outline" size="sm">{t("Add 500ml")}</Button>
+            <Button onClick={() => addWater(750)} variant="outline" size="sm">{t("Add 750ml")}</Button>
+            <Button onClick={() => addWater(1000)} variant="outline" size="sm">{t("Add 1l")}</Button>
           </div>
           
           <div className="mt-6">
