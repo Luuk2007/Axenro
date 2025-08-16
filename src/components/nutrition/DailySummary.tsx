@@ -179,7 +179,7 @@ export default function DailySummary({ className, meals = [], selectedDate = new
     <div className={`grid grid-cols-1 gap-3 ${className}`}>
       <div className="border rounded-lg p-4 shadow-sm">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium">{t("calories")}</div>
+          <div className="text-sm font-medium">{t("Calories")}</div>
           <div className="text-sm text-muted-foreground">
             {macroTargets.calories.consumed} / {macroTargets.calories.goal}
           </div>
