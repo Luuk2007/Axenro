@@ -253,28 +253,28 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
                 <div className="text-lg font-bold text-green-600">
                   {Math.round(calculateAdjustedNutrition().carbs * 10) / 10}g
                 </div>
-                <div className="text-xs text-muted-foreground">{t("carbs")}</div>
+                <div className="text-xs text-muted-foreground">{t("Carbs")}</div>
               </div>
               
               <div>
                 <div className="text-lg font-bold text-orange-500">
                   {Math.round(calculateAdjustedNutrition().fat * 10) / 10}g
                 </div>
-                <div className="text-xs text-muted-foreground">{t("fat")}</div>
+                <div className="text-xs text-muted-foreground">{t("Fat")}</div>
               </div>
               
               <div>
                 <div className="text-lg font-bold text-blue-600">
                   {Math.round(calculateAdjustedNutrition().protein * 10) / 10}g
                 </div>
-                <div className="text-xs text-muted-foreground">{t("protein")}</div>
+                <div className="text-xs text-muted-foreground">{t("Protein")}</div>
               </div>
               
               <div>
                 <div className="text-lg font-bold text-blue-500">
                   {Math.round(calculateAdjustedNutrition().calories)} cal
                 </div>
-                <div className="text-xs text-muted-foreground">cal</div>
+                <div className="text-xs text-muted-foreground">Cal</div>
               </div>
             </div>
           </div>
