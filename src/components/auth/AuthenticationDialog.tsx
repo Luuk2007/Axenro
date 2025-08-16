@@ -160,7 +160,7 @@ export default function AuthenticationDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{showForgotPassword ? t("resetPassword") : t("Login")}</DialogTitle>
+          <DialogTitle>{showForgotPassword ? t("Reset password") : t("Login")}</DialogTitle>
         </DialogHeader>
         {showForgotPassword ? (
           <form onSubmit={handleResetPassword} className="space-y-4 pt-4">
