@@ -35,7 +35,7 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
   const confirmDelete = () => {
     if (itemToDelete) {
       onDeleteItem(id, itemToDelete);
-      toast.success(t('foodItemRemoved') || 'Food item removed');
+      toast.success(t('Food item removed') || 'Food item removed');
       setItemToDelete(null);
     }
   };
@@ -98,18 +98,18 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
       <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
         <AlertDialogContent className="max-w-sm">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-base">{t("delete")}</AlertDialogTitle>
+            <AlertDialogTitle className="text-base">{t("Delete")}</AlertDialogTitle>
             <AlertDialogDescription className="text-sm">
-              {t('confirmDeleteFood') || 'Are you sure you want to delete this food item?'}
+              {t('Confirm delete food') || 'Are you sure you want to delete this food item?'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="text-sm">{t("cancel")}</AlertDialogCancel>
+            <AlertDialogCancel className="text-sm">{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete} 
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-sm"
             >
-              {t("delete")}
+              {t("Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
