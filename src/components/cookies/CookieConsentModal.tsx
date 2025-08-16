@@ -50,16 +50,16 @@ const CookieConsentModal = () => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Cookie className="h-5 w-5" />
-            {t('cookieConsentTitle')}
+            {t('Cookie preferences')}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            {t('cookieConsentDescription')}
+            {t('We use cookies to improve your experience, analyze site traffic, and personalize content')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <p className="text-sm">
-            {t('cookieExplanation')}
+            {t('You can choose which types of cookies you allow. Essential cookies are always active')}
           </p>
 
           {!showCustomization ? (
@@ -69,15 +69,15 @@ const CookieConsentModal = () => {
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base">
                       <Shield className="h-4 w-4" />
-                      {t('essentialCookies')}
+                      {t('Essential cookies')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground mb-2">
-                      {t('essentialCookiesDescription')}
+                      {t('These cookies are required for the website to function properly and cannot be disabled')}
                     </p>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="essential">{t('alwaysActive')}</Label>
+                      <Label htmlFor="essential">{t('Always active')}</Label>
                       <Switch id="essential" checked disabled />
                     </div>
                   </CardContent>
@@ -87,12 +87,12 @@ const CookieConsentModal = () => {
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base">
                       <BarChart3 className="h-4 w-4" />
-                      {t('analyticsCookies')}
+                      {t('Analytics cookies')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      {t('analyticsCookiesDescription')}
+                      {t('These cookies help us understand how visitors interact with the website, so we can improve performance and user experience')}
                     </p>
                   </CardContent>
                 </Card>
@@ -101,12 +101,12 @@ const CookieConsentModal = () => {
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base">
                       <Target className="h-4 w-4" />
-                      {t('marketingCookies')}
+                      {t('Marketing cookies')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      {t('marketingCookiesDescription')}
+                      {t('These cookies are used to deliver relevant ads and measure the effectiveness of our marketing campaigns')}
                     </p>
                   </CardContent>
                 </Card>
@@ -115,14 +115,14 @@ const CookieConsentModal = () => {
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
                 <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                   <Button onClick={acceptAllCookies} className="w-full sm:w-auto">
-                    {t('acceptAllCookies')}
+                    {t('Accept all')}
                   </Button>
                   <Button onClick={rejectAllCookies} variant="outline" className="w-full sm:w-auto">
-                    {t('rejectAllCookies')}
+                    {t('Reject all')}
                   </Button>
                 </div>
                 <Button onClick={handleCustomizeClick} variant="ghost" className="w-full sm:w-auto">
-                  {t('customizeCookies')}
+                  {t('Customize')}
                 </Button>
               </div>
             </div>
