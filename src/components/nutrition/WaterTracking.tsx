@@ -184,7 +184,6 @@ export default function WaterTracking() {
         <TabsContent value="calculator" className="space-y-4">
           <div className="mb-4">
             <h3 className="text-lg font-medium mb-2">{t("waterCalculator")}</h3>
-            <p className="text-sm text-muted-foreground mb-4">{t("waterCalculatorDescription")}</p>
             
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4">
