@@ -152,9 +152,9 @@ export default function WaterTracking() {
           </div>
           
           <div className="mt-6">
-            <h4 className="text-sm font-medium mb-2">{t("waterLog")}</h4>
+            <h4 className="text-sm font-medium mb-2">{t("Water log")}</h4>
             {waterLog.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("noWaterEntries")}</p>
+              <p className="text-sm text-muted-foreground">{t("No water entries")}</p>
             ) : (
               <div className="space-y-2 max-h-[250px] overflow-y-auto pr-2">
                 {waterLog.map((entry) => (
