@@ -160,13 +160,13 @@ export default function AuthenticationDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{showForgotPassword ? t("resetPassword") : t("login")}</DialogTitle>
+          <DialogTitle>{showForgotPassword ? t("resetPassword") : t("Login")}</DialogTitle>
         </DialogHeader>
         {showForgotPassword ? (
           <form onSubmit={handleResetPassword} className="space-y-4 pt-4">
             <DialogDescription>{t("enterEmail")}</DialogDescription>
             <div className="space-y-2">
-              <label htmlFor="reset-email" className="text-sm font-medium">{t("email")}</label>
+              <label htmlFor="reset-email" className="text-sm font-medium">{t("Email")}</label>
               <Input 
                 id="reset-email" 
                 type="email" 
@@ -177,7 +177,7 @@ export default function AuthenticationDialog({
             </div>
             <div className="flex justify-between">
               <Button type="button" variant="outline" onClick={() => setShowForgotPassword(false)}>
-                {t("cancel")}
+                {t("Cancel")}
               </Button>
               <Button type="submit">{t("send")}</Button>
             </div>
@@ -203,7 +203,7 @@ export default function AuthenticationDialog({
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
-                  {t("signInWithGoogle")}
+                  {t("Sign in with google")}
                 </Button>
                 
                 <div className="relative">
@@ -219,7 +219,7 @@ export default function AuthenticationDialog({
               
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium">{t("email")}</label>
+                    <label htmlFor="email" className="text-sm font-medium">{t("Email")}</label>
                     <Input 
                       id="email" 
                       type="email" 
@@ -230,13 +230,13 @@ export default function AuthenticationDialog({
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <label htmlFor="password" className="text-sm font-medium">{t("password")}</label>
+                      <label htmlFor="password" className="text-sm font-medium">{t("Password")}</label>
                       <button 
                         type="button" 
                         className="text-xs text-primary hover:underline"
                         onClick={() => setShowForgotPassword(true)}
                       >
-                        {t("forgotPassword")}
+                        {t("Forgot password")}
                       </button>
                     </div>
                     <div className="relative">
@@ -279,7 +279,7 @@ export default function AuthenticationDialog({
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
-                  {t("signInWithGoogle")}
+                  {t("Sign in with google")}
                 </Button>
                 
                 <div className="relative">
@@ -295,7 +295,7 @@ export default function AuthenticationDialog({
                 
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <label htmlFor="fullName" className="text-sm font-medium">{t("fullName")}</label>
+                    <label htmlFor="fullName" className="text-sm font-medium">{t("Full name")}</label>
                     <Input 
                       id="fullName" 
                       type="text" 
@@ -305,7 +305,7 @@ export default function AuthenticationDialog({
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="signup-email" className="text-sm font-medium">{t("email")}</label>
+                    <label htmlFor="signup-email" className="text-sm font-medium">{t("Email")}</label>
                     <Input 
                       id="signup-email" 
                       type="email" 
@@ -315,7 +315,7 @@ export default function AuthenticationDialog({
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="signup-password" className="text-sm font-medium">{t("password")}</label>
+                    <label htmlFor="signup-password" className="text-sm font-medium">{t("Password")}</label>
                     <div className="relative">
                       <Input 
                         id="signup-password" 
