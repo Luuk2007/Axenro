@@ -36,7 +36,6 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
   const { t } = useLanguage();
   const { callAIFunction, loading } = useSecureAI();
   const [mealDescription, setMealDescription] = useState('');
-  const [portionSize, setPortionSize] = useState(1);
   const [customMealName, setCustomMealName] = useState('');
   const [selectedMealId, setSelectedMealId] = useState<string>('1');
   const [nutritionResult, setNutritionResult] = useState<NutritionResult | null>(null);
@@ -55,7 +54,7 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
         functionName: 'ai-meal-analyzer',
         body: {
           mealDescription: mealDescription.trim(),
-          portionSize: portionSize || 1
+          portionSize: 1
         },
         onSuccess: (data) => {
           setNutritionResult(data);
@@ -99,9 +98,9 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
       protein: nutritionResult.protein,
       carbs: nutritionResult.carbs,
       fat: nutritionResult.fat,
-      servingSize: `${portionSize} portion${portionSize !== 1 ? 's' : ''}`,
+      servingSize: '1 portion',
       servings: 1,
-      amount: portionSize,
+      amount: 1,
       unit: 'portion',
       mealId: selectedMealId,
       imageUrl: null,
@@ -149,23 +148,6 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
             value={mealDescription}
             onChange={(e) => setMealDescription(e.target.value)}
             className="mt-1 min-h-[80px]"
-            disabled={analyzing}
-          />
-        </div>
-
-        {/* Portion Size */}
-        <div>
-          <Label htmlFor="portion-size" className="text-sm font-medium">
-            Portion Size
-          </Label>
-          <Input
-            id="portion-size"
-            type="number"
-            min="0.1"
-            step="0.1"
-            value={portionSize}
-            onChange={(e) => setPortionSize(parseFloat(e.target.value) || 1)}
-            className="mt-1"
             disabled={analyzing}
           />
         </div>
