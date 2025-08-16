@@ -189,7 +189,7 @@ export default function WaterTracking() {
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="bodyWeight" className="text-sm font-medium">
-                    {t("bodyWeight")} (kg)
+                    {t("BodyWeight")} (kg)
                   </label>
                   <div className="flex gap-2">
                     <Input 
@@ -201,17 +201,17 @@ export default function WaterTracking() {
                       placeholder="70"
                     />
                     <Button onClick={calculateWaterIntake}>
-                      {t("calculate")}
+                      {t("Calculate")}
                     </Button>
                   </div>
                 </div>
               </div>
               
               <div className="bg-muted p-4 rounded-md">
-                <h4 className="font-medium mb-2">{t("recommendedWaterIntake")}</h4>
+                <h4 className="font-medium mb-2">{t("Recommended water intake")}</h4>
                 <p className="text-2xl font-bold text-blue-500">{waterGoal} ml</p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  {t("basedOnFormula")}: 35ml × {bodyWeight || '0'}kg
+                  {t("Based on formula")}: 35ml × {bodyWeight || '0'}kg
                 </p>
               </div>
             </div>
