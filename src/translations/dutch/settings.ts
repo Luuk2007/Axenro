@@ -1,4 +1,3 @@
-
 import { Translations } from "../types";
 
 export const settingsTranslations: Translations = {
@@ -82,6 +81,7 @@ export const settingsTranslations: Translations = {
   privacyPolicy: "Privacybeleid",
   cookiePolicy: "Cookie Beleid",
   and: "en",
+  "Manage cookie preferences": "Beheer cookie voorkeuren",
   
   // Body Measurements
   "Body Measurements": "Lichaamsmetingen",
