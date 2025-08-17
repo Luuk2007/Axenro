@@ -19,6 +19,7 @@ interface CookieContextType {
   acceptAllCookies: () => Promise<void>;
   rejectAllCookies: () => Promise<void>;
   hideConsentModal: () => void;
+  showConsentModalForPreferences: () => void;
   checkConsentStatus: () => void;
 }
 
@@ -38,6 +39,12 @@ export function CookieProvider({ children }: { children: React.ReactNode }) {
 
   // Check if user has given consent
   const checkConsentStatus = async () => {
+    // If we're on the cookie preferences page, always show the modal
+    if (window.location.pathname === '/cookiepreferences') {
+      setShowConsentModal(true);
+      return;
+    }
+
     if (!user) {
       // For non-authenticated users, check localStorage
       const localConsent = localStorage.getItem('cookieConsent');
@@ -118,6 +125,11 @@ export function CookieProvider({ children }: { children: React.ReactNode }) {
     // Handle cookie setting/removal based on consent
     handleCookieManagement(updatedConsent);
     setShowConsentModal(false);
+    
+    // If we're on the cookie preferences page, navigate back to home
+    if (window.location.pathname === '/cookiepreferences') {
+      window.history.pushState({}, '', '/');
+    }
   };
 
   const acceptAllCookies = async () => {
@@ -138,6 +150,14 @@ export function CookieProvider({ children }: { children: React.ReactNode }) {
 
   const hideConsentModal = () => {
     setShowConsentModal(false);
+    // If we're on the cookie preferences page, navigate back to home
+    if (window.location.pathname === '/cookiepreferences') {
+      window.history.pushState({}, '', '/');
+    }
+  };
+
+  const showConsentModalForPreferences = () => {
+    setShowConsentModal(true);
   };
 
   const handleCookieManagement = (consentData: CookieConsent) => {
@@ -170,6 +190,7 @@ export function CookieProvider({ children }: { children: React.ReactNode }) {
     acceptAllCookies,
     rejectAllCookies,
     hideConsentModal,
+    showConsentModalForPreferences,
     checkConsentStatus,
   };
 
