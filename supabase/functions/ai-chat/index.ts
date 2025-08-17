@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, messageType = 'fitness' } = await req.json();
+    const { message, messageType = 'nutrition', userContext, systemPrompt } = await req.json();
 
     // Create Supabase client with proper auth handling
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -41,7 +41,7 @@ serve(async (req) => {
 
     console.log('Authenticated user:', user.id);
 
-    // Get recent chat history for context
+    // Get recent chat history for context (last 5 messages)
     const { data: recentChats } = await supabase
       .from('ai_chat_history')
       .select('message, response')
@@ -55,15 +55,31 @@ serve(async (req) => {
       .map(chat => `Human: ${chat.message}\nAssistant: ${chat.response}`)
       .join('\n\n') || '';
 
-    const systemPrompt = messageType === 'nutrition' 
-      ? 'You are an expert nutritionist and dietitian. Provide helpful, accurate advice about nutrition, diet, and healthy eating habits.'
-      : 'You are an expert fitness coach and personal trainer. Provide helpful, accurate advice about exercise, fitness, and health.';
+    // Build enhanced system prompt with user context
+    let enhancedSystemPrompt = systemPrompt || 'You are a helpful fitness and nutrition assistant.';
+    
+    if (userContext) {
+      if (userContext.recentFoodLogs && userContext.recentFoodLogs.length > 0) {
+        const foodSummary = userContext.recentFoodLogs.slice(0, 3).map((log: any) => 
+          `${log.date}: ${log.food_item.name} (${log.food_item.calories} calories, ${log.food_item.protein}g protein, ${log.food_item.carbs}g carbs, ${log.food_item.fat}g fat)`
+        ).join(', ');
+        enhancedSystemPrompt += ` Recent nutrition data: ${foodSummary}.`;
+      }
+      
+      if (userContext.profile && userContext.profile.full_name) {
+        enhancedSystemPrompt += ` User's name: ${userContext.profile.full_name}.`;
+      }
+    }
+
+    enhancedSystemPrompt += ' Provide personalized, helpful advice based on the user\'s data and chat context. Keep responses conversational and encouraging.';
 
     const messages = [
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: enhancedSystemPrompt },
       ...(conversationContext ? [{ role: 'user', content: `Previous conversation context:\n${conversationContext}` }] : []),
       { role: 'user', content: message }
     ];
+
+    console.log('Sending request to OpenAI with context for user:', user.id);
 
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -88,6 +104,8 @@ serve(async (req) => {
     const aiData = await openAIResponse.json();
     const response = aiData.choices[0].message.content;
 
+    console.log('Received response from OpenAI, saving to database');
+
     // Save chat history
     const { error } = await supabase
       .from('ai_chat_history')
@@ -100,6 +118,8 @@ serve(async (req) => {
 
     if (error) {
       console.error('Error saving chat history:', error);
+    } else {
+      console.log('Chat history saved successfully');
     }
 
     return new Response(JSON.stringify({ 
