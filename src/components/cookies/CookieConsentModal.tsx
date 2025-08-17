@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCookieConsent } from '@/contexts/CookieContext';
-import { Cookie, Shield, BarChart3, Target, ExternalLink } from 'lucide-react';
+import { Cookie, Shield, BarChart3, Target } from 'lucide-react';
 
 const CookieConsentModal = () => {
   const { t } = useLanguage();
@@ -211,11 +211,8 @@ const CookieConsentModal = () => {
               {t('and')}{' '}
               <Link to="/termsandconditions" className="text-primary underline hover:no-underline">
                 {t('terms & conditions')}
-              </Link>.{' '}
-              <Link to="/cookie-preferences" className="text-primary underline hover:no-underline inline-flex items-center gap-1">
-                {t('Manage cookie preferences')}
-                <ExternalLink className="h-3 w-3" />
               </Link>
+              .
             </p>
           </div>
         </div>
