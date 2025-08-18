@@ -44,7 +44,6 @@ const CookieSettings = () => {
           <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base">
-                <Cookie className="h-4 w-4" />
                 {t('Cookie preferences')}
               </CardTitle>
               {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
