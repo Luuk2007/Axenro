@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import BarcodeScanner from './BarcodeScanner';
 import { searchOpenFoodFacts, type ProductDetails } from '@/services/openFoodFactsService';
-import { predefinedFoods } from './FoodDatabase';
+import { predefinedFoods, type FoodItem as DatabaseFoodItem } from './FoodDatabase';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { PlanBadge } from '@/components/subscription/PlanBadge';
 import SubscriptionModal from '@/components/subscription/SubscriptionModal';
@@ -30,6 +30,9 @@ interface FoodItem {
   fat: number;
 }
 
+// Union type for both API and database food items
+type SelectableFoodItem = ProductDetails | DatabaseFoodItem;
+
 const defaultFoodItem: FoodItem = {
   name: '',
   calories: 0,
@@ -46,7 +49,7 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
   const [apiResults, setApiResults] = useState<ProductDetails[]>([]);
   const [searching, setSearching] = useState(false);
   const [selectedMealId, setSelectedMealId] = useState<string>(selectedMeal || "");
-  const [selectedProduct, setSelectedProduct] = useState<ProductDetails | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<SelectableFoodItem | null>(null);
   const [servings, setServings] = useState(1);
   const [amount, setAmount] = useState<number>(100);
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
@@ -110,8 +113,31 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
     }
   };
 
-  const handleSelectProduct = (product: ProductDetails) => {
+  const handleSelectProduct = (product: SelectableFoodItem) => {
     setSelectedProduct(product);
+  };
+
+  // Helper function to check if item is ProductDetails
+  const isProductDetails = (item: SelectableFoodItem): item is ProductDetails => {
+    return 'nutrition' in item && 'description' in item;
+  };
+
+  // Helper function to get nutrition values from either type
+  const getNutritionValue = (item: SelectableFoodItem, field: 'calories' | 'protein' | 'carbs' | 'fat'): number => {
+    if (isProductDetails(item)) {
+      return item.nutrition?.[field] || 0;
+    } else {
+      return item[field] || 0;
+    }
+  };
+
+  // Helper function to get name from either type
+  const getItemName = (item: SelectableFoodItem): string => {
+    if (isProductDetails(item)) {
+      return item.name || item.product_name || "Unknown";
+    } else {
+      return item.name || "Unknown";
+    }
   };
 
   const handleAddFood = async () => {
@@ -125,13 +151,13 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
       return;
     }
 
-    const calories = (selectedProduct.nutrition?.calories || 0) * (amount / 100) * servings;
-    const protein = (selectedProduct.nutrition?.protein || 0) * (amount / 100) * servings;
-    const carbs = (selectedProduct.nutrition?.carbs || 0) * (amount / 100) * servings;
-    const fat = (selectedProduct.nutrition?.fat || 0) * (amount / 100) * servings;
+    const calories = getNutritionValue(selectedProduct, 'calories') * (amount / 100) * servings;
+    const protein = getNutritionValue(selectedProduct, 'protein') * (amount / 100) * servings;
+    const carbs = getNutritionValue(selectedProduct, 'carbs') * (amount / 100) * servings;
+    const fat = getNutritionValue(selectedProduct, 'fat') * (amount / 100) * servings;
 
     const foodData = {
-      name: selectedProduct.name || "Unknown",
+      name: getItemName(selectedProduct),
       calories: Math.round(calories),
       protein: Math.round(protein),
       carbs: Math.round(carbs),
@@ -166,7 +192,7 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
     food.name.toLowerCase().includes(searchValue.toLowerCase())
   );
 
-  const displayResults = searchValue.length >= 2 
+  const displayResults: SelectableFoodItem[] = searchValue.length >= 2 
     ? [...apiResults, ...filteredPredefinedFoods]
     : filteredPredefinedFoods;
 
@@ -254,7 +280,7 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
                         className="p-3 rounded-md bg-muted/50 hover:bg-muted cursor-pointer"
                         onClick={() => handleSelectProduct(product)}
                       >
-                        {product.name}
+                        {getItemName(product)}
                       </li>
                     ))}
                   </ul>
@@ -308,10 +334,10 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
           <div className="mt-4 p-4 rounded-md bg-muted/50">
             <h4 className="text-lg font-semibold mb-2">{t("Food Details")}</h4>
             <p>
-              <strong>{t("Name")}:</strong> {selectedProduct.name}
+              <strong>{t("Name")}:</strong> {getItemName(selectedProduct)}
             </p>
             <p>
-              <strong>{t("Calories per 100g")}:</strong> {selectedProduct.nutrition?.calories || 0} kcal
+              <strong>{t("Calories per 100g")}:</strong> {getNutritionValue(selectedProduct, 'calories')} kcal
             </p>
 
             <div className="flex items-center space-x-4 mt-4">
