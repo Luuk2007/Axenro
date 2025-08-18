@@ -127,4 +127,7 @@ export const nutritionTranslations: Translations = {
   "high": "hoog",
   "medium": "gemiddeld",
   "low": "laag",
+  
+  // Additional translation for meal selection placeholder
+  "Select the meal": "Selecteer de maaltijd",
 };

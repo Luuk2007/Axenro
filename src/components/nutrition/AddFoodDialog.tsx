@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -26,7 +27,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
   const [searchValue, setSearchValue] = useState('');
   const [apiResults, setApiResults] = useState<ProductDetails[]>([]);
   const [searching, setSearching] = useState(false);
-  const [selectedMealId, setSelectedMealId] = useState<string>(selectedMeal || "1");
+  const [selectedMealId, setSelectedMealId] = useState<string>(selectedMeal || "");
   const [selectedProduct, setSelectedProduct] = useState<ProductDetails | null>(null);
   const [servings, setServings] = useState(1);
   const [amount, setAmount] = useState<number>(100);
@@ -234,7 +235,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
           <div className="mb-4">
             <Select value={selectedMealId} onValueChange={setSelectedMealId}>
               <SelectTrigger className="h-10">
-                <SelectValue placeholder={t("selectMeal")} />
+                <SelectValue placeholder={t("Select the meal")} />
               </SelectTrigger>
               <SelectContent>
                 {meals.map(meal => (
@@ -293,11 +294,11 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
           <div>
             <label className="text-sm font-medium block mb-2">{t("Meal")}</label>
             <Select 
-              defaultValue={selectedMealId}
+              value={selectedMealId}
               onValueChange={setSelectedMealId}
             >
               <SelectTrigger className="h-10">
-                <SelectValue placeholder={t("selectMeal")} />
+                <SelectValue placeholder={t("Select the meal")} />
               </SelectTrigger>
               <SelectContent>
                 {meals.map(meal => (
