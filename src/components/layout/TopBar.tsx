@@ -7,7 +7,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import Sidebar from './Sidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import UserMenu from '@/components/auth/UserMenu';
-import { ThemeSwitch } from '@/components/ui/theme-switch-button';
+import { ThemeSwitchButton } from '@/components/ui/theme-switch-button';
 import { LanguageSwitch } from '@/components/ui/language-switch-button';
 
 export default function TopBar() {
@@ -39,7 +39,7 @@ export default function TopBar() {
       </div>
       <div className="flex items-center gap-4">
         <LanguageSwitch />
-        <ThemeSwitch />
+        <ThemeSwitchButton />
         <UserMenu />
       </div>
     </header>

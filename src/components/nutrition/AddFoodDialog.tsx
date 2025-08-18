@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, ScanLine, Package } from 'lucide-react';
+import { Search, ScanLine, Package, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,7 +98,7 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
       if (results.length > 0) {
         setSelectedProduct(results[0]);
         setActiveTab('search');
-        setSearchValue(results[0].product_name || '');
+        setSearchValue(results[0].name || '');
       } else {
         toast.error(t("No product found with this barcode"));
       }
@@ -124,13 +125,13 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
       return;
     }
 
-    const calories = (selectedProduct.nutriments?.['energy-kcal_100g'] || 0) * (amount / 100) * servings;
-    const protein = (selectedProduct.nutriments?.protein_100g || 0) * (amount / 100) * servings;
-    const carbs = (selectedProduct.nutriments?.carbohydrates_100g || 0) * (amount / 100) * servings;
-    const fat = (selectedProduct.nutriments?.fat_100g || 0) * (amount / 100) * servings;
+    const calories = (selectedProduct.nutrition?.calories || 0) * (amount / 100) * servings;
+    const protein = (selectedProduct.nutrition?.protein || 0) * (amount / 100) * servings;
+    const carbs = (selectedProduct.nutrition?.carbs || 0) * (amount / 100) * servings;
+    const fat = (selectedProduct.nutrition?.fat || 0) * (amount / 100) * servings;
 
     const foodData = {
-      name: selectedProduct.product_name || "Unknown",
+      name: selectedProduct.name || "Unknown",
       calories: Math.round(calories),
       protein: Math.round(protein),
       carbs: Math.round(carbs),
@@ -140,7 +141,7 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
     const newFoodLog = {
       user_id: user?.id,
       date: new Date().toISOString().split('T')[0],
-      meal: selectedMealId,
+      meal_id: selectedMealId,
       food_item: foodData,
     };
 
@@ -172,8 +173,11 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
   if (showBarcodeScanner) {
     return (
       <BarcodeScanner
-        onBarcodeDetected={handleBarcodeDetected}
         onClose={() => setShowBarcodeScanner(false)}
+        onProductScanned={(product) => {
+          setSelectedProduct(product);
+          setShowBarcodeScanner(false);
+        }}
       />
     );
   }
@@ -250,7 +254,7 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
                         className="p-3 rounded-md bg-muted/50 hover:bg-muted cursor-pointer"
                         onClick={() => handleSelectProduct(product)}
                       >
-                        {product.product_name || product.name}
+                        {product.name}
                       </li>
                     ))}
                   </ul>
@@ -304,10 +308,10 @@ export default function AddFoodDialog({ onAddFood, selectedMeal }: AddFoodDialog
           <div className="mt-4 p-4 rounded-md bg-muted/50">
             <h4 className="text-lg font-semibold mb-2">{t("Food Details")}</h4>
             <p>
-              <strong>{t("Name")}:</strong> {selectedProduct.product_name}
+              <strong>{t("Name")}:</strong> {selectedProduct.name}
             </p>
             <p>
-              <strong>{t("Calories per 100g")}:</strong> {selectedProduct.nutriments?.['energy-kcal_100g'] || 0} kcal
+              <strong>{t("Calories per 100g")}:</strong> {selectedProduct.nutrition?.calories || 0} kcal
             </p>
 
             <div className="flex items-center space-x-4 mt-4">

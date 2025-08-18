@@ -1,4 +1,3 @@
-
 // This module provides the food database for the nutrition page
 
 export interface FoodItem {
@@ -80,5 +79,8 @@ const FoodDatabase: FoodItem[] = [
   { id: '49', name: 'Black Beans (Cooked)', calories: 132, protein: 8.9, carbs: 24, fat: 0.5 },
   { id: '50', name: 'Caesar Salad', calories: 233, protein: 8.1, carbs: 7.9, fat: 18.3 },
 ];
+
+// Export the predefined foods for use in components
+export const predefinedFoods = FoodDatabase;
 
 export default FoodDatabase;

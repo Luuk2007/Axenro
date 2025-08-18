@@ -14,6 +14,7 @@ export interface NutritionInfo {
 export interface ProductDetails {
   id: string;
   name: string;
+  product_name?: string;  // For backward compatibility
   description: string;
   brand: string;
   imageUrl: string | null;
@@ -22,6 +23,12 @@ export interface ProductDetails {
   amount?: number;
   unit?: string;
   nutrition: NutritionInfo;
+  nutriments?: {  // For backward compatibility
+    'energy-kcal_100g'?: number;
+    protein_100g?: number;
+    carbohydrates_100g?: number;
+    fat_100g?: number;
+  };
   foodAnalysis?: FoodAnalysis;
   categories?: string[];
 }
@@ -84,12 +91,19 @@ export const fetchProductByBarcode = async (barcode: string, lang = 'nl'): Promi
     const productDetails: ProductDetails = {
       id: barcode,
       name: productName,
+      product_name: productName,
       description: product.ingredients_text || '',
       brand: product.brands || 'Generic',
       imageUrl: product.image_front_url || null,
       servingSize: product.serving_size || '100g',
       servings: 1,
       nutrition,
+      nutriments: {
+        'energy-kcal_100g': nutrition.calories,
+        protein_100g: nutrition.protein,
+        carbohydrates_100g: nutrition.carbs,
+        fat_100g: nutrition.fat,
+      },
       foodAnalysis,
       categories
     };
@@ -150,12 +164,19 @@ export const searchProductsByName = async (query: string, lang = 'nl'): Promise<
       return {
         id: product.code || String(Date.now()),
         name: productName,
+        product_name: productName,
         description: product.ingredients_text || '',
         brand: product.brands || 'Generic',
         imageUrl: product.image_front_url || null,
         servingSize: product.serving_size || '100g',
         servings: 1,
         nutrition,
+        nutriments: {
+          'energy-kcal_100g': nutrition.calories,
+          protein_100g: nutrition.protein,
+          carbohydrates_100g: nutrition.carbs,
+          fat_100g: nutrition.fat,
+        },
         foodAnalysis,
         categories
       };
@@ -165,6 +186,9 @@ export const searchProductsByName = async (query: string, lang = 'nl'): Promise<
     return [];
   }
 };
+
+// Export searchOpenFoodFacts as an alias to searchProductsByName
+export const searchOpenFoodFacts = searchProductsByName;
 
 /**
  * Save food log to Supabase
