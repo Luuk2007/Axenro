@@ -43,7 +43,7 @@ const FEATURE_ACCESS: Record<SubscriptionTier, Record<FeatureName, boolean>> = {
     bodyMeasurementCharts: false,
     progressPhotos: false,
     progressPhotoNotes: false,
-    bmiCalculator: false,
+    bmiCalculator: false, // FREE PLAN DOESN'T HAVE BMI CALCULATOR
     aiFeatures: false
   },
   pro: {

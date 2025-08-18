@@ -21,12 +21,28 @@ interface SubscriptionModalProps {
 export default function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { subscribed, subscription_tier, createCheckout } = useSubscription();
+  const { subscribed, subscription_tier, createCheckout, switchToTestTier } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleSelectPlan = async (planId: string) => {
-    if (planId === 'free') return;
+    if (planId === 'free') {
+      // Switch to free tier locally for testing
+      switchToTestTier('free');
+      toast.success(t('Switched to Free plan for testing'));
+      onOpenChange(false);
+      return;
+    }
     
+    // For development/testing, allow switching to paid tiers without payment
+    if (planId === 'pro' || planId === 'premium') {
+      switchToTestTier(planId as 'pro' | 'premium');
+      toast.success(t(`Switched to ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan for testing`));
+      onOpenChange(false);
+      return;
+    }
+    
+    // Original payment flow (commented out for testing)
+    /*
     try {
       setLoading(planId);
       const billingInterval = 'monthly';
@@ -38,6 +54,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     } finally {
       setLoading(null);
     }
+    */
   };
 
   const handleManageSubscription = async () => {
@@ -56,18 +73,14 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   const getButtonText = (planId: string) => {
     if (planId === 'free') {
-      return subscribed ? t('Downgrade') : t('Current Plan');
+      return subscribed ? t('Switch to Free') : t('Current Plan');
     }
     
     if (subscribed && subscription_tier === planId) {
       return t('Current Plan');
     }
     
-    if (subscribed) {
-      return subscription_tier === 'pro' && planId === 'premium' ? t('Upgrade') : t('Switch Plan');
-    }
-    
-    return t('Select Plan');
+    return t('Switch to Plan');
   };
 
   const plans = [
@@ -168,6 +181,12 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-6xl max-h-[90vh] p-0 flex flex-col">
         <div className="flex-1 overflow-y-auto p-6 pb-4">
+          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+              🧪 {t('Testing Mode: You can switch between plans without payment')}
+            </p>
+          </div>
+          
           <PricingSection 
             plans={plans}
             heading={t('Choose Your Plan')}
