@@ -29,7 +29,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     
     try {
       setLoading(planId);
-      const billingInterval = 'monthly'; // Default to monthly for now
+      const billingInterval = 'monthly';
       await createCheckout(planId, billingInterval);
       toast.success(t('Redirecting to Stripe checkout...'));
     } catch (error) {
@@ -79,9 +79,26 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         yearly: 0,
       },
       features: [
-        { text: t('Basic fitness tracking') },
-        { text: t('Limited workout history') },
-        { text: t('Basic nutrition logging') }
+        { text: t('Theme: Light mode only') },
+        { text: t('Food adding: Manual only') },
+        { text: t('Food overview + water tracking') },
+        { text: t('Custom workouts: ❌') },
+        { text: t('Custom exercises: Max 5 exercises') },
+        { text: t('Custom meals: ❌') },
+        { text: t('Training calendar: ❌') },
+        { text: t('Planned workouts: ❌') },
+        { text: t('Personal records tracking: ❌') },
+        { text: t('1RM calculator: ❌') },
+        { text: t('Weight tracking with charts') },
+        { text: t('Weight history view') },
+        { text: t('Target weight setting') },
+        { text: t('Body measurement tracking: View data only') },
+        { text: t('Progress photos + date: ❌') },
+        { text: t('Data import (time, length, weight, etc.)') },
+        { text: t('BMI calculator with indication: ❌') },
+        { text: t('Meal plan with macros') },
+        { text: t('Settings page') },
+        { text: t('AI functions (coach, planner, feedback): ❌') }
       ],
       btn: {
         text: getButtonText('free'),
@@ -97,11 +114,26 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         yearly: 49.99,
       },
       features: [
-        { text: t('Advanced fitness tracking') },
-        { text: t('Unlimited workout history') },
-        { text: t('Detailed nutrition analysis') },
-        { text: t('Progress charts') },
-        { text: t('Export data') }
+        { text: t('Theme: Light + dark mode') },
+        { text: t('Food adding: Manual + barcode scanner') },
+        { text: t('Food overview + water tracking') },
+        { text: t('Custom workouts') },
+        { text: t('Custom exercises: Max 5 exercises') },
+        { text: t('Custom meals: Max 2 meals') },
+        { text: t('Training calendar') },
+        { text: t('Planned workouts') },
+        { text: t('Personal records tracking') },
+        { text: t('1RM calculator') },
+        { text: t('Weight tracking with charts') },
+        { text: t('Weight history view') },
+        { text: t('Target weight setting') },
+        { text: t('Body measurement tracking: Basic chart with body measurements') },
+        { text: t('Progress photos + date: Photos + date') },
+        { text: t('Data import (time, length, weight, etc.)') },
+        { text: t('BMI calculator with indication') },
+        { text: t('Meal plan with macros') },
+        { text: t('Settings page') },
+        { text: t('AI functions (coach, planner, feedback): ❌') }
       ],
       btn: {
         text: loading === 'pro' ? t('Processing...') : getButtonText('pro'),
@@ -118,11 +150,11 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
       },
       features: [
         { text: t('Everything in Pro') },
-        { text: t('AI-powered recommendations') },
-        { text: t('Advanced analytics') },
-        { text: t('Personalized meal plans') },
-        { text: t('Priority support') },
-        { text: t('Early access to new features') }
+        { text: t('Custom exercises: Unlimited') },
+        { text: t('Custom meals: Unlimited') },
+        { text: t('Body measurement tracking: Chart with body measurements') },
+        { text: t('Progress photos + date: Photos + date + notes + scrollable display') },
+        { text: t('AI functions (coach, planner, feedback)') }
       ],
       btn: {
         text: loading === 'premium' ? t('Processing...') : getButtonText('premium'),
