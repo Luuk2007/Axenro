@@ -122,8 +122,25 @@ export const useSubscription = () => {
       localStorage.setItem('testSubscription', JSON.stringify(testData));
     }
     
+    // Immediately update the state
     setSubscriptionData(testData);
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('subscriptionChanged', { detail: testData }));
   };
+
+  // Listen for subscription changes from other components
+  useEffect(() => {
+    const handleSubscriptionChange = (event: CustomEvent) => {
+      setSubscriptionData(event.detail);
+    };
+
+    window.addEventListener('subscriptionChanged', handleSubscriptionChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('subscriptionChanged', handleSubscriptionChange as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     checkSubscription();

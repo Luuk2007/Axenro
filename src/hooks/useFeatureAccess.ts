@@ -1,5 +1,6 @@
 
 import { useSubscription } from '@/hooks/useSubscription';
+import { useEffect, useState } from 'react';
 
 export type SubscriptionTier = 'free' | 'pro' | 'premium';
 export type FeatureName = 
@@ -82,7 +83,21 @@ const FEATURE_ACCESS: Record<SubscriptionTier, Record<FeatureName, boolean>> = {
 
 export const useFeatureAccess = () => {
   const { subscribed, subscription_tier, loading } = useSubscription();
+  const [forceUpdate, setForceUpdate] = useState(0);
   
+  // Listen for subscription changes to force re-evaluation
+  useEffect(() => {
+    const handleSubscriptionChange = () => {
+      setForceUpdate(prev => prev + 1);
+    };
+
+    window.addEventListener('subscriptionChanged', handleSubscriptionChange);
+    
+    return () => {
+      window.removeEventListener('subscriptionChanged', handleSubscriptionChange);
+    };
+  }, []);
+
   const getCurrentTier = (): SubscriptionTier => {
     if (!subscribed) return 'free';
     if (subscription_tier === 'pro') return 'pro';
