@@ -134,7 +134,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-6xl max-h-[90vh] p-0 flex flex-col">
+      <DialogContent className="sm:max-w-6xl max-h-[90vh] p-0 flex flex-col z-[100] fixed">
         <div className="flex-1 overflow-y-auto p-6 pb-4">
           <PricingSection 
             plans={plans}
