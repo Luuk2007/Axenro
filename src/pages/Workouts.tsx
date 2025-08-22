@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import PersonalRecords from "@/components/workouts/PersonalRecords";
 import { Dumbbell, Trophy, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const Workouts = () => {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
+  const { test_mode, test_subscription_tier, subscription_tier } = useSubscription();
+  
+  // Determine current subscription tier
+  const currentTier = test_mode ? test_subscription_tier : subscription_tier;
+  const canAccessPersonalRecords = currentTier === 'pro' || currentTier === 'premium';
+  
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
   const [showWorkoutDetails, setShowWorkoutDetails] = useState(false);
@@ -121,7 +127,7 @@ const Workouts = () => {
       </div>
 
       <Tabs defaultValue="workouts">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className={`grid w-full ${canAccessPersonalRecords ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <TabsTrigger value="workouts">
             <Dumbbell className="h-4 w-4 mr-2" />
             {t("Workouts")}
@@ -130,10 +136,12 @@ const Workouts = () => {
             <Dumbbell className="h-4 w-4 mr-2" />
             {t("Calendar")}
           </TabsTrigger>
-          <TabsTrigger value="personal-records">
-            <Trophy className="h-4 w-4 mr-2" />
-            {isMobile ? "PR's" : t("Personal records")}
-          </TabsTrigger>
+          {canAccessPersonalRecords && (
+            <TabsTrigger value="personal-records">
+              <Trophy className="h-4 w-4 mr-2" />
+              {isMobile ? "PR's" : t("Personal records")}
+            </TabsTrigger>
+          )}
         </TabsList>
         
         <TabsContent value="workouts" className="mt-6">
@@ -149,9 +157,11 @@ const Workouts = () => {
           <WorkoutCalendar workouts={workouts} />
         </TabsContent>
         
-        <TabsContent value="personal-records" className="mt-6">
-          <PersonalRecords />
-        </TabsContent>
+        {canAccessPersonalRecords && (
+          <TabsContent value="personal-records" className="mt-6">
+            <PersonalRecords />
+          </TabsContent>
+        )}
       </Tabs>
 
       {/* Component dialogs */}
