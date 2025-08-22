@@ -84,7 +84,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     return t('Select Plan');
   };
 
-  const getButtonVariant = (planId: string) => {
+  const getButtonVariant = (planId: string): "default" | "outline" => {
     return currentTier === planId ? 'outline' : 'default';
   };
 
