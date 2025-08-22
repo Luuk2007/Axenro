@@ -13,7 +13,7 @@ interface StepsConnectionModalProps {
 }
 
 export default function StepsConnectionModal({ open, onOpenChange }: StepsConnectionModalProps) {
-  const { user, session } = useAuth();
+  const { user } = useAuth();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -44,7 +44,7 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
   };
 
   const handleConnectGoogleFit = async () => {
-    if (!user || !session) {
+    if (!user) {
       toast.error('Please sign in first');
       return;
     }
@@ -52,6 +52,16 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
     setIsConnecting(true);
 
     try {
+      // Get current session to ensure we have a valid token
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error('Session error:', sessionError);
+        toast.error('Authentication required. Please sign in again.');
+        setIsConnecting(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('google-fit-auth', {
         body: { action: 'getAuthUrl' },
         headers: {
@@ -62,38 +72,66 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
       if (error) {
         console.error('Error getting auth URL:', error);
         toast.error('Failed to start connection process');
+        setIsConnecting(false);
         return;
       }
 
-      // Open Google OAuth in new window
-      window.open(data.authUrl, '_blank', 'width=500,height=600');
+      if (!data?.authUrl) {
+        console.error('No auth URL received');
+        toast.error('Failed to get authorization URL');
+        setIsConnecting(false);
+        return;
+      }
+
+      // For mobile devices, try to open in the same window instead of popup
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      // Listen for messages from the popup (in case of success)
+      if (isMobile) {
+        // On mobile, redirect in the same window
+        window.location.href = data.authUrl;
+      } else {
+        // On desktop, try popup first
+        const popup = window.open(data.authUrl, '_blank', 'width=500,height=600');
+        
+        if (!popup) {
+          // If popup is blocked, redirect in same window
+          window.location.href = data.authUrl;
+        } else {
+          // Listen for popup to close
+          const checkClosed = setInterval(() => {
+            if (popup.closed) {
+              clearInterval(checkClosed);
+              setTimeout(() => {
+                checkConnection();
+              }, 1000);
+            }
+          }, 1000);
+        }
+      }
+
+      // Listen for messages from popup (for desktop)
       const handleMessage = (event: MessageEvent) => {
         if (event.data.type === 'GOOGLE_FIT_SUCCESS') {
           setIsConnected(true);
           toast.success('Successfully connected to Google Fit!');
           window.removeEventListener('message', handleMessage);
+          setIsConnecting(false);
         }
       };
       
-      window.addEventListener('message', handleMessage);
-      
-      // Also check connection status after a delay
-      setTimeout(() => {
-        checkConnection();
-      }, 3000);
+      if (!isMobile) {
+        window.addEventListener('message', handleMessage);
+      }
 
     } catch (error) {
       console.error('Error connecting to Google Fit:', error);
       toast.error('Failed to connect to Google Fit');
-    } finally {
       setIsConnecting(false);
     }
   };
 
   const handleSyncSteps = async () => {
-    if (!user || !session) {
+    if (!user) {
       toast.error('Please sign in first');
       return;
     }
@@ -101,6 +139,15 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
     setIsSyncing(true);
 
     try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error('Session error:', sessionError);
+        toast.error('Authentication required. Please sign in again.');
+        setIsSyncing(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('sync-google-fit-steps', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -162,7 +209,7 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
               variant="outline"
               className="w-full h-14 flex items-center justify-start gap-3 text-left"
               onClick={handleConnectGoogleFit}
-              disabled={isConnecting}
+              disabled={isConnecting || !user}
             >
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100">
                 <Activity className="h-5 w-5 text-green-600" />
