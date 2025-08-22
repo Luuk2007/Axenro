@@ -1,21 +1,18 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React from 'react';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Heart, 
-  Star, 
-  Calendar, 
-  MessageSquare, 
-  MoreVertical,
-  Edit,
-  Trash2,
-  Copy
-} from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Heart, Star, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { ProgressPhoto } from '@/types/progressPhotos';
-import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface ProgressPhotoCardProps {
   photo: ProgressPhoto;
@@ -23,10 +20,6 @@ interface ProgressPhotoCardProps {
   onDelete?: (id: string) => void;
   onToggleFavorite?: (id: string, isFavorite: boolean) => void;
   onToggleMilestone?: (id: string, isMilestone: boolean) => void;
-  onSelect?: (photo: ProgressPhoto) => void;
-  isSelected?: boolean;
-  selectionMode?: boolean;
-  showMeasurements?: { weight?: number; measurements?: any };
 }
 
 export default function ProgressPhotoCard({
@@ -34,139 +27,111 @@ export default function ProgressPhotoCard({
   onEdit,
   onDelete,
   onToggleFavorite,
-  onToggleMilestone,
-  onSelect,
-  isSelected,
-  selectionMode,
-  showMeasurements
+  onToggleMilestone
 }: ProgressPhotoCardProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const showAdvancedFeatures = !!(onEdit || onToggleFavorite || onToggleMilestone);
 
   return (
-    <Card 
-      className={`group relative overflow-hidden transition-all duration-200 hover:shadow-lg ${
-        isSelected ? 'ring-2 ring-primary' : ''
-      } ${selectionMode ? 'cursor-pointer' : ''}`}
-      onClick={selectionMode ? () => onSelect?.(photo) : undefined}
-    >
-      <CardContent className="p-0">
-        {/* Image */}
-        <div className="relative aspect-square bg-gray-100">
-          <img
-            src={photo.image_url}
-            alt={`Progress from ${photo.date}`}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={() => setImageLoaded(true)}
-          />
-          
-          {/* Overlay with icons */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <div className="absolute bottom-2 left-2 flex gap-2">
-              {photo.is_milestone && (
-                <Badge variant="secondary" className="text-xs">
-                  <Star className="h-3 w-3 mr-1" />
-                  Milestone
-                </Badge>
-              )}
-              {photo.is_favorite && (
-                <Badge variant="secondary" className="text-xs">
-                  <Heart className="h-3 w-3 mr-1 fill-red-500 text-red-500" />
-                </Badge>
-              )}
-            </div>
-          </div>
-
-          {/* Selection indicator for comparison mode */}
-          {selectionMode && isSelected && (
-            <div className="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full" />
-            </div>
-          )}
-
-          {/* Action menu */}
-          {!selectionMode && (
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => onEdit?.(photo)}>
-                    <Edit className="h-4 w-4 mr-2" />
+    <Card className="overflow-hidden group hover:shadow-md transition-shadow">
+      <div className="relative">
+        <img
+          src={photo.image_url}
+          alt={`Progress photo from ${format(parseISO(photo.date), 'MMM d, yyyy')}`}
+          className="w-full aspect-square object-cover"
+        />
+        
+        {/* Overlay with actions */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors">
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onEdit && (
+                  <DropdownMenuItem onClick={() => onEdit(photo)}>
+                    <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => onToggleFavorite?.(photo.id, !photo.is_favorite)}
-                  >
-                    <Heart className={`h-4 w-4 mr-2 ${photo.is_favorite ? 'fill-red-500 text-red-500' : ''}`} />
-                    {photo.is_favorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                )}
+                {onToggleFavorite && (
+                  <DropdownMenuItem onClick={() => onToggleFavorite(photo.id, !photo.is_favorite)}>
+                    <Heart className={cn("mr-2 h-4 w-4", photo.is_favorite && "fill-current")} />
+                    {photo.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => onToggleMilestone?.(photo.id, !photo.is_milestone)}
-                  >
-                    <Star className={`h-4 w-4 mr-2 ${photo.is_milestone ? 'fill-yellow-500 text-yellow-500' : ''}`} />
-                    {photo.is_milestone ? 'Remove Milestone' : 'Mark as Milestone'}
+                )}
+                {onToggleMilestone && (
+                  <DropdownMenuItem onClick={() => onToggleMilestone(photo.id, !photo.is_milestone)}>
+                    <Star className={cn("mr-2 h-4 w-4", photo.is_milestone && "fill-current")} />
+                    {photo.is_milestone ? 'Remove milestone' : 'Mark as milestone'}
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => onDelete?.(photo.id)}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                )}
+                {onDelete && (
+                  <DropdownMenuItem onClick={() => onDelete(photo.id)} className="text-destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Delete
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-        </div>
-
-        {/* Photo Details */}
-        <div className="p-3 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Calendar className="h-3 w-3" />
-              {format(new Date(photo.date), 'MMM d, yyyy')}
-            </div>
-            <Badge variant="outline" className="text-xs">
-              {photo.category}
-            </Badge>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
+        </div>
 
-          {photo.notes && (
-            <div className="flex items-start gap-1 text-xs text-muted-foreground">
-              <MessageSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
-              <p className="line-clamp-2">{photo.notes}</p>
-            </div>
+        {/* Status badges */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          {photo.is_favorite && showAdvancedFeatures && (
+            <Badge variant="secondary" className="text-xs bg-red-100 text-red-800">
+              <Heart className="w-3 h-3 mr-1 fill-current" />
+              Favorite
+            </Badge>
           )}
-
-          {photo.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {photo.tags.slice(0, 3).map(tag => (
-                <Badge key={tag} variant="secondary" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-              {photo.tags.length > 3 && (
-                <Badge variant="secondary" className="text-xs">
-                  +{photo.tags.length - 3}
-                </Badge>
-              )}
-            </div>
-          )}
-
-          {showMeasurements && (
-            <div className="text-xs text-muted-foreground border-t pt-2">
-              {showMeasurements.weight && (
-                <div>Weight: {showMeasurements.weight} kg</div>
-              )}
-            </div>
+          {photo.is_milestone && showAdvancedFeatures && (
+            <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
+              <Star className="w-3 h-3 mr-1 fill-current" />
+              Milestone
+            </Badge>
           )}
         </div>
-      </CardContent>
+      </div>
+
+      {/* Photo details */}
+      <div className="p-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm font-medium">
+            {format(parseISO(photo.date), 'MMM d, yyyy')}
+          </p>
+          <Badge variant="outline" className="text-xs">
+            {photo.category}
+          </Badge>
+        </div>
+        
+        {photo.notes && showAdvancedFeatures && (
+          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+            {photo.notes}
+          </p>
+        )}
+        
+        {photo.tags && photo.tags.length > 0 && showAdvancedFeatures && (
+          <div className="flex flex-wrap gap-1">
+            {photo.tags.slice(0, 2).map((tag) => (
+              <Badge key={tag} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+            {photo.tags.length > 2 && (
+              <Badge variant="secondary" className="text-xs">
+                +{photo.tags.length - 2}
+              </Badge>
+            )}
+          </div>
+        )}
+      </div>
     </Card>
   );
 }
