@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2 } from 'lucide-react';
+import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2, Filter, Grid, Timeline, ArrowLeftRight, Star, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +11,8 @@ import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { Progress as ProgressBar } from '@/components/ui/progress';
 import WeightTracker from '@/components/progress/WeightTracker';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Table, 
   TableBody, 
@@ -19,6 +21,13 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+
+import { useProgressPhotos } from '@/hooks/useProgressPhotos';
+import AddProgressPhotoDialog from '@/components/progress/AddProgressPhotoDialog';
+import ProgressPhotoCard from '@/components/progress/ProgressPhotoCard';
+import ProgressTimeline from '@/components/progress/ProgressTimeline';
+import PhotoComparisonDialog from '@/components/progress/PhotoComparisonDialog';
+import { ProgressPhoto, PHOTO_CATEGORIES } from '@/types/progressPhotos';
 
 interface MeasurementType {
   id: string;
@@ -36,25 +45,24 @@ interface MeasurementEntry {
   unit: string;
 }
 
-interface ProgressPhoto {
-  id: string;
-  date: string;
-  url: string;
-}
-
 export default function Progress() {
   const { t } = useLanguage();
   const [measurementType, setMeasurementType] = useState('waist');
   const [measurementValue, setMeasurementValue] = useState('');
   const [measurementDate, setMeasurementDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [showAddPhoto, setShowAddPhoto] = useState(false);
-  const [showCamera, setShowCamera] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [measurements, setMeasurements] = useState<MeasurementEntry[]>([]);
-  const [progressPhotos, setProgressPhotos] = useState<ProgressPhoto[]>([]);
   const [measurementTypes, setMeasurementTypes] = useState<MeasurementType[]>([]);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const { photos, loading: photosLoading, addPhoto, updatePhoto, deletePhoto } = useProgressPhotos();
+  const [showAddPhotoDialog, setShowAddPhotoDialog] = useState(false);
+  const [showComparisonDialog, setShowComparisonDialog] = useState(false);
+  const [photoViewMode, setPhotoViewMode] = useState<'grid' | 'timeline'>('grid');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [tagFilter, setTagFilter] = useState<string>('all');
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [showMilestonesOnly, setShowMilestonesOnly] = useState(false);
+  const [comparisonPhotos, setComparisonPhotos] = useState<ProgressPhoto[]>([]);
+  const [selectionMode, setSelectionMode] = useState(false);
 
   const defaultMeasurementTypes: MeasurementType[] = [
     { id: 'chest', name: 'Chest', unit: 'cm', enabled: true },
@@ -89,29 +97,12 @@ export default function Progress() {
     loadMeasurementTypes();
     
     const savedMeasurements = localStorage.getItem('bodyMeasurements');
-    const savedPhotos = localStorage.getItem('progressPhotos');
     
     if (savedMeasurements) {
       try {
         setMeasurements(JSON.parse(savedMeasurements));
       } catch (error) {
         console.error("Error loading measurements:", error);
-      }
-    }
-    
-    if (savedPhotos) {
-      try {
-        const photos = JSON.parse(savedPhotos);
-        // Filter out any default progress photos that might exist
-        const userPhotos = photos.filter((photo: ProgressPhoto) => 
-          !photo.id.includes('default') && 
-          !photo.date.includes('Jun 1, 2023') && 
-          !photo.date.includes('Jul 1, 2023')
-        );
-        setProgressPhotos(userPhotos);
-      } catch (error) {
-        console.error("Error loading progress photos:", error);
-        setProgressPhotos([]);
       }
     }
   }, []);
@@ -132,17 +123,7 @@ export default function Progress() {
       localStorage.setItem('bodyMeasurements', JSON.stringify(measurements));
     }
   }, [measurements]);
-  
-  useEffect(() => {
-    // Filter out any default photos before saving
-    const userPhotos = progressPhotos.filter(photo => 
-      !photo.id.includes('default') && 
-      !photo.date.includes('Jun 1, 2023') && 
-      !photo.date.includes('Jul 1, 2023')
-    );
-    localStorage.setItem('progressPhotos', JSON.stringify(userPhotos));
-  }, [progressPhotos]);
-  
+
   const handleAddMeasurement = () => {
     if (!measurementValue) {
       toast.error(t('Please enter value'));
@@ -181,101 +162,7 @@ export default function Progress() {
     setMeasurements(prev => prev.filter(measurement => measurement.id !== id));
     toast.success(t('Measurement deleted'));
   };
-  
-  const handleCapturePhoto = async () => {
-    setShowCamera(true);
-    try {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: {
-            facingMode: { ideal: 'environment' },
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
-        });
-        
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
-      } else {
-        toast.error(t('cameraNotAvailable'));
-        setShowCamera(false);
-      }
-    } catch (err) {
-      console.error('Error accessing camera:', err);
-      toast.error(t('couldNotAccessCamera'));
-      setShowCamera(false);
-    }
-  };
-  
-  const takePicture = () => {
-    if (videoRef.current && canvasRef.current) {
-      const context = canvasRef.current.getContext('2d');
-      if (context && videoRef.current.videoWidth > 0) {
-        canvasRef.current.width = videoRef.current.videoWidth;
-        canvasRef.current.height = videoRef.current.videoHeight;
-        context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-        
-        const imageData = canvasRef.current.toDataURL('image/png');
-        setCapturedImage(imageData);
-        
-        if (videoRef.current.srcObject) {
-          const stream = videoRef.current.srcObject as MediaStream;
-          const tracks = stream.getTracks();
-          tracks.forEach(track => track.stop());
-          videoRef.current.srcObject = null;
-        }
-        
-        setShowCamera(false);
-      }
-    }
-  };
-  
-  const savePhoto = () => {
-    if (capturedImage) {
-      const today = format(new Date(), 'MMM d, yyyy');
-      const newPhoto = {
-        id: `photo-${Date.now()}`,
-        date: today,
-        url: capturedImage
-      };
-      
-      setProgressPhotos(prevPhotos => [...prevPhotos, newPhoto]);
-      toast.success(t('progressPhotoSaved'));
-      setCapturedImage(null);
-      setShowAddPhoto(false);
-    }
-  };
 
-  const handleSelectFromGallery = () => {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = (e) => {
-      const target = e.target as HTMLInputElement;
-      const file = target.files?.[0];
-      
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (loadEvent) => {
-          const result = loadEvent.target?.result as string;
-          const today = format(new Date(), 'MMM d, yyyy');
-          const newPhoto = {
-            id: `photo-${Date.now()}`,
-            date: today,
-            url: result
-          };
-          
-          setProgressPhotos(prevPhotos => [...prevPhotos, newPhoto]);
-          toast.success(t('progressPhotoSaved'));
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    fileInput.click();
-  };
-  
   const getMeasurementsByType = (type: string) => {
     const typeMeasurements = measurements.filter(m => m.type === type);
     console.log(`getMeasurementsByType(${type}):`, typeMeasurements);
@@ -307,7 +194,56 @@ export default function Progress() {
     return chartData;
   };
 
+  const handleAddPhoto = async (photoData: any) => {
+    await addPhoto(photoData);
+  };
+
+  const handleEditPhoto = (photo: ProgressPhoto) => {
+    console.log('Edit photo:', photo);
+  };
+
+  const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
+    await updatePhoto(id, { is_favorite: isFavorite });
+  };
+
+  const handleToggleMilestone = async (id: string, isMilestone: boolean) => {
+    await updatePhoto(id, { is_milestone: isMilestone });
+  };
+
+  const handleSelectPhotoForComparison = (photo: ProgressPhoto) => {
+    if (comparisonPhotos.length < 2) {
+      setComparisonPhotos(prev => [...prev, photo]);
+    } else {
+      setComparisonPhotos([photo]);
+    }
+  };
+
+  const startComparison = () => {
+    if (comparisonPhotos.length === 2) {
+      setShowComparisonDialog(true);
+      setSelectionMode(false);
+    }
+  };
+
+  const cancelComparison = () => {
+    setComparisonPhotos([]);
+    setSelectionMode(false);
+  };
+
+  const filteredPhotos = photos.filter(photo => {
+    if (categoryFilter !== 'all' && photo.category !== categoryFilter) return false;
+    if (tagFilter !== 'all' && !photo.tags.includes(tagFilter)) return false;
+    if (showFavoritesOnly && !photo.is_favorite) return false;
+    if (showMilestonesOnly && !photo.is_milestone) return false;
+    return true;
+  });
+
+  const allTags = Array.from(new Set(photos.flatMap(photo => photo.tags))).sort();
+
   const enabledMeasurementTypes = measurementTypes.filter(type => type.enabled);
+
+  const milestonesCount = photos.filter(p => p.is_milestone).length;
+  const favoritesCount = photos.filter(p => p.is_favorite).length;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -523,131 +459,205 @@ export default function Progress() {
         </TabsContent>
         
         <TabsContent value="photos" className="space-y-6">
-          <Dialog open={showAddPhoto} onOpenChange={setShowAddPhoto}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t("addProgressPhoto")}</DialogTitle>
-                <DialogDescription>{t("trackYourProgressVisually")}</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                {capturedImage ? (
-                  <div className="space-y-4">
-                    <div className="aspect-square max-h-96 overflow-hidden rounded-lg">
-                      <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex justify-between">
-                      <Button variant="outline" onClick={() => setCapturedImage(null)}>
-                        {t("retake")}
-                      </Button>
-                      <Button onClick={savePhoto}>
-                        {t("savePhoto")}
-                      </Button>
-                    </div>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold">{photos.length}</div>
+                  <div className="text-sm text-muted-foreground">Total Photos</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold">{milestonesCount}</div>
+                  <div className="text-sm text-muted-foreground">Milestones</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold">{favoritesCount}</div>
+                  <div className="text-sm text-muted-foreground">Favorites</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold">
+                    {photos.length > 0 ? Math.ceil(
+                      (new Date().getTime() - new Date(photos[photos.length - 1]?.date).getTime()) / 
+                      (1000 * 60 * 60 * 24)
+                    ) : 0}
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <Button onClick={handleCapturePhoto} className="w-full">
-                      <Camera className="mr-2 h-4 w-4" />
-                      {t("takePhoto")}
-                    </Button>
-                    <Button onClick={handleSelectFromGallery} className="w-full">
-                      <Upload className="mr-2 h-4 w-4" />
-                      {t("uploadFromGallery")}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
-          
-          <Dialog open={showCamera} onOpenChange={(open) => {
-            if (!open && videoRef.current && videoRef.current.srcObject) {
-              const stream = videoRef.current.srcObject as MediaStream;
-              const tracks = stream.getTracks();
-              tracks.forEach(track => track.stop());
-              videoRef.current.srcObject = null;
-            }
-            setShowCamera(open);
-          }}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t("takePhoto")}</DialogTitle>
-                <DialogDescription>{t("positionYourselfAndClickButton")}</DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <div className="relative aspect-square max-h-96 overflow-hidden rounded-lg bg-black">
-                  <video 
-                    ref={videoRef} 
-                    className="absolute inset-0 h-full w-full object-cover"
-                    autoPlay
-                    playsInline
-                    muted
-                  />
-                </div>
-                <div className="mt-4 flex justify-center">
-                  <Button onClick={takePicture} size="lg" className="rounded-full h-12 w-12 p-0">
-                    <Camera className="h-6 w-6" />
-                  </Button>
-                </div>
-                <canvas ref={canvasRef} className="hidden" />
-              </div>
-            </DialogContent>
-          </Dialog>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6 p-6">
-              <CardTitle className="text-2xl font-semibold leading-none tracking-tight">{t("Progress photos")}</CardTitle>
-              <Button variant="outline" onClick={() => setShowAddPhoto(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                {t("Add photo")}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {progressPhotos.map((photo) => (
-                  <div key={photo.id} className="group relative aspect-square rounded-lg overflow-hidden border border-border">
-                    <img 
-                      src={photo.url} 
-                      alt={`Progress from ${photo.date}`} 
-                      className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
-                      <div className="text-center text-white">
-                        <Calendar className="h-6 w-6 mx-auto mb-2" />
-                        <p className="text-sm">{photo.date}</p>
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      variant="destructive" 
-                      size="icon" 
-                      className="h-6 w-6 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => {
-                        setProgressPhotos(photos => photos.filter(p => p.id !== photo.id));
-                        toast.success(t("photoRemoved"));
-                      }}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
+                  <div className="text-sm text-muted-foreground">Days Tracking</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={() => setShowAddPhotoDialog(true)}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Photo
+                </Button>
                 
-                {progressPhotos.length === 0 && (
-                  <div className="col-span-2 md:col-span-4 flex flex-col items-center justify-center py-12 text-center">
-                    <Camera className="h-12 w-12 text-muted-foreground mb-3" />
-                    <h3 className="text-lg font-medium mb-1">{t("No progress photos")}</h3>
-                    <p className="text-muted-foreground mb-6">
-                      {t("Start tracking visual progress")}
-                    </p>
-                    <Button onClick={() => setShowAddPhoto(true)}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      {t("Add first photo")}
+                {!selectionMode ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectionMode(true)}
+                    disabled={photos.length < 2}
+                  >
+                    <ArrowLeftRight className="mr-2 h-4 w-4" />
+                    Compare
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={startComparison}
+                      disabled={comparisonPhotos.length !== 2}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Compare Selected ({comparisonPhotos.length}/2)
+                    </Button>
+                    <Button variant="outline" onClick={cancelComparison}>
+                      Cancel
                     </Button>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+
+              <div className="flex gap-2">
+                <Button
+                  variant={photoViewMode === 'grid' ? 'default' : 'outline'}
+                  size="icon"
+                  onClick={() => setPhotoViewMode('grid')}
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={photoViewMode === 'timeline' ? 'default' : 'outline'}
+                  size="icon"
+                  onClick={() => setPhotoViewMode('timeline')}
+                >
+                  <Timeline className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-4 items-center">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {PHOTO_CATEGORIES.map(cat => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {allTags.length > 0 && (
+                <Select value={tagFilter} onValueChange={setTagFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="All Tags" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Tags</SelectItem>
+                    {allTags.map(tag => (
+                      <SelectItem key={tag} value={tag}>
+                        {tag}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              <Button
+                variant={showFavoritesOnly ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+              >
+                <Heart className={`h-4 w-4 mr-1 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+                Favorites
+              </Button>
+
+              <Button
+                variant={showMilestonesOnly ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setShowMilestonesOnly(!showMilestonesOnly)}
+              >
+                <Star className={`h-4 w-4 mr-1 ${showMilestonesOnly ? 'fill-current' : ''}`} />
+                Milestones
+              </Button>
+            </div>
+
+            {photoViewMode === 'timeline' ? (
+              <ProgressTimeline
+                photos={filteredPhotos}
+                onEditPhoto={handleEditPhoto}
+                onDeletePhoto={deletePhoto}
+                onToggleFavorite={handleToggleFavorite}
+                onToggleMilestone={handleToggleMilestone}
+              />
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {filteredPhotos.map(photo => (
+                  <ProgressPhotoCard
+                    key={photo.id}
+                    photo={photo}
+                    onEdit={handleEditPhoto}
+                    onDelete={deletePhoto}
+                    onToggleFavorite={handleToggleFavorite}
+                    onToggleMilestone={handleToggleMilestone}
+                    onSelect={handleSelectPhotoForComparison}
+                    isSelected={comparisonPhotos.some(p => p.id === photo.id)}
+                    selectionMode={selectionMode}
+                  />
+                ))}
+              </div>
+            )}
+
+            {filteredPhotos.length === 0 && photos.length > 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <Filter className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">No Photos Match Your Filters</h3>
+                <p>Try adjusting your filters to see more photos.</p>
+              </div>
+            )}
+
+            {photos.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <Camera className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">Start Your Progress Journey</h3>
+                <p className="mb-6">Take your first progress photo to begin tracking your transformation.</p>
+                <Button onClick={() => setShowAddPhotoDialog(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Your First Photo
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <AddProgressPhotoDialog
+            open={showAddPhotoDialog}
+            onOpenChange={setShowAddPhotoDialog}
+            onAddPhoto={handleAddPhoto}
+          />
+
+          <PhotoComparisonDialog
+            open={showComparisonDialog}
+            onOpenChange={setShowComparisonDialog}
+            photos={photos}
+            selectedPhotos={comparisonPhotos.length === 2 ? [comparisonPhotos[0], comparisonPhotos[1]] : undefined}
+          />
         </TabsContent>
       </Tabs>
     </div>
