@@ -33,8 +33,8 @@ function App() {
           <Toaster />
           <BrowserRouter>
             <LanguageProvider>
-              <CookieProvider>
-                <AuthProvider>
+              <AuthProvider>
+                <CookieProvider>
                   <Routes>
                     <Route path="/" element={<Layout />}>
                       <Route index element={<Index />} />
@@ -52,8 +52,8 @@ function App() {
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
-                </AuthProvider>
-              </CookieProvider>
+                </CookieProvider>
+              </AuthProvider>
             </LanguageProvider>
           </BrowserRouter>
         </TooltipProvider>
