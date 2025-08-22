@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2, Filter, Grid, Timeline, ArrowLeftRight, Star, Heart } from 'lucide-react';
+import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2, Filter, Grid, Clock, ArrowLeftRight, Star, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -540,7 +541,7 @@ export default function Progress() {
                   size="icon"
                   onClick={() => setPhotoViewMode('timeline')}
                 >
-                  <Timeline className="h-4 w-4" />
+                  <Clock className="h-4 w-4" />
                 </Button>
               </div>
             </div>
