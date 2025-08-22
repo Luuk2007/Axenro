@@ -16,12 +16,12 @@ export const useProgressPhotos = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('progress_photos' as any)
+        .from('progress_photos')
         .select('*')
         .order('date', { ascending: false });
 
       if (error) throw error;
-      setPhotos((data as any) || []);
+      setPhotos(data || []);
     } catch (error) {
       console.error('Error loading photos:', error);
       toast.error('Failed to load progress photos');
@@ -35,7 +35,7 @@ export const useProgressPhotos = () => {
 
     try {
       const { data, error } = await supabase
-        .from('progress_photos' as any)
+        .from('progress_photos')
         .insert({
           ...photoData,
           user_id: session.user.id
@@ -45,9 +45,9 @@ export const useProgressPhotos = () => {
 
       if (error) throw error;
       
-      setPhotos(prev => [data as any, ...prev]);
+      setPhotos(prev => [data, ...prev]);
       toast.success('Progress photo added successfully');
-      return data as any;
+      return data;
     } catch (error) {
       console.error('Error adding photo:', error);
       toast.error('Failed to add progress photo');
@@ -60,7 +60,7 @@ export const useProgressPhotos = () => {
 
     try {
       const { data, error } = await supabase
-        .from('progress_photos' as any)
+        .from('progress_photos')
         .update(updates)
         .eq('id', id)
         .select()
@@ -69,10 +69,10 @@ export const useProgressPhotos = () => {
       if (error) throw error;
 
       setPhotos(prev => prev.map(photo => 
-        photo.id === id ? { ...photo, ...(data as any) } : photo
+        photo.id === id ? { ...photo, ...data } : photo
       ));
       toast.success('Photo updated successfully');
-      return data as any;
+      return data;
     } catch (error) {
       console.error('Error updating photo:', error);
       toast.error('Failed to update photo');
@@ -85,7 +85,7 @@ export const useProgressPhotos = () => {
 
     try {
       const { error } = await supabase
-        .from('progress_photos' as any)
+        .from('progress_photos')
         .delete()
         .eq('id', id);
 

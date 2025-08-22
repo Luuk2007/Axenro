@@ -353,6 +353,48 @@ export type Database = {
         }
         Relationships: []
       }
+      progress_photos: {
+        Row: {
+          category: string
+          created_at: string
+          date: string
+          id: string
+          image_url: string
+          is_favorite: boolean
+          is_milestone: boolean
+          notes: string | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          date: string
+          id?: string
+          image_url: string
+          is_favorite?: boolean
+          is_milestone?: boolean
+          notes?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          date?: string
+          id?: string
+          image_url?: string
+          is_favorite?: boolean
+          is_milestone?: boolean
+          notes?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       rate_limits: {
         Row: {
           created_at: string
