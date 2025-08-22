@@ -35,7 +35,7 @@ export default function Reviews() {
   const [rating, setRating] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch approved reviews
+  // Fetch approved reviews with profile information
   const { data: reviews, isLoading } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
@@ -48,7 +48,7 @@ export default function Reviews() {
           rating,
           created_at,
           user_id,
-          profiles!inner (
+          profiles (
             full_name,
             profile_picture_url
           )
@@ -60,7 +60,12 @@ export default function Reviews() {
         console.error('Error fetching reviews:', error);
         return [];
       }
-      return data as Review[];
+      
+      // Transform the data to match our Review interface
+      return (data || []).map(review => ({
+        ...review,
+        profiles: review.profiles || null
+      })) as Review[];
     },
   });
 
