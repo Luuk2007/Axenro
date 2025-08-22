@@ -3,6 +3,7 @@ import { Plus, Apple, Camera, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -28,6 +29,7 @@ interface Meal {
 
 const Nutrition = () => {
   const { t, language } = useLanguage();
+  const { test_subscription_tier } = useSubscription();
   const [showAddFood, setShowAddFood] = useState(false);
   const [showScanBarcode, setShowScanBarcode] = useState(false);
   const [showAIMealAnalyzer, setShowAIMealAnalyzer] = useState(false);
@@ -203,7 +205,14 @@ const Nutrition = () => {
 
   const handleAddItem = (mealId: string) => {
     setSelectedMeal(mealId);
-    setShowAddFood(true);
+    
+    // For free plan, directly open the AddFoodDialog since there's only one option
+    if (test_subscription_tier === 'free') {
+      setShowAddFood(true);
+    } else {
+      // For pro and premium plans, this will be handled by the modal dialog
+      setShowAddFood(true);
+    }
   };
 
   const handleAddFood = async (foodItem: any) => {
@@ -327,6 +336,43 @@ const Nutrition = () => {
     setShowAIMealAnalyzer(true);
   };
 
+  // Determine available add food options based on subscription tier
+  const getAddFoodOptions = () => {
+    const options = [];
+    
+    // All plans have search functionality
+    options.push({
+      key: 'search',
+      icon: Apple,
+      label: t("Add food"),
+      action: () => setShowAddFood(true)
+    });
+
+    // Pro and Premium have barcode scanning
+    if (test_subscription_tier === 'pro' || test_subscription_tier === 'premium') {
+      options.push({
+        key: 'barcode',
+        icon: Camera,
+        label: "Scan Barcode",
+        action: handleScanBarcode
+      });
+    }
+
+    // Only Premium has AI meal analyzer
+    if (test_subscription_tier === 'premium') {
+      options.push({
+        key: 'ai',
+        icon: Bot,
+        label: "AI Meal Analyzer",
+        action: handleAIMealAnalyzer
+      });
+    }
+
+    return options;
+  };
+
+  const addFoodOptions = getAddFoodOptions();
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -334,34 +380,45 @@ const Nutrition = () => {
           <h1 className="text-2xl font-semibold tracking-tight">{t("nutrition")}</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button data-testid="add-food-trigger">
-                <Plus className="mr-2 h-4 w-4" />
-                {t("Add food")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t("Add food")}</DialogTitle>
-                <DialogDescription>Search for a product, scan, or analyze with AI</DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-3 py-4">
-                <Button className="flex-1" onClick={() => setShowAddFood(true)}>
-                  <Apple className="mr-2 h-4 w-4" />
+          {/* Free plan: Direct button, no modal */}
+          {test_subscription_tier === 'free' ? (
+            <Button data-testid="add-food-trigger" onClick={() => setShowAddFood(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t("Add food")}
+            </Button>
+          ) : (
+            /* Pro and Premium plans: Modal with multiple options */
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button data-testid="add-food-trigger">
+                  <Plus className="mr-2 h-4 w-4" />
                   {t("Add food")}
                 </Button>
-                <Button className="flex-1" onClick={handleScanBarcode}>
-                  <Camera className="mr-2 h-4 w-4" />
-                  Scan Barcode
-                </Button>
-                <Button className="flex-1" onClick={handleAIMealAnalyzer}>
-                  <Bot className="mr-2 h-4 w-4" />
-                  AI Meal Analyzer
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("Add food")}</DialogTitle>
+                  <DialogDescription>
+                    {test_subscription_tier === 'pro' 
+                      ? "Search for a product or scan a barcode"
+                      : "Search for a product, scan, or analyze with AI"
+                    }
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col gap-3 py-4">
+                  {addFoodOptions.map(option => {
+                    const IconComponent = option.icon;
+                    return (
+                      <Button key={option.key} className="flex-1" onClick={option.action}>
+                        <IconComponent className="mr-2 h-4 w-4" />
+                        {option.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
 
@@ -393,25 +450,29 @@ const Nutrition = () => {
         </DialogContent>
       </Dialog>
 
-      {/* AI Meal Analyzer Dialog */}
-      <Dialog open={showAIMealAnalyzer} onOpenChange={setShowAIMealAnalyzer}>
-        <DialogContent className="p-0">
-          <AIMealAnalyzer
-            meals={meals}
-            onClose={() => setShowAIMealAnalyzer(false)}
-            onAddFood={handleAddFood}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* AI Meal Analyzer Dialog - Only for Premium */}
+      {test_subscription_tier === 'premium' && (
+        <Dialog open={showAIMealAnalyzer} onOpenChange={setShowAIMealAnalyzer}>
+          <DialogContent className="p-0">
+            <AIMealAnalyzer
+              meals={meals}
+              onClose={() => setShowAIMealAnalyzer(false)}
+              onAddFood={handleAddFood}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
 
-      {/* Barcode Scanner Dialog */}
-      <Dialog open={showScanBarcode} onOpenChange={setShowScanBarcode}>
-        <BarcodeScanner
-          key={showScanBarcode ? 'scanner-open' : 'scanner-closed'}
-          onClose={() => setShowScanBarcode(false)}
-          onProductScanned={handleProductScanned}
-        />
-      </Dialog>
+      {/* Barcode Scanner Dialog - Only for Pro and Premium */}
+      {(test_subscription_tier === 'pro' || test_subscription_tier === 'premium') && (
+        <Dialog open={showScanBarcode} onOpenChange={setShowScanBarcode}>
+          <BarcodeScanner
+            key={showScanBarcode ? 'scanner-open' : 'scanner-closed'}
+            onClose={() => setShowScanBarcode(false)}
+            onProductScanned={handleProductScanned}
+          />
+        </Dialog>
+      )}
 
       {/* Product Modal */}
       <Dialog open={showProductModal} onOpenChange={setShowProductModal}>
