@@ -9,16 +9,24 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import UserMenu from '@/components/auth/UserMenu';
 import { ThemeSwitch } from '@/components/ui/theme-switch-button';
 import { LanguageSwitch } from '@/components/ui/language-switch-button';
+import { useSubscription } from '@/hooks/useSubscription';
 
 export default function TopBar() {
   const isMobile = useIsMobile();
   const { t } = useLanguage();
+  const { test_mode, test_subscription_tier, subscription_tier } = useSubscription();
   
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleSidebarNavigate = () => {
     setSidebarOpen(false);
   };
+
+  // Determine current tier
+  const currentTier = test_mode ? test_subscription_tier : subscription_tier;
+  
+  // Only show theme switch for pro and premium plans
+  const showThemeSwitch = currentTier === 'pro' || currentTier === 'premium';
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 md:px-6">
@@ -39,7 +47,7 @@ export default function TopBar() {
       </div>
       <div className="flex items-center gap-4">
         <LanguageSwitch />
-        <ThemeSwitch />
+        {showThemeSwitch && <ThemeSwitch />}
         <UserMenu />
       </div>
     </header>

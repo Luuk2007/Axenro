@@ -12,6 +12,7 @@ type NavItem = {
   titleKey: TranslationKeys;
   href: string;
   icon: LucideIcon;
+  requiresPremium?: boolean;
 };
 
 const navItems: NavItem[] = [
@@ -24,6 +25,7 @@ const navItems: NavItem[] = [
     titleKey: "Axenro AI",
     href: '/axenro-ai',
     icon: Sparkles,
+    requiresPremium: true,
   },
   {
     titleKey: "nutrition",
@@ -94,11 +96,11 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
     
     switch (currentTier) {
       case 'pro':
-        return t('Pro version');
+        return t('Pro plan');
       case 'premium':
-        return t('Premium version');
+        return t('Premium plan');
       default:
-        return t('Free version');
+        return t('Free plan');
     }
   };
 
@@ -132,6 +134,15 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
     navigate('/termsandconditions');
     handleNavClick();
   };
+
+  // Filter navigation items based on subscription tier
+  const currentTier = getCurrentTier();
+  const filteredNavItems = navItems.filter(item => {
+    if (item.requiresPremium) {
+      return currentTier === 'premium';
+    }
+    return true;
+  });
   
   return (
     <>
@@ -153,7 +164,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         <div className="flex flex-col flex-1 overflow-hidden">
           <nav className="flex-1 overflow-auto py-2">
             <ul className="grid gap-1 px-2">
-              {navItems.map((item, index) => (
+              {filteredNavItems.map((item, index) => (
                 <li key={index}>
                   <NavLink
                     to={item.href}
