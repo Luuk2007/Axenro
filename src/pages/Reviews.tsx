@@ -20,10 +20,8 @@ interface Review {
   rating: number;
   created_at: string;
   user_id: string;
-  profiles?: {
-    full_name: string | null;
-    profile_picture_url: string | null;
-  } | null;
+  author_name: string | null;
+  author_avatar: string | null;
 }
 
 export default function Reviews() {
@@ -35,7 +33,7 @@ export default function Reviews() {
   const [rating, setRating] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch approved reviews with profile information
+  // Fetch approved reviews with user information
   const { data: reviews, isLoading } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
@@ -47,11 +45,7 @@ export default function Reviews() {
           content,
           rating,
           created_at,
-          user_id,
-          profiles (
-            full_name,
-            profile_picture_url
-          )
+          user_id
         `)
         .eq('is_approved', true)
         .order('created_at', { ascending: false });
@@ -60,12 +54,25 @@ export default function Reviews() {
         console.error('Error fetching reviews:', error);
         return [];
       }
-      
-      // Transform the data to match our Review interface
-      return (data || []).map(review => ({
-        ...review,
-        profiles: review.profiles || null
-      })) as Review[];
+
+      // Fetch profile information for each review
+      const reviewsWithProfiles = await Promise.all(
+        (data || []).map(async (review) => {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('full_name, profile_picture_url')
+            .eq('id', review.user_id)
+            .single();
+
+          return {
+            ...review,
+            author_name: profileData?.full_name || null,
+            author_avatar: profileData?.profile_picture_url || null,
+          };
+        })
+      );
+
+      return reviewsWithProfiles as Review[];
     },
   });
 
@@ -256,12 +263,12 @@ export default function Reviews() {
                   <div className="flex items-start space-x-4">
                     <Avatar className="w-12 h-12">
                       <AvatarImage 
-                        src={review.profiles?.profile_picture_url || ''} 
-                        alt={review.profiles?.full_name || 'Anonymous'} 
+                        src={review.author_avatar || ''} 
+                        alt={review.author_name || 'Anonymous'} 
                       />
                       <AvatarFallback>
-                        {review.profiles?.full_name 
-                          ? review.profiles.full_name.charAt(0).toUpperCase()
+                        {review.author_name 
+                          ? review.author_name.charAt(0).toUpperCase()
                           : 'A'
                         }
                       </AvatarFallback>
@@ -271,7 +278,7 @@ export default function Reviews() {
                         <div>
                           <h3 className="font-semibold text-lg">{review.title}</h3>
                           <p className="text-sm text-muted-foreground">
-                            {review.profiles?.full_name || 'Anonymous'} • {formatDate(review.created_at)}
+                            {review.author_name || 'Anonymous'} • {formatDate(review.created_at)}
                           </p>
                         </div>
                         {renderStars(review.rating)}
