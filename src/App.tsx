@@ -35,23 +35,23 @@ function App() {
             <LanguageProvider>
               <CookieProvider>
                 <AuthProvider>
-                  <Layout>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/nutrition" element={<Nutrition />} />
-                      <Route path="/workouts" element={<Workouts />} />
-                      <Route path="/progress" element={<Progress />} />
-                      <Route path="/profile" element={<Profile />} />
-                      <Route path="/reviews" element={<Reviews />} />
-                      <Route path="/settings" element={<Settings />} />
-                      <Route path="/axenro-ai" element={<AxenroAI />} />
-                      <Route path="/resetyourpassword" element={<PasswordResetPage />} />
-                      <Route path="/privacypolicy" element={<PrivacyPolicyPage />} />
-                      <Route path="/termsandconditions" element={<TermsConditionsPage />} />
-                      <Route path="/cookiepreferences" element={<CookiePreferencesPage />} />
+                  <Routes>
+                    <Route path="/" element={<Layout />}>
+                      <Route index element={<Index />} />
+                      <Route path="nutrition" element={<Nutrition />} />
+                      <Route path="workouts" element={<Workouts />} />
+                      <Route path="progress" element={<Progress />} />
+                      <Route path="profile" element={<Profile />} />
+                      <Route path="reviews" element={<Reviews />} />
+                      <Route path="settings" element={<Settings />} />
+                      <Route path="axenro-ai" element={<AxenroAI />} />
+                      <Route path="resetyourpassword" element={<PasswordResetPage />} />
+                      <Route path="privacypolicy" element={<PrivacyPolicyPage />} />
+                      <Route path="termsandconditions" element={<TermsConditionsPage />} />
+                      <Route path="cookiepreferences" element={<CookiePreferencesPage />} />
                       <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Layout>
+                    </Route>
+                  </Routes>
                 </AuthProvider>
               </CookieProvider>
             </LanguageProvider>
