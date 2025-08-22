@@ -36,19 +36,29 @@ serve(async (req) => {
       const clientId = Deno.env.get('GOOGLE_FIT_CLIENT_ID')
       const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-fit-callback`
       
+      if (!clientId) {
+        console.error('GOOGLE_FIT_CLIENT_ID not configured')
+        return new Response(
+          JSON.stringify({ error: 'Google Fit client ID not configured' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
       const scopes = [
         'https://www.googleapis.com/auth/fitness.activity.read',
         'https://www.googleapis.com/auth/fitness.body.read'
       ].join(' ')
 
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${clientId}&` +
+        `client_id=${encodeURIComponent(clientId)}&` +
         `redirect_uri=${encodeURIComponent(redirectUri)}&` +
         `scope=${encodeURIComponent(scopes)}&` +
         `response_type=code&` +
         `access_type=offline&` +
+        `prompt=consent&` +
         `state=${user.id}`
 
+      console.log('Generated auth URL for user:', user.id)
       return new Response(
         JSON.stringify({ authUrl }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

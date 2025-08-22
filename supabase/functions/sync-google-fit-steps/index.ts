@@ -31,13 +31,21 @@ serve(async (req) => {
     }
 
     // Get user's Google Fit connection
-    const { data: connection } = await supabase
+    const { data: connection, error: connectionError } = await supabase
       .from('health_connections')
       .select('*')
       .eq('user_id', user.id)
       .eq('provider', 'google_fit')
       .eq('is_active', true)
-      .single()
+      .maybeSingle()
+
+    if (connectionError) {
+      console.error('Error fetching connection:', connectionError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to fetch connection' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     if (!connection) {
       return new Response(
@@ -50,12 +58,22 @@ serve(async (req) => {
     let accessToken = connection.access_token
     if (connection.token_expires_at && new Date(connection.token_expires_at) <= new Date()) {
       // Refresh token
+      const clientId = Deno.env.get('GOOGLE_FIT_CLIENT_ID')
+      const clientSecret = Deno.env.get('GOOGLE_FIT_CLIENT_SECRET')
+      
+      if (!clientId || !clientSecret) {
+        return new Response(
+          JSON.stringify({ error: 'Google Fit credentials not configured' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
       const refreshResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
-          client_id: Deno.env.get('GOOGLE_FIT_CLIENT_ID')!,
-          client_secret: Deno.env.get('GOOGLE_FIT_CLIENT_SECRET')!,
+          client_id: clientId,
+          client_secret: clientSecret,
           refresh_token: connection.refresh_token,
           grant_type: 'refresh_token'
         })
@@ -75,6 +93,12 @@ serve(async (req) => {
               : null
           })
           .eq('id', connection.id)
+      } else {
+        console.error('Failed to refresh token:', refreshTokens)
+        return new Response(
+          JSON.stringify({ error: 'Failed to refresh access token' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
       }
     }
 
@@ -107,7 +131,7 @@ serve(async (req) => {
     if (!fitnessResponse.ok) {
       console.error('Google Fit API error:', fitnessData)
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch steps data' }),
+        JSON.stringify({ error: 'Failed to fetch steps data from Google Fit' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -153,6 +177,8 @@ serve(async (req) => {
         )
       }
     }
+
+    console.log(`Successfully synced ${stepsData.length} days of steps for user ${user.id}`)
 
     return new Response(
       JSON.stringify({ 
