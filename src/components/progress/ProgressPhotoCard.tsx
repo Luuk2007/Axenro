@@ -27,6 +27,7 @@ interface ProgressPhotoCardProps {
   isSelected?: boolean;
   selectionMode?: boolean;
   showMeasurements?: { weight?: number; measurements?: any };
+  subscriptionTier?: string;
 }
 
 export default function ProgressPhotoCard({
@@ -38,9 +39,12 @@ export default function ProgressPhotoCard({
   onSelect,
   isSelected,
   selectionMode,
-  showMeasurements
+  showMeasurements,
+  subscriptionTier
 }: ProgressPhotoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
+  
+  const isPremium = subscriptionTier === 'premium';
 
   return (
     <Card 
@@ -61,22 +65,24 @@ export default function ProgressPhotoCard({
             onLoad={() => setImageLoaded(true)}
           />
           
-          {/* Overlay with icons */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <div className="absolute bottom-2 left-2 flex gap-2">
-              {photo.is_milestone && (
-                <Badge variant="secondary" className="text-xs">
-                  <Star className="h-3 w-3 mr-1" />
-                  Milestone
-                </Badge>
-              )}
-              {photo.is_favorite && (
-                <Badge variant="secondary" className="text-xs">
-                  <Heart className="h-3 w-3 mr-1 fill-red-500 text-red-500" />
-                </Badge>
-              )}
+          {/* Overlay with icons - only show for premium */}
+          {isPremium && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="absolute bottom-2 left-2 flex gap-2">
+                {photo.is_milestone && (
+                  <Badge variant="secondary" className="text-xs">
+                    <Star className="h-3 w-3 mr-1" />
+                    Milestone
+                  </Badge>
+                )}
+                {photo.is_favorite && (
+                  <Badge variant="secondary" className="text-xs">
+                    <Heart className="h-3 w-3 mr-1 fill-red-500 text-red-500" />
+                  </Badge>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Selection indicator for comparison mode */}
           {selectionMode && isSelected && (
@@ -85,8 +91,8 @@ export default function ProgressPhotoCard({
             </div>
           )}
 
-          {/* Action menu */}
-          {!selectionMode && (
+          {/* Action menu - only show for premium */}
+          {!selectionMode && isPremium && (
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -136,14 +142,16 @@ export default function ProgressPhotoCard({
             </Badge>
           </div>
 
-          {photo.notes && (
+          {/* Only show notes for premium */}
+          {isPremium && photo.notes && (
             <div className="flex items-start gap-1 text-xs text-muted-foreground">
               <MessageSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
               <p className="line-clamp-2">{photo.notes}</p>
             </div>
           )}
 
-          {photo.tags.length > 0 && (
+          {/* Only show tags for premium */}
+          {isPremium && photo.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {photo.tags.slice(0, 3).map(tag => (
                 <Badge key={tag} variant="secondary" className="text-xs">

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 
 import { useProgressPhotos } from '@/hooks/useProgressPhotos';
+import { useSubscription } from '@/hooks/useSubscription';
 import AddProgressPhotoDialog from '@/components/progress/AddProgressPhotoDialog';
 import ProgressPhotoCard from '@/components/progress/ProgressPhotoCard';
 import ProgressTimeline from '@/components/progress/ProgressTimeline';
@@ -47,6 +48,14 @@ interface MeasurementEntry {
 
 export default function Progress() {
   const { t } = useLanguage();
+  const { subscription_tier, test_mode, test_subscription_tier } = useSubscription();
+  
+  // Determine current plan
+  const currentPlan = test_mode ? test_subscription_tier : subscription_tier;
+  const isFree = currentPlan === 'free' || !currentPlan;
+  const isPro = currentPlan === 'pro';
+  const isPremium = currentPlan === 'premium';
+
   const [measurementType, setMeasurementType] = useState('waist');
   const [measurementValue, setMeasurementValue] = useState('');
   const [measurementDate, setMeasurementDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -203,11 +212,15 @@ export default function Progress() {
   };
 
   const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
-    await updatePhoto(id, { is_favorite: isFavorite });
+    if (isPremium) {
+      await updatePhoto(id, { is_favorite: isFavorite });
+    }
   };
 
   const handleToggleMilestone = async (id: string, isMilestone: boolean) => {
-    await updatePhoto(id, { is_milestone: isMilestone });
+    if (isPremium) {
+      await updatePhoto(id, { is_milestone: isMilestone });
+    }
   };
 
   const handleSelectPhotoForComparison = (photo: ProgressPhoto) => {
@@ -309,10 +322,10 @@ export default function Progress() {
       </div>
 
       <Tabs defaultValue="weight" className="w-full">
-        <TabsList className="grid grid-cols-3 mb-4">
+        <TabsList className={`grid mb-4 ${isFree ? 'grid-cols-2' : 'grid-cols-3'}`}>
           <TabsTrigger value="weight">{t("Weight")}</TabsTrigger>
           <TabsTrigger value="measurements">{t("Measurements")}</TabsTrigger>
-          <TabsTrigger value="photos">{t("Photos")}</TabsTrigger>
+          {!isFree && <TabsTrigger value="photos">{t("Photos")}</TabsTrigger>}
         </TabsList>
         
         <TabsContent value="weight" className="space-y-6">
@@ -458,180 +471,190 @@ export default function Progress() {
           </div>
         </TabsContent>
         
-        <TabsContent value="photos" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("Progress photos")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    onClick={() => setShowAddPhotoDialog(true)}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Photo
-                  </Button>
-                  
-                  {!selectionMode ? (
+        {!isFree && (
+          <TabsContent value="photos" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("Progress photos")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                  <div className="flex flex-wrap gap-2">
                     <Button
-                      variant="outline"
-                      onClick={() => setSelectionMode(true)}
-                      disabled={photos.length < 2}
+                      onClick={() => setShowAddPhotoDialog(true)}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
                     >
-                      <ArrowLeftRight className="mr-2 h-4 w-4" />
-                      Compare
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Photo
                     </Button>
-                  ) : (
+                    
+                    {isPremium && !selectionMode ? (
+                      <Button
+                        variant="outline"
+                        onClick={() => setSelectionMode(true)}
+                        disabled={photos.length < 2}
+                      >
+                        <ArrowLeftRight className="mr-2 h-4 w-4" />
+                        Compare
+                      </Button>
+                    ) : isPremium && selectionMode ? (
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={startComparison}
+                          disabled={comparisonPhotos.length !== 2}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          Compare Selected ({comparisonPhotos.length}/2)
+                        </Button>
+                        <Button variant="outline" onClick={cancelComparison}>
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {isPremium && (
                     <div className="flex gap-2">
                       <Button
-                        onClick={startComparison}
-                        disabled={comparisonPhotos.length !== 2}
-                        className="bg-green-600 hover:bg-green-700"
+                        variant={photoViewMode === 'grid' ? 'default' : 'outline'}
+                        size="icon"
+                        onClick={() => setPhotoViewMode('grid')}
                       >
-                        Compare Selected ({comparisonPhotos.length}/2)
+                        <Grid className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" onClick={cancelComparison}>
-                        Cancel
+                      <Button
+                        variant={photoViewMode === 'timeline' ? 'default' : 'outline'}
+                        size="icon"
+                        onClick={() => setPhotoViewMode('timeline')}
+                      >
+                        <Clock className="h-4 w-4" />
                       </Button>
                     </div>
                   )}
                 </div>
 
-                <div className="flex gap-2">
-                  <Button
-                    variant={photoViewMode === 'grid' ? 'default' : 'outline'}
-                    size="icon"
-                    onClick={() => setPhotoViewMode('grid')}
-                  >
-                    <Grid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={photoViewMode === 'timeline' ? 'default' : 'outline'}
-                    size="icon"
-                    onClick={() => setPhotoViewMode('timeline')}
-                  >
-                    <Clock className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+                {isPremium && (
+                  <div className="flex flex-wrap gap-4 items-center">
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="All Categories" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {PHOTO_CATEGORIES.map(cat => (
+                          <SelectItem key={cat.value} value={cat.value}>
+                            {cat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-              <div className="flex flex-wrap gap-4 items-center">
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {PHOTO_CATEGORIES.map(cat => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    {allTags.length > 0 && (
+                      <Select value={tagFilter} onValueChange={setTagFilter}>
+                        <SelectTrigger className="w-40">
+                          <SelectValue placeholder="All Tags" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Tags</SelectItem>
+                          {allTags.map(tag => (
+                            <SelectItem key={tag} value={tag}>
+                              {tag}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
 
-                {allTags.length > 0 && (
-                  <Select value={tagFilter} onValueChange={setTagFilter}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="All Tags" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Tags</SelectItem>
-                      {allTags.map(tag => (
-                        <SelectItem key={tag} value={tag}>
-                          {tag}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Button
+                      variant={showFavoritesOnly ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                    >
+                      <Heart className={`h-4 w-4 mr-1 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+                      Favorites
+                    </Button>
+
+                    <Button
+                      variant={showMilestonesOnly ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setShowMilestonesOnly(!showMilestonesOnly)}
+                    >
+                      <Star className={`h-4 w-4 mr-1 ${showMilestonesOnly ? 'fill-current' : ''}`} />
+                      Milestones
+                    </Button>
+                  </div>
                 )}
 
-                <Button
-                  variant={showFavoritesOnly ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                >
-                  <Heart className={`h-4 w-4 mr-1 ${showFavoritesOnly ? 'fill-current' : ''}`} />
-                  Favorites
-                </Button>
-
-                <Button
-                  variant={showMilestonesOnly ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setShowMilestonesOnly(!showMilestonesOnly)}
-                >
-                  <Star className={`h-4 w-4 mr-1 ${showMilestonesOnly ? 'fill-current' : ''}`} />
-                  Milestones
-                </Button>
-              </div>
-
-              {photoViewMode === 'timeline' ? (
-                <ProgressTimeline
-                  photos={filteredPhotos}
-                  onEditPhoto={handleEditPhoto}
-                  onDeletePhoto={deletePhoto}
-                  onToggleFavorite={handleToggleFavorite}
-                  onToggleMilestone={handleToggleMilestone}
-                />
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {filteredPhotos.map(photo => (
-                    <ProgressPhotoCard
-                      key={photo.id}
-                      photo={photo}
-                      onEdit={handleEditPhoto}
-                      onDelete={deletePhoto}
-                      onToggleFavorite={handleToggleFavorite}
-                      onToggleMilestone={handleToggleMilestone}
-                      onSelect={handleSelectPhotoForComparison}
-                      isSelected={comparisonPhotos.some(p => p.id === photo.id)}
-                      selectionMode={selectionMode}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {filteredPhotos.length === 0 && photos.length > 0 && (
-                <div className="text-center py-12 text-muted-foreground">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                    <Filter className="h-8 w-8" />
+                {isPremium && photoViewMode === 'timeline' ? (
+                  <ProgressTimeline
+                    photos={filteredPhotos}
+                    onEditPhoto={handleEditPhoto}
+                    onDeletePhoto={deletePhoto}
+                    onToggleFavorite={handleToggleFavorite}
+                    onToggleMilestone={handleToggleMilestone}
+                  />
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {filteredPhotos.map(photo => (
+                      <ProgressPhotoCard
+                        key={photo.id}
+                        photo={photo}
+                        onEdit={handleEditPhoto}
+                        onDelete={deletePhoto}
+                        onToggleFavorite={handleToggleFavorite}
+                        onToggleMilestone={handleToggleMilestone}
+                        onSelect={handleSelectPhotoForComparison}
+                        isSelected={comparisonPhotos.some(p => p.id === photo.id)}
+                        selectionMode={selectionMode && isPremium}
+                        subscriptionTier={currentPlan}
+                      />
+                    ))}
                   </div>
-                  <h3 className="text-lg font-medium mb-2">No Photos Match Your Filters</h3>
-                  <p>Try adjusting your filters to see more photos.</p>
-                </div>
-              )}
+                )}
 
-              {photos.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                    <Camera className="h-8 w-8" />
+                {filteredPhotos.length === 0 && photos.length > 0 && isPremium && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                      <Filter className="h-8 w-8" />
+                    </div>
+                    <h3 className="text-lg font-medium mb-2">No Photos Match Your Filters</h3>
+                    <p>Try adjusting your filters to see more photos.</p>
                   </div>
-                  <h3 className="text-lg font-medium mb-2">Start Your Progress Journey</h3>
-                  <p className="mb-6">Take your first progress photo to begin tracking your transformation.</p>
-                  <Button onClick={() => setShowAddPhotoDialog(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Your First Photo
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                )}
 
-          <AddProgressPhotoDialog
-            open={showAddPhotoDialog}
-            onOpenChange={setShowAddPhotoDialog}
-            onAddPhoto={handleAddPhoto}
-          />
+                {photos.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                      <Camera className="h-8 w-8" />
+                    </div>
+                    <h3 className="text-lg font-medium mb-2">Start Your Progress Journey</h3>
+                    <p className="mb-6">Take your first progress photo to begin tracking your transformation.</p>
+                    <Button onClick={() => setShowAddPhotoDialog(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Your First Photo
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-          <PhotoComparisonDialog
-            open={showComparisonDialog}
-            onOpenChange={setShowComparisonDialog}
-            photos={photos}
-            selectedPhotos={comparisonPhotos.length === 2 ? [comparisonPhotos[0], comparisonPhotos[1]] : undefined}
-          />
-        </TabsContent>
+            <AddProgressPhotoDialog
+              open={showAddPhotoDialog}
+              onOpenChange={setShowAddPhotoDialog}
+              onAddPhoto={handleAddPhoto}
+              subscriptionTier={currentPlan}
+            />
+
+            {isPremium && (
+              <PhotoComparisonDialog
+                open={showComparisonDialog}
+                onOpenChange={setShowComparisonDialog}
+                photos={photos}
+                selectedPhotos={comparisonPhotos.length === 2 ? [comparisonPhotos[0], comparisonPhotos[1]] : undefined}
+              />
+            )}
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
