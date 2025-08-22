@@ -72,6 +72,12 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
 
       onImageUpdate(imageUrl);
       setPreviewUrl(imageUrl);
+      
+      // Emit custom event to notify other components
+      window.dispatchEvent(new CustomEvent('profilePictureUpdated', { 
+        detail: { imageUrl } 
+      }));
+      
       toast.success('Profile picture updated successfully');
     } catch (error: any) {
       console.error('Error uploading image:', error);
@@ -97,6 +103,12 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
 
       onImageUpdate('');
       setPreviewUrl(null);
+      
+      // Emit custom event to notify other components
+      window.dispatchEvent(new CustomEvent('profilePictureUpdated', { 
+        detail: { imageUrl: '' } 
+      }));
+      
       toast.success('Profile picture removed');
     } catch (error: any) {
       console.error('Error removing image:', error);

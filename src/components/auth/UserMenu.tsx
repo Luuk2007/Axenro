@@ -25,6 +25,19 @@ export default function UserMenu() {
     }
   }, [user]);
 
+  useEffect(() => {
+    // Listen for profile picture updates
+    const handleProfilePictureUpdate = (event: CustomEvent) => {
+      setProfilePictureUrl(event.detail.imageUrl);
+    };
+
+    window.addEventListener('profilePictureUpdated', handleProfilePictureUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('profilePictureUpdated', handleProfilePictureUpdate as EventListener);
+    };
+  }, []);
+
   const loadProfilePicture = async () => {
     if (!user) return;
 
