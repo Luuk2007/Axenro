@@ -1,4 +1,86 @@
 
-// Export from the structured Dutch translations
-import { dutch } from './dutch/index';
-export { dutch };
+import { DomainTranslations } from './types';
+
+export const dutchTranslations: DomainTranslations = {
+  common: {
+    // Navigation
+    "dashboard": "Dashboard",
+    "nutrition": "Voeding",
+    "workouts": "Workouts",
+    "progress": "Voortgang",
+    "profile": "Profiel",
+    "settings": "Instellingen",
+    "Reviews": "Beoordelingen",
+    
+    // Auth
+    "login": "Inloggen",
+    "register": "Registreren",
+    "logout": "Uitloggen",
+    "loginSuccess": "Succesvol ingelogd!",
+    "signupSuccess": "Registratie succesvol!",
+    "checkEmailConfirmation": "Controleer je e-mail om je account te bevestigen.",
+    "loggedOut": "Succesvol uitgelogd",
+    "resetEmailSent": "Wachtwoord reset e-mail verzonden!",
+    
+    // Common actions
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "add": "Toevoegen",
+    "remove": "Verwijderen",
+    "submit": "Verzenden",
+    "loading": "Laden...",
+    "error": "Fout",
+    "success": "Succes",
+    "confirm": "Bevestigen",
+    "close": "Sluiten",
+    "back": "Terug",
+    "next": "Volgende",
+    "previous": "Vorige",
+    "search": "Zoeken",
+    "filter": "Filter",
+    "sort": "Sorteren",
+    "clear": "Wissen",
+    "reset": "Reset",
+    "update": "Bijwerken",
+    "create": "Aanmaken",
+    "view": "Bekijken",
+    "download": "Downloaden",
+    "upload": "Uploaden",
+
+    // Reviews specific
+    "Privacy Policy": "Privacybeleid",
+    "Terms & Conditions": "Algemene Voorwaarden",
+    "Write a Review": "Schrijf een Beoordeling",
+    "Title": "Titel",
+    "Rating": "Beoordeling",
+    "Review": "Recensie",
+    "Customer Reviews": "Klantbeoordelingen",
+    "Reviews": "Beoordelingen",
+    "Give your review a title": "Geef je beoordeling een titel",
+    "Share your thoughts about Axenro...": "Deel je gedachten over Axenro...",
+    "Submitting...": "Verzenden...",
+    "Submit Review": "Beoordeling Verzenden",
+    "Please log in to write a review": "Log in om een beoordeling te schrijven",
+    "No reviews yet. Be the first to share your experience!": "Nog geen beoordelingen. Wees de eerste om je ervaring te delen!",
+    "Review submitted successfully! It will be reviewed before appearing publicly.": "Beoordeling succesvol verzonden! Het wordt beoordeeld voordat het openbaar verschijnt.",
+    "Please log in to submit a review": "Log in om een beoordeling in te dienen",
+    "Please fill in all required fields": "Vul alle verplichte velden in",
+    "Share your experience with Axenro and read what others have to say": "Deel je ervaring met Axenro en lees wat anderen te zeggen hebben",
+    "Loading...": "Laden...",
+    "Pro plan": "Pro abonnement",
+    "Premium plan": "Premium abonnement", 
+    "Free plan": "Gratis abonnement",
+    "Advanced features for consistent progress": "Geavanceerde functies voor consistente vooruitgang",
+    "The complete solution for maximum results": "De complete oplossing voor maximale resultaten",
+    "Essential tools to begin your fitness journey": "Essentiële tools om je fitness reis te beginnen"
+  },
+  auth: {},
+  dashboard: {},
+  nutrition: {},
+  workout: {},
+  progress: {},
+  profile: {},
+  settings: {}
+};
