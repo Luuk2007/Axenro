@@ -9,14 +9,26 @@ serve(async (req) => {
     const state = url.searchParams.get('state') // This is the user_id
     const error = url.searchParams.get('error')
 
-    // Determine the redirect base URL (remove .supabase.co and add .netlify.app for deployed apps)
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
-    let redirectBase = supabaseUrl.replace('.supabase.co', '.netlify.app')
+    console.log('Callback received:', { code: !!code, state: !!state, error })
+
+    // Get the origin from the request headers to determine redirect URL
+    const origin = req.headers.get('origin')
+    const referer = req.headers.get('referer')
     
-    // If we're in development, use localhost
-    if (supabaseUrl.includes('localhost') || supabaseUrl.includes('127.0.0.1')) {
-      redirectBase = 'http://localhost:5173'
+    // Try to determine the correct redirect URL
+    let redirectBase = 'http://localhost:5173' // Default for local development
+    
+    if (origin && origin.includes('lovable.dev')) {
+      redirectBase = origin
+    } else if (referer && referer.includes('lovable.dev')) {
+      redirectBase = new URL(referer).origin
+    } else if (origin && origin.includes('netlify.app')) {
+      redirectBase = origin
+    } else if (referer && referer.includes('netlify.app')) {
+      redirectBase = new URL(referer).origin
     }
+
+    console.log('Redirect base determined:', redirectBase)
 
     if (error) {
       console.error('OAuth error:', error)
@@ -46,6 +58,8 @@ serve(async (req) => {
       })
     }
 
+    console.log('Exchanging code for tokens...')
+
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -59,6 +73,7 @@ serve(async (req) => {
     })
 
     const tokens = await tokenResponse.json()
+    console.log('Token response:', { success: !!tokens.access_token, error: tokens.error })
 
     if (!tokens.access_token) {
       console.error('Failed to get access token:', tokens)
@@ -77,6 +92,8 @@ serve(async (req) => {
     const expiresAt = tokens.expires_in 
       ? new Date(Date.now() + tokens.expires_in * 1000).toISOString()
       : null
+
+    console.log('Storing connection in database for user:', state)
 
     const { error: dbError } = await supabase
       .from('health_connections')
@@ -107,8 +124,21 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Callback error:', error)
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
-    const redirectBase = supabaseUrl.replace('.supabase.co', '.netlify.app')
+    
+    // Fallback redirect URL
+    let redirectBase = 'http://localhost:5173'
+    try {
+      const origin = req.headers.get('origin')
+      const referer = req.headers.get('referer')
+      
+      if (origin && (origin.includes('lovable.dev') || origin.includes('netlify.app'))) {
+        redirectBase = origin
+      } else if (referer && (referer.includes('lovable.dev') || referer.includes('netlify.app'))) {
+        redirectBase = new URL(referer).origin
+      }
+    } catch (e) {
+      console.error('Error determining redirect URL:', e)
+    }
     
     return new Response(null, {
       status: 302,

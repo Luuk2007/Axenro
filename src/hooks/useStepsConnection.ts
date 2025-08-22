@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface StepData {
   date: string;
@@ -81,10 +82,44 @@ export const useStepsConnection = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const success = urlParams.get('success');
+    const error = urlParams.get('error');
+    const wasConnecting = localStorage.getItem('google_fit_connecting');
     
-    if (success === 'connected') {
+    if (success === 'connected' && wasConnecting) {
+      console.log('Google Fit connection successful');
+      toast.success('Successfully connected to Google Fit!');
       checkConnection();
       fetchRecentSteps();
+      localStorage.removeItem('google_fit_connecting');
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (error && wasConnecting) {
+      console.error('Google Fit connection error:', error);
+      let errorMessage = 'Failed to connect to Google Fit';
+      
+      switch (error) {
+        case 'auth_failed':
+          errorMessage = 'Authorization was denied or failed';
+          break;
+        case 'missing_params':
+          errorMessage = 'Missing required parameters';
+          break;
+        case 'token_failed':
+          errorMessage = 'Failed to get access token';
+          break;
+        case 'config_error':
+          errorMessage = 'Configuration error';
+          break;
+        case 'db_failed':
+          errorMessage = 'Failed to save connection';
+          break;
+        case 'server_error':
+          errorMessage = 'Server error occurred';
+          break;
+      }
+      
+      toast.error(errorMessage);
+      localStorage.removeItem('google_fit_connecting');
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }

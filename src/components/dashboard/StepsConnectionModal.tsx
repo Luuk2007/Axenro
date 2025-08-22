@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -83,45 +82,12 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
         return;
       }
 
-      // For mobile devices, try to open in the same window instead of popup
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      console.log('Connecting to Google Fit...');
       
-      if (isMobile) {
-        // On mobile, redirect in the same window
-        window.location.href = data.authUrl;
-      } else {
-        // On desktop, try popup first
-        const popup = window.open(data.authUrl, '_blank', 'width=500,height=600');
-        
-        if (!popup) {
-          // If popup is blocked, redirect in same window
-          window.location.href = data.authUrl;
-        } else {
-          // Listen for popup to close
-          const checkClosed = setInterval(() => {
-            if (popup.closed) {
-              clearInterval(checkClosed);
-              setTimeout(() => {
-                checkConnection();
-              }, 1000);
-            }
-          }, 1000);
-        }
-      }
-
-      // Listen for messages from popup (for desktop)
-      const handleMessage = (event: MessageEvent) => {
-        if (event.data.type === 'GOOGLE_FIT_SUCCESS') {
-          setIsConnected(true);
-          toast.success('Successfully connected to Google Fit!');
-          window.removeEventListener('message', handleMessage);
-          setIsConnecting(false);
-        }
-      };
-      
-      if (!isMobile) {
-        window.addEventListener('message', handleMessage);
-      }
+      // Always redirect in the same window for mobile compatibility
+      // Store a flag to know we're in the middle of connecting
+      localStorage.setItem('google_fit_connecting', 'true');
+      window.location.href = data.authUrl;
 
     } catch (error) {
       console.error('Error connecting to Google Fit:', error);
