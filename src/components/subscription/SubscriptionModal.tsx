@@ -38,6 +38,8 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         toast.success(t(`Successfully switched to ${planId} plan!`));
         // Close modal after successful plan switch
         onOpenChange(false);
+        // Refresh the page to ensure all UI elements update
+        window.location.reload();
       } else {
         // Use real Stripe checkout
         const billingInterval = 'monthly'; // Default to monthly for now
