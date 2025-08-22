@@ -1,7 +1,8 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { english } from '../translations/english';
-import { dutch } from '../translations/dutch';
-import { Translations } from '../translations/types';
+import { englishTranslations } from '../translations/english';
+import { dutchTranslations } from '../translations/dutch';
+import { DomainTranslations } from '../translations/types';
 
 // Define the type for translations
 export type TranslationKeys = string;
@@ -10,9 +11,9 @@ export type TranslationKeys = string;
 export type Language = 'english' | 'dutch';
 
 // Translation object maps by language
-const translations = {
-  english,
-  dutch
+const translations: Record<Language, DomainTranslations> = {
+  english: englishTranslations,
+  dutch: dutchTranslations
 };
 
 interface LanguageContextType {
@@ -115,10 +116,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     window.dispatchEvent(new CustomEvent('languagechange', { detail: { language } }));
   }, [language]);
 
-  // Translation function
+  // Translation function - simplified to use common translations
   const t = (key: TranslationKeys): string => {
     const translation = translations[language];
-    return (translation[key] as string) || (english[key] as string) || key;
+    const commonTranslations = translation.common as Record<string, string>;
+    return commonTranslations[key] || (translations.english.common as Record<string, string>)[key] || key;
   };
 
   return (

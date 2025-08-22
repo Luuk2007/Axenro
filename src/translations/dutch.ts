@@ -57,7 +57,6 @@ export const dutchTranslations: DomainTranslations = {
     "Rating": "Beoordeling",
     "Review": "Recensie",
     "Customer Reviews": "Klantbeoordelingen",
-    "Reviews": "Beoordelingen",
     "Give your review a title": "Geef je beoordeling een titel",
     "Share your thoughts about Axenro...": "Deel je gedachten over Axenro...",
     "Submitting...": "Verzenden...",

@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Star, StarIcon } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +23,7 @@ interface Review {
   profiles?: {
     full_name: string | null;
     profile_picture_url: string | null;
-  };
+  } | null;
 }
 
 export default function Reviews() {
@@ -48,7 +48,7 @@ export default function Reviews() {
           rating,
           created_at,
           user_id,
-          profiles (
+          profiles!inner (
             full_name,
             profile_picture_url
           )
@@ -56,7 +56,10 @@ export default function Reviews() {
         .eq('is_approved', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        return [];
+      }
       return data as Review[];
     },
   });
