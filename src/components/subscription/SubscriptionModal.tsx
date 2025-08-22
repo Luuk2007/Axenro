@@ -27,7 +27,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
 
   const handleSelectPlan = async (planId: string) => {
-    if (planId === 'free' && currentTier === 'free') return;
+    if (planId === currentTier) return;
     
     try {
       setLoading(planId);
@@ -65,16 +65,16 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
   };
 
   const getButtonText = (planId: string) => {
-    if (planId === 'free') {
-      return currentTier === 'free' ? t('Current Plan') : (test_mode ? t('Switch to Free') : t('Downgrade'));
-    }
-    
     if (currentTier === planId) {
       return t('Current Plan');
     }
     
     if (test_mode) {
-      return t('Select Plan (Test)');
+      return loading === planId ? t('Switching...') : t('Select Plan');
+    }
+    
+    if (planId === 'free') {
+      return subscribed ? t('Downgrade') : t('Select Plan');
     }
     
     if (subscribed) {
@@ -82,6 +82,10 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     }
     
     return t('Select Plan');
+  };
+
+  const getButtonVariant = (planId: string) => {
+    return currentTier === planId ? 'outline' : 'default';
   };
 
   const plans = [
@@ -99,9 +103,12 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
       ],
       btn: {
         text: getButtonText('free'),
-        onClick: () => handleSelectPlan('free')
+        onClick: () => handleSelectPlan('free'),
+        variant: getButtonVariant('free'),
+        disabled: currentTier === 'free' || loading !== null
       },
-      highlighted: false
+      highlighted: false,
+      isCurrentPlan: currentTier === 'free'
     },
     {
       name: t('Pro'),
@@ -118,10 +125,13 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         { text: t('Export data') }
       ],
       btn: {
-        text: loading === 'pro' ? t('Processing...') : getButtonText('pro'),
-        onClick: () => handleSelectPlan('pro')
+        text: getButtonText('pro'),
+        onClick: () => handleSelectPlan('pro'),
+        variant: getButtonVariant('pro'),
+        disabled: currentTier === 'pro' || loading !== null
       },
-      highlighted: true
+      highlighted: true,
+      isCurrentPlan: currentTier === 'pro'
     },
     {
       name: t('Premium'),
@@ -139,10 +149,13 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         { text: t('Early access to new features') }
       ],
       btn: {
-        text: loading === 'premium' ? t('Processing...') : getButtonText('premium'),
-        onClick: () => handleSelectPlan('premium')
+        text: getButtonText('premium'),
+        onClick: () => handleSelectPlan('premium'),
+        variant: getButtonVariant('premium'),
+        disabled: currentTier === 'premium' || loading !== null
       },
-      highlighted: false
+      highlighted: false,
+      isCurrentPlan: currentTier === 'premium'
     }
   ];
 

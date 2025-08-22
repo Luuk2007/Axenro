@@ -29,8 +29,11 @@ interface Plan {
 	btn: {
 		text: string;
 		onClick?: () => void;
+		variant?: 'default' | 'outline';
+		disabled?: boolean;
 	};
 	highlighted?: boolean;
+	isCurrentPlan?: boolean;
 }
 
 interface PricingSectionProps extends React.ComponentProps<'div'> {
@@ -137,16 +140,24 @@ export function PricingCard({
 			100,
 	) : 0;
 
+	const getCardBorderColor = () => {
+		if (plan.isCurrentPlan) {
+			return 'border-white bg-white shadow-lg';
+		}
+		return 'border-primary bg-primary/5';
+	};
+
 	return (
 		<div
 			key={plan.name}
 			className={cn(
-				'relative flex w-full flex-col rounded-lg border',
+				'relative flex w-full flex-col rounded-lg border-2',
+				getCardBorderColor(),
 				className,
 			)}
 			{...props}
 		>
-			{plan.highlighted && (
+			{plan.highlighted && !plan.isCurrentPlan && (
 				<BorderTrail
 					style={{
 						boxShadow:
@@ -157,12 +168,17 @@ export function PricingCard({
 			)}
 			<div
 				className={cn(
-					'bg-muted/20 rounded-t-lg border-b p-4',
-					plan.highlighted && 'bg-muted/40',
+					'rounded-t-lg border-b p-4',
+					plan.isCurrentPlan ? 'bg-white' : 'bg-primary/10',
 				)}
 			>
 				<div className="absolute top-2 right-2 z-10 flex items-center gap-2">
-					{plan.highlighted && (
+					{plan.isCurrentPlan && (
+						<p className="bg-green-100 text-green-800 flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium">
+							Current Plan
+						</p>
+					)}
+					{plan.highlighted && !plan.isCurrentPlan && (
 						<p className="bg-background flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs">
 							<Star className="h-3 w-3 fill-current" />
 							Popular
@@ -193,7 +209,7 @@ export function PricingCard({
 			<div
 				className={cn(
 					'text-muted-foreground space-y-4 px-4 py-6 text-sm',
-					plan.highlighted && 'bg-muted/10',
+					plan.isCurrentPlan ? 'bg-white' : 'bg-primary/5',
 				)}
 			>
 				{plan.features.map((feature, index) => (
@@ -224,13 +240,14 @@ export function PricingCard({
 			<div
 				className={cn(
 					'mt-auto w-full border-t p-3',
-					plan.highlighted && 'bg-muted/40',
+					plan.isCurrentPlan ? 'bg-white' : 'bg-primary/10',
 				)}
 			>
 				<Button
 					className="w-full"
-					variant={plan.name !== 'Free' ? 'default' : 'outline'}
+					variant={plan.btn.variant || (plan.name !== 'Free' ? 'default' : 'outline')}
 					onClick={plan.btn.onClick}
+					disabled={plan.btn.disabled}
 				>
 					{plan.btn.text}
 				</Button>
