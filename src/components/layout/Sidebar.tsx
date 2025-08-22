@@ -94,11 +94,11 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
     
     switch (currentTier) {
       case 'pro':
-        return t('Pro Plan');
+        return t('Pro version');
       case 'premium':
-        return t('Premium Plan');
+        return t('Premium version');
       default:
-        return t('Free Plan');
+        return t('Free version');
     }
   };
 
