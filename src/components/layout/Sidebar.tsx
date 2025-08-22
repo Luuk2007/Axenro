@@ -62,7 +62,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const navigate = useNavigate();
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
-  const { subscribed, subscription_tier, loading } = useSubscription();
+  const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
   
   // Monitor theme changes
   useEffect(() => {
@@ -83,18 +83,38 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
     return () => observer.disconnect();
   }, []);
 
+  const getCurrentTier = () => {
+    return test_mode ? test_subscription_tier : subscription_tier;
+  };
+
   const getCurrentPlanDisplay = () => {
     if (loading) return t('Loading...');
-    if (!subscribed) return t('Free Plan');
-    return `${subscription_tier} ${t('Plan')}`;
+    
+    const currentTier = getCurrentTier();
+    
+    switch (currentTier) {
+      case 'pro':
+        return t('Pro Plan');
+      case 'premium':
+        return t('Premium Plan');
+      default:
+        return t('Free Plan');
+    }
   };
 
   const getPlanDescription = () => {
     if (loading) return '';
-    if (!subscribed) return t('Get started with the basics — track your progress for free');
-    if (subscription_tier === 'Pro') return t('Unlock smarter tracking with added features and flexibility');
-    if (subscription_tier === 'Premium') return t('Experience the full potential — all features, zero limits');
-    return '';
+    
+    const currentTier = getCurrentTier();
+    
+    switch (currentTier) {
+      case 'pro':
+        return t('Advanced features for consistent progress');
+      case 'premium':
+        return t('The complete solution for maximum results');
+      default:
+        return t('Essential tools to begin your fitness journey');
+    }
   };
 
   const handleNavClick = () => {
