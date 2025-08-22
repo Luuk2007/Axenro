@@ -1,11 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils, Sparkles, MessageSquare } from 'lucide-react';
+import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils, Sparkles } from 'lucide-react';
 import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SubscriptionModal from '@/components/subscription/SubscriptionModal';
-import ReviewsModal from '@/components/reviews/ReviewsModal';
 import { useSubscription } from '@/hooks/useSubscription';
 
 type NavItem = {
@@ -64,7 +64,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const navigate = useNavigate();
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
-  const [reviewsModalOpen, setReviewsModalOpen] = useState(false);
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
   
   // Monitor theme changes
@@ -197,19 +196,8 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
             </ul>
           </nav>
           
-          {/* Bottom section with reviews, legal links and subscription plan */}
+          {/* Bottom section with legal links and subscription plan */}
           <div className="mt-auto">
-            {/* Reviews section */}
-            <div className="px-4 pb-2">
-              <button
-                onClick={() => setReviewsModalOpen(true)}
-                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-full justify-center py-2"
-              >
-                <MessageSquare size={14} />
-                <span>Reviews</span>
-              </button>
-            </div>
-            
             {/* Legal links section */}
             <div className="px-4 pb-2">
               <div className="flex items-center justify-center gap-4">
@@ -246,11 +234,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
       <SubscriptionModal 
         open={subscriptionModalOpen} 
         onOpenChange={setSubscriptionModalOpen} 
-      />
-      
-      <ReviewsModal 
-        open={reviewsModalOpen} 
-        onOpenChange={setReviewsModalOpen} 
       />
     </>
   );

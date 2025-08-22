@@ -380,39 +380,6 @@ export type Database = {
         }
         Relationships: []
       }
-      reviews: {
-        Row: {
-          content: string
-          created_at: string
-          id: string
-          is_approved: boolean
-          rating: number
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          is_approved?: boolean
-          rating: number
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          is_approved?: boolean
-          rating?: number
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       subscribers: {
         Row: {
           created_at: string
