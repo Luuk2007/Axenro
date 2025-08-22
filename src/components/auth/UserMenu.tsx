@@ -1,11 +1,13 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogIn } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { supabase } from '@/integrations/supabase/client';
 import AuthenticationDialog from './AuthenticationDialog';
 
 export default function UserMenu() {
@@ -13,6 +15,38 @@ export default function UserMenu() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string>('');
+
+  useEffect(() => {
+    if (user) {
+      loadProfilePicture();
+    } else {
+      setProfilePictureUrl('');
+    }
+  }, [user]);
+
+  const loadProfilePicture = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('profile_picture_url')
+        .eq('id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading profile picture:', error);
+        return;
+      }
+
+      if (data?.profile_picture_url) {
+        setProfilePictureUrl(data.profile_picture_url);
+      }
+    } catch (error) {
+      console.error('Error loading profile picture:', error);
+    }
+  };
 
   // Get user initials from fullName
   const getUserInitials = () => {
@@ -54,9 +88,12 @@ export default function UserMenu() {
               className="rounded-full h-8 w-8 overflow-hidden border border-border"
             >
               <span className="sr-only">User menu</span>
-              <div className="h-full w-full bg-primary/10 text-xs font-medium flex items-center justify-center text-primary">
-                {getUserInitials()}
-              </div>
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={profilePictureUrl} alt="Profile picture" />
+                <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
+                  {getUserInitials()}
+                </AvatarFallback>
+              </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

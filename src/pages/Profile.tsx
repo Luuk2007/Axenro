@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import BMICalculator from "@/components/profile/BMICalculator";
 import ProfileForm, { ProfileFormValues, defaultValues, emptyDefaultValues } from "@/components/profile/ProfileForm";
 import UserStatsDisplay from "@/components/profile/UserStatsDisplay";
 import NutritionCalculator from "@/components/profile/NutritionCalculator";
+import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -23,6 +25,7 @@ const Profile = () => {
   const [isNewUser, setIsNewUser] = useState(true);
   const [initialValues, setInitialValues] = useState<Partial<ProfileFormValues>>(emptyDefaultValues);
   const [hasValidSavedProfile, setHasValidSavedProfile] = useState(false);
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string>('');
   
   useEffect(() => {
     // Only load from localStorage if user is authenticated
@@ -47,14 +50,41 @@ const Profile = () => {
         setInitialValues(emptyDefaultValues);
         setHasValidSavedProfile(false);
       }
+
+      // Load profile picture from Supabase
+      loadProfilePicture();
     } else {
       // If not authenticated, always start with empty values
       setProfile(null);
       setIsNewUser(true);
       setInitialValues(emptyDefaultValues);
       setHasValidSavedProfile(false);
+      setProfilePictureUrl('');
     }
   }, [user]);
+
+  const loadProfilePicture = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('profile_picture_url')
+        .eq('id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading profile picture:', error);
+        return;
+      }
+
+      if (data?.profile_picture_url) {
+        setProfilePictureUrl(data.profile_picture_url);
+      }
+    } catch (error) {
+      console.error('Error loading profile picture:', error);
+    }
+  };
 
   const handleSubmit = (data: ProfileFormValues) => {
     // Only save to localStorage if user is authenticated
@@ -90,6 +120,10 @@ const Profile = () => {
     }
   };
 
+  const handleProfilePictureUpdate = (imageUrl: string) => {
+    setProfilePictureUrl(imageUrl);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -103,6 +137,20 @@ const Profile = () => {
         </TabsList>
         
         <TabsContent value="profile" className="space-y-6">
+          {user && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("Profile picture")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ProfilePictureUpload
+                  currentImageUrl={profilePictureUrl}
+                  onImageUpdate={handleProfilePictureUpdate}
+                />
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle>{t("Personal details")}</CardTitle>

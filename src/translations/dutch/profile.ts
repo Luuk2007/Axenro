@@ -1,3 +1,4 @@
+
 import { Translations } from "../types";
 
 export const profileTranslations: Translations = {
@@ -32,6 +33,7 @@ export const profileTranslations: Translations = {
   selectActivityLevel: "Selecteer activiteitsniveau",
   selectGoal: "Selecteer doel",
   saveChanges: "Wijzigingen opslaan",
+  "Profile picture": "Profielfoto",
   
   // Coaching
   coach: "Coach",
