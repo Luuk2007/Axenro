@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import BMICalculator from "@/components/profile/BMICalculator";
 import ProfileForm, { ProfileFormValues, defaultValues, emptyDefaultValues } from "@/components/profile/ProfileForm";
@@ -21,11 +21,16 @@ import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
 const Profile = () => {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const { test_mode, test_subscription_tier, subscription_tier } = useSubscription();
   const [profile, setProfile] = useState<ProfileFormValues | null>(null);
   const [isNewUser, setIsNewUser] = useState(true);
   const [initialValues, setInitialValues] = useState<Partial<ProfileFormValues>>(emptyDefaultValues);
   const [hasValidSavedProfile, setHasValidSavedProfile] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string>('');
+  
+  // Determine current subscription tier
+  const currentTier = test_mode ? test_subscription_tier : subscription_tier;
+  const canUseBMICalculator = currentTier === 'pro' || currentTier === 'premium';
   
   useEffect(() => {
     // Only load from localStorage if user is authenticated
@@ -164,8 +169,8 @@ const Profile = () => {
             </CardContent>
           </Card>
           
-          {/* BMI Calculator - only show after user has saved valid weight and height */}
-          {hasValidSavedProfile && profile && (
+          {/* BMI Calculator - only show for Pro and Premium plans */}
+          {hasValidSavedProfile && profile && canUseBMICalculator && (
             <BMICalculator 
               initialWeight={profile.weight} 
               initialHeight={profile.height} 
