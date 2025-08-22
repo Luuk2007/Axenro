@@ -46,7 +46,7 @@ const CookieConsentModal = () => {
 
   return (
     <Dialog open={showConsentModal} onOpenChange={() => {}}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto w-full sm:w-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             {t('Cookie preferences')}
