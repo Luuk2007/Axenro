@@ -36,6 +36,8 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         // Use test plan switching
         await switchTestPlan(planId);
         toast.success(t(`Successfully switched to ${planId} plan!`));
+        // Close modal after successful plan switch
+        onOpenChange(false);
       } else {
         // Use real Stripe checkout
         const billingInterval = 'monthly'; // Default to monthly for now

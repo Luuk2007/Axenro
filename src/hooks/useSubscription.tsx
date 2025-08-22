@@ -41,13 +41,15 @@ export const useSubscription = () => {
         return;
       }
 
-      setSubscriptionData({
+      const newSubscriptionData = {
         subscribed: data.subscribed || false,
         subscription_tier: data.subscription_tier || null,
         subscription_end: data.subscription_end || null,
         test_mode: data.test_mode ?? true,
         test_subscription_tier: data.test_subscription_tier || 'free',
-      });
+      };
+
+      setSubscriptionData(newSubscriptionData);
     } catch (error) {
       console.error('Error in checkSubscription:', error);
     } finally {
@@ -72,14 +74,19 @@ export const useSubscription = () => {
         throw error;
       }
 
-      // Update local state immediately
-      setSubscriptionData(prev => ({
-        ...prev,
+      // Update local state immediately for all components using this hook
+      const newSubscriptionData = {
         subscribed: data.subscribed,
         subscription_tier: data.subscription_tier,
         subscription_end: data.subscription_end,
+        test_mode: true,
         test_subscription_tier: data.test_subscription_tier,
-      }));
+      };
+
+      setSubscriptionData(newSubscriptionData);
+
+      // Also trigger a fresh check from the server to ensure consistency
+      await checkSubscription();
 
       return data;
     } catch (error) {
