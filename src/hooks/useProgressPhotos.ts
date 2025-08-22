@@ -21,7 +21,7 @@ export const useProgressPhotos = () => {
         .order('date', { ascending: false });
 
       if (error) throw error;
-      setPhotos((data as unknown as ProgressPhoto[]) || []);
+      setPhotos(data || []);
     } catch (error) {
       console.error('Error loading photos:', error);
       toast.error('Failed to load progress photos');
@@ -45,10 +45,9 @@ export const useProgressPhotos = () => {
 
       if (error) throw error;
       
-      const newPhoto = data as unknown as ProgressPhoto;
-      setPhotos(prev => [newPhoto, ...prev]);
+      setPhotos(prev => [data, ...prev]);
       toast.success('Progress photo added successfully');
-      return newPhoto;
+      return data;
     } catch (error) {
       console.error('Error adding photo:', error);
       toast.error('Failed to add progress photo');
@@ -69,12 +68,11 @@ export const useProgressPhotos = () => {
 
       if (error) throw error;
 
-      const updatedPhoto = data as unknown as ProgressPhoto;
       setPhotos(prev => prev.map(photo => 
-        photo.id === id ? { ...photo, ...updatedPhoto } : photo
+        photo.id === id ? { ...photo, ...data } : photo
       ));
       toast.success('Photo updated successfully');
-      return updatedPhoto;
+      return data;
     } catch (error) {
       console.error('Error updating photo:', error);
       toast.error('Failed to update photo');
@@ -98,7 +96,6 @@ export const useProgressPhotos = () => {
     } catch (error) {
       console.error('Error deleting photo:', error);
       toast.error('Failed to delete photo');
-      throw error;
     }
   };
 

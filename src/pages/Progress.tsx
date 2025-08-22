@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2, Filter, Grid, Clock, ArrowLeftRight, Star, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -461,6 +460,13 @@ export default function Progress() {
         
         <TabsContent value="photos" className="space-y-6">
           <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold tracking-tight">{t("Progress photos")}</h2>
+                <p className="text-sm text-muted-foreground">Track your visual progress over time</p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card>
                 <CardContent className="p-4">
