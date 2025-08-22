@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -6,14 +7,11 @@ import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SubscriptionModal from '@/components/subscription/SubscriptionModal';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useFeatureAccess } from '@/hooks/useFeatureAccess';
-import { PlanBadge } from '@/components/subscription/PlanBadge';
 
 type NavItem = {
   titleKey: TranslationKeys;
   href: string;
   icon: LucideIcon;
-  requiresFeature?: 'aiFeatures';
 };
 
 const navItems: NavItem[] = [
@@ -26,7 +24,6 @@ const navItems: NavItem[] = [
     titleKey: "Axenro AI",
     href: '/axenro-ai',
     icon: Sparkles,
-    requiresFeature: 'aiFeatures',
   },
   {
     titleKey: "nutrition",
@@ -66,7 +63,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const { subscribed, subscription_tier, loading } = useSubscription();
-  const { hasFeature, currentTier } = useFeatureAccess();
   
   // Monitor theme changes
   useEffect(() => {
@@ -116,14 +112,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
     navigate('/termsandconditions');
     handleNavClick();
   };
-
-  // Filter nav items based on feature access
-  const visibleNavItems = navItems.filter(item => {
-    if (item.requiresFeature) {
-      return hasFeature(item.requiresFeature);
-    }
-    return true;
-  });
   
   return (
     <>
@@ -145,7 +133,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         <div className="flex flex-col flex-1 overflow-hidden">
           <nav className="flex-1 overflow-auto py-2">
             <ul className="grid gap-1 px-2">
-              {visibleNavItems.map((item, index) => (
+              {navItems.map((item, index) => (
                 <li key={index}>
                   <NavLink
                     to={item.href}
@@ -168,10 +156,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                             isActive && "text-primary"
                           )} 
                         />
-                        <span className="flex-1">{t(item.titleKey)}</span>
-                        {item.requiresFeature && (
-                          <PlanBadge tier="premium" size="sm" />
-                        )}
+                        <span>{t(item.titleKey)}</span>
                       </>
                     )}
                   </NavLink>
@@ -207,12 +192,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                 className="glassy-card rounded-lg p-4 subtle-shadow cursor-pointer hover:bg-accent/50 transition-colors"
                 onClick={() => setSubscriptionModalOpen(true)}
               >
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs font-medium text-muted-foreground">{getCurrentPlanDisplay()}</p>
-                  {currentTier !== 'free' && (
-                    <PlanBadge tier={currentTier as 'pro' | 'premium'} size="sm" />
-                  )}
-                </div>
+                <p className="text-xs font-medium text-muted-foreground">{getCurrentPlanDisplay()}</p>
                 <p className="text-xs mt-1 text-muted-foreground leading-relaxed">{getPlanDescription()}</p>
               </div>
             </div>

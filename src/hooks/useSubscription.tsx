@@ -26,16 +26,6 @@ export const useSubscription = () => {
 
     try {
       setLoading(true);
-      
-      // Check for locally stored test subscription first
-      const testSubscription = localStorage.getItem('testSubscription');
-      if (testSubscription) {
-        const testData = JSON.parse(testSubscription);
-        setSubscriptionData(testData);
-        setLoading(false);
-        return;
-      }
-
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -108,40 +98,6 @@ export const useSubscription = () => {
     }
   };
 
-  // Test function to switch subscription tiers locally
-  const switchToTestTier = (tier: 'free' | 'pro' | 'premium') => {
-    const testData: SubscriptionData = {
-      subscribed: tier !== 'free',
-      subscription_tier: tier === 'free' ? null : tier,
-      subscription_end: tier !== 'free' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() : null,
-    };
-    
-    if (tier === 'free') {
-      localStorage.removeItem('testSubscription');
-    } else {
-      localStorage.setItem('testSubscription', JSON.stringify(testData));
-    }
-    
-    // Immediately update the state
-    setSubscriptionData(testData);
-    
-    // Dispatch custom event to notify other components
-    window.dispatchEvent(new CustomEvent('subscriptionChanged', { detail: testData }));
-  };
-
-  // Listen for subscription changes from other components
-  useEffect(() => {
-    const handleSubscriptionChange = (event: CustomEvent) => {
-      setSubscriptionData(event.detail);
-    };
-
-    window.addEventListener('subscriptionChanged', handleSubscriptionChange as EventListener);
-    
-    return () => {
-      window.removeEventListener('subscriptionChanged', handleSubscriptionChange as EventListener);
-    };
-  }, []);
-
   useEffect(() => {
     checkSubscription();
   }, [user, session]);
@@ -152,6 +108,5 @@ export const useSubscription = () => {
     checkSubscription,
     createCheckout,
     openCustomerPortal,
-    switchToTestTier, // Expose test function
   };
 };

@@ -1,63 +1,108 @@
 
-import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import { useState } from "react";
-import SubscriptionModal from "@/components/subscription/SubscriptionModal";
-import { toast } from "sonner";
-import { useLanguage } from "@/contexts/LanguageContext";
+'use client'
 
-export function ThemeSwitchButton() {
-  const { hasFeature } = useFeatureAccess();
-  const { t } = useLanguage();
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+import * as React from 'react'
+import { Moon, Sun } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-  const toggleTheme = () => {
-    const currentTheme = document.documentElement.classList.contains("dark") ? "dark" : "light";
+interface ThemeSwitchProps {
+  className?: string
+}
+
+export function ThemeSwitch({ className }: ThemeSwitchProps) {
+  const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
+
+  // Check current theme on component mount
+  React.useEffect(() => {
+    const savedSettings = localStorage.getItem("userSettings");
+    let savedTheme = 'light';
     
-    // If trying to switch to dark mode and user doesn't have access
-    if (currentTheme === "light" && !hasFeature('darkTheme')) {
-      toast.error(t('Dark theme is a Pro feature'));
-      setShowSubscriptionModal(true);
-      return;
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      savedTheme = settings.theme || 'light';
     }
 
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-    
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    setTheme(savedTheme as 'light' | 'dark')
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark')
+  }, [])
 
-    // Update localStorage
-    const settings = JSON.parse(localStorage.getItem("userSettings") || "{}");
-    settings.theme = newTheme;
-    localStorage.setItem("userSettings", JSON.stringify(settings));
+  // Toggle theme
+  const toggleTheme = React.useCallback(() => {
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(newTheme)
     
-    // Dispatch event for settings page
-    window.dispatchEvent(new CustomEvent('settingsChanged'));
-  };
+    // Save to localStorage
+    const savedSettings = localStorage.getItem("userSettings");
+    const settings = savedSettings ? JSON.parse(savedSettings) : {};
+    localStorage.setItem("userSettings", JSON.stringify({
+      ...settings,
+      theme: newTheme
+    }));
+    
+    document.documentElement.classList.toggle('dark', newTheme === 'dark')
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('settingsChanged'))
+  }, [theme])
 
-  const isDark = document.documentElement.classList.contains("dark");
+  const isDark = theme === 'dark'
 
   return (
-    <>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={toggleTheme}
-        className="relative"
-      >
-        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        <span className="sr-only">Toggle theme</span>
-      </Button>
-      
-      <SubscriptionModal 
-        open={showSubscriptionModal} 
-        onOpenChange={setShowSubscriptionModal} 
-      />
-    </>
-  );
+    <div
+      className={cn(
+        "flex w-16 h-8 p-1 rounded-full cursor-pointer transition-all duration-300",
+        isDark 
+          ? "bg-zinc-950 border border-zinc-800" 
+          : "bg-white border border-zinc-200",
+        className
+      )}
+      onClick={toggleTheme}
+      role="button"
+      tabIndex={0}
+      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      <div className="flex justify-between items-center w-full">
+        <div
+          className={cn(
+            "flex justify-center items-center w-6 h-6 rounded-full transition-transform duration-300",
+            isDark 
+              ? "transform translate-x-0 bg-zinc-800" 
+              : "transform translate-x-8 bg-gray-200"
+          )}
+        >
+          {isDark ? (
+            <Moon 
+              className="w-4 h-4 text-white" 
+              strokeWidth={1.5}
+            />
+          ) : (
+            <Sun 
+              className="w-4 h-4 text-gray-700" 
+              strokeWidth={1.5}
+            />
+          )}
+        </div>
+        <div
+          className={cn(
+            "flex justify-center items-center w-6 h-6 rounded-full transition-transform duration-300",
+            isDark 
+              ? "bg-transparent" 
+              : "transform -translate-x-8"
+          )}
+        >
+          {isDark ? (
+            <Sun 
+              className="w-4 h-4 text-gray-500" 
+              strokeWidth={1.5}
+            />
+          ) : (
+            <Moon 
+              className="w-4 h-4 text-black" 
+              strokeWidth={1.5}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }

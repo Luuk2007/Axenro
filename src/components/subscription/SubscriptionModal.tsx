@@ -21,31 +21,15 @@ interface SubscriptionModalProps {
 export default function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { subscribed, subscription_tier, createCheckout, switchToTestTier } = useSubscription();
+  const { subscribed, subscription_tier, createCheckout } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleSelectPlan = async (planId: string) => {
-    if (planId === 'free') {
-      // Switch to free tier locally for testing
-      switchToTestTier('free');
-      toast.success(t('Switched to Free plan for testing'));
-      onOpenChange(false);
-      return;
-    }
+    if (planId === 'free') return;
     
-    // For development/testing, allow switching to paid tiers without payment
-    if (planId === 'pro' || planId === 'premium') {
-      switchToTestTier(planId as 'pro' | 'premium');
-      toast.success(t(`Switched to ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan for testing`));
-      onOpenChange(false);
-      return;
-    }
-    
-    // Original payment flow (commented out for testing)
-    /*
     try {
       setLoading(planId);
-      const billingInterval = 'monthly';
+      const billingInterval = 'monthly'; // Default to monthly for now
       await createCheckout(planId, billingInterval);
       toast.success(t('Redirecting to Stripe checkout...'));
     } catch (error) {
@@ -54,7 +38,6 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     } finally {
       setLoading(null);
     }
-    */
   };
 
   const handleManageSubscription = async () => {
@@ -73,14 +56,18 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   const getButtonText = (planId: string) => {
     if (planId === 'free') {
-      return subscribed ? t('Switch to Free') : t('Current Plan');
+      return subscribed ? t('Downgrade') : t('Current Plan');
     }
     
     if (subscribed && subscription_tier === planId) {
       return t('Current Plan');
     }
     
-    return t('Switch to Plan');
+    if (subscribed) {
+      return subscription_tier === 'pro' && planId === 'premium' ? t('Upgrade') : t('Switch Plan');
+    }
+    
+    return t('Select Plan');
   };
 
   const plans = [
@@ -92,26 +79,9 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         yearly: 0,
       },
       features: [
-        { text: t('Theme: Light mode only') },
-        { text: t('Food adding: Manual only') },
-        { text: t('Food overview + water tracking') },
-        { text: t('Custom workouts: ❌') },
-        { text: t('Custom exercises: Max 5 exercises') },
-        { text: t('Custom meals: ❌') },
-        { text: t('Training calendar: ❌') },
-        { text: t('Planned workouts: ❌') },
-        { text: t('Personal records tracking: ❌') },
-        { text: t('1RM calculator: ❌') },
-        { text: t('Weight tracking with charts') },
-        { text: t('Weight history view') },
-        { text: t('Target weight setting') },
-        { text: t('Body measurement tracking: View data only') },
-        { text: t('Progress photos + date: ❌') },
-        { text: t('Data import (time, length, weight, etc.)') },
-        { text: t('BMI calculator with indication: ❌') },
-        { text: t('Meal plan with macros') },
-        { text: t('Settings page') },
-        { text: t('AI functions (coach, planner, feedback): ❌') }
+        { text: t('Basic fitness tracking') },
+        { text: t('Limited workout history') },
+        { text: t('Basic nutrition logging') }
       ],
       btn: {
         text: getButtonText('free'),
@@ -127,26 +97,11 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         yearly: 49.99,
       },
       features: [
-        { text: t('Theme: Light + dark mode') },
-        { text: t('Food adding: Manual + barcode scanner') },
-        { text: t('Food overview + water tracking') },
-        { text: t('Custom workouts') },
-        { text: t('Custom exercises: Max 5 exercises') },
-        { text: t('Custom meals: Max 2 meals') },
-        { text: t('Training calendar') },
-        { text: t('Planned workouts') },
-        { text: t('Personal records tracking') },
-        { text: t('1RM calculator') },
-        { text: t('Weight tracking with charts') },
-        { text: t('Weight history view') },
-        { text: t('Target weight setting') },
-        { text: t('Body measurement tracking: Basic chart with body measurements') },
-        { text: t('Progress photos + date: Photos + date') },
-        { text: t('Data import (time, length, weight, etc.)') },
-        { text: t('BMI calculator with indication') },
-        { text: t('Meal plan with macros') },
-        { text: t('Settings page') },
-        { text: t('AI functions (coach, planner, feedback): ❌') }
+        { text: t('Advanced fitness tracking') },
+        { text: t('Unlimited workout history') },
+        { text: t('Detailed nutrition analysis') },
+        { text: t('Progress charts') },
+        { text: t('Export data') }
       ],
       btn: {
         text: loading === 'pro' ? t('Processing...') : getButtonText('pro'),
@@ -163,11 +118,11 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
       },
       features: [
         { text: t('Everything in Pro') },
-        { text: t('Custom exercises: Unlimited') },
-        { text: t('Custom meals: Unlimited') },
-        { text: t('Body measurement tracking: Chart with body measurements') },
-        { text: t('Progress photos + date: Photos + date + notes + scrollable display') },
-        { text: t('AI functions (coach, planner, feedback)') }
+        { text: t('AI-powered recommendations') },
+        { text: t('Advanced analytics') },
+        { text: t('Personalized meal plans') },
+        { text: t('Priority support') },
+        { text: t('Early access to new features') }
       ],
       btn: {
         text: loading === 'premium' ? t('Processing...') : getButtonText('premium'),
@@ -181,12 +136,6 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-6xl max-h-[90vh] p-0 flex flex-col">
         <div className="flex-1 overflow-y-auto p-6 pb-4">
-          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
-              🧪 {t('Testing Mode: You can switch between plans without payment')}
-            </p>
-          </div>
-          
           <PricingSection 
             plans={plans}
             heading={t('Choose Your Plan')}
