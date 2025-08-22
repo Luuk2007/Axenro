@@ -21,20 +21,30 @@ interface SubscriptionModalProps {
 export default function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { subscribed, subscription_tier, createCheckout } = useSubscription();
+  const { subscribed, subscription_tier, test_mode, test_subscription_tier, switchTestPlan, createCheckout } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
 
+  const currentTier = test_mode ? test_subscription_tier : subscription_tier;
+
   const handleSelectPlan = async (planId: string) => {
-    if (planId === 'free') return;
+    if (planId === 'free' && currentTier === 'free') return;
     
     try {
       setLoading(planId);
-      const billingInterval = 'monthly'; // Default to monthly for now
-      await createCheckout(planId, billingInterval);
-      toast.success(t('Redirecting to Stripe checkout...'));
+      
+      if (test_mode) {
+        // Use test plan switching
+        await switchTestPlan(planId);
+        toast.success(t(`Successfully switched to ${planId} plan!`));
+      } else {
+        // Use real Stripe checkout
+        const billingInterval = 'monthly'; // Default to monthly for now
+        await createCheckout(planId, billingInterval);
+        toast.success(t('Redirecting to Stripe checkout...'));
+      }
     } catch (error) {
-      console.error('Checkout error:', error);
-      toast.error(t('Failed to start checkout process'));
+      console.error('Plan selection error:', error);
+      toast.error(test_mode ? t('Failed to switch plan') : t('Failed to start checkout process'));
     } finally {
       setLoading(null);
     }
@@ -56,11 +66,15 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   const getButtonText = (planId: string) => {
     if (planId === 'free') {
-      return subscribed ? t('Downgrade') : t('Current Plan');
+      return currentTier === 'free' ? t('Current Plan') : (test_mode ? t('Switch to Free') : t('Downgrade'));
     }
     
-    if (subscribed && subscription_tier === planId) {
+    if (currentTier === planId) {
       return t('Current Plan');
+    }
+    
+    if (test_mode) {
+      return t('Select Plan (Test)');
     }
     
     if (subscribed) {
@@ -93,8 +107,8 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
       name: t('Pro'),
       info: t('Advanced fitness tracking'),
       price: {
-        monthly: 4.99,
-        yearly: 49.99,
+        monthly: test_mode ? 0 : 4.99,
+        yearly: test_mode ? 0 : 49.99,
       },
       features: [
         { text: t('Advanced fitness tracking') },
@@ -113,8 +127,8 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
       name: t('Premium'),
       info: t('Complete fitness solution'),
       price: {
-        monthly: 7.99,
-        yearly: 79.99,
+        monthly: test_mode ? 0 : 7.99,
+        yearly: test_mode ? 0 : 79.99,
       },
       features: [
         { text: t('Everything in Pro') },
@@ -135,15 +149,29 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-6xl max-h-[90vh] p-0 flex flex-col">
+        {test_mode && (
+          <div className="bg-blue-50 border-b border-blue-200 px-6 py-3">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <p className="text-sm text-blue-700 font-medium">
+                {t('Test Mode Active')} - {t('You can freely switch between plans without payment')}
+              </p>
+            </div>
+          </div>
+        )}
+        
         <div className="flex-1 overflow-y-auto p-6 pb-4">
           <PricingSection 
             plans={plans}
-            heading={t('Choose Your Plan')}
-            description={t('Unlock the full potential of your fitness journey with our premium features.')}
+            heading={test_mode ? t('Choose Your Plan (Test Version)') : t('Choose Your Plan')}
+            description={test_mode 
+              ? t('Experience all features in test mode. Switch between any plan to test functionality.')
+              : t('Unlock the full potential of your fitness journey with our premium features.')
+            }
           />
         </div>
 
-        {subscribed && (
+        {subscribed && !test_mode && (
           <div className="border-t px-6 py-4 bg-muted/10">
             <div className="flex justify-center">
               <Button 

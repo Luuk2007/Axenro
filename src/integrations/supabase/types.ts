@@ -389,6 +389,8 @@ export type Database = {
           subscribed: boolean
           subscription_end: string | null
           subscription_tier: string | null
+          test_mode: boolean
+          test_subscription_tier: string | null
           updated_at: string
           user_id: string | null
         }
@@ -400,6 +402,8 @@ export type Database = {
           subscribed?: boolean
           subscription_end?: string | null
           subscription_tier?: string | null
+          test_mode?: boolean
+          test_subscription_tier?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -411,6 +415,8 @@ export type Database = {
           subscribed?: boolean
           subscription_end?: string | null
           subscription_tier?: string | null
+          test_mode?: boolean
+          test_subscription_tier?: string | null
           updated_at?: string
           user_id?: string | null
         }

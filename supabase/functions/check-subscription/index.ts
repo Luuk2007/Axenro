@@ -44,6 +44,36 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // First check if user exists in subscribers table and get test mode status
+    const { data: existingSubscriber } = await supabaseClient
+      .from("subscribers")
+      .select("*")
+      .eq("email", user.email)
+      .single();
+
+    // If user is in test mode, return test subscription data
+    if (existingSubscriber?.test_mode) {
+      logStep("User is in test mode, returning test subscription data", { 
+        testSubscriptionTier: existingSubscriber.test_subscription_tier 
+      });
+      
+      const testTier = existingSubscriber.test_subscription_tier || 'free';
+      const isSubscribed = testTier !== 'free';
+      const subscriptionEnd = isSubscribed ? existingSubscriber.subscription_end : null;
+
+      return new Response(JSON.stringify({
+        subscribed: isSubscribed,
+        subscription_tier: isSubscribed ? testTier : null,
+        subscription_end: subscriptionEnd,
+        test_mode: true,
+        test_subscription_tier: testTier
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // If not in test mode, check Stripe as before
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
@@ -56,9 +86,15 @@ serve(async (req) => {
         subscribed: false,
         subscription_tier: null,
         subscription_end: null,
+        test_mode: existingSubscriber?.test_mode ?? true,
+        test_subscription_tier: existingSubscriber?.test_subscription_tier ?? 'free',
         updated_at: new Date().toISOString(),
       }, { onConflict: 'email' });
-      return new Response(JSON.stringify({ subscribed: false }), {
+      return new Response(JSON.stringify({ 
+        subscribed: false,
+        test_mode: existingSubscriber?.test_mode ?? true,
+        test_subscription_tier: existingSubscriber?.test_subscription_tier ?? 'free'
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
@@ -102,6 +138,8 @@ serve(async (req) => {
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,
       subscription_end: subscriptionEnd,
+      test_mode: existingSubscriber?.test_mode ?? false,
+      test_subscription_tier: existingSubscriber?.test_subscription_tier ?? 'free',
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
 
@@ -109,7 +147,9 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,
-      subscription_end: subscriptionEnd
+      subscription_end: subscriptionEnd,
+      test_mode: existingSubscriber?.test_mode ?? false,
+      test_subscription_tier: existingSubscriber?.test_subscription_tier ?? 'free'
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
