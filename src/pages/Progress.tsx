@@ -25,6 +25,7 @@ import {
 import { useProgressPhotos } from '@/hooks/useProgressPhotos';
 import { useSubscription } from '@/hooks/useSubscription';
 import AddProgressPhotoDialog from '@/components/progress/AddProgressPhotoDialog';
+import EditProgressPhotoDialog from '@/components/progress/EditProgressPhotoDialog';
 import ProgressPhotoCard from '@/components/progress/ProgressPhotoCard';
 import ProgressTimeline from '@/components/progress/ProgressTimeline';
 import PhotoComparisonDialog from '@/components/progress/PhotoComparisonDialog';

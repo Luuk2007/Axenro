@@ -27,7 +27,7 @@ export default function EditProgressPhotoDialog({
 }: EditProgressPhotoDialogProps) {
   const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
-  const [category, setCategory] = useState<string>('front');
+  const [category, setCategory] = useState<ProgressPhoto['category']>('front');
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
@@ -126,7 +126,7 @@ export default function EditProgressPhotoDialog({
           {isPremium && (
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select value={category} onValueChange={setCategory}>
+              <Select value={category} onValueChange={(value) => setCategory(value as ProgressPhoto['category'])}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
