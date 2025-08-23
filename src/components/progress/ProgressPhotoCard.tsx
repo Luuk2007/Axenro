@@ -11,7 +11,7 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  Copy
+  ImageIcon
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ProgressPhoto } from '@/types/progressPhotos';
@@ -43,8 +43,20 @@ export default function ProgressPhotoCard({
   subscriptionTier
 }: ProgressPhotoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   
   const isPremium = subscriptionTier === 'premium';
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    setImageError(false);
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoaded(false);
+    console.error('Failed to load progress photo:', photo.image_url);
+  };
 
   return (
     <Card 
@@ -55,18 +67,35 @@ export default function ProgressPhotoCard({
     >
       <CardContent className="p-0">
         {/* Image */}
-        <div className="relative aspect-square bg-gray-100">
-          <img
-            src={photo.image_url}
-            alt={`Progress from ${photo.date}`}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={() => setImageLoaded(true)}
-          />
+        <div className="relative aspect-square bg-muted">
+          {imageError ? (
+            <div className="w-full h-full flex items-center justify-center bg-muted">
+              <div className="text-center text-muted-foreground">
+                <ImageIcon className="h-8 w-8 mx-auto mb-2" />
+                <p className="text-xs">Image not available</p>
+              </div>
+            </div>
+          ) : (
+            <img
+              src={photo.image_url}
+              alt={`Progress from ${photo.date}`}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              loading="lazy"
+            />
+          )}
+          
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 bg-muted animate-pulse flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
           
           {/* Overlay with icons - only show for premium */}
-          {isPremium && (
+          {isPremium && imageLoaded && !imageError && (
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <div className="absolute bottom-2 left-2 flex gap-2">
                 {photo.is_milestone && (
