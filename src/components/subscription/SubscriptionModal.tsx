@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Dialog,
@@ -164,9 +165,9 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="fixed inset-0 z-[100] flex flex-col bg-background p-0 m-0 max-w-none max-h-none w-screen h-screen overflow-hidden">
+      <DialogContent className="sm:max-w-6xl max-h-[90vh] p-0 flex flex-col">
         {test_mode && (
-          <div className="bg-blue-50 border-b border-blue-200 px-6 py-3 flex-shrink-0">
+          <div className="bg-blue-50 border-b border-blue-200 px-6 py-3">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
               <p className="text-sm text-blue-700 font-medium">
@@ -188,7 +189,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         </div>
 
         {subscribed && !test_mode && (
-          <div className="border-t px-6 py-4 bg-muted/10 flex-shrink-0">
+          <div className="border-t px-6 py-4 bg-muted/10">
             <div className="flex justify-center">
               <Button 
                 variant="outline" 
