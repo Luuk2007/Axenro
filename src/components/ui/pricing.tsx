@@ -1,4 +1,3 @@
-
 'use client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -55,7 +54,7 @@ export function PricingSection({
 	return (
 		<div
 			className={cn(
-				'flex w-full flex-col items-center justify-center space-y-5 p-4',
+				'flex w-full flex-col items-center justify-center space-y-5',
 				props.className,
 			)}
 			{...props}
