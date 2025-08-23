@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,84 +8,50 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Upload, X, Loader2 } from 'lucide-react';
-import { PHOTO_CATEGORIES, COMMON_TAGS } from '@/types/progressPhotos';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { X, ImageOff } from 'lucide-react';
+import { ProgressPhoto, PHOTO_CATEGORIES, COMMON_TAGS } from '@/types/progressPhotos';
 import { format } from 'date-fns';
 
-interface AddProgressPhotoDialogProps {
+interface EditProgressPhotoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddPhoto: (photoData: any) => Promise<void>;
+  photo: ProgressPhoto | null;
+  onUpdatePhoto: (id: string, updates: Partial<ProgressPhoto>) => Promise<void>;
   subscriptionTier?: string;
 }
 
-export default function AddProgressPhotoDialog({
+export default function EditProgressPhotoDialog({
   open,
   onOpenChange,
-  onAddPhoto,
+  photo,
+  onUpdatePhoto,
   subscriptionTier
-}: AddProgressPhotoDialogProps) {
-  const { user } = useAuth();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>('');
-  const [uploading, setUploading] = useState(false);
+}: EditProgressPhotoDialogProps) {
   const [notes, setNotes] = useState('');
-  const [category, setCategory] = useState<string>('front');
+  const [category, setCategory] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [isMilestone, setIsMilestone] = useState(false);
-  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [date, setDate] = useState('');
+  const [imageError, setImageError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const isPro = subscriptionTier === 'pro';
   const isPremium = subscriptionTier === 'premium';
   const hasAdvancedFeatures = isPremium; // Only premium gets advanced features
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        toast.error('File size must be less than 10MB');
-        return;
-      }
-      
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file');
-        return;
-      }
-      
-      setSelectedFile(file);
-      
-      // Create preview URL
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+  useEffect(() => {
+    if (photo) {
+      setNotes(photo.notes || '');
+      setCategory(photo.category);
+      setTags(photo.tags || []);
+      setIsFavorite(photo.is_favorite);
+      setIsMilestone(photo.is_milestone);
+      setDate(photo.date);
+      setImageError(false);
     }
-  };
-
-  const uploadImage = async (file: File): Promise<string> => {
-    if (!user) throw new Error('User not authenticated');
-    
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-    
-    const { data, error } = await supabase.storage
-      .from('progress-images')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-    
-    if (error) throw error;
-    
-    const { data: { publicUrl } } = supabase.storage
-      .from('progress-images')
-      .getPublicUrl(data.path);
-    
-    return publicUrl;
-  };
+  }, [photo]);
 
   const handleAddTag = (tag: string) => {
     if (tag && !tags.includes(tag)) {
@@ -98,119 +64,68 @@ export default function AddProgressPhotoDialog({
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  const handleSubmit = async () => {
-    if (!selectedFile) {
-      toast.error('Please select an image');
-      return;
-    }
+  const handleSave = async () => {
+    if (!photo) return;
     
-    if (!category) {
-      toast.error('Please select a category');
-      return;
-    }
-    
-    setUploading(true);
+    setLoading(true);
     try {
-      // Upload image to Supabase Storage
-      const imageUrl = await uploadImage(selectedFile);
-      
-      // Prepare photo data based on subscription tier
-      const photoData = {
-        image_url: imageUrl,
+      const updates: Partial<ProgressPhoto> = {
         date,
-        category,
-        notes: hasAdvancedFeatures ? notes : '', // Only premium gets notes
-        tags: hasAdvancedFeatures ? tags : [], // Only premium gets tags
-        is_favorite: hasAdvancedFeatures ? isFavorite : false, // Only premium gets favorites
-        is_milestone: hasAdvancedFeatures ? isMilestone : false, // Only premium gets milestones
+        category: category as any,
       };
-      
-      await onAddPhoto(photoData);
-      
-      // Reset form
-      setSelectedFile(null);
-      setPreviewUrl('');
-      setNotes('');
-      setCategory('front');
-      setTags([]);
-      setNewTag('');
-      setIsFavorite(false);
-      setIsMilestone(false);
-      setDate(format(new Date(), 'yyyy-MM-dd'));
-      
+
+      // Only include advanced features for premium users
+      if (hasAdvancedFeatures) {
+        updates.notes = notes;
+        updates.tags = tags;
+        updates.is_favorite = isFavorite;
+        updates.is_milestone = isMilestone;
+      }
+
+      await onUpdatePhoto(photo.id, updates);
       onOpenChange(false);
-      toast.success('Progress photo added successfully!');
     } catch (error) {
-      console.error('Error adding photo:', error);
-      toast.error('Failed to add progress photo');
+      console.error('Error updating photo:', error);
     } finally {
-      setUploading(false);
+      setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
+  const getImageUrl = (url: string) => {
+    if (url.includes('supabase.co') && !url.includes('?')) {
+      return `${url}?t=${Date.now()}`;
     }
-    setSelectedFile(null);
-    setPreviewUrl('');
-    setNotes('');
-    setTags([]);
-    setNewTag('');
-    setIsFavorite(false);
-    setIsMilestone(false);
-    onOpenChange(false);
+    return url;
   };
+
+  if (!photo) return null;
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Progress Photo</DialogTitle>
+          <DialogTitle>Edit Progress Photo</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
-          {/* File Upload */}
-          <div className="space-y-2">
-            <Label>Photo</Label>
-            <div className="border-2 border-dashed border-border rounded-lg p-4">
-              {previewUrl ? (
-                <div className="relative">
-                  <img
-                    src={previewUrl}
-                    alt="Preview"
-                    className="w-full h-48 object-cover rounded-md"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    className="absolute top-2 right-2"
-                    onClick={() => {
-                      if (previewUrl) URL.revokeObjectURL(previewUrl);
-                      setSelectedFile(null);
-                      setPreviewUrl('');
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+          {/* Image Preview */}
+          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+            {!imageError ? (
+              <img
+                src={getImageUrl(photo.image_url)}
+                alt={`Progress from ${photo.date}`}
+                className="w-full h-full object-cover"
+                onError={() => setImageError(true)}
+                crossOrigin="anonymous"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                <div className="text-center text-gray-500">
+                  <ImageOff className="h-8 w-8 mx-auto mb-2" />
+                  <p className="text-sm">Image not available</p>
                 </div>
-              ) : (
-                <div className="text-center">
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <Label htmlFor="photo-upload" className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                    Click to upload a photo
-                  </Label>
-                  <Input
-                    id="photo-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleFileSelect}
-                  />
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Date */}
@@ -246,7 +161,7 @@ export default function AddProgressPhotoDialog({
             <>
               {/* Notes */}
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes (Optional)</Label>
+                <Label htmlFor="notes">Notes</Label>
                 <Textarea
                   id="notes"
                   placeholder="Add notes about this photo..."
@@ -258,7 +173,7 @@ export default function AddProgressPhotoDialog({
 
               {/* Tags */}
               <div className="space-y-2">
-                <Label>Tags (Optional)</Label>
+                <Label>Tags</Label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {tags.map(tag => (
                     <Badge key={tag} variant="secondary" className="text-xs">
@@ -339,18 +254,11 @@ export default function AddProgressPhotoDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={uploading || !selectedFile}>
-            {uploading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              'Add Photo'
-            )}
+          <Button onClick={handleSave} disabled={loading}>
+            {loading ? 'Saving...' : 'Save Changes'}
           </Button>
         </DialogFooter>
       </DialogContent>
