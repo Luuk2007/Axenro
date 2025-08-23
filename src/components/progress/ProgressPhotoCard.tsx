@@ -11,7 +11,7 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  ImageOff
+  ImageIcon
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ProgressPhoto } from '@/types/progressPhotos';
@@ -45,27 +45,26 @@ export default function ProgressPhotoCard({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   
-  const isPro = subscriptionTier === 'pro';
   const isPremium = subscriptionTier === 'premium';
-  const hasAdvancedFeatures = isPremium; // Only premium gets advanced features
 
   const handleImageLoad = () => {
+    console.log('Image loaded successfully:', photo.image_url);
     setImageLoaded(true);
     setImageError(false);
   };
 
-  const handleImageError = () => {
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('Failed to load progress photo:', photo.image_url, e);
     setImageError(true);
     setImageLoaded(false);
   };
 
-  const getImageUrl = (url: string) => {
-    // Handle Supabase storage URLs
-    if (url.includes('supabase.co') && !url.includes('?')) {
-      return `${url}?t=${Date.now()}`;
-    }
-    return url;
-  };
+  // Create a proper image URL - ensure it's properly formatted
+  const imageUrl = photo.image_url?.startsWith('http') 
+    ? photo.image_url 
+    : `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/${photo.image_url}`;
+
+  console.log('Rendering photo card with URL:', imageUrl);
 
   return (
     <Card 
@@ -76,29 +75,38 @@ export default function ProgressPhotoCard({
     >
       <CardContent className="p-0">
         {/* Image */}
-        <div className="relative aspect-square bg-gray-100">
-          {!imageError ? (
-            <img
-              src={getImageUrl(photo.image_url)}
-              alt={`Progress from ${photo.date}`}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              crossOrigin="anonymous"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-200">
-              <div className="text-center text-gray-500">
-                <ImageOff className="h-8 w-8 mx-auto mb-2" />
+        <div className="relative aspect-square bg-muted">
+          <img
+            src={imageUrl}
+            alt={`Progress from ${photo.date}`}
+            className="w-full h-full object-cover"
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+            loading="lazy"
+            crossOrigin="anonymous"
+            style={{ display: imageError ? 'none' : 'block' }}
+          />
+          
+          {/* Loading state */}
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 bg-muted animate-pulse flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+
+          {/* Error state */}
+          {imageError && (
+            <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-muted">
+              <div className="text-center text-muted-foreground">
+                <ImageIcon className="h-8 w-8 mx-auto mb-2" />
                 <p className="text-xs">Image not available</p>
+                <p className="text-xs opacity-60">Click edit to reupload</p>
               </div>
             </div>
           )}
           
           {/* Overlay with icons - only show for premium */}
-          {hasAdvancedFeatures && imageLoaded && !imageError && (
+          {isPremium && imageLoaded && !imageError && (
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <div className="absolute bottom-2 left-2 flex gap-2">
                 {photo.is_milestone && (
@@ -123,8 +131,8 @@ export default function ProgressPhotoCard({
             </div>
           )}
 
-          {/* Action menu - show for both pro and premium */}
-          {!selectionMode && (isPro || isPremium) && (
+          {/* Action menu - always show edit button, other features for premium */}
+          {!selectionMode && (
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -137,7 +145,7 @@ export default function ProgressPhotoCard({
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </DropdownMenuItem>
-                  {hasAdvancedFeatures && (
+                  {isPremium && (
                     <>
                       <DropdownMenuItem 
                         onClick={() => onToggleFavorite?.(photo.id, !photo.is_favorite)}
@@ -178,16 +186,16 @@ export default function ProgressPhotoCard({
             </Badge>
           </div>
 
-          {/* Only show notes for premium */}
-          {hasAdvancedFeatures && photo.notes && (
+          {/* Show notes for all users */}
+          {photo.notes && (
             <div className="flex items-start gap-1 text-xs text-muted-foreground">
               <MessageSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
               <p className="line-clamp-2">{photo.notes}</p>
             </div>
           )}
 
-          {/* Only show tags for premium */}
-          {hasAdvancedFeatures && photo.tags.length > 0 && (
+          {/* Show tags for premium users */}
+          {isPremium && photo.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {photo.tags.slice(0, 3).map(tag => (
                 <Badge key={tag} variant="secondary" className="text-xs">

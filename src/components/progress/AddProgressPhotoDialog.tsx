@@ -1,19 +1,17 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Upload, X, Loader2 } from 'lucide-react';
-import { PHOTO_CATEGORIES, COMMON_TAGS } from '@/types/progressPhotos';
+import { X, Upload, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { PHOTO_CATEGORIES, COMMON_TAGS } from '@/types/progressPhotos';
 
 interface AddProgressPhotoDialogProps {
   open: boolean;
@@ -28,118 +26,95 @@ export default function AddProgressPhotoDialog({
   onAddPhoto,
   subscriptionTier
 }: AddProgressPhotoDialogProps) {
-  const { user } = useAuth();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const { session } = useAuth();
   const [uploading, setUploading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
   const [category, setCategory] = useState<string>('front');
   const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState('');
+  const [customTag, setCustomTag] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [isMilestone, setIsMilestone] = useState(false);
-  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
-  const isPro = subscriptionTier === 'pro';
   const isPremium = subscriptionTier === 'premium';
-  const hasAdvancedFeatures = isPremium; // Only premium gets advanced features
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        toast.error('File size must be less than 10MB');
-        return;
-      }
-      
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file');
-        return;
-      }
-      
-      setSelectedFile(file);
-      
-      // Create preview URL
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const uploadImage = async (file: File): Promise<string> => {
-    if (!user) throw new Error('User not authenticated');
-    
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-    
-    const { data, error } = await supabase.storage
-      .from('progress-images')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-    
-    if (error) throw error;
-    
-    const { data: { publicUrl } } = supabase.storage
-      .from('progress-images')
-      .getPublicUrl(data.path);
-    
-    return publicUrl;
-  };
-
-  const handleAddTag = (tag: string) => {
-    if (tag && !tags.includes(tag)) {
+  const addTag = (tag: string) => {
+    if (isPremium && tag && !tags.includes(tag)) {
       setTags([...tags, tag]);
     }
-    setNewTag('');
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+  const removeTag = (tagToRemove: string) => {
+    if (isPremium) {
+      setTags(tags.filter(tag => tag !== tagToRemove));
+    }
+  };
+
+  const addCustomTag = () => {
+    if (isPremium && customTag.trim()) {
+      addTag(customTag.trim());
+      setCustomTag('');
+    }
   };
 
   const handleSubmit = async () => {
-    if (!selectedFile) {
-      toast.error('Please select an image');
-      return;
-    }
-    
-    if (!category) {
-      toast.error('Please select a category');
-      return;
-    }
-    
-    setUploading(true);
+    if (!imageFile || !session) return;
+
     try {
-      // Upload image to Supabase Storage
-      const imageUrl = await uploadImage(selectedFile);
+      setUploading(true);
+
+      // Upload image to storage
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
       
-      // Prepare photo data based on subscription tier
-      const photoData = {
-        image_url: imageUrl,
+      const { error: uploadError } = await supabase.storage
+        .from('progress-images')
+        .upload(fileName, imageFile);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('progress-images')
+        .getPublicUrl(fileName);
+
+      // Add photo data
+      await onAddPhoto({
+        image_url: publicUrl,
         date,
+        notes: isPremium ? notes : '',
         category,
-        notes: hasAdvancedFeatures ? notes : '', // Only premium gets notes
-        tags: hasAdvancedFeatures ? tags : [], // Only premium gets tags
-        is_favorite: hasAdvancedFeatures ? isFavorite : false, // Only premium gets favorites
-        is_milestone: hasAdvancedFeatures ? isMilestone : false, // Only premium gets milestones
-      };
-      
-      await onAddPhoto(photoData);
-      
+        tags: isPremium ? tags : [],
+        is_favorite: isPremium ? isFavorite : false,
+        is_milestone: isPremium ? isMilestone : false
+      });
+
       // Reset form
-      setSelectedFile(null);
-      setPreviewUrl('');
+      setImageFile(null);
+      setImagePreview(null);
+      setDate(new Date().toISOString().split('T')[0]);
       setNotes('');
       setCategory('front');
       setTags([]);
-      setNewTag('');
       setIsFavorite(false);
       setIsMilestone(false);
-      setDate(format(new Date(), 'yyyy-MM-dd'));
       
       onOpenChange(false);
-      toast.success('Progress photo added successfully!');
+      toast.success('Progress photo added successfully');
     } catch (error) {
       console.error('Error adding photo:', error);
       toast.error('Failed to add progress photo');
@@ -148,48 +123,35 @@ export default function AddProgressPhotoDialog({
     }
   };
 
-  const handleClose = () => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setSelectedFile(null);
-    setPreviewUrl('');
-    setNotes('');
-    setTags([]);
-    setNewTag('');
-    setIsFavorite(false);
-    setIsMilestone(false);
-    onOpenChange(false);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Progress Photo</DialogTitle>
+          <DialogDescription>
+            Upload a new progress photo to track your transformation journey.
+          </DialogDescription>
         </DialogHeader>
-        
-        <div className="space-y-4">
-          {/* File Upload */}
+
+        <div className="space-y-6">
+          {/* Image Upload */}
           <div className="space-y-2">
             <Label>Photo</Label>
-            <div className="border-2 border-dashed border-border rounded-lg p-4">
-              {previewUrl ? (
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
+              {imagePreview ? (
                 <div className="relative">
-                  <img
-                    src={previewUrl}
-                    alt="Preview"
-                    className="w-full h-48 object-cover rounded-md"
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full max-h-64 object-cover rounded-lg"
                   />
                   <Button
-                    type="button"
-                    variant="destructive"
+                    variant="secondary"
                     size="sm"
                     className="absolute top-2 right-2"
                     onClick={() => {
-                      if (previewUrl) URL.revokeObjectURL(previewUrl);
-                      setSelectedFile(null);
-                      setPreviewUrl('');
+                      setImageFile(null);
+                      setImagePreview(null);
                     }}
                   >
                     <X className="h-4 w-4" />
@@ -197,16 +159,20 @@ export default function AddProgressPhotoDialog({
                 </div>
               ) : (
                 <div className="text-center">
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <Label htmlFor="photo-upload" className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                    Click to upload a photo
-                  </Label>
+                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <div className="space-y-2">
+                    <Label htmlFor="image-upload" className="cursor-pointer">
+                      <span className="text-primary hover:text-primary/80">Click to upload</span>
+                      {' or drag and drop'}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">PNG, JPG up to 10MB</p>
+                  </div>
                   <Input
-                    id="photo-upload"
+                    id="image-upload"
                     type="file"
                     accept="image/*"
+                    onChange={handleImageSelect}
                     className="hidden"
-                    onChange={handleFileSelect}
                   />
                 </div>
               )}
@@ -216,20 +182,24 @@ export default function AddProgressPhotoDialog({
           {/* Date */}
           <div className="space-y-2">
             <Label htmlFor="date">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+            <div className="relative">
+              <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
 
-          {/* Category - Available for both Pro and Premium */}
+          {/* Category */}
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label>Category</Label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger id="category">
-                <SelectValue placeholder="Select category" />
+              <SelectTrigger>
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {PHOTO_CATEGORIES.map(cat => (
@@ -241,118 +211,106 @@ export default function AddProgressPhotoDialog({
             </Select>
           </div>
 
-          {/* Advanced Features - Only for Premium */}
-          {hasAdvancedFeatures && (
+          {/* Premium Features */}
+          {isPremium && (
             <>
               {/* Notes */}
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes (Optional)</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Add notes about this photo..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Add any notes about this photo..."
                   rows={3}
                 />
               </div>
 
               {/* Tags */}
               <div className="space-y-2">
-                <Label>Tags (Optional)</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {tags.map(tag => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                      <button
-                        onClick={() => handleRemoveTag(tag)}
-                        className="ml-1 hover:text-destructive"
+                <Label>Tags</Label>
+                <div className="space-y-3">
+                  {/* Selected Tags */}
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {tags.map(tag => (
+                        <Badge key={tag} variant="secondary" className="cursor-pointer">
+                          {tag}
+                          <X 
+                            className="h-3 w-3 ml-1" 
+                            onClick={() => removeTag(tag)}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Common Tags */}
+                  <div className="flex flex-wrap gap-2">
+                    {COMMON_TAGS.filter(tag => !tags.includes(tag)).map(tag => (
+                      <Badge 
+                        key={tag} 
+                        variant="outline" 
+                        className="cursor-pointer hover:bg-secondary"
+                        onClick={() => addTag(tag)}
                       >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Add custom tag..."
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddTag(newTag);
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleAddTag(newTag)}
-                    disabled={!newTag || tags.includes(newTag)}
-                  >
-                    Add
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {COMMON_TAGS.filter(tag => !tags.includes(tag)).slice(0, 6).map(tag => (
-                    <Button
-                      key={tag}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-6"
-                      onClick={() => handleAddTag(tag)}
-                    >
-                      {tag}
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  {/* Custom Tag Input */}
+                  <div className="flex gap-2">
+                    <Input
+                      value={customTag}
+                      onChange={(e) => setCustomTag(e.target.value)}
+                      placeholder="Add custom tag..."
+                      onKeyPress={(e) => e.key === 'Enter' && addCustomTag()}
+                    />
+                    <Button type="button" variant="outline" onClick={addCustomTag}>
+                      Add
                     </Button>
-                  ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Favorite and Milestone toggles */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="favorite">Mark as Favorite</Label>
-                  <Switch
-                    id="favorite"
-                    checked={isFavorite}
-                    onCheckedChange={setIsFavorite}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="milestone">Mark as Milestone</Label>
-                  <Switch
-                    id="milestone"
+              {/* Milestone and Favorite toggles */}
+              <div className="flex gap-4">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
                     checked={isMilestone}
-                    onCheckedChange={setIsMilestone}
+                    onChange={(e) => setIsMilestone(e.target.checked)}
+                    className="rounded border-gray-300"
                   />
-                </div>
+                  <span className="text-sm">Mark as milestone</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isFavorite}
+                    onChange={(e) => setIsFavorite(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <span className="text-sm">Add to favorites</span>
+                </label>
               </div>
             </>
           )}
 
-          {isPro && !isPremium && (
-            <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
-              <p>💎 Upgrade to Premium to unlock notes, tags, favorites, and milestone features!</p>
-            </div>
-          )}
+          {/* Submit Button */}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmit}
+              disabled={!imageFile || uploading}
+            >
+              {uploading ? 'Uploading...' : 'Add Photo'}
+            </Button>
+          </div>
         </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={uploading || !selectedFile}>
-            {uploading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              'Add Photo'
-            )}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

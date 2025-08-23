@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2, Filter, Grid, Clock, ArrowLeftRight, Star, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,11 +21,11 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import EditProgressPhotoDialog from '@/components/progress/EditProgressPhotoDialog';
 
 import { useProgressPhotos } from '@/hooks/useProgressPhotos';
 import { useSubscription } from '@/hooks/useSubscription';
 import AddProgressPhotoDialog from '@/components/progress/AddProgressPhotoDialog';
-import EditProgressPhotoDialog from '@/components/progress/EditProgressPhotoDialog';
 import ProgressPhotoCard from '@/components/progress/ProgressPhotoCard';
 import ProgressTimeline from '@/components/progress/ProgressTimeline';
 import PhotoComparisonDialog from '@/components/progress/PhotoComparisonDialog';
@@ -52,11 +51,12 @@ export default function Progress() {
   const { t } = useLanguage();
   const { subscription_tier, test_mode, test_subscription_tier, loading: subscriptionLoading } = useSubscription();
   
-  // Determine current plan
+  // Determine current plan - show premium features if we have pro/premium data or still loading
   const currentPlan = test_mode ? test_subscription_tier : subscription_tier;
   const isFree = !subscriptionLoading && currentPlan === 'free';
   const isPro = currentPlan === 'pro';
   const isPremium = currentPlan === 'premium';
+  // Show photos tab unless we're confirmed to be on free plan and not loading
   const showPhotosTab = !isFree;
 
   const [measurementType, setMeasurementType] = useState('waist');
@@ -68,7 +68,7 @@ export default function Progress() {
   const { photos, loading: photosLoading, addPhoto, updatePhoto, deletePhoto } = useProgressPhotos();
   const [showAddPhotoDialog, setShowAddPhotoDialog] = useState(false);
   const [showEditPhotoDialog, setShowEditPhotoDialog] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState<ProgressPhoto | null>(null);
+  const [editingPhoto, setEditingPhoto] = useState<ProgressPhoto | null>(null);
   const [showComparisonDialog, setShowComparisonDialog] = useState(false);
   const [photoViewMode, setPhotoViewMode] = useState<'grid' | 'timeline'>('grid');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -213,12 +213,13 @@ export default function Progress() {
   };
 
   const handleEditPhoto = (photo: ProgressPhoto) => {
-    setSelectedPhoto(photo);
+    setEditingPhoto(photo);
     setShowEditPhotoDialog(true);
   };
 
   const handleUpdatePhoto = async (id: string, updates: Partial<ProgressPhoto>) => {
     await updatePhoto(id, updates);
+    setEditingPhoto(null);
   };
 
   const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
@@ -253,24 +254,20 @@ export default function Progress() {
     setSelectionMode(false);
   };
 
-  // Filter photos based on subscription tier and user preferences
   const filteredPhotos = photos.filter(photo => {
     if (categoryFilter !== 'all' && photo.category !== categoryFilter) return false;
-    
-    // Only allow tag and favorite/milestone filtering for premium users
-    if (isPremium) {
-      if (tagFilter !== 'all' && !photo.tags.includes(tagFilter)) return false;
-      if (showFavoritesOnly && !photo.is_favorite) return false;
-      if (showMilestonesOnly && !photo.is_milestone) return false;
-    }
-    
+    if (tagFilter !== 'all' && !photo.tags.includes(tagFilter)) return false;
+    if (showFavoritesOnly && !photo.is_favorite) return false;
+    if (showMilestonesOnly && !photo.is_milestone) return false;
     return true;
   });
 
-  const allTags = isPremium ? Array.from(new Set(photos.flatMap(photo => photo.tags))).sort() : [];
+  const allTags = Array.from(new Set(photos.flatMap(photo => photo.tags))).sort();
+
   const enabledMeasurementTypes = measurementTypes.filter(type => type.enabled);
-  const milestonesCount = isPremium ? photos.filter(p => p.is_milestone).length : 0;
-  const favoritesCount = isPremium ? photos.filter(p => p.is_favorite).length : 0;
+
+  const milestonesCount = photos.filter(p => p.is_milestone).length;
+  const favoritesCount = photos.filter(p => p.is_favorite).length;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -536,12 +533,6 @@ export default function Progress() {
                         </Button>
                       </div>
                     ) : null}
-
-                    {isPro && (
-                      <div className="text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-md">
-                        💎 Pro Plan: Basic photo upload and categorization
-                      </div>
-                    )}
                   </div>
 
                   {isPremium && (
@@ -564,7 +555,6 @@ export default function Progress() {
                   )}
                 </div>
 
-                {/* Filters - Only for Premium */}
                 {isPremium && (
                   <div className="flex flex-wrap gap-4 items-center">
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -603,7 +593,7 @@ export default function Progress() {
                       onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
                     >
                       <Heart className={`h-4 w-4 mr-1 ${showFavoritesOnly ? 'fill-current' : ''}`} />
-                      Favorites ({favoritesCount})
+                      Favorites
                     </Button>
 
                     <Button
@@ -612,31 +602,11 @@ export default function Progress() {
                       onClick={() => setShowMilestonesOnly(!showMilestonesOnly)}
                     >
                       <Star className={`h-4 w-4 mr-1 ${showMilestonesOnly ? 'fill-current' : ''}`} />
-                      Milestones ({milestonesCount})
+                      Milestones
                     </Button>
                   </div>
                 )}
 
-                {/* Pro Plan Basic Filters */}
-                {isPro && !isPremium && (
-                  <div className="flex flex-wrap gap-4 items-center">
-                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                      <SelectTrigger className="w-40">
-                        <SelectValue placeholder="All Categories" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        {PHOTO_CATEGORIES.map(cat => (
-                          <SelectItem key={cat.value} value={cat.value}>
-                            {cat.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {/* Photo Grid/Timeline */}
                 {isPremium && photoViewMode === 'timeline' ? (
                   <ProgressTimeline
                     photos={filteredPhotos}
@@ -664,7 +634,6 @@ export default function Progress() {
                   </div>
                 )}
 
-                {/* Empty States */}
                 {filteredPhotos.length === 0 && photos.length > 0 && isPremium && (
                   <div className="text-center py-12 text-muted-foreground">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
@@ -691,20 +660,17 @@ export default function Progress() {
               </>
             )}
 
-            {/* Dialogs */}
             <AddProgressPhotoDialog
               open={showAddPhotoDialog}
               onOpenChange={setShowAddPhotoDialog}
               onAddPhoto={handleAddPhoto}
-              subscriptionTier={currentPlan}
             />
 
             <EditProgressPhotoDialog
               open={showEditPhotoDialog}
               onOpenChange={setShowEditPhotoDialog}
-              photo={selectedPhoto}
+              photo={editingPhoto}
               onUpdatePhoto={handleUpdatePhoto}
-              subscriptionTier={currentPlan}
             />
 
             {isPremium && (
