@@ -21,7 +21,6 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import EditProgressPhotoDialog from '@/components/progress/EditProgressPhotoDialog';
 
 import { useProgressPhotos } from '@/hooks/useProgressPhotos';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -67,8 +66,6 @@ export default function Progress() {
 
   const { photos, loading: photosLoading, addPhoto, updatePhoto, deletePhoto } = useProgressPhotos();
   const [showAddPhotoDialog, setShowAddPhotoDialog] = useState(false);
-  const [showEditPhotoDialog, setShowEditPhotoDialog] = useState(false);
-  const [editingPhoto, setEditingPhoto] = useState<ProgressPhoto | null>(null);
   const [showComparisonDialog, setShowComparisonDialog] = useState(false);
   const [photoViewMode, setPhotoViewMode] = useState<'grid' | 'timeline'>('grid');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -213,13 +210,7 @@ export default function Progress() {
   };
 
   const handleEditPhoto = (photo: ProgressPhoto) => {
-    setEditingPhoto(photo);
-    setShowEditPhotoDialog(true);
-  };
-
-  const handleUpdatePhoto = async (id: string, updates: Partial<ProgressPhoto>) => {
-    await updatePhoto(id, updates);
-    setEditingPhoto(null);
+    console.log('Edit photo:', photo);
   };
 
   const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
@@ -664,13 +655,6 @@ export default function Progress() {
               open={showAddPhotoDialog}
               onOpenChange={setShowAddPhotoDialog}
               onAddPhoto={handleAddPhoto}
-            />
-
-            <EditProgressPhotoDialog
-              open={showEditPhotoDialog}
-              onOpenChange={setShowEditPhotoDialog}
-              photo={editingPhoto}
-              onUpdatePhoto={handleUpdatePhoto}
             />
 
             {isPremium && (
