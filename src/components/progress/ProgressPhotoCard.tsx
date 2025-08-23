@@ -10,8 +10,7 @@ import {
   MessageSquare, 
   MoreVertical,
   Edit,
-  Trash2,
-  Copy
+  Trash2
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ProgressPhoto } from '@/types/progressPhotos';
@@ -26,7 +25,6 @@ interface ProgressPhotoCardProps {
   onSelect?: (photo: ProgressPhoto) => void;
   isSelected?: boolean;
   selectionMode?: boolean;
-  showMeasurements?: { weight?: number; measurements?: any };
   subscriptionTier?: string;
 }
 
@@ -39,12 +37,32 @@ export default function ProgressPhotoCard({
   onSelect,
   isSelected,
   selectionMode,
-  showMeasurements,
   subscriptionTier
 }: ProgressPhotoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   
   const isPremium = subscriptionTier === 'premium';
+
+  // Ensure proper image URL formatting
+  const getImageUrl = (url: string) => {
+    if (!url) return '';
+    // If it's already a full URL, return as is
+    if (url.startsWith('http')) return url;
+    // If it's a relative path, construct the full Supabase URL
+    return `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${url}`;
+  };
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    setImageError(false);
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoaded(false);
+    console.error('Failed to load image:', photo.image_url);
+  };
 
   return (
     <Card 
@@ -56,15 +74,33 @@ export default function ProgressPhotoCard({
       <CardContent className="p-0">
         {/* Image */}
         <div className="relative aspect-square bg-gray-100">
-          <img
-            src={photo.image_url}
-            alt={`Progress from ${photo.date}`}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={() => setImageLoaded(true)}
-          />
+          {!imageError ? (
+            <img
+              src={getImageUrl(photo.image_url)}
+              alt={`Progress from ${photo.date}`}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              crossOrigin="anonymous"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <div className="text-center text-gray-500">
+                <div className="text-2xl mb-2">📷</div>
+                <div className="text-xs">Image not available</div>
+              </div>
+            </div>
+          )}
           
+          {/* Loading placeholder */}
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+              <div className="text-gray-400">Loading...</div>
+            </div>
+          )}
+
           {/* Overlay with icons - only show for premium */}
           {isPremium && (
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -91,8 +127,8 @@ export default function ProgressPhotoCard({
             </div>
           )}
 
-          {/* Action menu - only show for premium */}
-          {!selectionMode && isPremium && (
+          {/* Action menu - only show for premium and pro */}
+          {!selectionMode && (subscriptionTier === 'premium' || subscriptionTier === 'pro') && (
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -105,18 +141,22 @@ export default function ProgressPhotoCard({
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => onToggleFavorite?.(photo.id, !photo.is_favorite)}
-                  >
-                    <Heart className={`h-4 w-4 mr-2 ${photo.is_favorite ? 'fill-red-500 text-red-500' : ''}`} />
-                    {photo.is_favorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => onToggleMilestone?.(photo.id, !photo.is_milestone)}
-                  >
-                    <Star className={`h-4 w-4 mr-2 ${photo.is_milestone ? 'fill-yellow-500 text-yellow-500' : ''}`} />
-                    {photo.is_milestone ? 'Remove Milestone' : 'Mark as Milestone'}
-                  </DropdownMenuItem>
+                  {isPremium && (
+                    <>
+                      <DropdownMenuItem 
+                        onClick={() => onToggleFavorite?.(photo.id, !photo.is_favorite)}
+                      >
+                        <Heart className={`h-4 w-4 mr-2 ${photo.is_favorite ? 'fill-red-500 text-red-500' : ''}`} />
+                        {photo.is_favorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => onToggleMilestone?.(photo.id, !photo.is_milestone)}
+                      >
+                        <Star className={`h-4 w-4 mr-2 ${photo.is_milestone ? 'fill-yellow-500 text-yellow-500' : ''}`} />
+                        {photo.is_milestone ? 'Remove Milestone' : 'Mark as Milestone'}
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuItem 
                     onClick={() => onDelete?.(photo.id)}
                     className="text-destructive"
@@ -137,9 +177,12 @@ export default function ProgressPhotoCard({
               <Calendar className="h-3 w-3" />
               {format(new Date(photo.date), 'MMM d, yyyy')}
             </div>
-            <Badge variant="outline" className="text-xs">
-              {photo.category}
-            </Badge>
+            {/* Only show category for premium users */}
+            {isPremium && (
+              <Badge variant="outline" className="text-xs">
+                {photo.category}
+              </Badge>
+            )}
           </div>
 
           {/* Only show notes for premium */}
@@ -151,7 +194,7 @@ export default function ProgressPhotoCard({
           )}
 
           {/* Only show tags for premium */}
-          {isPremium && photo.tags.length > 0 && (
+          {isPremium && photo.tags && photo.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {photo.tags.slice(0, 3).map(tag => (
                 <Badge key={tag} variant="secondary" className="text-xs">
@@ -162,14 +205,6 @@ export default function ProgressPhotoCard({
                 <Badge variant="secondary" className="text-xs">
                   +{photo.tags.length - 3}
                 </Badge>
-              )}
-            </div>
-          )}
-
-          {showMeasurements && (
-            <div className="text-xs text-muted-foreground border-t pt-2">
-              {showMeasurements.weight && (
-                <div>Weight: {showMeasurements.weight} kg</div>
               )}
             </div>
           )}

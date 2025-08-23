@@ -66,6 +66,8 @@ export default function Progress() {
 
   const { photos, loading: photosLoading, addPhoto, updatePhoto, deletePhoto } = useProgressPhotos();
   const [showAddPhotoDialog, setShowAddPhotoDialog] = useState(false);
+  const [showEditPhotoDialog, setShowEditPhotoDialog] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<ProgressPhoto | null>(null);
   const [showComparisonDialog, setShowComparisonDialog] = useState(false);
   const [photoViewMode, setPhotoViewMode] = useState<'grid' | 'timeline'>('grid');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -211,6 +213,13 @@ export default function Progress() {
 
   const handleEditPhoto = (photo: ProgressPhoto) => {
     console.log('Edit photo:', photo);
+    setSelectedPhoto(photo);
+    setShowEditPhotoDialog(true);
+  };
+
+  const handleUpdatePhoto = async (id: string, updates: Partial<ProgressPhoto>) => {
+    await updatePhoto(id, updates);
+    setSelectedPhoto(null);
   };
 
   const handleToggleFavorite = async (id: string, isFavorite: boolean) => {
@@ -655,6 +664,14 @@ export default function Progress() {
               open={showAddPhotoDialog}
               onOpenChange={setShowAddPhotoDialog}
               onAddPhoto={handleAddPhoto}
+            />
+
+            <EditProgressPhotoDialog
+              open={showEditPhotoDialog}
+              onOpenChange={setShowEditPhotoDialog}
+              photo={selectedPhoto}
+              onUpdatePhoto={handleUpdatePhoto}
+              subscriptionTier={currentPlan}
             />
 
             {isPremium && (
