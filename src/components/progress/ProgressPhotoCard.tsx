@@ -48,15 +48,23 @@ export default function ProgressPhotoCard({
   const isPremium = subscriptionTier === 'premium';
 
   const handleImageLoad = () => {
+    console.log('Image loaded successfully:', photo.image_url);
     setImageLoaded(true);
     setImageError(false);
   };
 
-  const handleImageError = () => {
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('Failed to load progress photo:', photo.image_url, e);
     setImageError(true);
     setImageLoaded(false);
-    console.error('Failed to load progress photo:', photo.image_url);
   };
+
+  // Create a proper image URL - ensure it's properly formatted
+  const imageUrl = photo.image_url?.startsWith('http') 
+    ? photo.image_url 
+    : `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/${photo.image_url}`;
+
+  console.log('Rendering photo card with URL:', imageUrl);
 
   return (
     <Card 
@@ -68,29 +76,32 @@ export default function ProgressPhotoCard({
       <CardContent className="p-0">
         {/* Image */}
         <div className="relative aspect-square bg-muted">
-          {imageError ? (
-            <div className="w-full h-full flex items-center justify-center bg-muted">
-              <div className="text-center text-muted-foreground">
-                <ImageIcon className="h-8 w-8 mx-auto mb-2" />
-                <p className="text-xs">Image not available</p>
-              </div>
-            </div>
-          ) : (
-            <img
-              src={photo.image_url}
-              alt={`Progress from ${photo.date}`}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              loading="lazy"
-            />
-          )}
+          <img
+            src={imageUrl}
+            alt={`Progress from ${photo.date}`}
+            className="w-full h-full object-cover"
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+            loading="lazy"
+            crossOrigin="anonymous"
+            style={{ display: imageError ? 'none' : 'block' }}
+          />
           
+          {/* Loading state */}
           {!imageLoaded && !imageError && (
             <div className="absolute inset-0 bg-muted animate-pulse flex items-center justify-center">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+
+          {/* Error state */}
+          {imageError && (
+            <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-muted">
+              <div className="text-center text-muted-foreground">
+                <ImageIcon className="h-8 w-8 mx-auto mb-2" />
+                <p className="text-xs">Image not available</p>
+                <p className="text-xs opacity-60">Click edit to reupload</p>
+              </div>
             </div>
           )}
           
@@ -120,8 +131,8 @@ export default function ProgressPhotoCard({
             </div>
           )}
 
-          {/* Action menu - only show for premium */}
-          {!selectionMode && isPremium && (
+          {/* Action menu - always show edit button, other features for premium */}
+          {!selectionMode && (
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -134,18 +145,22 @@ export default function ProgressPhotoCard({
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => onToggleFavorite?.(photo.id, !photo.is_favorite)}
-                  >
-                    <Heart className={`h-4 w-4 mr-2 ${photo.is_favorite ? 'fill-red-500 text-red-500' : ''}`} />
-                    {photo.is_favorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => onToggleMilestone?.(photo.id, !photo.is_milestone)}
-                  >
-                    <Star className={`h-4 w-4 mr-2 ${photo.is_milestone ? 'fill-yellow-500 text-yellow-500' : ''}`} />
-                    {photo.is_milestone ? 'Remove Milestone' : 'Mark as Milestone'}
-                  </DropdownMenuItem>
+                  {isPremium && (
+                    <>
+                      <DropdownMenuItem 
+                        onClick={() => onToggleFavorite?.(photo.id, !photo.is_favorite)}
+                      >
+                        <Heart className={`h-4 w-4 mr-2 ${photo.is_favorite ? 'fill-red-500 text-red-500' : ''}`} />
+                        {photo.is_favorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => onToggleMilestone?.(photo.id, !photo.is_milestone)}
+                      >
+                        <Star className={`h-4 w-4 mr-2 ${photo.is_milestone ? 'fill-yellow-500 text-yellow-500' : ''}`} />
+                        {photo.is_milestone ? 'Remove Milestone' : 'Mark as Milestone'}
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuItem 
                     onClick={() => onDelete?.(photo.id)}
                     className="text-destructive"
@@ -171,15 +186,15 @@ export default function ProgressPhotoCard({
             </Badge>
           </div>
 
-          {/* Only show notes for premium */}
-          {isPremium && photo.notes && (
+          {/* Show notes for all users */}
+          {photo.notes && (
             <div className="flex items-start gap-1 text-xs text-muted-foreground">
               <MessageSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
               <p className="line-clamp-2">{photo.notes}</p>
             </div>
           )}
 
-          {/* Only show tags for premium */}
+          {/* Show tags for premium users */}
           {isPremium && photo.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {photo.tags.slice(0, 3).map(tag => (
