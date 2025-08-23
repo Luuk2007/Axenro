@@ -48,13 +48,14 @@ interface MeasurementEntry {
 
 export default function Progress() {
   const { t } = useLanguage();
-  const { subscription_tier, test_mode, test_subscription_tier } = useSubscription();
+  const { subscription_tier, test_mode, test_subscription_tier, loading: subscriptionLoading } = useSubscription();
   
-  // Determine current plan
+  // Determine current plan - show premium features immediately if not loading
   const currentPlan = test_mode ? test_subscription_tier : subscription_tier;
-  const isFree = currentPlan === 'free' || !currentPlan;
+  const isFree = !subscriptionLoading && (currentPlan === 'free' || !currentPlan);
   const isPro = currentPlan === 'pro';
   const isPremium = currentPlan === 'premium';
+  const showPhotosTab = !subscriptionLoading && !isFree;
 
   const [measurementType, setMeasurementType] = useState('waist');
   const [measurementValue, setMeasurementValue] = useState('');
@@ -322,10 +323,10 @@ export default function Progress() {
       </div>
 
       <Tabs defaultValue="weight" className="w-full">
-        <TabsList className={`grid mb-4 ${isFree ? 'grid-cols-2' : 'grid-cols-3'}`}>
+        <TabsList className={`grid mb-4 ${showPhotosTab ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <TabsTrigger value="weight">{t("Weight")}</TabsTrigger>
           <TabsTrigger value="measurements">{t("Measurements")}</TabsTrigger>
-          {!isFree && <TabsTrigger value="photos">{t("Photos")}</TabsTrigger>}
+          {showPhotosTab && <TabsTrigger value="photos">{t("Photos")}</TabsTrigger>}
         </TabsList>
         
         <TabsContent value="weight" className="space-y-6">
@@ -471,7 +472,7 @@ export default function Progress() {
           </div>
         </TabsContent>
         
-        {!isFree && (
+        {showPhotosTab && (
           <TabsContent value="photos" className="space-y-6">
             <Card>
               <CardHeader>

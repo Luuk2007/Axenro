@@ -17,11 +17,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const Workouts = () => {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  const { test_mode, test_subscription_tier, subscription_tier } = useSubscription();
+  const { test_mode, test_subscription_tier, subscription_tier, loading: subscriptionLoading } = useSubscription();
   
-  // Determine current subscription tier
+  // Determine current subscription tier - show premium features immediately if not loading
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
-  const canAccessPersonalRecords = currentTier === 'pro' || currentTier === 'premium';
+  const canAccessPersonalRecords = !subscriptionLoading && (currentTier === 'pro' || currentTier === 'premium');
   
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
