@@ -19,9 +19,11 @@ const Workouts = () => {
   const isMobile = useIsMobile();
   const { test_mode, test_subscription_tier, subscription_tier, loading: subscriptionLoading } = useSubscription();
   
-  // Determine current subscription tier - show premium features immediately if not loading
+  // Determine current subscription tier - show premium features if we have pro/premium data or still loading
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
-  const canAccessPersonalRecords = !subscriptionLoading && (currentTier === 'pro' || currentTier === 'premium');
+  const isFree = currentTier === 'free';
+  // Show personal records tab if we're pro/premium OR still loading (to avoid flash)
+  const canAccessPersonalRecords = currentTier === 'pro' || currentTier === 'premium' || subscriptionLoading;
   
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
@@ -159,7 +161,24 @@ const Workouts = () => {
         
         {canAccessPersonalRecords && (
           <TabsContent value="personal-records" className="mt-6">
-            <PersonalRecords />
+            {/* Only show content restriction if we're definitely on free plan and not loading */}
+            {isFree && !subscriptionLoading ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                    <Trophy className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">Upgrade to Access Personal Records</h3>
+                  <p className="text-muted-foreground mb-6">Personal records tracking is available with Pro and Premium plans.</p>
+                  <Button onClick={() => window.dispatchEvent(new CustomEvent('openSubscriptionModal'))}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Upgrade Now
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <PersonalRecords />
+            )}
           </TabsContent>
         )}
       </Tabs>
