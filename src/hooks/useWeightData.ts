@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,7 +15,7 @@ export const useWeightData = () => {
 
   const loadWeightData = async () => {
     if (!user) {
-      // For non-authenticated users, load from localStorage
+      // For non-authenticated users, load from localStorage as fallback only
       const savedWeightData = localStorage.getItem("weightData");
       if (savedWeightData) {
         try {
@@ -48,6 +47,9 @@ export const useWeightData = () => {
           value: Number(item.weight)
         }));
         setWeightData(formattedData);
+        
+        // Keep localStorage as backup
+        localStorage.setItem("weightData", JSON.stringify(formattedData));
       }
     } catch (error) {
       console.error('Error loading weight data:', error);
@@ -64,7 +66,7 @@ export const useWeightData = () => {
     setWeightData(updatedData);
 
     if (!user) {
-      // For non-authenticated users, save to localStorage
+      // For non-authenticated users, save to localStorage only
       localStorage.setItem("weightData", JSON.stringify(updatedData));
       toast.success('Weight entry added locally');
       return;

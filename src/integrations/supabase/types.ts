@@ -266,6 +266,54 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_exercises: {
+        Row: {
+          created_at: string
+          id: string
+          muscle_group: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          muscle_group: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          muscle_group?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      custom_meals: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          order_index: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          order_index?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          order_index?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_steps: {
         Row: {
           created_at: string
@@ -292,6 +340,27 @@ export type Database = {
           source?: string
           steps?: number
           synced_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      deleted_meals: {
+        Row: {
+          created_at: string
+          id: string
+          meal_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meal_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meal_id?: string
           user_id?: string
         }
         Relationships: []
@@ -357,6 +426,69 @@ export type Database = {
           provider_user_id?: string | null
           refresh_token?: string | null
           token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      measurement_types: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          is_custom: boolean
+          measurement_id: string
+          name: string
+          unit: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          is_custom?: boolean
+          measurement_id: string
+          name: string
+          unit: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          is_custom?: boolean
+          measurement_id?: string
+          name?: string
+          unit?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      nutrition_logs: {
+        Row: {
+          created_at: string
+          date: string
+          food_data: Json
+          id: string
+          meal_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          food_data: Json
+          id?: string
+          meal_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          food_data?: Json
+          id?: string
+          meal_type?: string
           updated_at?: string
           user_id?: string
         }
@@ -599,6 +731,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          created_at: string
+          data_backup: boolean
+          id: string
+          language: string
+          theme: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_backup?: boolean
+          id?: string
+          language?: string
+          theme?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_backup?: boolean
+          id?: string
+          language?: string
+          theme?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       water_tracking: {
         Row: {
           created_at: string
@@ -653,6 +815,42 @@ export type Database = {
           id?: string
           user_id?: string
           weight?: number
+        }
+        Relationships: []
+      }
+      workouts: {
+        Row: {
+          completed: boolean
+          created_at: string
+          date: string
+          exercises: Json
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+          workout_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          date: string
+          exercises?: Json
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+          workout_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          date?: string
+          exercises?: Json
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+          workout_id?: string
         }
         Relationships: []
       }

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,7 +22,7 @@ export const useUserProfile = () => {
 
   const loadProfile = async () => {
     if (!user) {
-      // For non-authenticated users, load from localStorage
+      // For non-authenticated users, load from localStorage as fallback only
       const savedProfile = localStorage.getItem("userProfile");
       if (savedProfile) {
         try {
@@ -62,6 +61,9 @@ export const useUserProfile = () => {
           exercise_frequency: data.exercise_frequency,
         };
         setProfile(profileData);
+        
+        // Keep localStorage as backup for offline access
+        localStorage.setItem("userProfile", JSON.stringify(profileData));
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -72,7 +74,7 @@ export const useUserProfile = () => {
 
   const saveProfile = async (profileData: UserProfileData) => {
     if (!user) {
-      // For non-authenticated users, save to localStorage
+      // For non-authenticated users, save to localStorage only
       localStorage.setItem("userProfile", JSON.stringify(profileData));
       setProfile(profileData);
       toast.success("Profile updated locally");

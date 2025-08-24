@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,7 +18,7 @@ export const useWaterTracking = () => {
 
   const loadWaterData = async () => {
     if (!user) {
-      // For non-authenticated users, load from localStorage
+      // For non-authenticated users, load from localStorage as fallback only
       const today = new Date().toLocaleDateString('en-US');
       const savedWaterData = localStorage.getItem(`waterLog_${today}`);
       
@@ -53,11 +52,14 @@ export const useWaterTracking = () => {
       }
 
       if (data) {
-        // Properly cast the entries from JSONB to WaterEntry[]
         const entries = Array.isArray(data.entries) ? data.entries as WaterEntry[] : [];
         setWaterLog(entries);
         setTotalWater(data.total_water || 0);
         setWaterGoal(data.water_goal || 2000);
+        
+        // Keep localStorage as backup
+        const today = new Date().toLocaleDateString('en-US');
+        localStorage.setItem(`waterLog_${today}`, JSON.stringify(entries));
       } else {
         // No data for today, start fresh
         setWaterLog([]);
@@ -73,7 +75,7 @@ export const useWaterTracking = () => {
 
   const saveWaterData = async (entries: WaterEntry[], total: number, goal: number) => {
     if (!user) {
-      // For non-authenticated users, save to localStorage
+      // For non-authenticated users, save to localStorage only
       const today = new Date().toLocaleDateString('en-US');
       localStorage.setItem(`waterLog_${today}`, JSON.stringify(entries));
       return;
@@ -96,6 +98,10 @@ export const useWaterTracking = () => {
 
       if (error) {
         console.error('Error saving water data:', error);
+      } else {
+        // Keep localStorage as backup
+        const today = new Date().toLocaleDateString('en-US');
+        localStorage.setItem(`waterLog_${today}`, JSON.stringify(entries));
       }
     } catch (error) {
       console.error('Error saving water data:', error);
