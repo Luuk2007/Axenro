@@ -44,10 +44,8 @@ export default function ProgressPhotoCard({
   const isPremium = subscriptionTier === 'premium';
   const isPro = subscriptionTier === 'pro';
 
-  // Construct proper public URL for Supabase storage
-  const imageUrl = photo.image_url ? 
-    `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${photo.image_url.split('/').pop()}` : 
-    null;
+  // Use the image URL directly as stored in the database since bucket is now public
+  const imageUrl = photo.image_url;
 
   const handleImageLoad = () => {
     console.log('Image loaded successfully:', imageUrl);

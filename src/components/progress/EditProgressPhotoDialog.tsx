@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -37,7 +36,7 @@ export default function EditProgressPhotoDialog({
   const isPremium = subscriptionTier === 'premium';
   const isPro = subscriptionTier === 'pro';
 
-  // Direct image URL - the bucket is now public
+  // Use direct image URL since bucket is now public
   const imageUrl = photo?.image_url;
 
   useEffect(() => {
@@ -105,7 +104,6 @@ export default function EditProgressPhotoDialog({
                   className="max-w-full max-h-64 object-contain rounded-lg"
                   onError={(e) => {
                     console.error('Failed to load image in edit dialog:', imageUrl);
-                    // Show error state instead of hiding
                     e.currentTarget.style.filter = 'grayscale(1)';
                     e.currentTarget.style.opacity = '0.5';
                   }}
