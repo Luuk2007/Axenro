@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,10 +46,8 @@ const Profile = () => {
       weight: data.weight || 0,
       height: data.height || 0,
       gender: data.gender || '',
-      activityLevel: data.activityLevel || '',
       goal: data.goal || '',
       exerciseFrequency: data.exerciseFrequency || '',
-      dateOfBirth: data.dateOfBirth || '',
       targetWeight: data.targetWeight,
     };
   };
@@ -158,59 +154,39 @@ const Profile = () => {
   };
 
   const handleSubmit = async (data: ProfileFormValues) => {
-    if (user) {
-      // Save to Supabase for authenticated users
-      try {
-        const success = await profileService.saveProfile(data);
-        if (success) {
-          setProfile(data);
-          setIsNewUser(false);
-          setInitialValues(data);
-          setHasValidSavedProfile(data.weight > 0 && data.height > 0);
+    try {
+      const success = await profileService.saveProfile(data);
+      if (success) {
+        setProfile(data);
+        setIsNewUser(false);
+        setInitialValues(data);
+        setHasValidSavedProfile(data.weight > 0 && data.height > 0);
+        
+        if (user) {
           toast.success(t("profileUpdated"));
-          
-          // Save initial weight to weightData array if it doesn't exist yet
-          const savedWeightData = localStorage.getItem("weightData");
-          if (!savedWeightData || JSON.parse(savedWeightData).length === 0) {
-            const today = new Date();
-            const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-            const initialWeightData = [
-              {
-                date: formattedDate,
-                value: data.weight
-              }
-            ];
-            localStorage.setItem("weightData", JSON.stringify(initialWeightData));
-          }
         } else {
-          toast.error("Failed to save profile");
+          toast.info(t("Please login to save your profile"));
         }
-      } catch (error) {
-        console.error('Error saving profile:', error);
+        
+        // Save initial weight to weightData array if it doesn't exist yet
+        const savedWeightData = localStorage.getItem("weightData");
+        if (!savedWeightData || JSON.parse(savedWeightData).length === 0) {
+          const today = new Date();
+          const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+          const initialWeightData = [
+            {
+              date: formattedDate,
+              value: data.weight
+            }
+          ];
+          localStorage.setItem("weightData", JSON.stringify(initialWeightData));
+        }
+      } else {
         toast.error("Failed to save profile");
       }
-    } else {
-      // Save to localStorage for unauthenticated users
-      localStorage.setItem("userProfile", JSON.stringify(data));
-      setProfile(data);
-      setIsNewUser(false);
-      setInitialValues(data);
-      setHasValidSavedProfile(data.weight > 0 && data.height > 0);
-      toast.info(t("Please login to save your profile"));
-      
-      // Save initial weight to weightData array if it doesn't exist yet
-      const savedWeightData = localStorage.getItem("weightData");
-      if (!savedWeightData || JSON.parse(savedWeightData).length === 0) {
-        const today = new Date();
-        const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-        const initialWeightData = [
-          {
-            date: formattedDate,
-            value: data.weight
-          }
-        ];
-        localStorage.setItem("weightData", JSON.stringify(initialWeightData));
-      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast.error("Failed to save profile");
     }
   };
 
@@ -297,4 +273,3 @@ const Profile = () => {
 };
 
 export default Profile;
-

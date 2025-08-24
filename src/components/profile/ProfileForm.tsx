@@ -28,10 +28,8 @@ const formSchema = z.object({
   weight: z.number().min(1).max(1000),
   height: z.number().min(1).max(300),
   gender: z.string().min(1, "Gender is required"),
-  activityLevel: z.string().min(1, "Activity level is required"),
   goal: z.string().min(1, "Goal is required"),
   exerciseFrequency: z.string().min(1, "Exercise frequency is required"),
-  dateOfBirth: z.string().min(1, "Date of birth is required"),
   targetWeight: z.number().optional(),
 });
 
@@ -43,10 +41,8 @@ export const defaultValues: ProfileFormValues = {
   weight: 70,
   height: 170,
   gender: "male",
-  activityLevel: "moderately_active",
   goal: "maintain",
   exerciseFrequency: "3-4",
-  dateOfBirth: "",
   targetWeight: undefined,
 };
 
@@ -56,10 +52,8 @@ export const emptyDefaultValues: Partial<ProfileFormValues> = {
   weight: 0,
   height: 0,
   gender: "",
-  activityLevel: "",
   goal: "",
   exerciseFrequency: "",
-  dateOfBirth: "",
   targetWeight: undefined,
 };
 
@@ -126,22 +120,6 @@ const ProfileForm = ({ onSubmit, initialValues, isNewUser }: ProfileFormProps) =
 
           <FormField
             control={form.control}
-            name="dateOfBirth"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("Date of birth")}</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
             name="weight"
             render={({ field }) => (
               <FormItem>
@@ -159,26 +137,26 @@ const ProfileForm = ({ onSubmit, initialValues, isNewUser }: ProfileFormProps) =
               </FormItem>
             )}
           />
-
-          <FormField
-            control={form.control}
-            name="height"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("Height")} (cm)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder={t("Enter your height")}
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
+
+        <FormField
+          control={form.control}
+          name="height"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("Height")} (cm)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder={t("Enter your height")}
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -196,31 +174,6 @@ const ProfileForm = ({ onSubmit, initialValues, isNewUser }: ProfileFormProps) =
                   <SelectItem value="male">{t("Male")}</SelectItem>
                   <SelectItem value="female">{t("Female")}</SelectItem>
                   <SelectItem value="other">{t("Other")}</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="activityLevel"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("Activity level")}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("Select your activity level")} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="sedentary">{t("Sedentary")}</SelectItem>
-                  <SelectItem value="lightly_active">{t("Lightly active")}</SelectItem>
-                  <SelectItem value="moderately_active">{t("Moderately active")}</SelectItem>
-                  <SelectItem value="very_active">{t("Very active")}</SelectItem>
-                  <SelectItem value="extremely_active">{t("Extremely active")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
