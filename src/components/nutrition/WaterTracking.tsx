@@ -1,99 +1,25 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Trash2, GlassWater, Calculator, Droplet } from 'lucide-react';
-import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-
-type WaterEntry = {
-  id: string;
-  amount: number;
-  timestamp: number;
-};
+import { useWaterTracking } from '@/hooks/useWaterTracking';
 
 export default function WaterTracking() {
   const { t } = useLanguage();
-  const [totalWater, setTotalWater] = useState(0);
-  const [waterLog, setWaterLog] = useState<WaterEntry[]>([]);
-  const [waterGoal, setWaterGoal] = useState(2000); // Default 2 liters
-  const [bodyWeight, setBodyWeight] = useState<string>('70'); // Default 70kg
-
-  // Load water data and user weight on component mount
-  useEffect(() => {
-    const today = new Date().toLocaleDateString('en-US');
-    const savedWaterData = localStorage.getItem(`waterLog_${today}`);
-    
-    if (savedWaterData) {
-      try {
-        const parsedData = JSON.parse(savedWaterData);
-        setWaterLog(parsedData);
-        
-        // Calculate total water from the log
-        const total = parsedData.reduce((sum: number, entry: WaterEntry) => sum + entry.amount, 0);
-        setTotalWater(total);
-      } catch (error) {
-        console.error("Error parsing water data:", error);
-      }
-    } else {
-      // Reset for new day
-      setWaterLog([]);
-      setTotalWater(0);
-    }
-
-    // Load user profile to get weight if available
-    const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      try {
-        const profile = JSON.parse(savedProfile);
-        if (profile.weight) {
-          setBodyWeight(profile.weight.toString());
-          // Calculate recommended water intake: 35ml * body weight in kg
-          const recommendedIntake = Math.round(35 * profile.weight);
-          setWaterGoal(recommendedIntake);
-        }
-      } catch (error) {
-        console.error("Error parsing user profile:", error);
-      }
-    }
-  }, []);
-
-  // Save water data to localStorage whenever it changes
-  useEffect(() => {
-    const today = new Date().toLocaleDateString('en-US');
-    localStorage.setItem(`waterLog_${today}`, JSON.stringify(waterLog));
-  }, [waterLog]);
-
-  const addWater = (amount: number) => {
-    const newEntry: WaterEntry = {
-      id: Date.now().toString(),
-      amount,
-      timestamp: Date.now(),
-    };
-    
-    const updatedLog = [...waterLog, newEntry];
-    setWaterLog(updatedLog);
-    setTotalWater(prevTotal => prevTotal + amount);
-    toast.success(`Added ${amount}ml of water`);
-  };
-
-  const deleteWaterEntry = (id: string) => {
-    const entryToDelete = waterLog.find(entry => entry.id === id);
-    if (entryToDelete) {
-      const amountToRemove = entryToDelete.amount;
-      
-      // Update total water
-      setTotalWater(prevTotal => prevTotal - amountToRemove);
-      
-      // Remove from log
-      const updatedLog = waterLog.filter(entry => entry.id !== id);
-      setWaterLog(updatedLog);
-      
-      toast.success(`Removed ${amountToRemove}ml of water`);
-    }
-  };
+  const [bodyWeight, setBodyWeight] = useState<string>('70');
+  const {
+    totalWater,
+    waterLog,
+    waterGoal,
+    loading,
+    addWater,
+    deleteWaterEntry,
+    updateWaterGoal
+  } = useWaterTracking();
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -103,19 +29,21 @@ export default function WaterTracking() {
   const calculateWaterIntake = () => {
     const weightNum = parseFloat(bodyWeight);
     if (isNaN(weightNum) || weightNum <= 0) {
-      toast.error("Please enter a valid body weight");
       return;
     }
     
     // Formula: 35ml * body weight in kg
     const recommendedIntake = Math.round(35 * weightNum);
-    setWaterGoal(recommendedIntake);
-    toast.success(`Water goal updated to ${recommendedIntake}ml`);
+    updateWaterGoal(recommendedIntake);
   };
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBodyWeight(e.target.value);
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-4">

@@ -521,6 +521,147 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          activity_level: string | null
+          age: number | null
+          created_at: string
+          exercise_frequency: string | null
+          fitness_goal: string | null
+          gender: string | null
+          height: number | null
+          id: string
+          name: string | null
+          target_weight: number | null
+          updated_at: string
+          user_id: string
+          weight: number | null
+        }
+        Insert: {
+          activity_level?: string | null
+          age?: number | null
+          created_at?: string
+          exercise_frequency?: string | null
+          fitness_goal?: string | null
+          gender?: string | null
+          height?: number | null
+          id?: string
+          name?: string | null
+          target_weight?: number | null
+          updated_at?: string
+          user_id: string
+          weight?: number | null
+        }
+        Update: {
+          activity_level?: string | null
+          age?: number | null
+          created_at?: string
+          exercise_frequency?: string | null
+          fitness_goal?: string | null
+          gender?: string | null
+          height?: number | null
+          id?: string
+          name?: string | null
+          target_weight?: number | null
+          updated_at?: string
+          user_id?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      water_tracking: {
+        Row: {
+          created_at: string
+          date: string
+          entries: Json
+          id: string
+          total_water: number
+          updated_at: string
+          user_id: string
+          water_goal: number
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          entries?: Json
+          id?: string
+          total_water?: number
+          updated_at?: string
+          user_id: string
+          water_goal?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          entries?: Json
+          id?: string
+          total_water?: number
+          updated_at?: string
+          user_id?: string
+          water_goal?: number
+        }
+        Relationships: []
+      }
+      weight_data: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          user_id: string
+          weight: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          user_id?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      workouts_data: {
+        Row: {
+          completed: boolean
+          created_at: string
+          date: string
+          exercises: Json
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+          workout_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          date: string
+          exercises: Json
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+          workout_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          date?: string
+          exercises?: Json
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+          workout_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
