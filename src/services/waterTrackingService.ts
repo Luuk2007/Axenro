@@ -7,96 +7,91 @@ export interface WaterEntry {
   timestamp: number;
 }
 
-export interface WaterLog {
-  id: string;
-  user_id: string;
-  amount: number;
-  logged_at: string;
-  created_at: string;
-}
-
 export const waterTrackingService = {
   // Get water logs for a specific date
   async getWaterLogs(date: string): Promise<WaterEntry[]> {
-    const { data, error } = await supabase
-      .from('water_logs')
-      .select('*')
-      .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-      .gte('logged_at', `${date}T00:00:00`)
-      .lte('logged_at', `${date}T23:59:59`)
-      .order('logged_at', { ascending: true });
-
-    if (error) {
-      console.error('Error fetching water logs:', error);
-      return [];
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      // Fallback to localStorage for unauthenticated users
+      return this.getLocalStorageWaterLogs(date);
     }
 
-    return (data || []).map(log => ({
-      id: log.id,
-      amount: log.amount,
-      timestamp: new Date(log.logged_at).getTime(),
-    }));
+    // For now, return empty array since water_logs table doesn't exist yet
+    // This will be updated once the database migration is approved
+    console.log('Water logs from Supabase not available yet, using localStorage');
+    return this.getLocalStorageWaterLogs(date);
   },
 
   // Add water entry
   async addWaterEntry(amount: number): Promise<WaterEntry | null> {
+    const { data: user } = await supabase.auth.getUser();
     const now = new Date();
-    const { data, error } = await supabase
-      .from('water_logs')
-      .insert({
-        user_id: (await supabase.auth.getUser()).data.user?.id,
-        amount,
-        logged_at: now.toISOString(),
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error adding water entry:', error);
-      return null;
+    
+    if (!user.user) {
+      // Fallback to localStorage for unauthenticated users
+      return this.addLocalStorageWaterEntry(amount);
     }
 
-    return {
-      id: data.id,
-      amount: data.amount,
-      timestamp: new Date(data.logged_at).getTime(),
-    };
+    // For now, use localStorage until database migration is approved
+    console.log('Adding to localStorage until Supabase water_logs table is available');
+    return this.addLocalStorageWaterEntry(amount);
   },
 
   // Delete water entry
   async deleteWaterEntry(id: string): Promise<boolean> {
-    const { error } = await supabase
-      .from('water_logs')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
-
-    if (error) {
-      console.error('Error deleting water entry:', error);
-      return false;
+    const { data: user } = await supabase.auth.getUser();
+    
+    if (!user.user) {
+      // Fallback to localStorage for unauthenticated users
+      return this.deleteLocalStorageWaterEntry(id);
     }
 
+    // For now, use localStorage until database migration is approved
+    console.log('Deleting from localStorage until Supabase water_logs table is available');
+    return this.deleteLocalStorageWaterEntry(id);
+  },
+
+  // localStorage helper methods
+  getLocalStorageWaterLogs(date: string): WaterEntry[] {
+    const localData = localStorage.getItem(`waterLog_${date}`);
+    if (!localData) return [];
+
+    try {
+      return JSON.parse(localData);
+    } catch (error) {
+      console.error('Error parsing localStorage water data:', error);
+      return [];
+    }
+  },
+
+  addLocalStorageWaterEntry(amount: number): WaterEntry {
+    const now = new Date();
+    const today = now.toLocaleDateString('en-US');
+    const entry: WaterEntry = {
+      id: Date.now().toString(),
+      amount,
+      timestamp: now.getTime(),
+    };
+
+    const existingData = this.getLocalStorageWaterLogs(today);
+    existingData.push(entry);
+    localStorage.setItem(`waterLog_${today}`, JSON.stringify(existingData));
+    
+    return entry;
+  },
+
+  deleteLocalStorageWaterEntry(id: string): boolean {
+    const today = new Date().toLocaleDateString('en-US');
+    const existingData = this.getLocalStorageWaterLogs(today);
+    const filteredData = existingData.filter(entry => entry.id !== id);
+    
+    localStorage.setItem(`waterLog_${today}`, JSON.stringify(filteredData));
     return true;
   },
 
-  // Migrate localStorage data to Supabase
+  // Migrate localStorage data to Supabase (placeholder for now)
   async migrateLocalStorageData(): Promise<void> {
-    const today = new Date().toLocaleDateString('en-US');
-    const localData = localStorage.getItem(`waterLog_${today}`);
-    
-    if (!localData) return;
-
-    try {
-      const waterLog: WaterEntry[] = JSON.parse(localData);
-      
-      for (const entry of waterLog) {
-        await this.addWaterEntry(entry.amount);
-      }
-      
-      // Clear localStorage after successful migration
-      localStorage.removeItem(`waterLog_${today}`);
-    } catch (error) {
-      console.error('Error migrating water data:', error);
-    }
+    console.log('Water data migration will be available once Supabase table is created');
+    // This will be implemented once the water_logs table exists
   }
 };

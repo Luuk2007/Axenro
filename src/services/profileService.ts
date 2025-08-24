@@ -1,6 +1,34 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { ProfileFormValues } from '@/components/profile/ProfileForm';
+
+// Define the profile interface to match what we expect from the database
+interface ProfileData {
+  id: string;
+  full_name: string | null;
+  age: number | null;
+  weight: number | null;
+  height: number | null;
+  gender: string | null;
+  activity_level: string | null;
+  fitness_goal: string | null;
+  exercise_frequency: string | null;
+  date_of_birth: string | null;
+  updated_at: string | null;
+  profile_picture_url: string | null;
+}
+
+// Define the ProfileFormValues interface to match the form
+export interface ProfileFormValues {
+  fullName: string;
+  age: number;
+  weight: number;
+  height: number;
+  gender: string;
+  activityLevel: string;
+  goal: string;
+  exerciseFrequency: string;
+  dateOfBirth: string;
+}
 
 export const profileService = {
   // Get user profile data
@@ -8,6 +36,7 @@ export const profileService = {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) return null;
 
+    // For now, we'll work with the existing profiles table structure
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -21,17 +50,18 @@ export const profileService = {
 
     if (!data) return null;
 
-    // Convert Supabase data to ProfileFormValues format
+    // Convert basic profile data to ProfileFormValues format
+    // Since the extended fields don't exist yet, we'll return defaults
     return {
       fullName: data.full_name || '',
-      age: data.age || 0,
-      weight: data.weight || 0,
-      height: data.height || 0,
-      gender: data.gender || '',
-      activityLevel: data.activity_level || '',
-      goal: data.fitness_goal || '',
-      exerciseFrequency: data.exercise_frequency || '',
-      dateOfBirth: data.date_of_birth || '',
+      age: 0,
+      weight: 0,
+      height: 0,
+      gender: '',
+      activityLevel: '',
+      goal: '',
+      exerciseFrequency: '',
+      dateOfBirth: '',
     };
   },
 
@@ -40,19 +70,12 @@ export const profileService = {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) return false;
 
+    // For now, only update the full_name in the existing profiles table
     const { error } = await supabase
       .from('profiles')
       .upsert({
         id: user.user.id,
         full_name: profile.fullName,
-        age: profile.age,
-        weight: profile.weight,
-        height: profile.height,
-        gender: profile.gender,
-        activity_level: profile.activityLevel,
-        fitness_goal: profile.goal,
-        exercise_frequency: profile.exerciseFrequency,
-        date_of_birth: profile.dateOfBirth,
         updated_at: new Date().toISOString(),
       });
 
