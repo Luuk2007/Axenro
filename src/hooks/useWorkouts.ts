@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { Workout } from '@/types/workout';
+import { Workout, Exercise } from '@/types/workout';
 
 export const useWorkouts = () => {
   const { user } = useAuth();
@@ -39,11 +39,11 @@ export const useWorkouts = () => {
       }
 
       if (data) {
-        const formattedWorkouts = data.map(item => ({
+        const formattedWorkouts: Workout[] = data.map(item => ({
           id: item.workout_id,
           name: item.name,
           date: item.date,
-          exercises: item.exercises || [],
+          exercises: Array.isArray(item.exercises) ? item.exercises as Exercise[] : [],
           completed: item.completed
         }));
         setWorkouts(formattedWorkouts);
