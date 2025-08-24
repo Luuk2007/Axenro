@@ -43,26 +43,44 @@ export default function ProgressPhotoCard({
   const [imageError, setImageError] = useState(false);
   
   const isPremium = subscriptionTier === 'premium';
+  const isPro = subscriptionTier === 'pro';
 
-  // Ensure proper image URL formatting
+  // Fix the image URL generation
   const getImageUrl = (url: string) => {
-    if (!url) return '';
+    if (!url) {
+      console.log('No URL provided');
+      return '';
+    }
+    
+    console.log('Original image URL:', url);
+    
     // If it's already a full URL, return as is
-    if (url.startsWith('http')) return url;
-    // If it's a relative path, construct the full Supabase URL
-    return `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${url}`;
+    if (url.startsWith('http')) {
+      console.log('Using full URL:', url);
+      return url;
+    }
+    
+    // For Supabase storage paths, construct the public URL
+    const publicUrl = `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${url}`;
+    console.log('Constructed public URL:', publicUrl);
+    return publicUrl;
   };
 
   const handleImageLoad = () => {
+    console.log('Image loaded successfully for photo:', photo.id);
     setImageLoaded(true);
     setImageError(false);
   };
 
-  const handleImageError = () => {
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('Failed to load image for photo:', photo.id);
+    console.error('Image URL that failed:', getImageUrl(photo.image_url));
+    console.error('Error event:', e);
     setImageError(true);
     setImageLoaded(false);
-    console.error('Failed to load image:', photo.image_url);
   };
+
+  const imageUrl = getImageUrl(photo.image_url);
 
   return (
     <Card 
@@ -74,16 +92,15 @@ export default function ProgressPhotoCard({
       <CardContent className="p-0">
         {/* Image */}
         <div className="relative aspect-square bg-gray-100">
-          {!imageError ? (
+          {imageUrl && !imageError ? (
             <img
-              src={getImageUrl(photo.image_url)}
+              src={imageUrl}
               alt={`Progress from ${photo.date}`}
               className={`w-full h-full object-cover transition-opacity duration-300 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
               onLoad={handleImageLoad}
               onError={handleImageError}
-              crossOrigin="anonymous"
             />
           ) : (
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -95,13 +112,13 @@ export default function ProgressPhotoCard({
           )}
           
           {/* Loading placeholder */}
-          {!imageLoaded && !imageError && (
+          {imageUrl && !imageLoaded && !imageError && (
             <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
               <div className="text-gray-400">Loading...</div>
             </div>
           )}
 
-          {/* Overlay with icons - only show for premium */}
+          {/* Overlay with icons - show for premium */}
           {isPremium && (
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <div className="absolute bottom-2 left-2 flex gap-2">
@@ -127,8 +144,8 @@ export default function ProgressPhotoCard({
             </div>
           )}
 
-          {/* Action menu - only show for premium and pro */}
-          {!selectionMode && (subscriptionTier === 'premium' || subscriptionTier === 'pro') && (
+          {/* Action menu - show for pro and premium */}
+          {!selectionMode && (isPro || isPremium) && (
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -177,8 +194,8 @@ export default function ProgressPhotoCard({
               <Calendar className="h-3 w-3" />
               {format(new Date(photo.date), 'MMM d, yyyy')}
             </div>
-            {/* Only show category for premium users */}
-            {isPremium && (
+            {/* Show category for premium users, limited for pro */}
+            {(isPremium || isPro) && (
               <Badge variant="outline" className="text-xs">
                 {photo.category}
               </Badge>

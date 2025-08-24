@@ -37,11 +37,25 @@ export default function EditProgressPhotoDialog({
   const isPremium = subscriptionTier === 'premium';
   const isPro = subscriptionTier === 'pro';
 
-  // Ensure proper image URL formatting
+  // Fix image URL generation
   const getImageUrl = (url: string) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${url}`;
+    if (!url) {
+      console.log('No URL provided in edit dialog');
+      return '';
+    }
+    
+    console.log('Original image URL in edit dialog:', url);
+    
+    // If it's already a full URL, return as is
+    if (url.startsWith('http')) {
+      console.log('Using full URL in edit dialog:', url);
+      return url;
+    }
+    
+    // For Supabase storage paths, construct the public URL
+    const publicUrl = `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${url}`;
+    console.log('Constructed public URL in edit dialog:', publicUrl);
+    return publicUrl;
   };
 
   useEffect(() => {
@@ -73,11 +87,11 @@ export default function EditProgressPhotoDialog({
     try {
       const updates: Partial<ProgressPhoto> = {
         date,
-        notes: isPremium ? notes : '',
-        category: isPremium ? category : photo.category,
-        tags: isPremium ? tags : [],
-        is_favorite: isPremium ? isFavorite : false,
-        is_milestone: isPremium ? isMilestone : false,
+        notes: isPremium ? notes : photo.notes, // Keep existing notes for pro
+        category: (isPremium || isPro) ? category : photo.category, // Pro can edit category
+        tags: isPremium ? tags : photo.tags, // Keep existing tags for pro
+        is_favorite: isPremium ? isFavorite : photo.is_favorite, // Keep existing for pro
+        is_milestone: isPremium ? isMilestone : photo.is_milestone, // Keep existing for pro
       };
 
       await onUpdatePhoto(photo.id, updates);
@@ -91,6 +105,8 @@ export default function EditProgressPhotoDialog({
 
   if (!photo) return null;
 
+  const imageUrl = getImageUrl(photo.image_url);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -102,12 +118,24 @@ export default function EditProgressPhotoDialog({
           {/* Image Preview */}
           <div className="flex justify-center">
             <div className="relative">
-              <img
-                src={getImageUrl(photo.image_url)}
-                alt="Progress photo"
-                className="max-w-full max-h-64 object-contain rounded-lg"
-                crossOrigin="anonymous"
-              />
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt="Progress photo"
+                  className="max-w-full max-h-64 object-contain rounded-lg"
+                  onError={(e) => {
+                    console.error('Failed to load image in edit dialog:', imageUrl);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="w-64 h-64 bg-gray-200 flex items-center justify-center rounded-lg">
+                  <div className="text-center text-gray-500">
+                    <div className="text-2xl mb-2">📷</div>
+                    <div className="text-sm">Image not available</div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -122,8 +150,8 @@ export default function EditProgressPhotoDialog({
             />
           </div>
 
-          {/* Category - Only for Premium */}
-          {isPremium && (
+          {/* Category - For Pro and Premium */}
+          {(isPro || isPremium) && (
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Select value={category} onValueChange={(value) => setCategory(value as ProgressPhoto['category'])}>
