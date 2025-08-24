@@ -203,6 +203,36 @@ export type Database = {
         }
         Relationships: []
       }
+      body_measurements: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          measurement_type: string
+          unit: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          measurement_type: string
+          unit: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          measurement_type?: string
+          unit?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: []
+      }
       cookie_consent: {
         Row: {
           analytics_cookies: boolean

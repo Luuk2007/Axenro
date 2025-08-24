@@ -24,6 +24,7 @@ import {
 
 import { useProgressPhotos } from '@/hooks/useProgressPhotos';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useBodyMeasurements } from '@/hooks/useBodyMeasurements';
 import AddProgressPhotoDialog from '@/components/progress/AddProgressPhotoDialog';
 import EditProgressPhotoDialog from '@/components/progress/EditProgressPhotoDialog';
 import ProgressPhotoCard from '@/components/progress/ProgressPhotoCard';
@@ -37,14 +38,6 @@ interface MeasurementType {
   unit: string;
   enabled: boolean;
   isCustom?: boolean;
-}
-
-interface MeasurementEntry {
-  id: string;
-  type: string;
-  value: number;
-  date: string;
-  unit: string;
 }
 
 export default function Progress() {
@@ -62,10 +55,11 @@ export default function Progress() {
   const [measurementType, setMeasurementType] = useState('waist');
   const [measurementValue, setMeasurementValue] = useState('');
   const [measurementDate, setMeasurementDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [measurements, setMeasurements] = useState<MeasurementEntry[]>([]);
   const [measurementTypes, setMeasurementTypes] = useState<MeasurementType[]>([]);
 
+  const { measurements, loading: measurementsLoading, addMeasurement, deleteMeasurement } = useBodyMeasurements();
   const { photos, loading: photosLoading, addPhoto, updatePhoto, deletePhoto } = useProgressPhotos();
+
   const [showAddPhotoDialog, setShowAddPhotoDialog] = useState(false);
   const [showEditPhotoDialog, setShowEditPhotoDialog] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<ProgressPhoto | null>(null);
@@ -109,16 +103,6 @@ export default function Progress() {
   
   useEffect(() => {
     loadMeasurementTypes();
-    
-    const savedMeasurements = localStorage.getItem('bodyMeasurements');
-    
-    if (savedMeasurements) {
-      try {
-        setMeasurements(JSON.parse(savedMeasurements));
-      } catch (error) {
-        console.error("Error loading measurements:", error);
-      }
-    }
   }, []);
 
   useEffect(() => {
@@ -131,14 +115,8 @@ export default function Progress() {
       window.removeEventListener('measurementTypesChanged', handleMeasurementTypesChange);
     };
   }, []);
-  
-  useEffect(() => {
-    if (measurements.length > 0) {
-      localStorage.setItem('bodyMeasurements', JSON.stringify(measurements));
-    }
-  }, [measurements]);
 
-  const handleAddMeasurement = () => {
+  const handleAddMeasurement = async () => {
     if (!measurementValue) {
       toast.error(t('Please enter value'));
       return;
@@ -159,21 +137,22 @@ export default function Progress() {
     }
     
     const newMeasurement = {
-      id: `${measurementType}-${Date.now()}`,
       type: measurementType,
       value,
       date: measurementDate,
       unit: selectedType.unit
     };
     
-    setMeasurements(prev => [...prev, newMeasurement]);
+    const result = await addMeasurement(newMeasurement);
     
-    toast.success(`${selectedType.name} ${t('Measurement added')}`);
-    setMeasurementValue('');
+    if (result) {
+      toast.success(`${selectedType.name} ${t('Measurement added')}`);
+      setMeasurementValue('');
+    }
   };
   
-  const handleDeleteMeasurement = (id: string) => {
-    setMeasurements(prev => prev.filter(measurement => measurement.id !== id));
+  const handleDeleteMeasurement = async (id: string) => {
+    await deleteMeasurement(id);
     toast.success(t('Measurement deleted'));
   };
 
