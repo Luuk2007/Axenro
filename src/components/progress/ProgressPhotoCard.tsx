@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,35 +45,20 @@ export default function ProgressPhotoCard({
   const isPremium = subscriptionTier === 'premium';
   const isPro = subscriptionTier === 'pro';
 
-  // Simplified image URL handling
-  const getImageUrl = (url: string) => {
-    if (!url) return '';
-    
-    // If it's already a complete URL, use it
-    if (url.startsWith('http')) {
-      return url;
-    }
-    
-    // If it's a blob URL or data URL, use it directly
-    if (url.startsWith('blob:') || url.startsWith('data:')) {
-      return url;
-    }
-    
-    // Otherwise, assume it's a Supabase storage path
-    return `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${url}`;
-  };
+  // Direct image URL - the bucket is now public so we can use the URL directly
+  const imageUrl = photo.image_url;
 
   const handleImageLoad = () => {
+    console.log('Image loaded successfully:', imageUrl);
     setImageLoaded(true);
     setImageError(false);
   };
 
-  const handleImageError = () => {
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error('Image failed to load:', imageUrl, e);
     setImageError(true);
     setImageLoaded(false);
   };
-
-  const imageUrl = getImageUrl(photo.image_url);
 
   return (
     <Card 
@@ -84,7 +70,7 @@ export default function ProgressPhotoCard({
       <CardContent className="p-0">
         {/* Image */}
         <div className="relative aspect-square bg-gray-100">
-          {imageUrl && !imageError ? (
+          {imageUrl ? (
             <img
               src={imageUrl}
               alt={`Progress from ${photo.date}`}
@@ -93,13 +79,12 @@ export default function ProgressPhotoCard({
               }`}
               onLoad={handleImageLoad}
               onError={handleImageError}
-              crossOrigin="anonymous"
             />
           ) : (
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
               <div className="text-center text-gray-500">
                 <div className="text-2xl mb-2">📷</div>
-                <div className="text-xs">Image not available</div>
+                <div className="text-xs">No image URL</div>
               </div>
             </div>
           )}
@@ -108,6 +93,17 @@ export default function ProgressPhotoCard({
           {imageUrl && !imageLoaded && !imageError && (
             <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
               <div className="text-gray-400">Loading...</div>
+            </div>
+          )}
+
+          {/* Error state */}
+          {imageError && (
+            <div className="absolute inset-0 bg-red-50 flex items-center justify-center">
+              <div className="text-center text-red-500">
+                <div className="text-2xl mb-2">❌</div>
+                <div className="text-xs">Failed to load</div>
+                <div className="text-xs mt-1 px-2">{imageUrl}</div>
+              </div>
             </div>
           )}
 

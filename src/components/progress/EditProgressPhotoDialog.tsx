@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -36,23 +37,8 @@ export default function EditProgressPhotoDialog({
   const isPremium = subscriptionTier === 'premium';
   const isPro = subscriptionTier === 'pro';
 
-  // Simplified image URL handling - same as in ProgressPhotoCard
-  const getImageUrl = (url: string) => {
-    if (!url) return '';
-    
-    // If it's already a complete URL, use it
-    if (url.startsWith('http')) {
-      return url;
-    }
-    
-    // If it's a blob URL or data URL, use it directly
-    if (url.startsWith('blob:') || url.startsWith('data:')) {
-      return url;
-    }
-    
-    // Otherwise, assume it's a Supabase storage path
-    return `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${url}`;
-  };
+  // Direct image URL - the bucket is now public
+  const imageUrl = photo?.image_url;
 
   useEffect(() => {
     if (photo) {
@@ -101,8 +87,6 @@ export default function EditProgressPhotoDialog({
 
   if (!photo) return null;
 
-  const imageUrl = getImageUrl(photo.image_url);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -119,10 +103,11 @@ export default function EditProgressPhotoDialog({
                   src={imageUrl}
                   alt="Progress photo"
                   className="max-w-full max-h-64 object-contain rounded-lg"
-                  crossOrigin="anonymous"
                   onError={(e) => {
                     console.error('Failed to load image in edit dialog:', imageUrl);
-                    e.currentTarget.style.display = 'none';
+                    // Show error state instead of hiding
+                    e.currentTarget.style.filter = 'grayscale(1)';
+                    e.currentTarget.style.opacity = '0.5';
                   }}
                 />
               ) : (
