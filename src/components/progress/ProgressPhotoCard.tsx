@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,8 +45,25 @@ export default function ProgressPhotoCard({
   const isPremium = subscriptionTier === 'premium';
   const isPro = subscriptionTier === 'pro';
 
-  // Use the image URL directly as stored in the database since bucket is now public
-  const imageUrl = photo.image_url;
+  // Construct the proper public URL for the image
+  const getImageUrl = (imageUrl: string) => {
+    if (!imageUrl) return null;
+    
+    // If it's already a full URL, use it as is
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    
+    // If it's a storage path, construct the public URL
+    if (imageUrl.startsWith('progress-images/')) {
+      return `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/${imageUrl}`;
+    }
+    
+    // If it's just a filename, construct the full path
+    return `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${imageUrl}`;
+  };
+
+  const imageUrl = getImageUrl(photo.image_url);
 
   const handleImageLoad = () => {
     console.log('Image loaded successfully:', imageUrl);

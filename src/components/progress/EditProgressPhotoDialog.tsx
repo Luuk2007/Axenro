@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -36,8 +37,25 @@ export default function EditProgressPhotoDialog({
   const isPremium = subscriptionTier === 'premium';
   const isPro = subscriptionTier === 'pro';
 
-  // Use direct image URL since bucket is now public
-  const imageUrl = photo?.image_url;
+  // Construct the proper public URL for the image
+  const getImageUrl = (imageUrl: string | undefined) => {
+    if (!imageUrl) return null;
+    
+    // If it's already a full URL, use it as is
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    
+    // If it's a storage path, construct the public URL
+    if (imageUrl.startsWith('progress-images/')) {
+      return `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/${imageUrl}`;
+    }
+    
+    // If it's just a filename, construct the full path
+    return `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${imageUrl}`;
+  };
+
+  const imageUrl = getImageUrl(photo?.image_url);
 
   useEffect(() => {
     if (photo) {
