@@ -21,6 +21,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 import { useProgressPhotos } from '@/hooks/useProgressPhotos';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -42,6 +43,7 @@ interface MeasurementType {
 
 export default function Progress() {
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const { subscription_tier, test_mode, test_subscription_tier, loading: subscriptionLoading } = useSubscription();
   
   // Determine current plan - show premium features if we have pro/premium data or still loading
@@ -326,7 +328,7 @@ export default function Progress() {
         </TabsContent>
         
         <TabsContent value="measurements" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
             <Card>
               <CardHeader>
                 <CardTitle>{t("Body measurements")}</CardTitle>
@@ -418,19 +420,19 @@ export default function Progress() {
             </Card>
             
             {measurements.length > 0 && enabledMeasurementTypes.length > 0 && (
-              <div className="col-span-2">
+              <div className={isMobile ? 'col-span-1' : 'col-span-2'}>
                 <Card>
                   <CardHeader>
                     <CardTitle>{t("Measurement Trends")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <Tabs defaultValue={enabledMeasurementTypes[0]?.id} className="w-full">
-                      <TabsList className="mb-4 flex flex-wrap">
+                      <TabsList className={`mb-4 ${isMobile ? 'grid grid-cols-2 w-full' : 'flex flex-wrap'}`}>
                         {enabledMeasurementTypes.map(type => {
                           const hasData = getMeasurementsByType(type.id).length > 0;
                           return (
-                            <TabsTrigger key={type.id} value={type.id} disabled={!hasData}>
-                              {t(type.id) || type.name} {hasData && `(${getMeasurementsByType(type.id).length})`}
+                            <TabsTrigger key={type.id} value={type.id} disabled={!hasData} className={isMobile ? 'text-xs' : ''}>
+                              {isMobile ? (t(type.id) || type.name) : `${t(type.id) || type.name} ${hasData ? `(${getMeasurementsByType(type.id).length})` : ''}`}
                             </TabsTrigger>
                           );
                         })}
@@ -439,7 +441,7 @@ export default function Progress() {
                       {enabledMeasurementTypes.map(type => (
                         <TabsContent key={type.id} value={type.id}>
                           {getMeasurementsByType(type.id).length > 0 ? (
-                            <div className="h-[300px]">
+                            <div className={`${isMobile ? 'h-[250px]' : 'h-[300px]'} w-full`}>
                               <ProgressChart
                                 data={prepareMeasurementDataForChart(type.id)}
                                 title=""
