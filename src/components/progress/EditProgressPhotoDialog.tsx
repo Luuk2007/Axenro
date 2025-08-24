@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -37,25 +36,22 @@ export default function EditProgressPhotoDialog({
   const isPremium = subscriptionTier === 'premium';
   const isPro = subscriptionTier === 'pro';
 
-  // Fix image URL generation
+  // Simplified image URL handling - same as in ProgressPhotoCard
   const getImageUrl = (url: string) => {
-    if (!url) {
-      console.log('No URL provided in edit dialog');
-      return '';
-    }
+    if (!url) return '';
     
-    console.log('Original image URL in edit dialog:', url);
-    
-    // If it's already a full URL, return as is
+    // If it's already a complete URL, use it
     if (url.startsWith('http')) {
-      console.log('Using full URL in edit dialog:', url);
       return url;
     }
     
-    // For Supabase storage paths, construct the public URL
-    const publicUrl = `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${url}`;
-    console.log('Constructed public URL in edit dialog:', publicUrl);
-    return publicUrl;
+    // If it's a blob URL or data URL, use it directly
+    if (url.startsWith('blob:') || url.startsWith('data:')) {
+      return url;
+    }
+    
+    // Otherwise, assume it's a Supabase storage path
+    return `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${url}`;
   };
 
   useEffect(() => {
@@ -123,6 +119,7 @@ export default function EditProgressPhotoDialog({
                   src={imageUrl}
                   alt="Progress photo"
                   className="max-w-full max-h-64 object-contain rounded-lg"
+                  crossOrigin="anonymous"
                   onError={(e) => {
                     console.error('Failed to load image in edit dialog:', imageUrl);
                     e.currentTarget.style.display = 'none';

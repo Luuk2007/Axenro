@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,37 +44,30 @@ export default function ProgressPhotoCard({
   const isPremium = subscriptionTier === 'premium';
   const isPro = subscriptionTier === 'pro';
 
-  // Fix the image URL generation
+  // Simplified image URL handling
   const getImageUrl = (url: string) => {
-    if (!url) {
-      console.log('No URL provided');
-      return '';
-    }
+    if (!url) return '';
     
-    console.log('Original image URL:', url);
-    
-    // If it's already a full URL, return as is
+    // If it's already a complete URL, use it
     if (url.startsWith('http')) {
-      console.log('Using full URL:', url);
       return url;
     }
     
-    // For Supabase storage paths, construct the public URL
-    const publicUrl = `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${url}`;
-    console.log('Constructed public URL:', publicUrl);
-    return publicUrl;
+    // If it's a blob URL or data URL, use it directly
+    if (url.startsWith('blob:') || url.startsWith('data:')) {
+      return url;
+    }
+    
+    // Otherwise, assume it's a Supabase storage path
+    return `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${url}`;
   };
 
   const handleImageLoad = () => {
-    console.log('Image loaded successfully for photo:', photo.id);
     setImageLoaded(true);
     setImageError(false);
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.error('Failed to load image for photo:', photo.id);
-    console.error('Image URL that failed:', getImageUrl(photo.image_url));
-    console.error('Error event:', e);
+  const handleImageError = () => {
     setImageError(true);
     setImageLoaded(false);
   };
@@ -101,6 +93,7 @@ export default function ProgressPhotoCard({
               }`}
               onLoad={handleImageLoad}
               onError={handleImageError}
+              crossOrigin="anonymous"
             />
           ) : (
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
