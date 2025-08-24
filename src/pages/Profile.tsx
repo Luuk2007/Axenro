@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import BMICalculator from "@/components/profile/BMICalculator";
-import ProfileForm, { ProfileFormValues, defaultValues, emptyDefaultValues } from "@/components/profile/ProfileForm";
+import ProfileForm, { ProfileFormValues, defaultValues } from "@/components/profile/ProfileForm";
 import UserStatsDisplay from "@/components/profile/UserStatsDisplay";
 import NutritionCalculator from "@/components/profile/NutritionCalculator";
 import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
@@ -26,7 +25,7 @@ const Profile = () => {
   const { test_mode, test_subscription_tier, subscription_tier } = useSubscription();
   const [profile, setProfile] = useState<ProfileFormValues | null>(null);
   const [isNewUser, setIsNewUser] = useState(true);
-  const [initialValues, setInitialValues] = useState<Partial<ProfileFormValues>>(emptyDefaultValues);
+  const [initialValues, setInitialValues] = useState<ProfileFormValues>(defaultValues);
   const [hasValidSavedProfile, setHasValidSavedProfile] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -57,10 +56,11 @@ const Profile = () => {
           if (savedProfile) {
             try {
               const parsedProfile = JSON.parse(savedProfile);
-              setProfile(parsedProfile);
-              setInitialValues(parsedProfile);
+              const completeProfile = { ...defaultValues, ...parsedProfile };
+              setProfile(completeProfile);
+              setInitialValues(completeProfile);
               setIsNewUser(false);
-              setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
+              setHasValidSavedProfile(completeProfile.weight > 0 && completeProfile.height > 0);
               
               // Migrate localStorage data to Supabase
               await profileService.migrateLocalStorageProfile();
@@ -93,10 +93,11 @@ const Profile = () => {
     if (savedProfile) {
       try {
         const parsedProfile = JSON.parse(savedProfile);
-        setProfile(parsedProfile);
-        setInitialValues(parsedProfile);
+        const completeProfile = { ...defaultValues, ...parsedProfile };
+        setProfile(completeProfile);
+        setInitialValues(completeProfile);
         setIsNewUser(false);
-        setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
+        setHasValidSavedProfile(completeProfile.weight > 0 && completeProfile.height > 0);
       } catch (error) {
         console.error("Error parsing profile:", error);
         setProfileToDefaults();
@@ -110,7 +111,7 @@ const Profile = () => {
   const setProfileToDefaults = () => {
     setProfile(null);
     setIsNewUser(true);
-    setInitialValues(emptyDefaultValues);
+    setInitialValues(defaultValues);
     setHasValidSavedProfile(false);
   };
 
