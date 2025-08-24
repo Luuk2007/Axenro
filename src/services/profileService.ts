@@ -1,22 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-// Define the profile interface to match what we expect from the database
-interface ProfileData {
-  id: string;
-  full_name: string | null;
-  age: number | null;
-  weight: number | null;
-  height: number | null;
-  gender: string | null;
-  activity_level: string | null;
-  fitness_goal: string | null;
-  exercise_frequency: string | null;
-  date_of_birth: string | null;
-  updated_at: string | null;
-  profile_picture_url: string | null;
-}
-
 // Define the ProfileFormValues interface to match the form
 export interface ProfileFormValues {
   fullName: string;
@@ -28,6 +12,7 @@ export interface ProfileFormValues {
   goal: string;
   exerciseFrequency: string;
   dateOfBirth: string;
+  targetWeight?: number;
 }
 
 export const profileService = {
@@ -62,6 +47,7 @@ export const profileService = {
       goal: '',
       exerciseFrequency: '',
       dateOfBirth: '',
+      targetWeight: undefined,
     };
   },
 

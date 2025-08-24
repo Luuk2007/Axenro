@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,6 +32,7 @@ const formSchema = z.object({
   goal: z.string().min(1, "Goal is required"),
   exerciseFrequency: z.string().min(1, "Exercise frequency is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
+  targetWeight: z.number().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof formSchema>;
@@ -45,6 +47,7 @@ export const defaultValues: ProfileFormValues = {
   goal: "maintain",
   exerciseFrequency: "3-4",
   dateOfBirth: "",
+  targetWeight: undefined,
 };
 
 export const emptyDefaultValues: Partial<ProfileFormValues> = {
@@ -57,6 +60,7 @@ export const emptyDefaultValues: Partial<ProfileFormValues> = {
   goal: "",
   exerciseFrequency: "",
   dateOfBirth: "",
+  targetWeight: undefined,
 };
 
 interface ProfileFormProps {
@@ -237,10 +241,9 @@ const ProfileForm = ({ onSubmit, initialValues, isNewUser }: ProfileFormProps) =
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="lose_weight">{t("Lose weight")}</SelectItem>
+                  <SelectItem value="lose">{t("Lose weight")}</SelectItem>
                   <SelectItem value="maintain">{t("Maintain weight")}</SelectItem>
-                  <SelectItem value="gain_weight">{t("Gain weight")}</SelectItem>
-                  <SelectItem value="build_muscle">{t("Build muscle")}</SelectItem>
+                  <SelectItem value="gain">{t("Gain weight")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -261,17 +264,38 @@ const ProfileForm = ({ onSubmit, initialValues, isNewUser }: ProfileFormProps) =
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="never">{t("Never")}</SelectItem>
-                  <SelectItem value="1-2">{t("1-2 times per week")}</SelectItem>
-                  <SelectItem value="3-4">{t("3-4 times per week")}</SelectItem>
-                  <SelectItem value="5-6">{t("5-6 times per week")}</SelectItem>
-                  <SelectItem value="daily">{t("Daily")}</SelectItem>
+                  <SelectItem value="0-1">{t("0-1 times per week")}</SelectItem>
+                  <SelectItem value="2-3">{t("2-3 times per week")}</SelectItem>
+                  <SelectItem value="4-5">{t("4-5 times per week")}</SelectItem>
+                  <SelectItem value="6+">{t("6+ times per week")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {(form.watch("goal") === "lose" || form.watch("goal") === "gain") && (
+          <FormField
+            control={form.control}
+            name="targetWeight"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("Target weight")} (kg)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    placeholder={t("Enter your target weight")}
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <Button type="submit" className="w-full">
           {t("Save profile")}
