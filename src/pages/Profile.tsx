@@ -203,8 +203,8 @@ const Profile = () => {
   const getCompleteProfile = (profile: ProfileFormValues | null): ProfileFormValues | null => {
     if (!profile) return null;
     
-    // Ensure all required fields are present
-    return {
+    // Ensure all required fields are present with proper defaults
+    const completeProfile: ProfileFormValues = {
       fullName: profile.fullName || '',
       age: profile.age || 0,
       weight: profile.weight || 0,
@@ -216,6 +216,8 @@ const Profile = () => {
       dateOfBirth: profile.dateOfBirth || '',
       targetWeight: profile.targetWeight,
     };
+
+    return completeProfile;
   };
 
   if (loading) {
