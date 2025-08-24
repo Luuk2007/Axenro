@@ -198,6 +198,25 @@ const Profile = () => {
     setProfilePictureUrl(imageUrl);
   };
 
+  // Helper function to ensure profile has all required fields for ProfileFormValues
+  const getCompleteProfile = (profile: ProfileFormValues | null): ProfileFormValues | null => {
+    if (!profile) return null;
+    
+    // Ensure all required fields are present
+    return {
+      fullName: profile.fullName || '',
+      age: profile.age || 0,
+      weight: profile.weight || 0,
+      height: profile.height || 0,
+      gender: profile.gender || '',
+      activityLevel: profile.activityLevel || '',
+      goal: profile.goal || '',
+      exerciseFrequency: profile.exerciseFrequency || '',
+      dateOfBirth: profile.dateOfBirth || '',
+      targetWeight: profile.targetWeight,
+    };
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -205,6 +224,8 @@ const Profile = () => {
       </div>
     );
   }
+
+  const completeProfile = getCompleteProfile(profile);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -247,19 +268,19 @@ const Profile = () => {
           </Card>
           
           {/* BMI Calculator - only show for Pro and Premium plans */}
-          {hasValidSavedProfile && profile && canUseBMICalculator && (
+          {hasValidSavedProfile && completeProfile && canUseBMICalculator && (
             <BMICalculator 
-              initialWeight={profile.weight} 
-              initialHeight={profile.height} 
+              initialWeight={completeProfile.weight} 
+              initialHeight={completeProfile.height} 
             />
           )}
         </TabsContent>
         
         <TabsContent value="nutrition" className="space-y-6">
-          {profile ? (
+          {completeProfile ? (
             <>
-              <UserStatsDisplay profile={profile} />
-              <NutritionCalculator profile={profile} />
+              <UserStatsDisplay profile={completeProfile} />
+              <NutritionCalculator profile={completeProfile} />
             </>
           ) : (
             <Card>
