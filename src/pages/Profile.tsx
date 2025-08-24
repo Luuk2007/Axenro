@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,7 @@ import ProfileForm, { ProfileFormValues, defaultValues, emptyDefaultValues } fro
 import UserStatsDisplay from "@/components/profile/UserStatsDisplay";
 import NutritionCalculator from "@/components/profile/NutritionCalculator";
 import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
+import { profileService } from "@/services/profileService";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -27,46 +29,90 @@ const Profile = () => {
   const [initialValues, setInitialValues] = useState<Partial<ProfileFormValues>>(emptyDefaultValues);
   const [hasValidSavedProfile, setHasValidSavedProfile] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string>('');
+  const [loading, setLoading] = useState(true);
   
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
   const canUseBMICalculator = currentTier === 'pro' || currentTier === 'premium';
   
   useEffect(() => {
-    // Only load from localStorage if user is authenticated
-    if (user) {
-      const savedProfile = localStorage.getItem("userProfile");
-      if (savedProfile) {
-        try {
-          const parsedProfile = JSON.parse(savedProfile);
-          setProfile(parsedProfile);
-          setInitialValues(parsedProfile);
-          setIsNewUser(false);
-          // Only show BMI calculator if we have valid saved weight and height
-          setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
-        } catch (error) {
-          console.error("Error parsing profile:", error);
-          setIsNewUser(true);
-          setInitialValues(emptyDefaultValues);
-          setHasValidSavedProfile(false);
-        }
-      } else {
-        setIsNewUser(true);
-        setInitialValues(emptyDefaultValues);
-        setHasValidSavedProfile(false);
-      }
-
-      // Load profile picture from Supabase
-      loadProfilePicture();
-    } else {
-      // If not authenticated, always start with empty values
-      setProfile(null);
-      setIsNewUser(true);
-      setInitialValues(emptyDefaultValues);
-      setHasValidSavedProfile(false);
-      setProfilePictureUrl('');
-    }
+    loadProfileData();
   }, [user]);
+
+  const loadProfileData = async () => {
+    setLoading(true);
+    
+    if (user) {
+      // Load from Supabase for authenticated users
+      try {
+        const profileData = await profileService.getProfile();
+        if (profileData) {
+          setProfile(profileData);
+          setInitialValues(profileData);
+          setIsNewUser(false);
+          setHasValidSavedProfile(profileData.weight > 0 && profileData.height > 0);
+        } else {
+          // Check if there's localStorage data to migrate
+          const savedProfile = localStorage.getItem("userProfile");
+          if (savedProfile) {
+            try {
+              const parsedProfile = JSON.parse(savedProfile);
+              setProfile(parsedProfile);
+              setInitialValues(parsedProfile);
+              setIsNewUser(false);
+              setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
+              
+              // Migrate localStorage data to Supabase
+              await profileService.migrateLocalStorageProfile();
+            } catch (error) {
+              console.error("Error parsing localStorage profile:", error);
+              setProfileToDefaults();
+            }
+          } else {
+            setProfileToDefaults();
+          }
+        }
+        
+        // Load profile picture
+        await loadProfilePicture();
+      } catch (error) {
+        console.error('Error loading profile from Supabase:', error);
+        // Fallback to localStorage
+        loadFromLocalStorage();
+      }
+    } else {
+      // Load from localStorage for unauthenticated users
+      loadFromLocalStorage();
+    }
+    
+    setLoading(false);
+  };
+
+  const loadFromLocalStorage = () => {
+    const savedProfile = localStorage.getItem("userProfile");
+    if (savedProfile) {
+      try {
+        const parsedProfile = JSON.parse(savedProfile);
+        setProfile(parsedProfile);
+        setInitialValues(parsedProfile);
+        setIsNewUser(false);
+        setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
+      } catch (error) {
+        console.error("Error parsing profile:", error);
+        setProfileToDefaults();
+      }
+    } else {
+      setProfileToDefaults();
+    }
+    setProfilePictureUrl('');
+  };
+
+  const setProfileToDefaults = () => {
+    setProfile(null);
+    setIsNewUser(true);
+    setInitialValues(emptyDefaultValues);
+    setHasValidSavedProfile(false);
+  };
 
   const loadProfilePicture = async () => {
     if (!user) return;
@@ -91,16 +137,46 @@ const Profile = () => {
     }
   };
 
-  const handleSubmit = (data: ProfileFormValues) => {
-    // Only save to localStorage if user is authenticated
+  const handleSubmit = async (data: ProfileFormValues) => {
     if (user) {
+      // Save to Supabase for authenticated users
+      try {
+        const success = await profileService.saveProfile(data);
+        if (success) {
+          setProfile(data);
+          setIsNewUser(false);
+          setInitialValues(data);
+          setHasValidSavedProfile(data.weight > 0 && data.height > 0);
+          toast.success(t("profileUpdated"));
+          
+          // Save initial weight to weightData array if it doesn't exist yet
+          const savedWeightData = localStorage.getItem("weightData");
+          if (!savedWeightData || JSON.parse(savedWeightData).length === 0) {
+            const today = new Date();
+            const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+            const initialWeightData = [
+              {
+                date: formattedDate,
+                value: data.weight
+              }
+            ];
+            localStorage.setItem("weightData", JSON.stringify(initialWeightData));
+          }
+        } else {
+          toast.error("Failed to save profile");
+        }
+      } catch (error) {
+        console.error('Error saving profile:', error);
+        toast.error("Failed to save profile");
+      }
+    } else {
+      // Save to localStorage for unauthenticated users
       localStorage.setItem("userProfile", JSON.stringify(data));
       setProfile(data);
       setIsNewUser(false);
       setInitialValues(data);
-      // Set flag to show BMI calculator after saving
       setHasValidSavedProfile(data.weight > 0 && data.height > 0);
-      toast.success(t("profileUpdated"));
+      toast.info(t("Please login to save your profile"));
       
       // Save initial weight to weightData array if it doesn't exist yet
       const savedWeightData = localStorage.getItem("weightData");
@@ -115,19 +191,20 @@ const Profile = () => {
         ];
         localStorage.setItem("weightData", JSON.stringify(initialWeightData));
       }
-    } else {
-      // If not authenticated, just update the local state without saving
-      setProfile(data);
-      setIsNewUser(false);
-      setInitialValues(data);
-      setHasValidSavedProfile(data.weight > 0 && data.height > 0);
-      toast.info(t("Please login to save your profile"));
     }
   };
 
   const handleProfilePictureUpdate = (imageUrl: string) => {
     setProfilePictureUrl(imageUrl);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
