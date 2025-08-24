@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -12,9 +11,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
 import { convertWeight, getWeightUnit } from "@/utils/unitConversions";
 import { useWeightData } from "@/hooks/useWeightData";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const WeightTracker = () => {
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const { measurementSystem } = useMeasurementSystem();
   const [newWeight, setNewWeight] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
@@ -108,7 +109,7 @@ const WeightTracker = () => {
           <CardTitle>{t("Weight Progress")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className={`grid gap-4 mb-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
             {currentWeight && (
               <div className="text-center p-4 bg-primary/5 rounded-lg">
                 <p className="text-sm text-muted-foreground">{t("Current Weight")}</p>
@@ -132,17 +133,19 @@ const WeightTracker = () => {
           </div>
 
           {displayWeightData.length > 0 && (
-            <div className="h-64 mb-6">
+            <div className={`mb-6 ${isMobile ? 'h-[200px]' : 'h-64'}`}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={displayWeightData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="date" 
                     tickFormatter={formatDate}
+                    fontSize={isMobile ? 10 : 12}
                   />
                   <YAxis 
                     domain={['dataMin - 2', 'dataMax + 2']}
                     tickFormatter={(value) => `${value.toFixed(1)}`}
+                    fontSize={isMobile ? 10 : 12}
                   />
                   <Tooltip 
                     labelFormatter={formatDate}
@@ -161,7 +164,7 @@ const WeightTracker = () => {
           )}
 
           <div className="space-y-4">
-            <div className="flex gap-4 items-end">
+            <div className={`gap-4 items-end ${isMobile ? 'flex flex-col space-y-4' : 'flex'}`}>
               <div className="flex-1">
                 <Label htmlFor="date">{t("Date")}</Label>
                 <Input
@@ -182,7 +185,7 @@ const WeightTracker = () => {
                   onChange={(e) => setNewWeight(e.target.value)}
                 />
               </div>
-              <Button onClick={handleAddWeight}>
+              <Button onClick={handleAddWeight} className={isMobile ? 'w-full' : ''}>
                 {t("Add Entry")}
               </Button>
             </div>
@@ -196,10 +199,10 @@ const WeightTracker = () => {
             <CardTitle>{t("Weight History")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
+            <div className={`space-y-2 overflow-y-auto ${isMobile ? 'max-h-48' : 'max-h-64'}`}>
               {displayWeightData.slice().reverse().map((entry) => (
-                <div key={entry.date} className="flex items-center justify-between p-2 border rounded">
-                  <div>
+                <div key={entry.date} className={`flex items-center justify-between p-2 border rounded ${isMobile ? 'flex-col space-y-2' : ''}`}>
+                  <div className={isMobile ? 'text-center' : ''}>
                     <p className="font-medium">{formatDate(entry.date)}</p>
                     <p className="text-sm text-muted-foreground">{entry.value.toFixed(1)} {weightUnit}</p>
                   </div>
