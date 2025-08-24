@@ -62,20 +62,7 @@ export const useSubscription = () => {
       throw new Error('User not authenticated');
     }
 
-    console.log('Switching to plan:', planId);
-
     try {
-      // Optimistically update the local state first
-      const newSubscriptionData = {
-        subscribed: planId !== 'free',
-        subscription_tier: planId === 'free' ? null : planId,
-        subscription_end: planId === 'free' ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        test_mode: true,
-        test_subscription_tier: planId,
-      };
-
-      setSubscriptionData(newSubscriptionData);
-
       const { data, error } = await supabase.functions.invoke('switch-test-plan', {
         body: { planId },
         headers: {
@@ -84,16 +71,11 @@ export const useSubscription = () => {
       });
 
       if (error) {
-        console.error('Switch plan error details:', error);
-        // Revert optimistic update on error
-        await checkSubscription();
-        throw new Error(error.message || 'Failed to switch plan');
+        throw error;
       }
 
-      console.log('Plan switch successful:', data);
-
-      // Update with server response
-      const finalSubscriptionData = {
+      // Update local state immediately for all components using this hook
+      const newSubscriptionData = {
         subscribed: data.subscribed,
         subscription_tier: data.subscription_tier,
         subscription_end: data.subscription_end,
@@ -101,12 +83,14 @@ export const useSubscription = () => {
         test_subscription_tier: data.test_subscription_tier,
       };
 
-      setSubscriptionData(finalSubscriptionData);
+      setSubscriptionData(newSubscriptionData);
+
+      // Also trigger a fresh check from the server to ensure consistency
+      await checkSubscription();
+
       return data;
     } catch (error) {
       console.error('Error switching test plan:', error);
-      // Ensure we revert to the correct state on any error
-      await checkSubscription();
       throw error;
     }
   };

@@ -29,46 +29,26 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
   const handleSelectPlan = async (planId: string) => {
     if (planId === currentTier) return;
     
-    console.log('Selecting plan:', planId, 'Current tier:', currentTier);
-    
     try {
       setLoading(planId);
       
       if (test_mode) {
-        console.log('Using test plan switching for plan:', planId);
-        // Use test plan switching with better error handling
-        const result = await switchTestPlan(planId);
-        console.log('Switch result:', result);
-        
+        // Use test plan switching
+        await switchTestPlan(planId);
         toast.success(t(`Successfully switched to ${planId} plan!`));
-        
-        // Small delay to show the success message, then close modal
-        setTimeout(() => {
-          onOpenChange(false);
-        }, 1000);
+        // Close modal after successful plan switch
+        onOpenChange(false);
+        // Refresh the page to ensure all UI elements update
+        window.location.reload();
       } else {
-        console.log('Using real Stripe checkout for plan:', planId);
         // Use real Stripe checkout
         const billingInterval = 'monthly'; // Default to monthly for now
         await createCheckout(planId, billingInterval);
         toast.success(t('Redirecting to Stripe checkout...'));
       }
     } catch (error) {
-      console.error('Plan selection error details:', error);
-      
-      // More user-friendly error handling
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      
-      if (test_mode) {
-        // For test mode, we'll show a generic success message since the plan should switch anyway
-        console.log('Test mode error, but showing success to user');
-        toast.success(t(`Switched to ${planId} plan!`));
-        setTimeout(() => {
-          onOpenChange(false);
-        }, 1000);
-      } else {
-        toast.error(t('Failed to start checkout process'));
-      }
+      console.error('Plan selection error:', error);
+      toast.error(test_mode ? t('Failed to switch plan') : t('Failed to start checkout process'));
     } finally {
       setLoading(null);
     }
