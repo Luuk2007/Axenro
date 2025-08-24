@@ -4,7 +4,6 @@ import { Plus, Utensils } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
 import { getAvailableMeals, MealData, FoodItem } from '@/types/nutrition';
 import { getFoodLogs } from '@/services/openFoodFactsService';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,35 +26,29 @@ interface MealsListProps {
 
 export default function MealsList({ title, className, onViewAll }: MealsListProps) {
   const { t } = useLanguage();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [meals, setMeals] = useState<MealItemData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    loadTodaysMeals();
-
-    // Listen for meal changes
-    const handleMealsChanged = () => {
-      loadTodaysMeals();
+    // Check auth status
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
     };
+    checkAuth();
+  }, []);
 
-    window.addEventListener('mealsChanged', handleMealsChanged);
-    
-    return () => {
-      window.removeEventListener('mealsChanged', handleMealsChanged);
-    };
-  }, [user]);
+  useEffect(() => {
+    const loadTodaysMeals = async () => {
+      setIsLoading(true);
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        let mealData: MealData[] = [];
 
-  const loadTodaysMeals = async () => {
-    setIsLoading(true);
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      let mealData: MealData[] = [];
-
-      if (user) {
-        // Load from Supabase for authenticated users
-        try {
+        if (isAuthenticated) {
+          // Load from Supabase
           const logs = await getFoodLogs(today);
           const availableMeals = getAvailableMeals();
           
@@ -71,68 +64,70 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
               mealData[mealIndex].items.push(log.food_item);
             }
           });
-        } catch (error) {
-          console.error('Error loading meals from Supabase:', error);
-          // Fallback to localStorage
-          mealData = await loadFromLocalStorage(today);
-        }
-      } else {
-        // Load from localStorage for unauthenticated users
-        mealData = await loadFromLocalStorage(today);
-      }
+        } else {
+          // Load from localStorage
+          const availableMeals = getAvailableMeals();
+          mealData = availableMeals.map(meal => ({
+            ...meal,
+            items: []
+          }));
 
-      // Convert to MealItemData format
-      const mealItems: MealItemData[] = mealData
-        .filter(meal => meal.items.length > 0)
-        .slice(0, 3) // Show only first 3 meals
-        .map(meal => {
-          const totalCalories = meal.items.reduce((sum: number, item: FoodItem) => sum + item.calories, 0);
-          const totalProtein = meal.items.reduce((sum: number, item: FoodItem) => sum + item.protein, 0);
-          
-          return {
-            id: meal.id,
-            name: meal.name,
-            time: getTimeForMeal(meal.id),
-            calories: Math.round(totalCalories),
-            protein: Math.round(totalProtein * 10) / 10
-          };
-        });
-
-      setMeals(mealItems);
-    } catch (error) {
-      console.error('Error loading today\'s meals:', error);
-      setMeals([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadFromLocalStorage = async (today: string): Promise<MealData[]> => {
-    const availableMeals = getAvailableMeals();
-    const mealData = availableMeals.map(meal => ({
-      ...meal,
-      items: []
-    }));
-
-    const savedData = localStorage.getItem(`foodLog_${today}`);
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        parsedData.forEach((item: any) => {
-          if (item.mealId) {
-            const mealIndex = mealData.findIndex(meal => meal.id === item.mealId);
-            if (mealIndex >= 0) {
-              mealData[mealIndex].items.push(item);
+          const savedData = localStorage.getItem(`foodLog_${today}`);
+          if (savedData) {
+            try {
+              const parsedData = JSON.parse(savedData);
+              parsedData.forEach((item: any) => {
+                if (item.mealId) {
+                  const mealIndex = mealData.findIndex(meal => meal.id === item.mealId);
+                  if (mealIndex >= 0) {
+                    mealData[mealIndex].items.push(item);
+                  }
+                }
+              });
+            } catch (error) {
+              console.error('Error parsing local food data:', error);
             }
           }
-        });
-      } catch (error) {
-        console.error('Error parsing local food data:', error);
-      }
-    }
+        }
 
-    return mealData;
-  };
+        // Convert to MealItemData format
+        const mealItems: MealItemData[] = mealData
+          .filter(meal => meal.items.length > 0)
+          .slice(0, 3) // Show only first 3 meals
+          .map(meal => {
+            const totalCalories = meal.items.reduce((sum: number, item: FoodItem) => sum + item.calories, 0);
+            const totalProtein = meal.items.reduce((sum: number, item: FoodItem) => sum + item.protein, 0);
+            
+            return {
+              id: meal.id,
+              name: meal.name,
+              time: getTimeForMeal(meal.id),
+              calories: Math.round(totalCalories),
+              protein: Math.round(totalProtein * 10) / 10
+            };
+          });
+
+        setMeals(mealItems);
+      } catch (error) {
+        console.error('Error loading today\'s meals:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTodaysMeals();
+
+    // Listen for meal changes
+    const handleMealsChanged = () => {
+      loadTodaysMeals();
+    };
+
+    window.addEventListener('mealsChanged', handleMealsChanged);
+    
+    return () => {
+      window.removeEventListener('mealsChanged', handleMealsChanged);
+    };
+  }, [isAuthenticated]);
 
   const getTimeForMeal = (mealId: string): string => {
     const timeMap: { [key: string]: string } = {
@@ -203,6 +198,7 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
               </p>
               <Button size="sm" onClick={() => {
                 navigate('/nutrition');
+                // Trigger the add food dialog after a short delay
                 setTimeout(() => {
                   const addFoodBtn = document.querySelector('[data-testid="add-food-trigger"]');
                   if (addFoodBtn) {

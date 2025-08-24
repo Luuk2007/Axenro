@@ -13,11 +13,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import BMICalculator from "@/components/profile/BMICalculator";
-import ProfileForm, { ProfileFormValues, defaultValues } from "@/components/profile/ProfileForm";
+import ProfileForm, { ProfileFormValues, defaultValues, emptyDefaultValues } from "@/components/profile/ProfileForm";
 import UserStatsDisplay from "@/components/profile/UserStatsDisplay";
 import NutritionCalculator from "@/components/profile/NutritionCalculator";
 import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
-import { profileService } from "@/services/profileService";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -25,110 +24,49 @@ const Profile = () => {
   const { test_mode, test_subscription_tier, subscription_tier } = useSubscription();
   const [profile, setProfile] = useState<ProfileFormValues | null>(null);
   const [isNewUser, setIsNewUser] = useState(true);
-  const [initialValues, setInitialValues] = useState<ProfileFormValues>(defaultValues);
+  const [initialValues, setInitialValues] = useState<Partial<ProfileFormValues>>(emptyDefaultValues);
   const [hasValidSavedProfile, setHasValidSavedProfile] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string>('');
-  const [loading, setLoading] = useState(true);
   
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
   const canUseBMICalculator = currentTier === 'pro' || currentTier === 'premium';
   
   useEffect(() => {
-    loadProfileData();
-  }, [user]);
-
-  // Helper function to ensure we always have complete ProfileFormValues
-  const ensureCompleteProfile = (data: Partial<ProfileFormValues>): ProfileFormValues => {
-    return {
-      fullName: data.fullName || '',
-      age: data.age || 0,
-      weight: data.weight || 0,
-      height: data.height || 0,
-      gender: data.gender || '',
-      goal: data.goal || '',
-      exerciseFrequency: data.exerciseFrequency || '',
-      targetWeight: data.targetWeight,
-    };
-  };
-
-  const loadProfileData = async () => {
-    setLoading(true);
-    
+    // Only load from localStorage if user is authenticated
     if (user) {
-      // Load from Supabase for authenticated users
-      try {
-        const profileData = await profileService.getProfile();
-        if (profileData) {
-          const completeProfile = ensureCompleteProfile(profileData);
-          setProfile(completeProfile);
-          setInitialValues(completeProfile);
+      const savedProfile = localStorage.getItem("userProfile");
+      if (savedProfile) {
+        try {
+          const parsedProfile = JSON.parse(savedProfile);
+          setProfile(parsedProfile);
+          setInitialValues(parsedProfile);
           setIsNewUser(false);
-          setHasValidSavedProfile(completeProfile.weight > 0 && completeProfile.height > 0);
-        } else {
-          // Check if there's localStorage data to migrate
-          const savedProfile = localStorage.getItem("userProfile");
-          if (savedProfile) {
-            try {
-              const parsedProfile = JSON.parse(savedProfile);
-              const completeProfile = ensureCompleteProfile(parsedProfile);
-              setProfile(completeProfile);
-              setInitialValues(completeProfile);
-              setIsNewUser(false);
-              setHasValidSavedProfile(completeProfile.weight > 0 && completeProfile.height > 0);
-              
-              // Migrate localStorage data to Supabase
-              await profileService.migrateLocalStorageProfile();
-            } catch (error) {
-              console.error("Error parsing localStorage profile:", error);
-              setProfileToDefaults();
-            }
-          } else {
-            setProfileToDefaults();
-          }
+          // Only show BMI calculator if we have valid saved weight and height
+          setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
+        } catch (error) {
+          console.error("Error parsing profile:", error);
+          setIsNewUser(true);
+          setInitialValues(emptyDefaultValues);
+          setHasValidSavedProfile(false);
         }
-        
-        // Load profile picture
-        await loadProfilePicture();
-      } catch (error) {
-        console.error('Error loading profile from Supabase:', error);
-        // Fallback to localStorage
-        loadFromLocalStorage();
+      } else {
+        setIsNewUser(true);
+        setInitialValues(emptyDefaultValues);
+        setHasValidSavedProfile(false);
       }
-    } else {
-      // Load from localStorage for unauthenticated users
-      loadFromLocalStorage();
-    }
-    
-    setLoading(false);
-  };
 
-  const loadFromLocalStorage = () => {
-    const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      try {
-        const parsedProfile = JSON.parse(savedProfile);
-        const completeProfile = ensureCompleteProfile(parsedProfile);
-        setProfile(completeProfile);
-        setInitialValues(completeProfile);
-        setIsNewUser(false);
-        setHasValidSavedProfile(completeProfile.weight > 0 && completeProfile.height > 0);
-      } catch (error) {
-        console.error("Error parsing profile:", error);
-        setProfileToDefaults();
-      }
+      // Load profile picture from Supabase
+      loadProfilePicture();
     } else {
-      setProfileToDefaults();
+      // If not authenticated, always start with empty values
+      setProfile(null);
+      setIsNewUser(true);
+      setInitialValues(emptyDefaultValues);
+      setHasValidSavedProfile(false);
+      setProfilePictureUrl('');
     }
-    setProfilePictureUrl('');
-  };
-
-  const setProfileToDefaults = () => {
-    setProfile(null);
-    setIsNewUser(true);
-    setInitialValues(defaultValues);
-    setHasValidSavedProfile(false);
-  };
+  }, [user]);
 
   const loadProfilePicture = async () => {
     if (!user) return;
@@ -153,54 +91,43 @@ const Profile = () => {
     }
   };
 
-  const handleSubmit = async (data: ProfileFormValues) => {
-    try {
-      const success = await profileService.saveProfile(data);
-      if (success) {
-        setProfile(data);
-        setIsNewUser(false);
-        setInitialValues(data);
-        setHasValidSavedProfile(data.weight > 0 && data.height > 0);
-        
-        if (user) {
-          toast.success(t("profileUpdated"));
-        } else {
-          toast.info(t("Please login to save your profile"));
-        }
-        
-        // Save initial weight to weightData array if it doesn't exist yet
-        const savedWeightData = localStorage.getItem("weightData");
-        if (!savedWeightData || JSON.parse(savedWeightData).length === 0) {
-          const today = new Date();
-          const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-          const initialWeightData = [
-            {
-              date: formattedDate,
-              value: data.weight
-            }
-          ];
-          localStorage.setItem("weightData", JSON.stringify(initialWeightData));
-        }
-      } else {
-        toast.error("Failed to save profile");
+  const handleSubmit = (data: ProfileFormValues) => {
+    // Only save to localStorage if user is authenticated
+    if (user) {
+      localStorage.setItem("userProfile", JSON.stringify(data));
+      setProfile(data);
+      setIsNewUser(false);
+      setInitialValues(data);
+      // Set flag to show BMI calculator after saving
+      setHasValidSavedProfile(data.weight > 0 && data.height > 0);
+      toast.success(t("profileUpdated"));
+      
+      // Save initial weight to weightData array if it doesn't exist yet
+      const savedWeightData = localStorage.getItem("weightData");
+      if (!savedWeightData || JSON.parse(savedWeightData).length === 0) {
+        const today = new Date();
+        const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+        const initialWeightData = [
+          {
+            date: formattedDate,
+            value: data.weight
+          }
+        ];
+        localStorage.setItem("weightData", JSON.stringify(initialWeightData));
       }
-    } catch (error) {
-      console.error('Error saving profile:', error);
-      toast.error("Failed to save profile");
+    } else {
+      // If not authenticated, just update the local state without saving
+      setProfile(data);
+      setIsNewUser(false);
+      setInitialValues(data);
+      setHasValidSavedProfile(data.weight > 0 && data.height > 0);
+      toast.info(t("Please login to save your profile"));
     }
   };
 
   const handleProfilePictureUpdate = (imageUrl: string) => {
     setProfilePictureUrl(imageUrl);
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 animate-fade-in">

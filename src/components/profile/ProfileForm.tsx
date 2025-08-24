@@ -1,8 +1,8 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,7 +12,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -20,78 +19,153 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
+import { convertWeight, convertHeight, getWeightUnit, getHeightUnit } from "@/utils/unitConversions";
 
-const formSchema = z.object({
-  fullName: z.string().min(1, "Full name is required"),
-  age: z.number().min(1).max(120),
-  weight: z.number().min(1).max(1000),
-  height: z.number().min(1).max(300),
-  gender: z.string().min(1, "Gender is required"),
-  goal: z.string().min(1, "Goal is required"),
-  exerciseFrequency: z.string().min(1, "Exercise frequency is required"),
-  targetWeight: z.number().optional(),
-});
+export interface ProfileFormValues {
+  name: string;
+  gender: "male" | "female" | "other";
+  age: number;
+  height: number;
+  weight: number;
+  activityLevel: "sedentary" | "light" | "moderate" | "active" | "very_active";
+  fitnessGoal: "lose" | "maintain" | "gain";
+  targetWeight?: number;
+  exerciseFrequency?: "0-1" | "2-3" | "4-5" | "6+";
+  goal?: "lose" | "maintain" | "gain";
+}
 
-export type ProfileFormValues = z.infer<typeof formSchema>;
-
-export const defaultValues: ProfileFormValues = {
-  fullName: "",
-  age: 25,
-  weight: 70,
-  height: 170,
-  gender: "male",
-  goal: "maintain",
-  exerciseFrequency: "3-4",
-  targetWeight: undefined,
+// Empty default values for new users
+export const emptyDefaultValues: Partial<ProfileFormValues> = {
+  name: "",
+  gender: undefined,
+  age: undefined,
+  height: undefined,
+  weight: undefined,
+  activityLevel: undefined,
+  fitnessGoal: undefined,
+  exerciseFrequency: undefined,
+  goal: undefined
 };
 
-export const emptyDefaultValues: Partial<ProfileFormValues> = {
-  fullName: "",
-  age: 0,
-  weight: 0,
-  height: 0,
-  gender: "",
-  goal: "",
-  exerciseFrequency: "",
-  targetWeight: undefined,
+// Default values for fallback when creating profiles
+export const defaultValues: ProfileFormValues = {
+  name: "",
+  gender: "male",
+  age: 30,
+  height: 175,
+  weight: 75,
+  activityLevel: "moderate",
+  fitnessGoal: "maintain",
+  exerciseFrequency: "2-3",
+  goal: "maintain"
 };
 
 interface ProfileFormProps {
   onSubmit: (data: ProfileFormValues) => void;
-  initialValues: Partial<ProfileFormValues>;
-  isNewUser: boolean;
+  initialValues?: Partial<ProfileFormValues>;
+  isNewUser?: boolean;
 }
 
-const ProfileForm = ({ onSubmit, initialValues, isNewUser }: ProfileFormProps) => {
+const ProfileForm: React.FC<ProfileFormProps> = ({ 
+  onSubmit, 
+  initialValues = emptyDefaultValues,
+  isNewUser = false 
+}) => {
   const { t } = useLanguage();
-
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: isNewUser ? defaultValues : { ...defaultValues, ...initialValues },
+  const { measurementSystem } = useMeasurementSystem();
+  
+  const formSchema = z.object({
+    name: z.string()
+      .min(2, "Name must be at least 2 characters")
+      .max(50, "Name must be less than 50 characters")
+      .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
+    gender: z.enum(["male", "female", "other"]),
+    age: z.number()
+      .min(16, "Age must be at least 16")
+      .max(100, "Age must be less than 100"),
+    height: z.number()
+      .min(100, "Height must be at least 100cm")
+      .max(250, "Height must be less than 250cm"),
+    weight: z.number()
+      .min(30, "Weight must be at least 30kg")
+      .max(300, "Weight must be less than 300kg"),
+    activityLevel: z.enum(["sedentary", "light", "moderate", "active", "very_active"]),
+    fitnessGoal: z.enum(["lose", "maintain", "gain"]),
+    targetWeight: z.number()
+      .min(30, "Target weight must be at least 30kg")
+      .max(300, "Target weight must be less than 300kg")
+      .optional(),
+    exerciseFrequency: z.enum(["0-1", "2-3", "4-5", "6+"]).optional(),
+    goal: z.enum(["lose", "maintain", "gain"]).optional(),
   });
 
-  useEffect(() => {
-    if (!isNewUser && initialValues) {
-      const formValues = { ...defaultValues, ...initialValues };
-      Object.keys(formValues).forEach((key) => {
-        const typedKey = key as keyof ProfileFormValues;
-        form.setValue(typedKey, formValues[typedKey]);
-      });
+  // Convert stored metric values to display values
+  const getDisplayValues = (values: Partial<ProfileFormValues>) => {
+    if (!values) return {};
+    
+    return {
+      ...values,
+      height: values.height ? convertHeight(values.height, 'metric', measurementSystem) : undefined,
+      weight: values.weight ? convertWeight(values.weight, 'metric', measurementSystem) : undefined,
+      targetWeight: values.targetWeight ? convertWeight(values.targetWeight, 'metric', measurementSystem) : undefined,
+    };
+  };
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: isNewUser ? {
+      name: "",
+      gender: undefined,
+      age: undefined,
+      height: undefined,
+      weight: undefined,
+      activityLevel: undefined,
+      fitnessGoal: undefined,
+      exerciseFrequency: undefined,
+      goal: undefined
+    } : getDisplayValues(initialValues),
+  });
+
+  const watchFitnessGoal = form.watch("fitnessGoal");
+  const showTargetWeight = watchFitnessGoal === "gain" || watchFitnessGoal === "lose";
+
+  const handleNumberChange = (field: any, value: string) => {
+    if (value === "") {
+      field.onChange(undefined);
+    } else {
+      const num = parseFloat(value);
+      if (!isNaN(num)) {
+        field.onChange(num);
+      }
     }
-  }, [initialValues, isNewUser, form]);
+  };
+
+  const handleFormSubmit = (data: ProfileFormValues) => {
+    // Convert display values back to metric for storage
+    const metricData = {
+      ...data,
+      height: convertHeight(data.height, measurementSystem, 'metric'),
+      weight: convertWeight(data.weight, measurementSystem, 'metric'),
+      targetWeight: data.targetWeight ? convertWeight(data.targetWeight, measurementSystem, 'metric') : undefined,
+    };
+    
+    onSubmit(metricData);
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="fullName"
+          name="name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("Full name")}</FormLabel>
               <FormControl>
-                <Input placeholder={t("Enter your full name")} {...field} />
+                <Input placeholder="Enter your full name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -101,16 +175,63 @@ const ProfileForm = ({ onSubmit, initialValues, isNewUser }: ProfileFormProps) =
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
+            name="gender"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("Gender")}</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  value={field.value || ""}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("Select gender")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="age"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("Age")}</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    placeholder={t("Enter your age")}
-                    {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  <Input 
+                    type="number" 
+                    placeholder="Enter your age"
+                    value={field.value?.toString() || ''}
+                    onChange={(e) => handleNumberChange(field, e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="height"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("Height")} ({getHeightUnit(measurementSystem)})</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Enter your height"
+                    value={field.value?.toString() || ''}
+                    onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -123,14 +244,14 @@ const ProfileForm = ({ onSubmit, initialValues, isNewUser }: ProfileFormProps) =
             name="weight"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("Weight")} (kg)</FormLabel>
+                <FormLabel>{t("Weight")} ({getWeightUnit(measurementSystem)})</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    placeholder={t("Enter your weight")}
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  <Input 
+                    type="number" 
+                    placeholder="Enter your weight"
+                    value={field.value?.toString() || ''}
+                    onChange={(e) => handleNumberChange(field, e.target.value)}
+                    step="0.5"
                   />
                 </FormControl>
                 <FormMessage />
@@ -141,86 +262,36 @@ const ProfileForm = ({ onSubmit, initialValues, isNewUser }: ProfileFormProps) =
 
         <FormField
           control={form.control}
-          name="height"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("Height")} (cm)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder={t("Enter your height")}
-                  {...field}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="gender"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("Gender")}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("Select your gender")} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="male">{t("Male")}</SelectItem>
-                  <SelectItem value="female">{t("Female")}</SelectItem>
-                  <SelectItem value="other">{t("Other")}</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="goal"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("Fitness goal")}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("Select your fitness goal")} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="lose">{t("Lose weight")}</SelectItem>
-                  <SelectItem value="maintain">{t("Maintain weight")}</SelectItem>
-                  <SelectItem value="gain">{t("Gain weight")}</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="exerciseFrequency"
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("Exercise frequency")}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select 
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  // Also update the activityLevel to keep in sync
+                  if (value === "0-1") {
+                    form.setValue("activityLevel", "sedentary");
+                  } else if (value === "2-3") {
+                    form.setValue("activityLevel", "light");
+                  } else if (value === "4-5") {
+                    form.setValue("activityLevel", "moderate");
+                  } else {
+                    form.setValue("activityLevel", "active");
+                  }
+                }} 
+                value={field.value || ""}
+              >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder={t("How often do you exercise?")} />
+                    <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="0-1">{t("0-1 times per week")}</SelectItem>
-                  <SelectItem value="2-3">{t("2-3 times per week")}</SelectItem>
-                  <SelectItem value="4-5">{t("4-5 times per week")}</SelectItem>
-                  <SelectItem value="6+">{t("6+ times per week")}</SelectItem>
+                  <SelectItem value="0-1">0–1 times per week</SelectItem>
+                  <SelectItem value="2-3">2–3 times per week</SelectItem>
+                  <SelectItem value="4-5">4–5 times per week</SelectItem>
+                  <SelectItem value="6+">6+ times per week</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -228,20 +299,50 @@ const ProfileForm = ({ onSubmit, initialValues, isNewUser }: ProfileFormProps) =
           )}
         />
 
-        {(form.watch("goal") === "lose" || form.watch("goal") === "gain") && (
+        <FormField
+          control={form.control}
+          name="fitnessGoal"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("Goal")}</FormLabel>
+              <Select 
+                onValueChange={(value: "lose" | "maintain" | "gain") => {
+                  field.onChange(value);
+                  // Also update the goal to keep in sync with fitnessGoal
+                  form.setValue("goal", value);
+                }}
+                value={field.value || ""}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select goal" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="lose">{t("loseWeight")}</SelectItem>
+                  <SelectItem value="maintain">{t("maintainWeight")}</SelectItem>
+                  <SelectItem value="gain">{t("gainWeight")}</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {showTargetWeight && (
           <FormField
             control={form.control}
             name="targetWeight"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("Target weight")} (kg)</FormLabel>
+                <FormLabel>{t("targetWeight")} ({getWeightUnit(measurementSystem)})</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    placeholder={t("Enter your target weight")}
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                  <Input 
+                    type="number" 
+                    placeholder="Enter target weight"
+                    value={field.value?.toString() || ''}
+                    onChange={(e) => handleNumberChange(field, e.target.value)}
+                    step="0.5"
                   />
                 </FormControl>
                 <FormMessage />
@@ -250,9 +351,7 @@ const ProfileForm = ({ onSubmit, initialValues, isNewUser }: ProfileFormProps) =
           />
         )}
 
-        <Button type="submit" className="w-full">
-          {t("Save profile")}
-        </Button>
+        <Button type="submit">{t("saveChanges")}</Button>
       </form>
     </Form>
   );

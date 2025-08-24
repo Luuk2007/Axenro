@@ -1,11 +1,10 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { useLanguage } from './LanguageContext';
-import { waterTrackingService } from '@/services/waterTrackingService';
-import { profileService } from '@/services/profileService';
 
 interface AuthContextType {
   session: Session | null;
@@ -82,8 +81,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Check subscription status after auth state is set
       if (session?.user) {
         checkSubscriptionStatus(session);
-        // Migrate localStorage data when user logs in
-        migrateLocalStorageData();
       }
     });
 
@@ -95,40 +92,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Check subscription status on auth change
       if (session?.user) {
         checkSubscriptionStatus(session);
-        // Migrate localStorage data when user logs in
-        setTimeout(() => {
-          migrateLocalStorageData();
-        }, 100);
-      } else {
-        // Clear any cached data when user logs out
-        clearUserData();
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const migrateLocalStorageData = async () => {
-    try {
-      console.log('Migrating localStorage data to Supabase...');
-      
-      // Migrate water tracking data
-      await waterTrackingService.migrateLocalStorageData();
-      
-      // Migrate profile data
-      await profileService.migrateLocalStorageProfile();
-      
-      console.log('Data migration completed');
-    } catch (error) {
-      console.error('Error during data migration:', error);
-    }
-  };
-
-  const clearUserData = () => {
-    // Don't clear localStorage data when user logs out
-    // Keep it as backup for unauthenticated usage
-    console.log('User logged out - keeping localStorage data as backup');
-  };
 
   const checkSubscriptionStatus = async (session: Session) => {
     try {

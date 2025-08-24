@@ -8,7 +8,7 @@ import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
 import { convertWeight, convertHeight, getWeightUnit, getHeightUnit, formatWeight, formatHeight } from "@/utils/unitConversions";
 
 interface UserStatsDisplayProps {
-  profile: ProfileFormValues | Partial<ProfileFormValues>;
+  profile: ProfileFormValues;
 }
 
 const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
@@ -16,7 +16,7 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
   const { measurementSystem } = useMeasurementSystem();
   
   // Safely access property with optional chaining to prevent errors
-  const showTargetWeight = profile?.goal === "lose" || profile?.goal === "gain";
+  const showTargetWeight = profile?.goal !== "maintain";
   
   // Function to capitalize the first letter
   const capitalize = (str: string) => {
@@ -24,9 +24,9 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
-  // Convert values for display - handle undefined values
-  const displayWeight = profile.weight ? convertWeight(profile.weight, 'metric', measurementSystem) : 0;
-  const displayHeight = profile.height ? convertHeight(profile.height, 'metric', measurementSystem) : 0;
+  // Convert values for display
+  const displayWeight = convertWeight(profile.weight, 'metric', measurementSystem);
+  const displayHeight = convertHeight(profile.height, 'metric', measurementSystem);
   const displayTargetWeight = profile.targetWeight ? convertWeight(profile.targetWeight, 'metric', measurementSystem) : undefined;
 
   return (
@@ -50,21 +50,17 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
             </dd>
           </div>
           
-          {profile.weight && (
-            <div className="flex items-center gap-2">
-              <Weight className="h-4 w-4 text-muted-foreground" />
-              <dt className="font-medium">{t("weight")}:</dt>
-              <dd>{formatWeight(displayWeight, measurementSystem)} {getWeightUnit(measurementSystem)}</dd>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Weight className="h-4 w-4 text-muted-foreground" />
+            <dt className="font-medium">{t("weight")}:</dt>
+            <dd>{formatWeight(displayWeight, measurementSystem)} {getWeightUnit(measurementSystem)}</dd>
+          </div>
           
-          {profile.height && (
-            <div className="flex items-center gap-2">
-              <Ruler className="h-4 w-4 text-muted-foreground" />
-              <dt className="font-medium">{t("Height")}:</dt>
-              <dd>{formatHeight(displayHeight, measurementSystem)} {getHeightUnit(measurementSystem)}</dd>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Ruler className="h-4 w-4 text-muted-foreground" />
+            <dt className="font-medium">{t("Height")}:</dt>
+            <dd>{formatHeight(displayHeight, measurementSystem)} {getHeightUnit(measurementSystem)}</dd>
+          </div>
           
           <div className="flex items-center gap-2">
             <Heart className="h-4 w-4 text-muted-foreground" />
@@ -78,13 +74,11 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
             </dd>
           </div>
           
-          {profile.age && (
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <dt className="font-medium">{t("Age")}:</dt>
-              <dd>{profile.age}</dd>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <dt className="font-medium">{t("Age")}:</dt>
+            <dd>{profile.age}</dd>
+          </div>
           
           <div className="flex items-center gap-2">
             <User2 className="h-4 w-4 text-muted-foreground" />

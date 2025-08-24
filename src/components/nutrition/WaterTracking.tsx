@@ -1,162 +1,97 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Trash2, GlassWater, Calculator, Droplet } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { waterTrackingService, WaterEntry } from '@/services/waterTrackingService';
+
+type WaterEntry = {
+  id: string;
+  amount: number;
+  timestamp: number;
+};
 
 export default function WaterTracking() {
   const { t } = useLanguage();
-  const { user } = useAuth();
   const [totalWater, setTotalWater] = useState(0);
   const [waterLog, setWaterLog] = useState<WaterEntry[]>([]);
   const [waterGoal, setWaterGoal] = useState(2000); // Default 2 liters
   const [bodyWeight, setBodyWeight] = useState<string>('70'); // Default 70kg
-  const [loading, setLoading] = useState(true);
 
-  // Load water data on component mount and when user changes
+  // Load water data and user weight on component mount
   useEffect(() => {
-    loadWaterData();
-  }, [user]);
-
-  const loadWaterData = async () => {
-    setLoading(true);
-    const today = new Date().toISOString().split('T')[0];
-    
-    if (user) {
-      // Load from Supabase for authenticated users
-      try {
-        const logs = await waterTrackingService.getWaterLogs(today);
-        setWaterLog(logs);
-        
-        const total = logs.reduce((sum, entry) => sum + entry.amount, 0);
-        setTotalWater(total);
-      } catch (error) {
-        console.error('Error loading water data from Supabase:', error);
-        // Fallback to localStorage if Supabase fails
-        loadFromLocalStorage(today);
-      }
-    } else {
-      // Load from localStorage for unauthenticated users
-      loadFromLocalStorage(today);
-    }
-    
-    // Load user profile weight for goal calculation
-    loadUserWeight();
-    setLoading(false);
-  };
-
-  const loadFromLocalStorage = (today: string) => {
-    const todayKey = new Date().toLocaleDateString('en-US');
-    const savedWaterData = localStorage.getItem(`waterLog_${todayKey}`);
+    const today = new Date().toLocaleDateString('en-US');
+    const savedWaterData = localStorage.getItem(`waterLog_${today}`);
     
     if (savedWaterData) {
       try {
         const parsedData = JSON.parse(savedWaterData);
         setWaterLog(parsedData);
         
+        // Calculate total water from the log
         const total = parsedData.reduce((sum: number, entry: WaterEntry) => sum + entry.amount, 0);
         setTotalWater(total);
       } catch (error) {
         console.error("Error parsing water data:", error);
-        setWaterLog([]);
-        setTotalWater(0);
       }
     } else {
+      // Reset for new day
       setWaterLog([]);
       setTotalWater(0);
     }
-  };
 
-  const loadUserWeight = () => {
-    if (user) {
-      // For authenticated users, weight should come from Supabase profile
-      // This will be loaded when profile service is integrated
-    } else {
-      // For unauthenticated users, load from localStorage profile
-      const savedProfile = localStorage.getItem("userProfile");
-      if (savedProfile) {
-        try {
-          const profile = JSON.parse(savedProfile);
-          if (profile.weight) {
-            setBodyWeight(profile.weight.toString());
-            const recommendedIntake = Math.round(35 * profile.weight);
-            setWaterGoal(recommendedIntake);
-          }
-        } catch (error) {
-          console.error("Error parsing user profile:", error);
+    // Load user profile to get weight if available
+    const savedProfile = localStorage.getItem("userProfile");
+    if (savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile);
+        if (profile.weight) {
+          setBodyWeight(profile.weight.toString());
+          // Calculate recommended water intake: 35ml * body weight in kg
+          const recommendedIntake = Math.round(35 * profile.weight);
+          setWaterGoal(recommendedIntake);
         }
+      } catch (error) {
+        console.error("Error parsing user profile:", error);
       }
     }
-  };
+  }, []);
 
-  // Save water data (only for localStorage when unauthenticated)
+  // Save water data to localStorage whenever it changes
   useEffect(() => {
-    if (!user && waterLog.length > 0) {
-      const today = new Date().toLocaleDateString('en-US');
-      localStorage.setItem(`waterLog_${today}`, JSON.stringify(waterLog));
-    }
-  }, [waterLog, user]);
+    const today = new Date().toLocaleDateString('en-US');
+    localStorage.setItem(`waterLog_${today}`, JSON.stringify(waterLog));
+  }, [waterLog]);
 
-  const addWater = async (amount: number) => {
-    if (user) {
-      // Add to Supabase for authenticated users
-      try {
-        const newEntry = await waterTrackingService.addWaterEntry(amount);
-        if (newEntry) {
-          setWaterLog(prev => [...prev, newEntry]);
-          setTotalWater(prev => prev + amount);
-          toast.success(`Added ${amount}ml of water`);
-        } else {
-          toast.error('Failed to add water entry');
-        }
-      } catch (error) {
-        console.error('Error adding water:', error);
-        toast.error('Failed to add water entry');
-      }
-    } else {
-      // Add to localStorage for unauthenticated users
-      const newEntry: WaterEntry = {
-        id: Date.now().toString(),
-        amount,
-        timestamp: Date.now(),
-      };
-      
-      setWaterLog(prev => [...prev, newEntry]);
-      setTotalWater(prev => prev + amount);
-      toast.success(`Added ${amount}ml of water`);
-    }
+  const addWater = (amount: number) => {
+    const newEntry: WaterEntry = {
+      id: Date.now().toString(),
+      amount,
+      timestamp: Date.now(),
+    };
+    
+    const updatedLog = [...waterLog, newEntry];
+    setWaterLog(updatedLog);
+    setTotalWater(prevTotal => prevTotal + amount);
+    toast.success(`Added ${amount}ml of water`);
   };
 
-  const deleteWaterEntry = async (id: string) => {
+  const deleteWaterEntry = (id: string) => {
     const entryToDelete = waterLog.find(entry => entry.id === id);
-    if (!entryToDelete) return;
-
-    if (user) {
-      // Delete from Supabase for authenticated users
-      try {
-        const success = await waterTrackingService.deleteWaterEntry(id);
-        if (success) {
-          setTotalWater(prev => prev - entryToDelete.amount);
-          setWaterLog(prev => prev.filter(entry => entry.id !== id));
-          toast.success(`Removed ${entryToDelete.amount}ml of water`);
-        } else {
-          toast.error('Failed to remove water entry');
-        }
-      } catch (error) {
-        console.error('Error deleting water:', error);
-        toast.error('Failed to remove water entry');
-      }
-    } else {
-      // Delete from localStorage for unauthenticated users
-      setTotalWater(prev => prev - entryToDelete.amount);
-      setWaterLog(prev => prev.filter(entry => entry.id !== id));
-      toast.success(`Removed ${entryToDelete.amount}ml of water`);
+    if (entryToDelete) {
+      const amountToRemove = entryToDelete.amount;
+      
+      // Update total water
+      setTotalWater(prevTotal => prevTotal - amountToRemove);
+      
+      // Remove from log
+      const updatedLog = waterLog.filter(entry => entry.id !== id);
+      setWaterLog(updatedLog);
+      
+      toast.success(`Removed ${amountToRemove}ml of water`);
     }
   };
 
@@ -181,14 +116,6 @@ export default function WaterTracking() {
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBodyWeight(e.target.value);
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">
