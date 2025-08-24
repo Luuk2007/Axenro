@@ -45,15 +45,17 @@ export const useWaterTracking = () => {
         .select('*')
         .eq('user_id', user.id)
         .eq('date', today)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error loading water data:', error);
         return;
       }
 
       if (data) {
-        setWaterLog(data.entries || []);
+        // Properly cast the entries from JSONB to WaterEntry[]
+        const entries = Array.isArray(data.entries) ? data.entries as WaterEntry[] : [];
+        setWaterLog(entries);
         setTotalWater(data.total_water || 0);
         setWaterGoal(data.water_goal || 2000);
       } else {
