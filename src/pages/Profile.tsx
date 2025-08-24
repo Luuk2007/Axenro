@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -217,27 +218,6 @@ const Profile = () => {
     setProfilePictureUrl(imageUrl);
   };
 
-  // Helper function to ensure profile has all required fields for ProfileFormValues
-  const getCompleteProfile = (profile: ProfileFormValues | null): ProfileFormValues | null => {
-    if (!profile) return null;
-    
-    // Ensure all required fields are present with proper defaults
-    const completeProfile: ProfileFormValues = {
-      fullName: profile.fullName || '',
-      age: profile.age || 0,
-      weight: profile.weight || 0,
-      height: profile.height || 0,
-      gender: profile.gender || '',
-      activityLevel: profile.activityLevel || '',
-      goal: profile.goal || '',
-      exerciseFrequency: profile.exerciseFrequency || '',
-      dateOfBirth: profile.dateOfBirth || '',
-      targetWeight: profile.targetWeight,
-    };
-
-    return completeProfile;
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -245,8 +225,6 @@ const Profile = () => {
       </div>
     );
   }
-
-  const completeProfile = getCompleteProfile(profile);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -289,19 +267,19 @@ const Profile = () => {
           </Card>
           
           {/* BMI Calculator - only show for Pro and Premium plans */}
-          {hasValidSavedProfile && completeProfile && canUseBMICalculator && (
+          {hasValidSavedProfile && profile && canUseBMICalculator && (
             <BMICalculator 
-              initialWeight={completeProfile.weight} 
-              initialHeight={completeProfile.height} 
+              initialWeight={profile.weight} 
+              initialHeight={profile.height} 
             />
           )}
         </TabsContent>
         
         <TabsContent value="nutrition" className="space-y-6">
-          {completeProfile ? (
+          {profile ? (
             <>
-              <UserStatsDisplay profile={completeProfile} />
-              <NutritionCalculator profile={completeProfile} />
+              <UserStatsDisplay profile={profile} />
+              <NutritionCalculator profile={profile} />
             </>
           ) : (
             <Card>
@@ -319,3 +297,4 @@ const Profile = () => {
 };
 
 export default Profile;
+
