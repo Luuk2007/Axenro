@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,8 +44,10 @@ export default function ProgressPhotoCard({
   const isPremium = subscriptionTier === 'premium';
   const isPro = subscriptionTier === 'pro';
 
-  // Direct image URL - the bucket is now public so we can use the URL directly
-  const imageUrl = photo.image_url;
+  // Construct proper public URL for Supabase storage
+  const imageUrl = photo.image_url ? 
+    `https://rfxaxuvteslmfefdeaje.supabase.co/storage/v1/object/public/progress-images/${photo.image_url.split('/').pop()}` : 
+    null;
 
   const handleImageLoad = () => {
     console.log('Image loaded successfully:', imageUrl);
@@ -102,7 +103,7 @@ export default function ProgressPhotoCard({
               <div className="text-center text-red-500">
                 <div className="text-2xl mb-2">❌</div>
                 <div className="text-xs">Failed to load</div>
-                <div className="text-xs mt-1 px-2">{imageUrl}</div>
+                <div className="text-xs mt-1 px-2 break-all">{imageUrl}</div>
               </div>
             </div>
           )}
