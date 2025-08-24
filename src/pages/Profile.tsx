@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +39,22 @@ const Profile = () => {
     loadProfileData();
   }, [user]);
 
+  // Helper function to ensure we always have complete ProfileFormValues
+  const ensureCompleteProfile = (data: Partial<ProfileFormValues>): ProfileFormValues => {
+    return {
+      fullName: data.fullName || '',
+      age: data.age || 0,
+      weight: data.weight || 0,
+      height: data.height || 0,
+      gender: data.gender || '',
+      activityLevel: data.activityLevel || '',
+      goal: data.goal || '',
+      exerciseFrequency: data.exerciseFrequency || '',
+      dateOfBirth: data.dateOfBirth || '',
+      targetWeight: data.targetWeight,
+    };
+  };
+
   const loadProfileData = async () => {
     setLoading(true);
     
@@ -46,17 +63,18 @@ const Profile = () => {
       try {
         const profileData = await profileService.getProfile();
         if (profileData) {
-          setProfile(profileData);
-          setInitialValues(profileData);
+          const completeProfile = ensureCompleteProfile(profileData);
+          setProfile(completeProfile);
+          setInitialValues(completeProfile);
           setIsNewUser(false);
-          setHasValidSavedProfile(profileData.weight > 0 && profileData.height > 0);
+          setHasValidSavedProfile(completeProfile.weight > 0 && completeProfile.height > 0);
         } else {
           // Check if there's localStorage data to migrate
           const savedProfile = localStorage.getItem("userProfile");
           if (savedProfile) {
             try {
               const parsedProfile = JSON.parse(savedProfile);
-              const completeProfile = { ...defaultValues, ...parsedProfile };
+              const completeProfile = ensureCompleteProfile(parsedProfile);
               setProfile(completeProfile);
               setInitialValues(completeProfile);
               setIsNewUser(false);
@@ -93,7 +111,7 @@ const Profile = () => {
     if (savedProfile) {
       try {
         const parsedProfile = JSON.parse(savedProfile);
-        const completeProfile = { ...defaultValues, ...parsedProfile };
+        const completeProfile = ensureCompleteProfile(parsedProfile);
         setProfile(completeProfile);
         setInitialValues(completeProfile);
         setIsNewUser(false);
