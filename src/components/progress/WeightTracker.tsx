@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -98,10 +99,7 @@ const WeightTracker = () => {
 
   const weightUnit = getWeightUnit(measurementSystem);
 
-  if (loading) {
-    return <div>Loading weight data...</div>;
-  }
-
+  // Don't show loading text - just render the content directly
   return (
     <div className="space-y-6">
       <Card>
