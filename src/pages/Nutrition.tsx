@@ -34,6 +34,7 @@ const Nutrition = () => {
   const [showScanBarcode, setShowScanBarcode] = useState(false);
   const [showAIMealAnalyzer, setShowAIMealAnalyzer] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
+  const [showMealOptionsModal, setShowMealOptionsModal] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<ProductDetails | null>(null);
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'meals' | 'water'>('meals');
@@ -210,8 +211,8 @@ const Nutrition = () => {
     if (test_subscription_tier === 'free') {
       setShowAddFood(true);
     } else {
-      // For pro and premium plans, this will be handled by the modal dialog
-      setShowAddFood(true);
+      // For pro and premium plans, show the modal to choose between options
+      setShowMealOptionsModal(true);
     }
   };
 
@@ -345,7 +346,10 @@ const Nutrition = () => {
       key: 'search',
       icon: Apple,
       label: t("Add food"),
-      action: () => setShowAddFood(true)
+      action: () => {
+        setShowMealOptionsModal(false);
+        setShowAddFood(true);
+      }
     });
 
     // Pro and Premium have barcode scanning
@@ -354,7 +358,10 @@ const Nutrition = () => {
         key: 'barcode',
         icon: Camera,
         label: "Scan Barcode",
-        action: handleScanBarcode
+        action: () => {
+          setShowMealOptionsModal(false);
+          handleScanBarcode();
+        }
       });
     }
 
@@ -364,7 +371,10 @@ const Nutrition = () => {
         key: 'ai',
         icon: Bot,
         label: "AI Meal Analyzer",
-        action: handleAIMealAnalyzer
+        action: () => {
+          setShowMealOptionsModal(false);
+          handleAIMealAnalyzer();
+        }
       });
     }
 
@@ -437,6 +447,32 @@ const Nutrition = () => {
           refreshTrigger={refreshTrigger}
         />
       </div>
+
+      {/* Meal Options Modal - For pro and premium when clicking "Add item" on a meal */}
+      <Dialog open={showMealOptionsModal} onOpenChange={setShowMealOptionsModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("Add food")}</DialogTitle>
+            <DialogDescription>
+              {test_subscription_tier === 'pro' 
+                ? "Search for a product or scan a barcode"
+                : "Search for a product, scan, or analyze with AI"
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 py-4">
+            {addFoodOptions.map(option => {
+              const IconComponent = option.icon;
+              return (
+                <Button key={option.key} className="flex-1" onClick={option.action}>
+                  <IconComponent className="mr-2 h-4 w-4" />
+                  {option.label}
+                </Button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Add Food Dialog */}
       <Dialog open={showAddFood} onOpenChange={setShowAddFood}>
