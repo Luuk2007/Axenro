@@ -54,12 +54,12 @@ export function PricingSection({
 	return (
 		<div
 			className={cn(
-				'flex w-full flex-col items-center justify-center space-y-5',
+				'flex w-full flex-col items-center justify-center',
 				props.className,
 			)}
 			{...props}
 		>
-			<div className="mx-auto max-w-xl space-y-2">
+			<div className="mx-auto max-w-xl space-y-3 mb-6">
 				<h2 className="text-center text-2xl font-bold tracking-tight md:text-3xl lg:text-4xl">
 					{heading}
 				</h2>
@@ -69,10 +69,12 @@ export function PricingSection({
 					</p>
 				)}
 			</div>
-			<PricingFrequencyToggle
-				frequency={frequency}
-				setFrequency={setFrequency}
-			/>
+			<div className="mb-6">
+				<PricingFrequencyToggle
+					frequency={frequency}
+					setFrequency={setFrequency}
+				/>
+			</div>
 			<div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-4 md:grid-cols-3">
 				{plans.map((plan) => (
 					<PricingCard plan={plan} key={plan.name} frequency={frequency} />

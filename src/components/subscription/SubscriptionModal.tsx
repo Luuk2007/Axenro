@@ -165,7 +165,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-6xl h-[85vh] p-0 flex flex-col overflow-hidden">
+      <DialogContent className="sm:max-w-6xl max-h-[90vh] p-0 flex flex-col overflow-hidden">
         {test_mode && (
           <div className="bg-blue-50 border-b border-blue-200 px-6 py-3 flex-shrink-0">
             <div className="flex items-center gap-2">
@@ -177,7 +177,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
           </div>
         )}
         
-        <div className="flex-1 overflow-y-auto px-6 pt-6 pb-4">
+        <div className="flex-1 overflow-y-auto p-6">
           <PricingSection 
             plans={plans}
             heading={test_mode ? t('Choose Your Plan (Test Version)') : t('Choose Your Plan')}
@@ -185,7 +185,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
               ? t('Experience all features in test mode. Switch between any plan to test functionality.')
               : t('Unlock the full potential of your fitness journey with our premium features.')
             }
-            className="p-0"
+            className="p-0 space-y-4"
           />
         </div>
 
