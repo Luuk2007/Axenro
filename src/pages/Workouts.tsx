@@ -18,12 +18,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const Workouts = () => {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  const { test_mode, test_subscription_tier, subscription_tier } = useSubscription();
+  const { test_mode, test_subscription_tier, subscription_tier, loading: subscriptionLoading } = useSubscription();
   
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
-  // Show personal records tab if pro/premium (including during loading to prevent flash)
-  const canAccessPersonalRecords = currentTier === 'pro' || currentTier === 'premium';
+  // Show personal records tab if pro/premium OR while loading (to prevent flash)
+  const canAccessPersonalRecords = subscriptionLoading || currentTier === 'pro' || currentTier === 'premium';
   
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);

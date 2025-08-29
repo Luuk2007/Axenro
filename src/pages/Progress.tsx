@@ -44,15 +44,15 @@ interface MeasurementType {
 export default function Progress() {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  const { subscription_tier, test_mode, test_subscription_tier } = useSubscription();
+  const { subscription_tier, test_mode, test_subscription_tier, loading: subscriptionLoading } = useSubscription();
   
   // Determine current plan
   const currentPlan = test_mode ? test_subscription_tier : subscription_tier;
   const isFree = currentPlan === 'free';
   const isPro = currentPlan === 'pro';
   const isPremium = currentPlan === 'premium';
-  // Show photos tab if pro/premium (including during loading to prevent flash)
-  const showPhotosTab = currentPlan === 'pro' || currentPlan === 'premium';
+  // Show photos tab if pro/premium OR while loading (to prevent flash)
+  const showPhotosTab = subscriptionLoading || currentPlan === 'pro' || currentPlan === 'premium';
 
   const [measurementType, setMeasurementType] = useState('waist');
   const [measurementValue, setMeasurementValue] = useState('');
