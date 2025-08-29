@@ -177,9 +177,9 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
         <CardTitle>{t("Workout calendar")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="flex gap-6">
           {/* Left side - Calendar and Stats */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="flex-1 space-y-6">
             {/* Enhanced Statistics Cards */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
@@ -228,7 +228,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
           </div>
 
           {/* Right side - Progress Panel */}
-          <div className="lg:col-span-1">
+          <div className="w-80 flex-shrink-0">
             <WorkoutProgressPanel 
               workouts={workouts} 
               onPlanWorkout={handlePlanWorkout}
