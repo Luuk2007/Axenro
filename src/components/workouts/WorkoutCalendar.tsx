@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -176,29 +175,28 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
       <CardHeader>
         <CardTitle>{t("Workout calendar")}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="flex gap-6">
-          {/* Left side - Calendar and Stats */}
-          <div className="flex-1 space-y-6">
-            {/* Enhanced Statistics Cards */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
-                <div className="text-sm text-muted-foreground">{t("Workouts this week")}</div>
-                <div className="text-3xl font-bold mt-1">{weeklyStats.totalWorkouts}</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {weeklyStats.weekComparison}
-                </div>
-              </div>
-              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md">
-                <div className="text-sm text-muted-foreground">{t("Workouts this month")}</div>
-                <div className="text-3xl font-bold mt-1">{monthlyStats.totalWorkouts}</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {monthlyStats.monthComparison}
-                </div>
-              </div>
+      <CardContent className="space-y-4">
+        {/* Enhanced Statistics Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
+            <div className="text-sm text-muted-foreground">{t("Workouts this week")}</div>
+            <div className="text-3xl font-bold mt-1">{weeklyStats.totalWorkouts}</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {weeklyStats.weekComparison}
             </div>
-            
-            {/* Calendar with custom styling for workout days */}
+          </div>
+          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md">
+            <div className="text-sm text-muted-foreground">{t("Workouts this month")}</div>
+            <div className="text-3xl font-bold mt-1">{monthlyStats.totalWorkouts}</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {monthlyStats.monthComparison}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          {/* Calendar */}
+          <div className="flex-1">
             <div className="workout-calendar">
               <style dangerouslySetInnerHTML={{
                 __html: `
@@ -227,7 +225,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
             </div>
           </div>
 
-          {/* Right side - Progress Panel */}
+          {/* Progress Panel */}
           <div className="w-80 flex-shrink-0">
             <WorkoutProgressPanel 
               workouts={workouts} 
