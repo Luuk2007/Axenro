@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,11 +20,10 @@ const Workouts = () => {
   const isMobile = useIsMobile();
   const { test_mode, test_subscription_tier, subscription_tier, loading: subscriptionLoading } = useSubscription();
   
-  // Determine current subscription tier - show premium features if we have pro/premium data or still loading
+  // Determine current subscription tier - only show premium features if confirmed pro/premium
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
-  const isFree = currentTier === 'free';
-  // Show personal records tab if we're pro/premium OR still loading (to avoid flash)
-  const canAccessPersonalRecords = currentTier === 'pro' || currentTier === 'premium' || subscriptionLoading;
+  // Only show personal records tab if we're confirmed pro/premium (not while loading)
+  const canAccessPersonalRecords = !subscriptionLoading && (currentTier === 'pro' || currentTier === 'premium');
   
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
@@ -163,24 +161,7 @@ const Workouts = () => {
         
         {canAccessPersonalRecords && (
           <TabsContent value="personal-records" className="mt-6">
-            {/* Only show content restriction if we're definitely on free plan and not loading */}
-            {isFree && !subscriptionLoading ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                    <Trophy className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">Upgrade to Access Personal Records</h3>
-                  <p className="text-muted-foreground mb-6">Personal records tracking is available with Pro and Premium plans.</p>
-                  <Button onClick={() => window.dispatchEvent(new CustomEvent('openSubscriptionModal'))}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Upgrade Now
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <PersonalRecords />
-            )}
+            <PersonalRecords />
           </TabsContent>
         )}
       </Tabs>
