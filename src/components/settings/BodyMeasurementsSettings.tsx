@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,12 +5,14 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Crown } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
+import { useSubscription } from '@/hooks/useSubscription';
+import { getSubscriptionLimits, formatUsageText, canAddMore } from '@/utils/subscriptionLimits';
 
 interface MeasurementType {
   id: string;
@@ -34,11 +35,19 @@ const defaultMeasurements: MeasurementType[] = [
 const BodyMeasurementsSettings = () => {
   const { t } = useLanguage();
   const { measurementSystem } = useMeasurementSystem();
+  const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
+  
   const [measurementTypes, setMeasurementTypes] = useState<MeasurementType[]>(defaultMeasurements);
   const [isOpen, setIsOpen] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newMeasurementName, setNewMeasurementName] = useState('');
   const [newMeasurementUnit, setNewMeasurementUnit] = useState('cm');
+
+  // Get subscription limits
+  const limits = getSubscriptionLimits(subscribed, subscription_tier, test_mode, test_subscription_tier);
+  const customMeasurementsCount = measurementTypes.filter(m => m.isCustom).length;
+  const canAddMoreMeasurements = canAddMore(customMeasurementsCount, limits.customMeasurements);
+  const usageText = formatUsageText(customMeasurementsCount, limits.customMeasurements);
 
   useEffect(() => {
     const savedMeasurementTypes = localStorage.getItem('measurementTypes');
@@ -70,6 +79,12 @@ const BodyMeasurementsSettings = () => {
   const handleAddCustomMeasurement = () => {
     if (!newMeasurementName.trim()) {
       toast.error(t('pleaseEnterValue'));
+      return;
+    }
+
+    // Check subscription limit
+    if (!canAddMoreMeasurements) {
+      toast.error(t("You've reached your custom measurements limit. Upgrade to add more."));
       return;
     }
 
@@ -115,13 +130,18 @@ const BodyMeasurementsSettings = () => {
     return t(measurement.id) || measurement.name;
   };
 
+  const showUpgradePrompt = !canAddMoreMeasurements && limits.customMeasurements !== -1;
+
   return (
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">{t("Body Measurements")}</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">{t("Body Measurements")}</CardTitle>
+                <span className="text-sm text-muted-foreground">{usageText}</span>
+              </div>
               {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </div>
           </CardHeader>
@@ -163,9 +183,30 @@ const BodyMeasurementsSettings = () => {
             </div>
 
             <div className="pt-2">
+              {showUpgradePrompt && (
+                <div className="p-3 border border-orange-200 bg-orange-50 rounded-md mb-3">
+                  <div className="flex items-center gap-2 text-orange-800">
+                    <Crown className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      {t("Upgrade to add more custom measurements")}
+                    </span>
+                  </div>
+                  <p className="text-xs text-orange-700 mt-1">
+                    {limits.customMeasurements === 2 
+                      ? t("Pro plan: 5 custom measurements, Premium: unlimited")
+                      : t("Premium plan: unlimited custom measurements")
+                    }
+                  </p>
+                </div>
+              )}
+              
               <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    disabled={!canAddMoreMeasurements || loading}
+                  >
                     <Plus className="mr-2 h-4 w-4" />
                     {t("Add Custom Measurement")}
                   </Button>

@@ -1,4 +1,3 @@
-
 import { Translations } from "../types";
 
 export const settingsTranslations: Translations = {
@@ -100,4 +99,18 @@ export const settingsTranslations: Translations = {
   profileSettings: "Profiel instellingen",
   nutritionPlan: "Voedingsplan",
   back: "Terug",
+  
+  // New subscription limit translations
+  "You've reached your custom meals limit. Upgrade to add more.": "Je hebt je limiet voor aangepaste maaltijden bereikt. Upgrade om er meer toe te voegen.",
+  "You've reached your custom exercises limit. Upgrade to add more.": "Je hebt je limiet voor aangepaste oefeningen bereikt. Upgrade om er meer toe te voegen.",
+  "You've reached your custom measurements limit. Upgrade to add more.": "Je hebt je limiet voor aangepaste metingen bereikt. Upgrade om er meer toe te voegen.",
+  "Upgrade to add more custom meals": "Upgrade om meer aangepaste maaltijden toe te voegen",
+  "Upgrade to add more custom exercises": "Upgrade om meer aangepaste oefeningen toe te voegen", 
+  "Upgrade to add more custom measurements": "Upgrade om meer aangepaste metingen toe te voegen",
+  "Pro plan: 5 custom meals, Premium: unlimited": "Pro-abonnement: 5 aangepaste maaltijden, Premium: onbeperkt",
+  "Pro plan: 5 custom exercises, Premium: unlimited": "Pro-abonnement: 5 aangepaste oefeningen, Premium: onbeperkt",
+  "Pro plan: 5 custom measurements, Premium: unlimited": "Pro-abonnement: 5 aangepaste metingen, Premium: onbeperkt",
+  "Premium plan: unlimited custom meals": "Premium-abonnement: onbeperkt aangepaste maaltijden",
+  "Premium plan: unlimited custom exercises": "Premium-abonnement: onbeperkt aangepaste oefeningen",
+  "Premium plan: unlimited custom measurements": "Premium-abonnement: onbeperkt aangepaste metingen",
 };

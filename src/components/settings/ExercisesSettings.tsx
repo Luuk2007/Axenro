@@ -1,14 +1,15 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, ChevronDown, ChevronUp } from "lucide-react";
+import { X, ChevronDown, ChevronUp, Crown } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { exerciseDatabase } from '@/types/workout';
+import { useSubscription } from "@/hooks/useSubscription";
+import { getSubscriptionLimits, formatUsageText, canAddMore } from "@/utils/subscriptionLimits";
 
 interface CustomExercise {
   id: string;
@@ -18,6 +19,8 @@ interface CustomExercise {
 
 const ExercisesSettings = () => {
   const { t } = useLanguage();
+  const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
+  
   const [customExercises, setCustomExercises] = useState<CustomExercise[]>(() => {
     const saved = localStorage.getItem('customExercises');
     if (saved) {
@@ -44,6 +47,12 @@ const ExercisesSettings = () => {
     'chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'cardio', 'full body'
   ];
 
+  // Get subscription limits
+  const limits = getSubscriptionLimits(subscribed, subscription_tier, test_mode, test_subscription_tier);
+  const customExercisesCount = customExercises.length;
+  const canAddMoreExercises = canAddMore(customExercisesCount, limits.customExercises);
+  const usageText = formatUsageText(customExercisesCount, limits.customExercises);
+
   const getExistingExercisesForGroup = (muscleGroup: string) => {
     return exerciseDatabase[muscleGroup as keyof typeof exerciseDatabase] || [];
   };
@@ -56,6 +65,12 @@ const ExercisesSettings = () => {
 
     if (!newMuscleGroup) {
       toast.error(t("Please select a muscle group"));
+      return;
+    }
+
+    // Check subscription limit
+    if (!canAddMoreExercises) {
+      toast.error(t("You've reached your custom exercises limit. Upgrade to add more."));
       return;
     }
 
@@ -86,13 +101,18 @@ const ExercisesSettings = () => {
     toast.success(t("Exercise removed successfully"));
   };
 
+  const showUpgradePrompt = !canAddMoreExercises && limits.customExercises !== -1;
+
   return (
     <Card>
       <Collapsible open={exercisesOpen} onOpenChange={setExercisesOpen}>
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">{t("Exercises")}</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">{t("Exercises")}</CardTitle>
+                <span className="text-sm text-muted-foreground">{usageText}</span>
+              </div>
               {exercisesOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </div>
           </CardHeader>
@@ -128,17 +148,40 @@ const ExercisesSettings = () => {
 
             <div className="space-y-2">
               <h3 className="font-medium text-sm">{t("Add custom exercise")}</h3>
+              
+              {showUpgradePrompt && (
+                <div className="p-3 border border-orange-200 bg-orange-50 rounded-md">
+                  <div className="flex items-center gap-2 text-orange-800">
+                    <Crown className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      {t("Upgrade to add more custom exercises")}
+                    </span>
+                  </div>
+                  <p className="text-xs text-orange-700 mt-1">
+                    {limits.customExercises === 2 
+                      ? t("Pro plan: 5 custom exercises, Premium: unlimited")
+                      : t("Premium plan: unlimited custom exercises")
+                    }
+                  </p>
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <Input
                   placeholder={t("Enter exercise name")}
                   value={newExerciseName}
                   onChange={(e) => setNewExerciseName(e.target.value)}
                   className="text-sm h-9"
+                  disabled={!canAddMoreExercises}
                 />
-                <Select value={newMuscleGroup} onValueChange={(value) => {
-                  setNewMuscleGroup(value);
-                  setShowExistingExercises(!!value);
-                }}>
+                <Select 
+                  value={newMuscleGroup} 
+                  onValueChange={(value) => {
+                    setNewMuscleGroup(value);
+                    setShowExistingExercises(!!value);
+                  }}
+                  disabled={!canAddMoreExercises}
+                >
                   <SelectTrigger className="h-9">
                     <SelectValue placeholder={t("Select muscle group")} />
                   </SelectTrigger>
@@ -163,7 +206,11 @@ const ExercisesSettings = () => {
                     </div>
                   </div>
                 )}
-                <Button onClick={addCustomExercise} className="w-full h-9">
+                <Button 
+                  onClick={addCustomExercise} 
+                  className="w-full h-9"
+                  disabled={!canAddMoreExercises || loading}
+                >
                   {t("Add Exercise")}
                 </Button>
               </div>

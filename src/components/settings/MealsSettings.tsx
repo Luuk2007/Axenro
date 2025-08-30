@@ -1,13 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
+import { X, ChevronDown, ChevronUp, RotateCcw, Crown } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getAvailableMeals } from '@/types/nutrition';
+import { useSubscription } from "@/hooks/useSubscription";
+import { getSubscriptionLimits, formatUsageText, canAddMore } from "@/utils/subscriptionLimits";
 
 interface CustomMeal {
   id: string;
@@ -18,6 +19,8 @@ interface CustomMeal {
 
 const MealsSettings = () => {
   const { t } = useLanguage();
+  const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
+  
   const [customMeals, setCustomMeals] = useState<CustomMeal[]>(() => {
     const saved = localStorage.getItem('customMeals');
     if (saved) {
@@ -40,6 +43,12 @@ const MealsSettings = () => {
   const [newMealName, setNewMealName] = useState('');
   const [mealsOpen, setMealsOpen] = useState(false);
   const [availableMeals, setAvailableMeals] = useState(() => getAvailableMeals());
+
+  // Get subscription limits
+  const limits = getSubscriptionLimits(subscribed, subscription_tier, test_mode, test_subscription_tier);
+  const customMealsCount = customMeals.length;
+  const canAddMoreMeals = canAddMore(customMealsCount, limits.customMeals);
+  const usageText = formatUsageText(customMealsCount, limits.customMeals);
 
   // Listen for meals changes and refresh available meals
   useEffect(() => {
@@ -71,6 +80,12 @@ const MealsSettings = () => {
   const addCustomMeal = () => {
     if (!newMealName.trim()) {
       toast.error(t("Please enter a meal name"));
+      return;
+    }
+
+    // Check subscription limit
+    if (!canAddMoreMeals) {
+      toast.error(t("You've reached your custom meals limit. Upgrade to add more."));
       return;
     }
 
@@ -136,13 +151,18 @@ const MealsSettings = () => {
     toast.success(t("Default meals restored successfully"));
   };
 
+  const showUpgradePrompt = !canAddMoreMeals && limits.customMeals !== -1;
+
   return (
     <Card>
       <Collapsible open={mealsOpen} onOpenChange={setMealsOpen}>
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">{t("Meals")}</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">{t("Meals")}</CardTitle>
+                <span className="text-sm text-muted-foreground">{usageText}</span>
+              </div>
               {mealsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
             </div>
           </CardHeader>
@@ -200,15 +220,39 @@ const MealsSettings = () => {
 
             <div className="space-y-2">
               <h3 className="font-medium text-sm">{t("Add custom meal")}</h3>
+              
+              {showUpgradePrompt && (
+                <div className="p-3 border border-orange-200 bg-orange-50 rounded-md">
+                  <div className="flex items-center gap-2 text-orange-800">
+                    <Crown className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      {t("Upgrade to add more custom meals")}
+                    </span>
+                  </div>
+                  <p className="text-xs text-orange-700 mt-1">
+                    {limits.customMeals === 2 
+                      ? t("Pro plan: 5 custom meals, Premium: unlimited")
+                      : t("Premium plan: unlimited custom meals")
+                    }
+                  </p>
+                </div>
+              )}
+              
               <div className="flex gap-2">
                 <Input
                   placeholder={t("Enter meal name")}
                   value={newMealName}
                   onChange={(e) => setNewMealName(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && addCustomMeal()}
+                  onKeyPress={(e) => e.key === 'Enter' && canAddMoreMeals && addCustomMeal()}
                   className="text-sm h-9"
+                  disabled={!canAddMoreMeals}
                 />
-                <Button onClick={addCustomMeal} size="sm" className="h-9">
+                <Button 
+                  onClick={addCustomMeal} 
+                  size="sm" 
+                  className="h-9"
+                  disabled={!canAddMoreMeals || loading}
+                >
                   {t("Add")}
                 </Button>
               </div>
