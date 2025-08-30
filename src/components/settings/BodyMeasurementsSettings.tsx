@@ -105,6 +105,16 @@ const BodyMeasurementsSettings = () => {
     return baseUnit;
   };
 
+  // Get display name for measurement
+  const getDisplayName = (measurement: MeasurementType) => {
+    // For custom measurements, always show the custom name
+    if (measurement.isCustom) {
+      return measurement.name;
+    }
+    // For default measurements, use translation if available, otherwise use the name
+    return t(measurement.id) || measurement.name;
+  };
+
   return (
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -127,7 +137,7 @@ const BodyMeasurementsSettings = () => {
                 <div key={measurement.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Label htmlFor={measurement.id} className="font-medium">
-                      {t(measurement.id) || measurement.name}
+                      {getDisplayName(measurement)}
                     </Label>
                     <span className="text-sm text-muted-foreground">({getDisplayUnit(measurement.unit)})</span>
                   </div>
