@@ -212,22 +212,25 @@ const Settings = () => {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="space-y-3 py-3">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="theme">{t("theme")}</Label>
-                  <Select
-                    value={settings.theme || "light"}
-                    onValueChange={handleThemeChange}
-                  >
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder={t("theme")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="light">{t("light")}</SelectItem>
-                      <SelectItem value="dark">{t("dark")}</SelectItem>
-                      <SelectItem value="system">{t("system")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Only show theme selector for subscribed users */}
+                {subscribed && (
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="theme">{t("theme")}</Label>
+                    <Select
+                      value={settings.theme || "light"}
+                      onValueChange={handleThemeChange}
+                    >
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder={t("theme")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="light">{t("light")}</SelectItem>
+                        <SelectItem value="dark">{t("dark")}</SelectItem>
+                        <SelectItem value="system">{t("system")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between">
                   <Label htmlFor="language">{t("language")}</Label>
