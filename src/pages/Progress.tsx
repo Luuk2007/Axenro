@@ -122,6 +122,15 @@ export default function Progress() {
     };
   }, []);
 
+  const getDisplayName = (measurement: MeasurementType) => {
+    // For custom measurements, always show the custom name
+    if (measurement.isCustom) {
+      return measurement.name;
+    }
+    // For default measurements, use translation if available, otherwise use the name
+    return t(measurement.id) || measurement.name;
+  };
+
   const handleAddMeasurement = async () => {
     if (!measurementValue) {
       toast.error(t('Please enter value'));
@@ -343,7 +352,7 @@ export default function Progress() {
                   
                   return (
                     <div key={type.id} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{t(type.id) || type.name}</span>
+                      <span className="text-sm font-medium">{getDisplayName(type)}</span>
                       <span className="text-sm">
                         {latestMeasurement ? `${latestMeasurement.value} ${type.unit}` : '—'}
                       </span>
@@ -389,7 +398,7 @@ export default function Progress() {
                               <TableRow key={measurement.id} className="border-b border-border">
                                 <TableCell className="py-3">{format(parseISO(measurement.date), 'MMM d, yyyy')}</TableCell>
                                 <TableCell className="py-3">
-                                  {t(measurement.type) || measurementTypeInfo?.name || measurement.type}
+                                  {measurementTypeInfo ? getDisplayName(measurementTypeInfo) : measurement.type}
                                 </TableCell>
                                 <TableCell className="py-3 text-right">{measurement.value} {measurement.unit}</TableCell>
                                 <TableCell className="py-3">
@@ -436,7 +445,7 @@ export default function Progress() {
                           const hasData = getMeasurementsByType(type.id).length > 0;
                           return (
                             <TabsTrigger key={type.id} value={type.id} disabled={!hasData} className={isMobile ? 'text-xs' : ''}>
-                              {isMobile ? (t(type.id) || type.name) : `${t(type.id) || type.name} ${hasData ? `(${getMeasurementsByType(type.id).length})` : ''}`}
+                              {isMobile ? getDisplayName(type) : `${getDisplayName(type)} ${hasData ? `(${getMeasurementsByType(type.id).length})` : ''}`}
                             </TabsTrigger>
                           );
                         })}
