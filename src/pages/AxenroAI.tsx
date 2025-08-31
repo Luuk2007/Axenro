@@ -22,6 +22,29 @@ interface ChatMessage {
 
 type AIMode = 'general' | 'workout' | 'nutrition' | 'progress';
 
+const modeStarterSuggestions = {
+  general: [
+    "Give me a full-body workout",
+    "How do I stay consistent?",
+    "Create a balanced fitness plan"
+  ],
+  workout: [
+    "Generate a push day workout",
+    "Best leg exercises?",
+    "Weekly strength program"
+  ],
+  nutrition: [
+    "Plan 3 high-protein meals",
+    "Calorie estimate for pasta dish",
+    "Snack ideas under 200 calories"
+  ],
+  progress: [
+    "Show my workout progress",
+    "Track weight changes",
+    "Summarize my last 7 days"
+  ]
+};
+
 export default function AxenroAI() {
   const { t } = useLanguage();
   const { session, user } = useAuth();
@@ -135,18 +158,15 @@ export default function AxenroAI() {
     return contextPrompt;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim() || !session) return;
+  const sendMessage = async (messageText: string) => {
+    if (!messageText.trim() || !session) return;
 
-    const currentMessage = message;
-    setMessage('');
     setLoading(true);
 
     try {
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: {
-          message: currentMessage,
+          message: messageText,
           messageType: aiMode,
           userContext: userContext,
           systemPrompt: getModePrompt(aiMode)
@@ -162,10 +182,20 @@ export default function AxenroAI() {
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
-      setMessage(currentMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const currentMessage = message;
+    setMessage('');
+    await sendMessage(currentMessage);
+  };
+
+  const handleSuggestionClick = async (suggestion: string) => {
+    await sendMessage(suggestion);
   };
 
   const deleteChatMessage = async (chatId: string) => {
@@ -199,7 +229,7 @@ export default function AxenroAI() {
 
   if (!user) {
     return (
-      <div className="animate-fade-in max-w-4xl mx-auto">
+      <div className="animate-fade-in">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight mb-2">Axenro AI</h1>
           <p className="text-muted-foreground">
@@ -231,7 +261,7 @@ export default function AxenroAI() {
   }
 
   return (
-    <div className="animate-fade-in max-w-4xl mx-auto">
+    <div className="animate-fade-in">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Axenro AI</h1>
         <p className="text-muted-foreground">
@@ -266,9 +296,22 @@ export default function AxenroAI() {
         <Card className="h-96 overflow-y-auto p-4 space-y-4 bg-background">
           {chatHistory.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
-              <Bot className="mx-auto h-12 w-12 mb-2" />
-              <p className="font-medium">Chat with your {getModeLabel(aiMode)}</p>
-              <p className="text-sm mt-1">Start a conversation to get personalized advice!</p>
+              <Bot className="mx-auto h-12 w-12 mb-4" />
+              <p className="font-medium mb-4">Chat with your {getModeLabel(aiMode)}</p>
+              <p className="text-sm mb-6">Try asking about:</p>
+              <div className="flex flex-wrap gap-2 justify-center max-w-md mx-auto">
+                {modeStarterSuggestions[aiMode].map((suggestion, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    {suggestion}
+                  </Button>
+                ))}
+              </div>
             </div>
           ) : (
             chatHistory.map((chat) => (
