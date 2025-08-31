@@ -44,7 +44,7 @@ export const getSubscriptionLimits = (
 };
 
 export const formatUsageText = (current: number, limit: number): string => {
-  if (limit === -1) return `(${current} used)`;
+  if (limit === -1) return ''; // Return empty string for unlimited plans
   return `(${current}/${limit} used)`;
 };
 
