@@ -230,7 +230,7 @@ export default function AxenroAI() {
     return (
       <div className="animate-fade-in">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Axenro AI</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Axenro AI</h1>
         </div>
         
         <div className="text-center py-12">
@@ -259,7 +259,7 @@ export default function AxenroAI() {
   return (
     <div className="animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Axenro AI</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Axenro AI</h1>
       </div>
 
       <div className="space-y-4">
