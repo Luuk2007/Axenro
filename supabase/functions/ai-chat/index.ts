@@ -22,7 +22,7 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Get the authorization header and set it for the supabase client
+    // Get the authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('Missing authorization header');
@@ -31,13 +31,19 @@ serve(async (req) => {
     // Extract the JWT token from the Authorization header
     const token = authHeader.replace('Bearer ', '');
     
-    // Set the auth token for this request
+    // Set the auth token for this request - this ensures RLS works correctly
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     
     if (userError || !user) {
       console.error('Auth error:', userError);
       throw new Error('Authentication failed');
     }
+
+    // Set the session for the supabase client to ensure RLS policies work
+    await supabase.auth.setSession({
+      access_token: token,
+      refresh_token: '', // Not needed for this operation
+    });
 
     console.log('Authenticated user:', user.id);
 
@@ -106,7 +112,7 @@ serve(async (req) => {
 
     console.log('Received response from OpenAI, saving to database');
 
-    // Save chat history
+    // Save chat history with proper auth context
     const { error } = await supabase
       .from('ai_chat_history')
       .insert({

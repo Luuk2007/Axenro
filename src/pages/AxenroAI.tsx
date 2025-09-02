@@ -163,6 +163,7 @@ export default function AxenroAI() {
     setLoading(true);
 
     try {
+      console.log('Sending message:', messageText);
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: {
           message: messageText,
@@ -175,12 +176,21 @@ export default function AxenroAI() {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('AI function error:', error);
+        throw error;
+      }
 
-      await loadChatHistory();
+      console.log('AI response received:', data);
+      
+      // Add a small delay to ensure database consistency
+      setTimeout(async () => {
+        await loadChatHistory();
+      }, 500);
+      
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error('Failed to send message');
+      toast.error('Failed to send message. Please try again.');
     } finally {
       setLoading(false);
     }
