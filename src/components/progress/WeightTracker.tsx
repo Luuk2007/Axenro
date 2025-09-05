@@ -99,7 +99,48 @@ const WeightTracker = () => {
 
   const weightUnit = getWeightUnit(measurementSystem);
 
-  // Don't show loading text - just render the content directly
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("Weight Progress")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={`grid gap-4 mb-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
+              <div className="text-center p-4 bg-primary/5 rounded-lg animate-pulse">
+                <div className="h-4 bg-muted rounded w-20 mx-auto mb-2"></div>
+                <div className="h-8 bg-muted rounded w-16 mx-auto"></div>
+              </div>
+              <div className="text-center p-4 bg-secondary/5 rounded-lg animate-pulse">
+                <div className="h-4 bg-muted rounded w-20 mx-auto mb-2"></div>
+                <div className="h-8 bg-muted rounded w-16 mx-auto"></div>
+              </div>
+              <div className="text-center p-4 bg-accent/5 rounded-lg animate-pulse">
+                <div className="h-4 bg-muted rounded w-20 mx-auto mb-2"></div>
+                <div className="h-8 bg-muted rounded w-16 mx-auto"></div>
+              </div>
+            </div>
+            <div className={`mb-6 ${isMobile ? 'h-[200px]' : 'h-64'} bg-muted rounded animate-pulse`}></div>
+            <div className="space-y-4">
+              <div className={`gap-4 items-end ${isMobile ? 'flex flex-col space-y-4' : 'flex'}`}>
+                <div className="flex-1">
+                  <div className="h-4 bg-muted rounded w-12 mb-2"></div>
+                  <div className="h-10 bg-muted rounded"></div>
+                </div>
+                <div className="flex-1">
+                  <div className="h-4 bg-muted rounded w-16 mb-2"></div>
+                  <div className="h-10 bg-muted rounded"></div>
+                </div>
+                <div className="h-10 bg-muted rounded w-20"></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card>
