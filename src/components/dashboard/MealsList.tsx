@@ -90,28 +90,27 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
           }
         }
 
-        // Convert to MealItemData format
-        const mealItems: MealItemData[] = mealData
+        // Convert to individual food items
+        const mealItems: MealItemData[] = [];
+        
+        mealData
           .filter(meal => meal.items.length > 0)
-          .slice(0, 3) // Show only first 3 meals
-          .map(meal => {
-            const totalCalories = meal.items.reduce((sum: number, item: FoodItem) => sum + item.calories, 0);
-            const totalProtein = meal.items.reduce((sum: number, item: FoodItem) => sum + item.protein, 0);
-            
-            // Create a readable list of food items
-            const foodNames = meal.items.map(item => item.name).join(", ");
-            const displayName = foodNames.length > 40 ? foodNames.substring(0, 37) + "..." : foodNames;
-            
-            return {
-              id: meal.id,
-              name: displayName,
-              time: getTimeForMeal(meal.id),
-              calories: Math.round(totalCalories),
-              protein: Math.round(totalProtein * 10) / 10
-            };
+          .forEach(meal => {
+            meal.items.forEach((item: FoodItem, index: number) => {
+              mealItems.push({
+                id: `${meal.id}-${index}`,
+                name: item.name,
+                time: '', // Remove time display
+                calories: Math.round(item.calories),
+                protein: Math.round(item.protein * 10) / 10
+              });
+            });
           });
+          
+        // Show only first 5 individual items
+        const displayItems = mealItems.slice(0, 5);
 
-        setMeals(mealItems);
+        setMeals(displayItems);
       } catch (error) {
         console.error('Error loading today\'s meals:', error);
       } finally {
@@ -176,15 +175,14 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
                 key={meal.id}
                 className="flex items-center justify-between p-4"
               >
-                <div className="flex items-center space-x-4">
-                  <div className="rounded-lg bg-primary/10 p-2">
-                    <Utensils className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{meal.name}</p>
-                    <p className="text-xs text-muted-foreground">{meal.time}</p>
-                  </div>
-                </div>
+                 <div className="flex items-center space-x-4">
+                   <div className="rounded-lg bg-primary/10 p-2">
+                     <Utensils className="h-5 w-5 text-primary" />
+                   </div>
+                   <div>
+                     <p className="font-medium">{meal.name}</p>
+                   </div>
+                 </div>
                 <div className="flex flex-col items-end">
                   <p className="font-medium">{meal.calories} cal</p>
                   <p className="text-xs text-muted-foreground">{meal.protein}g {t("protein")}</p>
