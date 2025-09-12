@@ -18,14 +18,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const Workouts = () => {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  const { test_mode, test_subscription_tier, subscription_tier, loading: subscriptionLoading } = useSubscription();
+  const { test_mode, test_subscription_tier, subscription_tier, loading: subscriptionLoading, initialized } = useSubscription();
   
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
   
   // Show personal records tab logic: Only show when we're certain user has access (pro/premium)
-  // Always explicitly check for pro/premium, never show for free or during loading
-  const canAccessPersonalRecords = (currentTier === 'pro' || currentTier === 'premium');
+  // Gate rendering until subscription is initialized to avoid flicker
+  const canAccessPersonalRecords = initialized && (currentTier === 'pro' || currentTier === 'premium');
   
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
@@ -130,43 +130,45 @@ const Workouts = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="workouts">
-        <TabsList className={`grid w-full ${canAccessPersonalRecords ? 'grid-cols-3' : 'grid-cols-2'}`}>
-          <TabsTrigger value="workouts">
-            <Dumbbell className="h-4 w-4 mr-2" />
-            {t("Workouts")}
-          </TabsTrigger>
-          <TabsTrigger value="calendar">
-            <Dumbbell className="h-4 w-4 mr-2" />
-            {t("Calendar")}
-          </TabsTrigger>
-          {canAccessPersonalRecords && (
-            <TabsTrigger value="personal-records">
-              <Trophy className="h-4 w-4 mr-2" />
-              {isMobile ? "PR's" : t("Personal records")}
+      {initialized && (
+        <Tabs defaultValue="workouts">
+          <TabsList className={`grid w-full ${canAccessPersonalRecords ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            <TabsTrigger value="workouts">
+              <Dumbbell className="h-4 w-4 mr-2" />
+              {t("Workouts")}
             </TabsTrigger>
-          )}
-        </TabsList>
-        
-        <TabsContent value="workouts" className="mt-6">
-          <WorkoutList 
-            workouts={workouts}
-            onViewWorkout={handleViewWorkout}
-            onEditWorkout={handleEditWorkout}
-            onDeleteWorkout={handleDeleteWorkout}
-          />
-        </TabsContent>
-        
-        <TabsContent value="calendar" className="mt-6">
-          <WorkoutCalendar workouts={workouts} />
-        </TabsContent>
-        
-        {canAccessPersonalRecords && (
-          <TabsContent value="personal-records" className="mt-6">
-            <PersonalRecords />
+            <TabsTrigger value="calendar">
+              <Dumbbell className="h-4 w-4 mr-2" />
+              {t("Calendar")}
+            </TabsTrigger>
+            {canAccessPersonalRecords && (
+              <TabsTrigger value="personal-records">
+                <Trophy className="h-4 w-4 mr-2" />
+                {isMobile ? "PR's" : t("Personal records")}
+              </TabsTrigger>
+            )}
+          </TabsList>
+          
+          <TabsContent value="workouts" className="mt-6">
+            <WorkoutList 
+              workouts={workouts}
+              onViewWorkout={handleViewWorkout}
+              onEditWorkout={handleEditWorkout}
+              onDeleteWorkout={handleDeleteWorkout}
+            />
           </TabsContent>
-        )}
-      </Tabs>
+          
+          <TabsContent value="calendar" className="mt-6">
+            <WorkoutCalendar workouts={workouts} />
+          </TabsContent>
+          
+          {canAccessPersonalRecords && (
+            <TabsContent value="personal-records" className="mt-6">
+              <PersonalRecords />
+            </TabsContent>
+          )}
+        </Tabs>
+      )}
 
       {/* Component dialogs */}
       <CreateWorkout 

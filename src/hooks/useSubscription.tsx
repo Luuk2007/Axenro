@@ -10,6 +10,8 @@ interface SubscriptionData {
   test_subscription_tier: string | null;
 }
 
+const STORAGE_KEY_PREFIX = 'subscriptionData:';
+
 export const useSubscription = () => {
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({
     subscribed: false,
@@ -19,6 +21,7 @@ export const useSubscription = () => {
     test_subscription_tier: 'free',
   });
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
   const { user, session } = useAuth();
 
   const checkSubscription = async () => {
@@ -49,10 +52,18 @@ export const useSubscription = () => {
       };
 
       setSubscriptionData(newSubscriptionData);
+      try {
+        if (user?.id) {
+          localStorage.setItem(`${STORAGE_KEY_PREFIX}${user.id}`, JSON.stringify(newSubscriptionData));
+        }
+      } catch (e) {
+        console.warn('Failed to cache subscription data', e);
+      }
     } catch (error) {
       console.error('Error in checkSubscription:', error);
     } finally {
       setLoading(false);
+      setInitialized(true);
     }
   };
 
@@ -83,6 +94,13 @@ export const useSubscription = () => {
       };
 
       setSubscriptionData(newSubscriptionData);
+      try {
+        if (user?.id) {
+          localStorage.setItem(`${STORAGE_KEY_PREFIX}${user.id}`, JSON.stringify(newSubscriptionData));
+        }
+      } catch (e) {
+        console.warn('Failed to cache subscription data', e);
+      }
 
       // Also trigger a fresh check from the server to ensure consistency
       await checkSubscription();
@@ -144,12 +162,33 @@ export const useSubscription = () => {
   };
 
   useEffect(() => {
+    if (!user) {
+      setInitialized(true);
+      setLoading(false);
+      return;
+    }
+
+    // Try to read cached subscription data synchronously for instant, stable UI
+    try {
+      const cachedRaw = localStorage.getItem(`${STORAGE_KEY_PREFIX}${user.id}`);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw) as SubscriptionData;
+        setSubscriptionData(cached);
+        setInitialized(true);
+      } else {
+        setInitialized(false);
+      }
+    } catch (e) {
+      console.warn('Failed to load cached subscription data', e);
+    }
+
     checkSubscription();
-  }, [user, session]);
+  }, [user?.id, session]);
 
   return {
     ...subscriptionData,
     loading,
+    initialized,
     checkSubscription,
     switchTestPlan,
     createCheckout,

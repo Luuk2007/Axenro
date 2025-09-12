@@ -44,7 +44,7 @@ interface MeasurementType {
 export default function Progress() {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  const { subscription_tier, test_mode, test_subscription_tier, loading: subscriptionLoading } = useSubscription();
+  const { subscription_tier, test_mode, test_subscription_tier, loading: subscriptionLoading, initialized } = useSubscription();
   
   // Determine current plan
   const currentPlan = test_mode ? test_subscription_tier : subscription_tier;
@@ -53,8 +53,8 @@ export default function Progress() {
   const isPremium = currentPlan === 'premium';
   
   // Show photos tab logic: Only show when we're certain user has access (pro/premium)
-  // Always explicitly check for pro/premium, never show for free or during loading
-  const showPhotosTab = (currentPlan === 'pro' || currentPlan === 'premium');
+  // Gate rendering until subscription is initialized to avoid flicker
+  const showPhotosTab = initialized && (currentPlan === 'pro' || currentPlan === 'premium');
 
   const [measurementType, setMeasurementType] = useState('waist');
   const [measurementValue, setMeasurementValue] = useState('');
@@ -325,12 +325,13 @@ export default function Progress() {
         </div>
       </div>
 
-      <Tabs defaultValue="weight" className="w-full">
-        <TabsList className={`grid mb-4 ${showPhotosTab ? 'grid-cols-3' : 'grid-cols-2'}`}>
-          <TabsTrigger value="weight">{t("Weight")}</TabsTrigger>
-          <TabsTrigger value="measurements">{t("Measurements")}</TabsTrigger>
-          {showPhotosTab && <TabsTrigger value="photos">{t("Photos")}</TabsTrigger>}
-        </TabsList>
+      {initialized && (
+        <Tabs defaultValue="weight" className="w-full">
+          <TabsList className={`grid mb-4 ${showPhotosTab ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            <TabsTrigger value="weight">{t("Weight")}</TabsTrigger>
+            <TabsTrigger value="measurements">{t("Measurements")}</TabsTrigger>
+            {showPhotosTab && <TabsTrigger value="photos">{t("Photos")}</TabsTrigger>}
+          </TabsList>
         
         <TabsContent value="weight" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-1">
@@ -475,7 +476,7 @@ export default function Progress() {
           </div>
         </TabsContent>
         
-        {showPhotosTab && (
+      {showPhotosTab && (
           <TabsContent value="photos" className="space-y-6">
             <>
               <Card>
@@ -668,6 +669,7 @@ export default function Progress() {
           </TabsContent>
         )}
       </Tabs>
+      )}
     </div>
   );
 }
