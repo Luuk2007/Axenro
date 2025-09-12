@@ -52,9 +52,9 @@ export default function Progress() {
   const isPro = currentPlan === 'pro';
   const isPremium = currentPlan === 'premium';
   
-  // Show photos tab logic: Only show when we're certain user has access
-  // Don't show during loading to prevent flickering
-  const showPhotosTab = !subscriptionLoading && (currentPlan === 'pro' || currentPlan === 'premium');
+  // Show photos tab logic: Only show when we're certain user has access (pro/premium)
+  // Always explicitly check for pro/premium, never show for free or during loading
+  const showPhotosTab = (currentPlan === 'pro' || currentPlan === 'premium');
 
   const [measurementType, setMeasurementType] = useState('waist');
   const [measurementValue, setMeasurementValue] = useState('');

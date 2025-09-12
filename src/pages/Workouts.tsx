@@ -23,9 +23,9 @@ const Workouts = () => {
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
   
-  // Show personal records tab logic: Only show when we're certain user has access
-  // Don't show during loading to prevent flickering
-  const canAccessPersonalRecords = !subscriptionLoading && (currentTier === 'pro' || currentTier === 'premium');
+  // Show personal records tab logic: Only show when we're certain user has access (pro/premium)
+  // Always explicitly check for pro/premium, never show for free or during loading
+  const canAccessPersonalRecords = (currentTier === 'pro' || currentTier === 'premium');
   
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);

@@ -16,7 +16,7 @@ export const useSubscription = () => {
     subscription_tier: null,
     subscription_end: null,
     test_mode: true,
-    test_subscription_tier: null,
+    test_subscription_tier: 'free',
   });
   const [loading, setLoading] = useState(true);
   const { user, session } = useAuth();
