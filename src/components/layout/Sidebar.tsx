@@ -200,14 +200,13 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           <div className="mt-auto">
             {/* Legal links section */}
             <div className="px-4 pb-2">
-              <div className="flex items-center justify-center gap-4">
+              <div className="flex flex-col items-center justify-center gap-2">
                 <button
                   onClick={handlePrivacyPolicyClick}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
                 >
                   {t('Privacy Policy')}
                 </button>
-                <span className="text-xs text-muted-foreground">•</span>
                 <button
                   onClick={handleTermsClick}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
