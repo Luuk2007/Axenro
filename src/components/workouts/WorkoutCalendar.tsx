@@ -106,11 +106,11 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
 
   console.log("Calendar modifiers:", modifiers);
 
-  // Create modifiers for the calendar with stronger selectors and !important
+  // Create modifiers for the calendar with CSS class names
   const modifiersClassNames = {
-    completedWorkout: "!bg-green-600 !text-white hover:!bg-green-700 !font-semibold !shadow-md !border-green-600 dark:!bg-green-500 dark:!text-white dark:hover:!bg-green-600",
-    plannedWorkout: "!bg-blue-500 !text-white hover:!bg-blue-600 !font-medium !shadow-sm dark:!bg-blue-600 dark:!text-white dark:hover:!bg-blue-700", 
-    bothWorkouts: "!bg-gradient-to-br !from-green-600 !to-blue-500 !text-white hover:!from-green-700 hover:!to-blue-600 !font-semibold !shadow-md dark:!from-green-500 dark:!to-blue-600 dark:hover:!from-green-600 dark:hover:!to-blue-700"
+    completedWorkout: "completedWorkout",
+    plannedWorkout: "plannedWorkout", 
+    bothWorkouts: "bothWorkouts"
   };
 
   // Custom day content with tooltips for hover information
@@ -202,23 +202,39 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
             <div className="workout-calendar">
               <style dangerouslySetInnerHTML={{
                 __html: `
-                  .workout-calendar .rdp-day_button[aria-pressed="true"] {
+                  /* Style for completed workout days - always visible */
+                  .workout-calendar .rdp-day_button.completedWorkout {
                     background-color: rgb(22 163 74) !important;
                     color: white !important;
                     font-weight: 600 !important;
                     box-shadow: 0 2px 4px rgba(22, 163, 74, 0.3) !important;
+                    border-radius: 6px !important;
                   }
-                  .workout-calendar .rdp-day_button[data-selected="true"] {
-                    background-color: rgb(22 163 74) !important;
+                  .workout-calendar .rdp-day_button.completedWorkout:hover {
+                    background-color: rgb(21 128 61) !important;
+                  }
+                  
+                  /* Style for planned workout days */
+                  .workout-calendar .rdp-day_button.plannedWorkout {
+                    background-color: rgb(59 130 246) !important;
+                    color: white !important;
+                    font-weight: 500 !important;
+                    border-radius: 6px !important;
+                  }
+                  .workout-calendar .rdp-day_button.plannedWorkout:hover {
+                    background-color: rgb(37 99 235) !important;
+                  }
+                  
+                  /* Style for days with both completed and planned workouts */
+                  .workout-calendar .rdp-day_button.bothWorkouts {
+                    background: linear-gradient(135deg, rgb(22 163 74), rgb(59 130 246)) !important;
                     color: white !important;
                     font-weight: 600 !important;
                     box-shadow: 0 2px 4px rgba(22, 163, 74, 0.3) !important;
+                    border-radius: 6px !important;
                   }
-                  .workout-calendar .rdp-day_button:hover[aria-pressed="true"] {
-                    background-color: rgb(21 128 61) !important;
-                  }
-                  .workout-calendar .rdp-day_button:hover[data-selected="true"] {
-                    background-color: rgb(21 128 61) !important;
+                  .workout-calendar .rdp-day_button.bothWorkouts:hover {
+                    background: linear-gradient(135deg, rgb(21 128 61), rgb(37 99 235)) !important;
                   }
                 `
               }} />
