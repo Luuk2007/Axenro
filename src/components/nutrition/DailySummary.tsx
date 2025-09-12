@@ -193,7 +193,7 @@ export default function DailySummary({ className, meals = [], selectedDate = new
       <div className="grid grid-cols-3 gap-3">
         <div className="border rounded-lg p-3 shadow-sm">
           <div className="text-xs text-muted-foreground">{t("Protein")}</div>
-          <div className="text-sm font-medium">{macroTargets.protein.consumed}g / {macroTargets.protein.goal}g</div>
+          <div className="text-sm font-medium">{Math.round(macroTargets.protein.consumed * 10) / 10}g / {macroTargets.protein.goal}g</div>
           <Progress 
             value={calculatePercentage(macroTargets.protein.consumed, macroTargets.protein.goal)} 
             className="h-1.5 mt-1" 
@@ -202,7 +202,7 @@ export default function DailySummary({ className, meals = [], selectedDate = new
         
         <div className="border rounded-lg p-3 shadow-sm">
           <div className="text-xs text-muted-foreground">{t("Carbs")}</div>
-          <div className="text-sm font-medium">{macroTargets.carbs.consumed}g / {macroTargets.carbs.goal}g</div>
+          <div className="text-sm font-medium">{Math.round(macroTargets.carbs.consumed * 10) / 10}g / {macroTargets.carbs.goal}g</div>
           <Progress 
             value={calculatePercentage(macroTargets.carbs.consumed, macroTargets.carbs.goal)} 
             className="h-1.5 mt-1" 
@@ -211,7 +211,7 @@ export default function DailySummary({ className, meals = [], selectedDate = new
         
         <div className="border rounded-lg p-3 shadow-sm">
           <div className="text-xs text-muted-foreground">{t("Fat")}</div>
-          <div className="text-sm font-medium">{macroTargets.fat.consumed}g / {macroTargets.fat.goal}g</div>
+          <div className="text-sm font-medium">{Math.round(macroTargets.fat.consumed * 10) / 10}g / {macroTargets.fat.goal}g</div>
           <Progress 
             value={calculatePercentage(macroTargets.fat.consumed, macroTargets.fat.goal)} 
             className="h-1.5 mt-1" 

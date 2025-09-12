@@ -223,33 +223,33 @@ export default function MacroProgressTracker() {
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium">{t("Protein")}</span>
-            <span className="text-sm font-medium">{macroTargets.protein.consumed}g / {macroTargets.protein.goal}g</span>
+            <span className="text-sm font-medium">{Math.round(macroTargets.protein.consumed * 10) / 10}g / {macroTargets.protein.goal}g</span>
           </div>
           <Progress value={calculatePercentage(macroTargets.protein.consumed, macroTargets.protein.goal)} className="h-2 bg-blue-100 [&>div]:bg-blue-500" />
           <div className="text-xs text-muted-foreground">
-            {Math.max(0, macroTargets.protein.goal - macroTargets.protein.consumed)}g {t("remaining")}
+            {Math.max(0, Math.round((macroTargets.protein.goal - macroTargets.protein.consumed) * 10) / 10)}g {t("remaining")}
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium">{t("Carbs")}</span>
-            <span className="text-sm font-medium">{macroTargets.carbs.consumed}g / {macroTargets.carbs.goal}g</span>
+            <span className="text-sm font-medium">{Math.round(macroTargets.carbs.consumed * 10) / 10}g / {macroTargets.carbs.goal}g</span>
           </div>
           <Progress value={calculatePercentage(macroTargets.carbs.consumed, macroTargets.carbs.goal)} className="h-2 bg-green-100 [&>div]:bg-green-500" />
           <div className="text-xs text-muted-foreground">
-            {Math.max(0, macroTargets.carbs.goal - macroTargets.carbs.consumed)}g {t("remaining")}
+            {Math.max(0, Math.round((macroTargets.carbs.goal - macroTargets.carbs.consumed) * 10) / 10)}g {t("remaining")}
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium">{t("Fat")}</span>
-            <span className="text-sm font-medium">{macroTargets.fat.consumed}g / {macroTargets.fat.goal}g</span>
+            <span className="text-sm font-medium">{Math.round(macroTargets.fat.consumed * 10) / 10}g / {macroTargets.fat.goal}g</span>
           </div>
           <Progress value={calculatePercentage(macroTargets.fat.consumed, macroTargets.fat.goal)} className="h-2 bg-yellow-100 [&>div]:bg-yellow-500" />
           <div className="text-xs text-muted-foreground">
-            {Math.max(0, macroTargets.fat.goal - macroTargets.fat.consumed)}g {t("remaining")}
+            {Math.max(0, Math.round((macroTargets.fat.goal - macroTargets.fat.consumed) * 10) / 10)}g {t("remaining")}
           </div>
         </div>
         

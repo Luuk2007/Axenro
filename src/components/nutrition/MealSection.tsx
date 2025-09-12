@@ -82,9 +82,9 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem, onEditItem }: M
                 <p className="text-sm font-medium">{item.name}</p>
                 <div className="flex text-xs text-muted-foreground space-x-2 mt-1">
                   <span>{item.calories} cal</span>
-                  <span>{item.protein}g {t("protein")}</span>
-                  <span>{item.carbs}g {t("carbs")}</span>
-                  <span>{item.fat}g {t("fat")}</span>
+                  <span>{Math.round(item.protein * 10) / 10}g {t("protein")}</span>
+                  <span>{Math.round(item.carbs * 10) / 10}g {t("carbs")}</span>
+                  <span>{Math.round(item.fat * 10) / 10}g {t("fat")}</span>
                 </div>
               </div>
               <div className="flex gap-1">
