@@ -202,39 +202,57 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
             <div className="workout-calendar">
               <style dangerouslySetInnerHTML={{
                 __html: `
-                  /* Style for completed workout days - always visible */
-                  .workout-calendar .rdp-day_button.completedWorkout {
+                  /* Override all default styles for completed workout days */
+                  .workout-calendar .rdp-day.completedWorkout .rdp-day_button,
+                  .workout-calendar .rdp-day .rdp-day_button.completedWorkout {
                     background-color: rgb(22 163 74) !important;
                     color: white !important;
                     font-weight: 600 !important;
-                    box-shadow: 0 2px 4px rgba(22, 163, 74, 0.3) !important;
+                    border: none !important;
                     border-radius: 6px !important;
+                    box-shadow: none !important;
                   }
-                  .workout-calendar .rdp-day_button.completedWorkout:hover {
+                  .workout-calendar .rdp-day.completedWorkout .rdp-day_button:hover,
+                  .workout-calendar .rdp-day .rdp-day_button.completedWorkout:hover {
                     background-color: rgb(21 128 61) !important;
                   }
                   
-                  /* Style for planned workout days */
-                  .workout-calendar .rdp-day_button.plannedWorkout {
+                  /* Override all default styles for planned workout days */
+                  .workout-calendar .rdp-day.plannedWorkout .rdp-day_button,
+                  .workout-calendar .rdp-day .rdp-day_button.plannedWorkout {
                     background-color: rgb(59 130 246) !important;
                     color: white !important;
                     font-weight: 500 !important;
+                    border: none !important;
                     border-radius: 6px !important;
+                    box-shadow: none !important;
                   }
-                  .workout-calendar .rdp-day_button.plannedWorkout:hover {
+                  .workout-calendar .rdp-day.plannedWorkout .rdp-day_button:hover,
+                  .workout-calendar .rdp-day .rdp-day_button.plannedWorkout:hover {
                     background-color: rgb(37 99 235) !important;
                   }
                   
-                  /* Style for days with both completed and planned workouts */
-                  .workout-calendar .rdp-day_button.bothWorkouts {
+                  /* Override all default styles for days with both workouts */
+                  .workout-calendar .rdp-day.bothWorkouts .rdp-day_button,
+                  .workout-calendar .rdp-day .rdp-day_button.bothWorkouts {
                     background: linear-gradient(135deg, rgb(22 163 74), rgb(59 130 246)) !important;
                     color: white !important;
                     font-weight: 600 !important;
-                    box-shadow: 0 2px 4px rgba(22, 163, 74, 0.3) !important;
+                    border: none !important;
                     border-radius: 6px !important;
+                    box-shadow: none !important;
                   }
-                  .workout-calendar .rdp-day_button.bothWorkouts:hover {
+                  .workout-calendar .rdp-day.bothWorkouts .rdp-day_button:hover,
+                  .workout-calendar .rdp-day .rdp-day_button.bothWorkouts:hover {
                     background: linear-gradient(135deg, rgb(21 128 61), rgb(37 99 235)) !important;
+                  }
+                  
+                  /* Additional override for any selected states */
+                  .workout-calendar .rdp-day_button[aria-selected="true"].completedWorkout {
+                    background-color: rgb(22 163 74) !important;
+                  }
+                  .workout-calendar .rdp-day_button[data-selected="true"].completedWorkout {
+                    background-color: rgb(22 163 74) !important;
                   }
                 `
               }} />
