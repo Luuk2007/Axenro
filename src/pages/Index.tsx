@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import StatsCard from '@/components/dashboard/StatsCard';
 import MacroProgressTracker from '@/components/dashboard/MacroProgressTracker';
 import MealsList from '@/components/dashboard/MealsList';
-import ProgressChart from '@/components/dashboard/ProgressChart';
+import WorkoutsSummary from '@/components/dashboard/WorkoutsSummary';
 import StepsConnectionModal from '@/components/dashboard/StepsConnectionModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { format, parse, isValid, startOfWeek, endOfWeek } from 'date-fns';
@@ -54,7 +54,6 @@ const Dashboard = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showStepsConnection, setShowStepsConnection] = useState(false);
-  const [weightData, setWeightData] = useState<Array<{date: string, value: number}>>([]);
   const [userWeight, setUserWeight] = useState<number | null>(null);
   const [userTargetWeight, setUserTargetWeight] = useState<number | null>(null);
   const [userCalories, setUserCalories] = useState<number>(2200);
@@ -64,25 +63,11 @@ const Dashboard = () => {
   const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
 
   useEffect(() => {
-    // Get weight data from localStorage (same source as WeightTracker)
+    // Get weight data from localStorage for stats card
     const savedWeightHistory = localStorage.getItem('weightHistory');
     if (savedWeightHistory) {
       try {
         const parsedHistory = JSON.parse(savedWeightHistory);
-        // Convert to chart data format and get the latest weight
-        const chartData = parsedHistory
-          .sort((a: any, b: any) => {
-            const dateA = new Date(a.originalDate || a.date);
-            const dateB = new Date(b.originalDate || b.date);
-            return dateA.getTime() - dateB.getTime();
-          })
-          .map((entry: any) => ({
-            date: entry.date,
-            value: entry.value,
-            originalDate: entry.originalDate
-          }));
-        
-        setWeightData(chartData);
         
         // Set current weight from the latest entry
         if (parsedHistory.length > 0) {
@@ -91,7 +76,6 @@ const Dashboard = () => {
         }
       } catch (error) {
         console.error("Error parsing weight history:", error);
-        setWeightData([]);
       }
     }
 
@@ -299,13 +283,9 @@ const Dashboard = () => {
 
       <div className="grid gap-6 md:grid-cols-2 items-start">
         <div className="h-[400px]">
-          <ProgressChart
-            title={t("weight")}
-            data={weightData}
-            label="kg"
-            color="#4F46E5"
-            onViewAll={navigateToProgress}
-            targetValue={userTargetWeight || undefined}
+          <WorkoutsSummary
+            title={t("Recent workouts")}
+            onViewAll={navigateToWorkouts}
           />
         </div>
         

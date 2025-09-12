@@ -27,4 +27,14 @@ export const dashboardTranslations: Translations = {
   startTracking: "Begin met bijhouden",
   noMealsTracked: "Geen maaltijden bijgehouden vandaag",
   noWorkoutsFound: "Geen workouts gevonden",
+  
+  // Workouts summary
+  "Recent workouts": "Recente workouts",
+  "No workouts completed": "Geen workouts voltooid",
+  "Complete your first workout to see it here": "Voltooi je eerste workout om deze hier te zien",
+  "Start workout": "Start workout",
+  "recent workouts": "recente workouts",
+  "View progress": "Bekijk voortgang",
+  Today: "Vandaag",
+  Yesterday: "Gisteren",
 };
