@@ -44,6 +44,7 @@ const Nutrition = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [meals, setMeals] = useState<Meal[]>([]);
+  const [editingItem, setEditingItem] = useState<FoodItem | null>(null);
 
   // Initialize meals when component mounts or language changes
   useEffect(() => {
@@ -229,34 +230,74 @@ const Nutrition = () => {
     const mealIndex = updatedMeals.findIndex(meal => meal.id === mealId);
     
     if (mealIndex >= 0) {
-      // Add new food item with unique ID
-      const newFoodItem = {
-        ...foodItem,
-        id: `${mealId}-${Date.now()}`,
-      };
-      
-      updatedMeals[mealIndex].items.push(newFoodItem);
-      
-      // Save to database if authenticated, otherwise to localStorage
-      try {
-        if (isAuthenticated) {
-          const dateStr = selectedDate.toISOString().split('T')[0];
-          await saveFoodLog(newFoodItem, mealId, dateStr);
-        } else {
-          // Fallback to localStorage
-          saveFoodLogsToLocalStorage(updatedMeals);
+      if (editingItem) {
+        // Handle editing existing item
+        try {
+          // Find and update the existing item
+          const itemIndex = updatedMeals[mealIndex].items.findIndex(item => item.id === editingItem.id);
+          
+          if (itemIndex >= 0) {
+            // Update the existing item with new data
+            const updatedItem = {
+              ...foodItem,
+              id: editingItem.id, // Keep the original ID
+              logId: editingItem.logId // Keep the original logId if it exists
+            };
+            
+            updatedMeals[mealIndex].items[itemIndex] = updatedItem;
+            
+            // Update database if authenticated
+            if (isAuthenticated && editingItem.logId) {
+              // For now, we'll delete the old entry and create a new one
+              // since there's no direct update function in the service
+              await deleteFoodLog(editingItem.logId);
+              const dateStr = selectedDate.toISOString().split('T')[0];
+              await saveFoodLog(updatedItem, mealId, dateStr);
+            } else {
+              // Update localStorage
+              saveFoodLogsToLocalStorage(updatedMeals);
+            }
+            
+            setMeals(updatedMeals);
+            setRefreshTrigger(prev => prev + 1);
+            toast.success(`${foodItem.name} ${t('updated successfully')}`);
+          }
+        } catch (error) {
+          console.error('Error updating food log:', error);
+          toast.error(t('errorSavingData'));
         }
+      } else {
+        // Handle adding new item
+        const newFoodItem = {
+          ...foodItem,
+          id: `${mealId}-${Date.now()}`,
+        };
         
-        setMeals(updatedMeals);
-        // Trigger a refresh of the summary
-        setRefreshTrigger(prev => prev + 1);
-        toast.success(`${foodItem.name} ${t('added to meal plan')}`);
-      } catch (error) {
-        console.error('Error saving food log:', error);
-        toast.error(t('errorSavingData'));
+        updatedMeals[mealIndex].items.push(newFoodItem);
+        
+        // Save to database if authenticated, otherwise to localStorage
+        try {
+          if (isAuthenticated) {
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            await saveFoodLog(newFoodItem, mealId, dateStr);
+          } else {
+            // Fallback to localStorage
+            saveFoodLogsToLocalStorage(updatedMeals);
+          }
+          
+          setMeals(updatedMeals);
+          // Trigger a refresh of the summary
+          setRefreshTrigger(prev => prev + 1);
+          toast.success(`${foodItem.name} ${t('added to meal plan')}`);
+        } catch (error) {
+          console.error('Error saving food log:', error);
+          toast.error(t('errorSavingData'));
+        }
       }
     }
     
+    // Reset editing state
+    setEditingItem(null);
     setShowAddFood(false);
   };
 
@@ -294,6 +335,12 @@ const Nutrition = () => {
         }
       }
     }
+  };
+
+  const handleEditFoodItem = (mealId: string, item: FoodItem) => {
+    setEditingItem(item);
+    setSelectedMeal(mealId);
+    setShowAddFood(true);
   };
 
   const handleScanBarcode = () => {
@@ -475,12 +522,21 @@ const Nutrition = () => {
       </Dialog>
 
       {/* Add Food Dialog */}
-      <Dialog open={showAddFood} onOpenChange={setShowAddFood}>
+      <Dialog open={showAddFood} onOpenChange={(open) => {
+        setShowAddFood(open);
+        if (!open) {
+          setEditingItem(null); // Reset editing state when dialog closes
+        }
+      }}>
         <DialogContent className="p-0">
           <AddFoodDialog 
             meals={meals}
             selectedMeal={selectedMeal}
-            onClose={() => setShowAddFood(false)}
+            editingItem={editingItem}
+            onClose={() => {
+              setShowAddFood(false);
+              setEditingItem(null);
+            }}
             onAddFood={handleAddFood}
           />
         </DialogContent>
@@ -550,6 +606,7 @@ const Nutrition = () => {
                     items={meal.items}
                     onAddItem={handleAddItem}
                     onDeleteItem={handleDeleteFoodItem}
+                    onEditItem={handleEditFoodItem}
                   />
                 ))
               )}

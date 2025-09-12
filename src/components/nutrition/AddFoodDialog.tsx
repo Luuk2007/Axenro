@@ -18,11 +18,12 @@ interface Meal {
 interface AddFoodDialogProps {
   meals: Meal[];
   selectedMeal: string | null;
+  editingItem?: any; // The food item being edited
   onClose: () => void;
   onAddFood: (foodItem: any) => void;
 }
 
-const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialogProps) => {
+const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }: AddFoodDialogProps) => {
   const { t, language } = useLanguage();
   const [searchValue, setSearchValue] = useState('');
   const [apiResults, setApiResults] = useState<ProductDetails[]>([]);
@@ -32,6 +33,35 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
   const [servings, setServings] = useState(1);
   const [amount, setAmount] = useState<number>(100);
   const [unit, setUnit] = useState<string>("gram");
+
+  // Pre-populate form when editing
+  useEffect(() => {
+    if (editingItem) {
+      // Create a mock ProductDetails from the existing food item
+      const mockProduct: ProductDetails = {
+        id: editingItem.id || 'mock-id',
+        name: editingItem.name,
+        description: editingItem.name, // Use name as description
+        brand: editingItem.brand || '',
+        imageUrl: editingItem.imageUrl || null,
+        servingSize: editingItem.servingSize || '100g',
+        servings: editingItem.servings || 1,
+        amount: editingItem.amount,
+        unit: editingItem.unit,
+        nutrition: {
+          calories: editingItem.calories || 0,
+          protein: editingItem.protein || 0,
+          carbs: editingItem.carbs || 0,
+          fat: editingItem.fat || 0
+        }
+      };
+      
+      setSelectedProduct(mockProduct);
+      setServings(editingItem.servings || 1);
+      setAmount(editingItem.amount || 100);
+      setUnit(editingItem.unit || 'gram');
+    }
+  }, [editingItem]);
 
   // Update unit options and defaults when a product is selected
   useEffect(() => {
@@ -141,7 +171,9 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
   return (
     <DialogContent className="sm:max-w-md mx-auto p-0 gap-0">
       <DialogHeader className="p-4 pb-3 text-center">
-        <DialogTitle className="text-xl font-semibold">{t("Add food")}</DialogTitle>
+        <DialogTitle className="text-xl font-semibold">
+          {editingItem ? t("Edit food") : t("Add food")}
+        </DialogTitle>
         <DialogDescription className="sr-only">
           {t("Search foods")}
         </DialogDescription>
@@ -286,7 +318,7 @@ const AddFoodDialog = ({ meals, selectedMeal, onClose, onAddFood }: AddFoodDialo
             onClick={handleAddProduct}
           >
             <Plus className="mr-2 h-4 w-4" />
-            {t("Add to meal plan")}
+            {editingItem ? t("Update meal") : t("Add to meal plan")}
           </Button>
         </div>
       ) : (

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, Utensils } from 'lucide-react';
+import { Plus, Trash2, Utensils, Edit } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { FoodItem } from '@/types/nutrition';
@@ -22,9 +22,10 @@ interface MealSectionProps {
   items: FoodItem[];
   onAddItem: (mealId: string) => void;
   onDeleteItem: (mealId: string, itemId: string) => void;
+  onEditItem: (mealId: string, item: FoodItem) => void;
 }
 
-const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionProps) => {
+const MealSection = ({ id, name, items, onAddItem, onDeleteItem, onEditItem }: MealSectionProps) => {
   const { t } = useLanguage();
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
@@ -42,6 +43,10 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
 
   const handleAddItem = () => {
     onAddItem(id);
+  };
+
+  const handleEditItem = (item: FoodItem) => {
+    onEditItem(id, item);
   };
 
   return (
@@ -82,14 +87,26 @@ const MealSection = ({ id, name, items, onAddItem, onDeleteItem }: MealSectionPr
                   <span>{item.fat}g {t("fat")}</span>
                 </div>
               </div>
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                className="h-7 w-7 p-0"
-                onClick={() => handleDeleteItem(item.id)}
-              >
-                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-              </Button>
+              <div className="flex gap-1">
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="h-7 w-7 p-0"
+                  onClick={() => handleEditItem(item)}
+                  title={t("Edit")}
+                >
+                  <Edit className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="h-7 w-7 p-0"
+                  onClick={() => handleDeleteItem(item.id)}
+                  title={t("Delete")}
+                >
+                  <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
