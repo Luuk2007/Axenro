@@ -2,6 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
+import { supabase } from '@/integrations/supabase/client';
+import { getFoodLogs } from '@/services/openFoodFactsService';
+import { FoodLogEntry } from '@/types/nutrition';
 
 type MacroData = {
   calories: { consumed: number; goal: number; unit: string };
@@ -20,6 +23,27 @@ const defaultMacroTargets: MacroData = {
 export default function MacroProgressTracker() {
   const { t } = useLanguage();
   const [macroTargets, setMacroTargets] = useState<MacroData>(defaultMacroTargets);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  // Check if user is authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+      setUserId(user?.id || null);
+    };
+    
+    checkAuth();
+    
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session?.user);
+      setUserId(session?.user?.id || null);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
   
   useEffect(() => {
     // Get profile data from localStorage
@@ -47,6 +71,56 @@ export default function MacroProgressTracker() {
     }
   }, []);
   
+  // Load and calculate consumed nutrition data
+  useEffect(() => {
+    const loadConsumedNutrition = async () => {
+      const today = new Date().toISOString().split('T')[0];
+      
+      try {
+        let allFoodItems: any[] = [];
+        
+        if (isAuthenticated) {
+          // Load from database
+          const logs = await getFoodLogs(today);
+          allFoodItems = logs.map((log: FoodLogEntry) => log.food_item);
+        } else {
+          // Load from localStorage
+          const savedData = localStorage.getItem(`foodLog_${today}`);
+          if (savedData) {
+            allFoodItems = JSON.parse(savedData);
+          }
+        }
+        
+        // Calculate consumed macros
+        const consumed = allFoodItems.reduce((total: any, item: any) => {
+          return {
+            calories: total.calories + (item.calories || 0),
+            protein: total.protein + (item.protein || 0),
+            carbs: total.carbs + (item.carbs || 0),
+            fat: total.fat + (item.fat || 0),
+          };
+        }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+        
+        // Update consumed values
+        setMacroTargets(prevState => ({
+          calories: { ...prevState.calories, consumed: consumed.calories },
+          protein: { ...prevState.protein, consumed: consumed.protein },
+          carbs: { ...prevState.carbs, consumed: consumed.carbs },
+          fat: { ...prevState.fat, consumed: consumed.fat },
+        }));
+      } catch (error) {
+        console.error('Error loading consumed nutrition:', error);
+      }
+    };
+
+    loadConsumedNutrition();
+    
+    // Set up interval to refresh data every 30 seconds
+    const interval = setInterval(loadConsumedNutrition, 30000);
+    
+    return () => clearInterval(interval);
+  }, [isAuthenticated, userId]);
+
   // Calculate BMR using Mifflin-St Jeor formula (same as in Profile.tsx)
   const calculateBMR = (data: any) => {
     const { weight, height, age, gender } = data;
@@ -125,6 +199,10 @@ export default function MacroProgressTracker() {
     return { protein, fats, carbs };
   };
   
+  const calculatePercentage = (consumed: number, goal: number) => {
+    return Math.min(Math.round((consumed / goal) * 100), 100);
+  };
+  
   return (
     <div className="glassy-card rounded-xl overflow-hidden card-shadow">
       <div className="px-5 py-4 border-b border-border">
@@ -134,44 +212,44 @@ export default function MacroProgressTracker() {
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium">{t("Calories")}</span>
-            <span className="text-sm font-medium">0 / {macroTargets.calories.goal} {t("kcal")}</span>
+            <span className="text-sm font-medium">{macroTargets.calories.consumed} / {macroTargets.calories.goal} {t("kcal")}</span>
           </div>
-          <Progress value={0} className="h-2" />
+          <Progress value={calculatePercentage(macroTargets.calories.consumed, macroTargets.calories.goal)} className="h-2" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.calories.goal} {t("kcal")} {t("remaining")}
+            {Math.max(0, macroTargets.calories.goal - macroTargets.calories.consumed)} {t("kcal")} {t("remaining")}
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium">{t("Protein")}</span>
-            <span className="text-sm font-medium">0 / {macroTargets.protein.goal}g</span>
+            <span className="text-sm font-medium">{macroTargets.protein.consumed}g / {macroTargets.protein.goal}g</span>
           </div>
-          <Progress value={0} className="h-2 bg-blue-100 [&>div]:bg-blue-500" />
+          <Progress value={calculatePercentage(macroTargets.protein.consumed, macroTargets.protein.goal)} className="h-2 bg-blue-100 [&>div]:bg-blue-500" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.protein.goal}g {t("remaining")}
+            {Math.max(0, macroTargets.protein.goal - macroTargets.protein.consumed)}g {t("remaining")}
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium">{t("Carbs")}</span>
-            <span className="text-sm font-medium">0 / {macroTargets.carbs.goal}g</span>
+            <span className="text-sm font-medium">{macroTargets.carbs.consumed}g / {macroTargets.carbs.goal}g</span>
           </div>
-          <Progress value={0} className="h-2 bg-green-100 [&>div]:bg-green-500" />
+          <Progress value={calculatePercentage(macroTargets.carbs.consumed, macroTargets.carbs.goal)} className="h-2 bg-green-100 [&>div]:bg-green-500" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.carbs.goal}g {t("remaining")}
+            {Math.max(0, macroTargets.carbs.goal - macroTargets.carbs.consumed)}g {t("remaining")}
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex justify-between mb-1">
             <span className="text-sm font-medium">{t("Fat")}</span>
-            <span className="text-sm font-medium">0 / {macroTargets.fat.goal}g</span>
+            <span className="text-sm font-medium">{macroTargets.fat.consumed}g / {macroTargets.fat.goal}g</span>
           </div>
-          <Progress value={0} className="h-2 bg-yellow-100 [&>div]:bg-yellow-500" />
+          <Progress value={calculatePercentage(macroTargets.fat.consumed, macroTargets.fat.goal)} className="h-2 bg-yellow-100 [&>div]:bg-yellow-500" />
           <div className="text-xs text-muted-foreground">
-            {macroTargets.fat.goal}g {t("remaining")}
+            {Math.max(0, macroTargets.fat.goal - macroTargets.fat.consumed)}g {t("remaining")}
           </div>
         </div>
         
