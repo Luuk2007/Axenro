@@ -98,9 +98,13 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
             const totalCalories = meal.items.reduce((sum: number, item: FoodItem) => sum + item.calories, 0);
             const totalProtein = meal.items.reduce((sum: number, item: FoodItem) => sum + item.protein, 0);
             
+            // Create a readable list of food items
+            const foodNames = meal.items.map(item => item.name).join(", ");
+            const displayName = foodNames.length > 40 ? foodNames.substring(0, 37) + "..." : foodNames;
+            
             return {
               id: meal.id,
-              name: meal.name,
+              name: displayName,
               time: getTimeForMeal(meal.id),
               calories: Math.round(totalCalories),
               protein: Math.round(totalProtein * 10) / 10
