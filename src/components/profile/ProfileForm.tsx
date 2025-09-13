@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -128,6 +128,16 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
       goal: undefined
     } : getDisplayValues(initialValues),
   });
+
+  // Reset form when initialValues change
+  useEffect(() => {
+    console.log('ProfileForm: initialValues changed', initialValues);
+    if (!isNewUser && initialValues) {
+      const displayValues = getDisplayValues(initialValues);
+      console.log('ProfileForm: resetting form with values', displayValues);
+      form.reset(displayValues);
+    }
+  }, [initialValues, isNewUser, form]);
 
   const watchFitnessGoal = form.watch("fitnessGoal");
   const showTargetWeight = watchFitnessGoal === "gain" || watchFitnessGoal === "lose";

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,14 +24,17 @@ const Profile = () => {
   const { user } = useAuth();
   const { test_mode, test_subscription_tier, subscription_tier } = useSubscription();
   const { profile: dbProfile, loading: profileLoading, saveProfile } = useUserProfile();
-  const [isNewUser, setIsNewUser] = useState(true);
   const [initialValues, setInitialValues] = useState<Partial<ProfileFormValues>>(emptyDefaultValues);
-  const [hasValidSavedProfile, setHasValidSavedProfile] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string>('');
+  const [hasMigratedLocalStorage, setHasMigratedLocalStorage] = useState(false);
   
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
   const canUseBMICalculator = currentTier === 'pro' || currentTier === 'premium';
+
+  // Derive values from dbProfile instead of separate state
+  const isNewUser = !dbProfile || (!dbProfile.weight || !dbProfile.height);
+  const hasValidSavedProfile = dbProfile?.weight > 0 && dbProfile?.height > 0;
 
   // Convert database profile to form profile
   const convertDbToFormProfile = (dbProfile: UserProfileData): ProfileFormValues => {
@@ -63,53 +66,62 @@ const Profile = () => {
     };
   };
   
+  // Load profile picture when user changes
   useEffect(() => {
     if (user) {
-      // Load profile picture from Supabase
       loadProfilePicture();
-      
-      // Check if we have database profile data
-      if (dbProfile) {
-        const formProfile = convertDbToFormProfile(dbProfile);
-        setInitialValues(formProfile);
-        setIsNewUser(false);
-        setHasValidSavedProfile(formProfile.weight > 0 && formProfile.height > 0);
-      } else {
-        // Check for localStorage data to migrate
-        const savedProfile = localStorage.getItem("userProfile");
-        if (savedProfile) {
-          try {
-            const parsedProfile = JSON.parse(savedProfile) as ProfileFormValues;
-            setInitialValues(parsedProfile);
-            setIsNewUser(false);
-            setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
-            
-            // Migrate localStorage data to database
-            const dbProfileData = convertFormToDbProfile(parsedProfile);
-            saveProfile(dbProfileData);
-            
-            // Clear localStorage after migration
-            localStorage.removeItem("userProfile");
-          } catch (error) {
-            console.error("Error parsing profile:", error);
-            setIsNewUser(true);
-            setInitialValues(emptyDefaultValues);
-            setHasValidSavedProfile(false);
-          }
-        } else {
-          setIsNewUser(true);
-          setInitialValues(emptyDefaultValues);
-          setHasValidSavedProfile(false);
-        }
-      }
     } else {
-      // If not authenticated, always start with empty values
-      setIsNewUser(true);
-      setInitialValues(emptyDefaultValues);
-      setHasValidSavedProfile(false);
       setProfilePictureUrl('');
     }
-  }, [user, dbProfile, saveProfile]);
+  }, [user]);
+
+  // Handle profile data loading and localStorage migration
+  useEffect(() => {
+    console.log('Profile: useEffect triggered', { user: !!user, dbProfile: !!dbProfile, profileLoading });
+    
+    if (!user) {
+      console.log('Profile: No user, resetting to empty values');
+      setInitialValues(emptyDefaultValues);
+      return;
+    }
+
+    if (profileLoading) {
+      console.log('Profile: Still loading profile data');
+      return;
+    }
+
+    if (dbProfile) {
+      console.log('Profile: Database profile found', dbProfile);
+      const formProfile = convertDbToFormProfile(dbProfile);
+      setInitialValues(formProfile);
+    } else if (!hasMigratedLocalStorage) {
+      console.log('Profile: No database profile, checking localStorage');
+      // Check for localStorage data to migrate (only once)
+      const savedProfile = localStorage.getItem("userProfile");
+      if (savedProfile) {
+        try {
+          const parsedProfile = JSON.parse(savedProfile) as ProfileFormValues;
+          console.log('Profile: Found localStorage data, migrating', parsedProfile);
+          setInitialValues(parsedProfile);
+          
+          // Migrate localStorage data to database
+          const dbProfileData = convertFormToDbProfile(parsedProfile);
+          saveProfile(dbProfileData);
+          
+          // Clear localStorage after migration
+          localStorage.removeItem("userProfile");
+          setHasMigratedLocalStorage(true);
+        } catch (error) {
+          console.error("Profile: Error parsing localStorage profile:", error);
+          setInitialValues(emptyDefaultValues);
+        }
+      } else {
+        console.log('Profile: No localStorage data found');
+        setInitialValues(emptyDefaultValues);
+      }
+      setHasMigratedLocalStorage(true);
+    }
+  }, [user, dbProfile, profileLoading, hasMigratedLocalStorage]);
 
   const loadProfilePicture = async () => {
     if (!user) return;
@@ -135,14 +147,16 @@ const Profile = () => {
   };
 
   const handleSubmit = async (data: ProfileFormValues) => {
+    console.log('Profile: handleSubmit called', data);
+    
     if (user) {
       // Convert form data to database format and save
       const dbProfileData = convertFormToDbProfile(data);
+      console.log('Profile: Saving to database', dbProfileData);
       await saveProfile(dbProfileData);
       
-      setIsNewUser(false);
+      // Update initial values to match what was just saved
       setInitialValues(data);
-      setHasValidSavedProfile(data.weight > 0 && data.height > 0);
       
       // Save initial weight to weightData array if it doesn't exist yet
       const savedWeightData = localStorage.getItem("weightData");
@@ -199,11 +213,17 @@ const Profile = () => {
               <CardTitle>{t("Personal details")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ProfileForm 
-                onSubmit={handleSubmit} 
-                initialValues={initialValues}
-                isNewUser={isNewUser}
-              />
+              {profileLoading ? (
+                <div className="py-10 text-center">
+                  <p className="text-muted-foreground">Loading profile...</p>
+                </div>
+              ) : (
+                <ProfileForm 
+                  onSubmit={handleSubmit} 
+                  initialValues={initialValues}
+                  isNewUser={isNewUser}
+                />
+              )}
             </CardContent>
           </Card>
           
