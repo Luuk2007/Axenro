@@ -11,6 +11,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useUserProfile, UserProfileData } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
 import BMICalculator from "@/components/profile/BMICalculator";
 import ProfileForm, { ProfileFormValues, defaultValues, emptyDefaultValues } from "@/components/profile/ProfileForm";
@@ -22,7 +23,7 @@ const Profile = () => {
   const { t } = useLanguage();
   const { user } = useAuth();
   const { test_mode, test_subscription_tier, subscription_tier } = useSubscription();
-  const [profile, setProfile] = useState<ProfileFormValues | null>(null);
+  const { profile: dbProfile, loading: profileLoading, saveProfile } = useUserProfile();
   const [isNewUser, setIsNewUser] = useState(true);
   const [initialValues, setInitialValues] = useState<Partial<ProfileFormValues>>(emptyDefaultValues);
   const [hasValidSavedProfile, setHasValidSavedProfile] = useState(false);
@@ -31,42 +32,84 @@ const Profile = () => {
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
   const canUseBMICalculator = currentTier === 'pro' || currentTier === 'premium';
+
+  // Convert database profile to form profile
+  const convertDbToFormProfile = (dbProfile: UserProfileData): ProfileFormValues => {
+    return {
+      name: dbProfile.name || '',
+      gender: (dbProfile.gender as 'male' | 'female' | 'other') || 'male',
+      age: dbProfile.age || 0,
+      height: dbProfile.height || 0,
+      weight: dbProfile.weight || 0,
+      activityLevel: (dbProfile.activity_level as 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active') || 'moderate',
+      fitnessGoal: (dbProfile.fitness_goal as 'lose' | 'maintain' | 'gain') || 'maintain',
+      targetWeight: dbProfile.target_weight || 0,
+      exerciseFrequency: (dbProfile.exercise_frequency as '0-1' | '2-3' | '4-5' | '6+') || '2-3'
+    };
+  };
+
+  // Convert form profile to database profile
+  const convertFormToDbProfile = (formProfile: ProfileFormValues): UserProfileData => {
+    return {
+      name: formProfile.name,
+      gender: formProfile.gender,
+      age: formProfile.age,
+      height: formProfile.height,
+      weight: formProfile.weight,
+      activity_level: formProfile.activityLevel,
+      fitness_goal: formProfile.fitnessGoal,
+      target_weight: formProfile.targetWeight,
+      exercise_frequency: formProfile.exerciseFrequency
+    };
+  };
   
   useEffect(() => {
-    // Only load from localStorage if user is authenticated
     if (user) {
-      const savedProfile = localStorage.getItem("userProfile");
-      if (savedProfile) {
-        try {
-          const parsedProfile = JSON.parse(savedProfile);
-          setProfile(parsedProfile);
-          setInitialValues(parsedProfile);
-          setIsNewUser(false);
-          // Only show BMI calculator if we have valid saved weight and height
-          setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
-        } catch (error) {
-          console.error("Error parsing profile:", error);
+      // Load profile picture from Supabase
+      loadProfilePicture();
+      
+      // Check if we have database profile data
+      if (dbProfile) {
+        const formProfile = convertDbToFormProfile(dbProfile);
+        setInitialValues(formProfile);
+        setIsNewUser(false);
+        setHasValidSavedProfile(formProfile.weight > 0 && formProfile.height > 0);
+      } else {
+        // Check for localStorage data to migrate
+        const savedProfile = localStorage.getItem("userProfile");
+        if (savedProfile) {
+          try {
+            const parsedProfile = JSON.parse(savedProfile) as ProfileFormValues;
+            setInitialValues(parsedProfile);
+            setIsNewUser(false);
+            setHasValidSavedProfile(parsedProfile.weight > 0 && parsedProfile.height > 0);
+            
+            // Migrate localStorage data to database
+            const dbProfileData = convertFormToDbProfile(parsedProfile);
+            saveProfile(dbProfileData);
+            
+            // Clear localStorage after migration
+            localStorage.removeItem("userProfile");
+          } catch (error) {
+            console.error("Error parsing profile:", error);
+            setIsNewUser(true);
+            setInitialValues(emptyDefaultValues);
+            setHasValidSavedProfile(false);
+          }
+        } else {
           setIsNewUser(true);
           setInitialValues(emptyDefaultValues);
           setHasValidSavedProfile(false);
         }
-      } else {
-        setIsNewUser(true);
-        setInitialValues(emptyDefaultValues);
-        setHasValidSavedProfile(false);
       }
-
-      // Load profile picture from Supabase
-      loadProfilePicture();
     } else {
       // If not authenticated, always start with empty values
-      setProfile(null);
       setIsNewUser(true);
       setInitialValues(emptyDefaultValues);
       setHasValidSavedProfile(false);
       setProfilePictureUrl('');
     }
-  }, [user]);
+  }, [user, dbProfile, saveProfile]);
 
   const loadProfilePicture = async () => {
     if (!user) return;
@@ -91,16 +134,15 @@ const Profile = () => {
     }
   };
 
-  const handleSubmit = (data: ProfileFormValues) => {
-    // Only save to localStorage if user is authenticated
+  const handleSubmit = async (data: ProfileFormValues) => {
     if (user) {
-      localStorage.setItem("userProfile", JSON.stringify(data));
-      setProfile(data);
+      // Convert form data to database format and save
+      const dbProfileData = convertFormToDbProfile(data);
+      await saveProfile(dbProfileData);
+      
       setIsNewUser(false);
       setInitialValues(data);
-      // Set flag to show BMI calculator after saving
       setHasValidSavedProfile(data.weight > 0 && data.height > 0);
-      toast.success(t("profileUpdated"));
       
       // Save initial weight to weightData array if it doesn't exist yet
       const savedWeightData = localStorage.getItem("weightData");
@@ -116,12 +158,8 @@ const Profile = () => {
         localStorage.setItem("weightData", JSON.stringify(initialWeightData));
       }
     } else {
-      // If not authenticated, just update the local state without saving
-      setProfile(data);
-      setIsNewUser(false);
-      setInitialValues(data);
-      setHasValidSavedProfile(data.weight > 0 && data.height > 0);
-      toast.info(t("Please login to save your profile"));
+      // If not authenticated, show warning
+      toast.error(t("Please login to save your profile"));
     }
   };
 
@@ -170,20 +208,26 @@ const Profile = () => {
           </Card>
           
           {/* BMI Calculator - only show for Pro and Premium plans */}
-          {hasValidSavedProfile && profile && canUseBMICalculator && (
+          {hasValidSavedProfile && dbProfile && canUseBMICalculator && (
             <BMICalculator 
-              initialWeight={profile.weight} 
-              initialHeight={profile.height} 
+              initialWeight={dbProfile.weight || 0} 
+              initialHeight={dbProfile.height || 0} 
             />
           )}
         </TabsContent>
         
         <TabsContent value="nutrition" className="space-y-6">
-          {profile ? (
+          {dbProfile && !profileLoading ? (
             <>
-              <UserStatsDisplay profile={profile} />
-              <NutritionCalculator profile={profile} />
+              <UserStatsDisplay profile={convertDbToFormProfile(dbProfile)} />
+              <NutritionCalculator profile={convertDbToFormProfile(dbProfile)} />
             </>
+          ) : profileLoading ? (
+            <Card>
+              <CardContent className="py-10 text-center">
+                <p className="text-muted-foreground">Loading profile...</p>
+              </CardContent>
+            </Card>
           ) : (
             <Card>
               <CardContent className="py-10 text-center">
