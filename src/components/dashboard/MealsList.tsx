@@ -22,9 +22,10 @@ interface MealsListProps {
   title: string;
   className?: string;
   onViewAll?: () => void;
+  selectedDate?: Date;
 }
 
-export default function MealsList({ title, className, onViewAll }: MealsListProps) {
+export default function MealsList({ title, className, onViewAll, selectedDate }: MealsListProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [meals, setMeals] = useState<MealItemData[]>([]);
@@ -44,12 +45,14 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
     const loadTodaysMeals = async () => {
       setIsLoading(true);
       try {
-        const today = new Date().toISOString().split('T')[0];
+        const targetDate = selectedDate 
+          ? selectedDate.toISOString().split('T')[0] 
+          : new Date().toISOString().split('T')[0];
         let mealData: MealData[] = [];
 
         if (isAuthenticated) {
           // Load from Supabase
-          const logs = await getFoodLogs(today);
+          const logs = await getFoodLogs(targetDate);
           const availableMeals = getAvailableMeals();
           
           mealData = availableMeals.map(meal => ({
@@ -72,7 +75,7 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
             items: []
           }));
 
-          const savedData = localStorage.getItem(`foodLog_${today}`);
+          const savedData = localStorage.getItem(`foodLog_${targetDate}`);
           if (savedData) {
             try {
               const parsedData = JSON.parse(savedData);
@@ -130,7 +133,7 @@ export default function MealsList({ title, className, onViewAll }: MealsListProp
     return () => {
       window.removeEventListener('mealsChanged', handleMealsChanged);
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, selectedDate]);
 
   const getTimeForMeal = (mealId: string): string => {
     const timeMap: { [key: string]: string } = {
