@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { Workout } from '@/types/workout';
 import { useWeightData } from '@/hooks/useWeightData';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { calculateDailyCalories, type ProfileData } from '@/utils/macroCalculations';
 
 const meals = [
   {
@@ -72,9 +73,8 @@ const Dashboard = () => {
   useEffect(() => {
     // Get user profile from profile hook for calories calculation
     if (profile) {
-      // Calculate calories
-      const bmr = calculateBMR(profile);
-      const calories = calculateDailyCalories(profile, bmr);
+      // Calculate calories using centralized function
+      const calories = calculateDailyCalories(profile as ProfileData);
       setUserCalories(calories);
     }
 
@@ -106,53 +106,6 @@ const Dashboard = () => {
     }
   }, [profile]);
 
-  // Calculate BMR using Mifflin-St Jeor formula (same as in Profile.tsx)
-  const calculateBMR = (data: any) => {
-    const { weight, height, age, gender } = data;
-    
-    if (gender === "male") {
-      return 10 * weight + 6.25 * height - 5 * age + 5;
-    } else if (gender === "female") {
-      return 10 * weight + 6.25 * height - 5 * age - 161;
-    } else {
-      // For "other" gender, use an average of male and female formulas
-      return 10 * weight + 6.25 * height - 5 * age - 78;
-    }
-  };
-
-  // Calculate daily calorie needs (same as in Profile.tsx)
-  const calculateDailyCalories = (data: any, bmr: number) => {
-    // Apply activity multiplier
-    let activityMultiplier = 1.2; // Sedentary
-    switch (data.exerciseFrequency) {
-      case "0-2":
-        activityMultiplier = 1.375; // Light activity
-        break;
-      case "3-5":
-        activityMultiplier = 1.55; // Moderate activity
-        break;
-      case "6+":
-        activityMultiplier = 1.725; // Very active
-        break;
-    }
-    
-    let calories = Math.round(bmr * activityMultiplier);
-    
-    // Adjust based on goal
-    switch (data.goal) {
-      case "gain":
-        calories += 500;
-        break;
-      case "lose":
-        calories -= 500;
-        break;
-      case "maintain":
-        // No adjustment needed
-        break;
-    }
-    
-    return calories;
-  };
 
   const navigateToNutrition = () => {
     navigate('/nutrition');

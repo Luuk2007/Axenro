@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
+import { calculateMacroGoals, type ProfileData } from '@/utils/macroCalculations';
 
 type MacroData = {
   calories: { consumed: number; goal: number; unit: string };
@@ -33,88 +34,18 @@ export default function DailySummary({ className, meals = [], selectedDate = new
     const savedProfile = localStorage.getItem("userProfile");
     if (savedProfile) {
       try {
-        const profile = JSON.parse(savedProfile);
-        // If the profile contains nutrition data, use it
-        if (profile) {
-          // Calculate macros using the same formula as in Profile.tsx
-          let calories = profile.nutritionGoals?.calories || 2200;
-          let protein = profile.nutritionGoals?.protein || 165;
-          let carbs = profile.nutritionGoals?.carbs || 220;
-          let fat = profile.nutritionGoals?.fat || 73;
-          
-          if (profile.weight && profile.height && profile.age && profile.gender && profile.exerciseFrequency && profile.goal) {
-            // Calculate BMR using Mifflin-St Jeor formula
-            let bmr = 0;
-            if (profile.gender === "male") {
-              bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5;
-            } else if (profile.gender === "female") {
-              bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
-            } else {
-              // For "other" gender, use an average of male and female formulas
-              bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 78;
-            }
-            
-            // Apply activity multiplier
-            let activityMultiplier = 1.2; // Sedentary
-            switch (profile.exerciseFrequency) {
-              case "0-2":
-                activityMultiplier = 1.375; // Light activity
-                break;
-              case "3-5":
-                activityMultiplier = 1.55; // Moderate activity
-                break;
-              case "6+":
-                activityMultiplier = 1.725; // Very active
-                break;
-            }
-            
-            // Calculate daily calorie needs
-            calories = Math.round(bmr * activityMultiplier);
-            
-            // Adjust based on goal
-            switch (profile.goal) {
-              case "gain":
-                calories += 500;
-                break;
-              case "lose":
-                calories -= 500;
-                break;
-              case "maintain":
-                // No adjustment needed
-                break;
-            }
-            
-            // Calculate macros based on goal
-            switch (profile.goal) {
-              case "gain":
-                // Higher carbs for weight gain
-                protein = Math.round((calories * 0.3) / 4); // 30% of calories from protein
-                fat = Math.round((calories * 0.25) / 9); // 25% of calories from fat
-                carbs = Math.round((calories * 0.45) / 4); // 45% of calories from carbs
-                break;
-              case "lose":
-                // Higher protein for weight loss
-                protein = Math.round((calories * 0.4) / 4); // 40% of calories from protein
-                fat = Math.round((calories * 0.3) / 9); // 30% of calories from fat
-                carbs = Math.round((calories * 0.3) / 4); // 30% of calories from carbs
-                break;
-              case "maintain":
-                // Balanced macros for maintenance
-                protein = Math.round((calories * 0.35) / 4); // 35% of calories from protein
-                fat = Math.round((calories * 0.3) / 9); // 30% of calories from fat
-                carbs = Math.round((calories * 0.35) / 4); // 35% of calories from carbs
-                break;
-            }
-          }
-          
-          // Update the macro targets
-          setMacroTargets(prevState => ({
-            calories: { ...prevState.calories, goal: calories },
-            protein: { ...prevState.protein, goal: protein },
-            carbs: { ...prevState.carbs, goal: carbs },
-            fat: { ...prevState.fat, goal: fat },
-          }));
-        }
+        const profileData: ProfileData = JSON.parse(savedProfile);
+        
+        // Calculate macros using centralized function
+        const macroGoals = calculateMacroGoals(profileData);
+        
+        // Update the macro targets
+        setMacroTargets(prevState => ({
+          calories: { ...prevState.calories, goal: macroGoals.calories },
+          protein: { ...prevState.protein, goal: macroGoals.protein },
+          carbs: { ...prevState.carbs, goal: macroGoals.carbs },
+          fat: { ...prevState.fat, goal: macroGoals.fat },
+        }));
       } catch (error) {
         console.error("Error loading nutrition goals:", error);
       }

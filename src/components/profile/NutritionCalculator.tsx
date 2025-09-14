@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { ProfileFormValues } from './ProfileForm';
+import { getDefaultRatios, calculateDailyCalories, calculateMacros, getMacroRatios, type ProfileData } from '@/utils/macroCalculations';
 
 interface NutritionCalculatorProps {
   profile: ProfileFormValues;
@@ -22,19 +23,6 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     fat: number;
   } | null>(null);
 
-  // Get default macro ratios based on goal
-  const getDefaultRatios = (goal: string = "maintain") => {
-    switch (goal) {
-      case "gain":
-        return { protein: 30, carbs: 45, fat: 25 };
-      case "lose":
-        return { protein: 40, carbs: 30, fat: 30 };
-      case "maintain":
-        return { protein: 35, carbs: 35, fat: 30 };
-      default:
-        return { protein: 35, carbs: 35, fat: 30 };
-    }
-  };
 
   // Load custom ratios from localStorage on component mount
   useEffect(() => {
@@ -94,65 +82,8 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     setCustomRatios(null);
   };
 
-  // Calculate BMR using Mifflin-St Jeor formula
-  const calculateBMR = (data: ProfileFormValues) => {
-    const { weight, height, age, gender } = data;
-    
-    if (gender === "male") {
-      return 10 * weight + 6.25 * height - 5 * age + 5;
-    } else if (gender === "female") {
-      return 10 * weight + 6.25 * height - 5 * age - 161;
-    } else {
-      // For "other" gender, use an average of male and female formulas
-      return 10 * weight + 6.25 * height - 5 * age - 78;
-    }
-  };
-
-  // Calculate daily calorie needs based on activity level and goal
-  const calculateDailyCalories = (data: ProfileFormValues) => {
-    let bmr = calculateBMR(data);
-    
-    // Apply activity multiplier - safely access properties
-    let activityMultiplier = 1.2; // Sedentary default
-    const exerciseFreq = data?.exerciseFrequency || "0-1";
-    
-    switch (exerciseFreq) {
-      case "0-1":
-        activityMultiplier = 1.375; // Light activity
-        break;
-      case "2-3":
-        activityMultiplier = 1.55; // Moderate activity
-        break;
-      case "4-5":
-        activityMultiplier = 1.65; // Active
-        break;
-      case "6+":
-        activityMultiplier = 1.725; // Very active
-        break;
-    }
-    
-    let calories = Math.round(bmr * activityMultiplier);
-    
-    // Adjust based on goal - safely access goal property
-    const goal = data?.goal || "maintain";
-    
-    switch (goal) {
-      case "gain":
-        calories += 500;
-        break;
-      case "lose":
-        calories -= 500;
-        break;
-      case "maintain":
-        // No adjustment needed
-        break;
-    }
-    
-    return calories;
-  };
-
-  // Calculate macro breakdown based on calorie needs and custom ratios
-  const calculateMacros = (calories: number, goal: string = "maintain") => {
+  // Use centralized macro calculation functions, but with custom ratios support
+  const calculateMacrosWithCustomRatios = (calories: number, goal: string = "maintain") => {
     const ratios = customRatios || getDefaultRatios(goal);
     
     const protein = Math.round((calories * (ratios.protein / 100)) / 4); // 4 calories per gram of protein
@@ -162,8 +93,8 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     return { protein, fats, carbs };
   };
 
-  const calories = calculateDailyCalories(profile);
-  const macros = calculateMacros(calories, profile?.goal || "maintain");
+  const calories = calculateDailyCalories(profile as ProfileData);
+  const macros = calculateMacrosWithCustomRatios(calories, profile?.goal || "maintain");
   const currentRatios = customRatios || getDefaultRatios(profile?.goal || "maintain");
 
   return (
