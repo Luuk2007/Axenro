@@ -20,7 +20,11 @@ const defaultMacroTargets: MacroData = {
   fat: { consumed: 0, goal: 73, unit: 'g' },
 };
 
-export default function MacroProgressTracker() {
+interface MacroProgressTrackerProps {
+  selectedDate?: Date;
+}
+
+export default function MacroProgressTracker({ selectedDate }: MacroProgressTrackerProps) {
   const { t } = useLanguage();
   const [macroTargets, setMacroTargets] = useState<MacroData>(defaultMacroTargets);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -74,18 +78,18 @@ export default function MacroProgressTracker() {
   // Load and calculate consumed nutrition data
   useEffect(() => {
     const loadConsumedNutrition = async () => {
-      const today = new Date().toISOString().split('T')[0];
+      const targetDate = selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
       
       try {
         let allFoodItems: any[] = [];
         
         if (isAuthenticated) {
           // Load from database
-          const logs = await getFoodLogs(today);
+          const logs = await getFoodLogs(targetDate);
           allFoodItems = logs.map((log: FoodLogEntry) => log.food_item);
         } else {
           // Load from localStorage
-          const savedData = localStorage.getItem(`foodLog_${today}`);
+          const savedData = localStorage.getItem(`foodLog_${targetDate}`);
           if (savedData) {
             allFoodItems = JSON.parse(savedData);
           }
@@ -119,7 +123,7 @@ export default function MacroProgressTracker() {
     const interval = setInterval(loadConsumedNutrition, 30000);
     
     return () => clearInterval(interval);
-  }, [isAuthenticated, userId]);
+  }, [isAuthenticated, userId, selectedDate]);
 
   // Calculate BMR using Mifflin-St Jeor formula (same as in Profile.tsx)
   const calculateBMR = (data: any) => {
