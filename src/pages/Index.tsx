@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Workout } from '@/types/workout';
 import { useWeightData } from '@/hooks/useWeightData';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 const meals = [
   {
@@ -53,10 +54,10 @@ const Dashboard = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { weightData } = useWeightData();
+  const { profile } = useUserProfile();
   const [date, setDate] = useState<Date>(new Date());
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showStepsConnection, setShowStepsConnection] = useState(false);
-  const [userTargetWeight, setUserTargetWeight] = useState<number | null>(null);
   const [userCalories, setUserCalories] = useState<number>(2200);
   const [dailySteps, setDailySteps] = useState<number>(8546);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -69,25 +70,12 @@ const Dashboard = () => {
     : null;
 
   useEffect(() => {
-    // Get target weight from localStorage
-    const savedTargetWeight = localStorage.getItem('targetWeight');
-    if (savedTargetWeight) {
-      setUserTargetWeight(parseFloat(savedTargetWeight));
-    }
-
-    // Get user profile from localStorage for calories calculation
-    const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      try {
-        const profileData = JSON.parse(savedProfile);
-        
-        // Calculate calories
-        const bmr = calculateBMR(profileData);
-        const calories = calculateDailyCalories(profileData, bmr);
-        setUserCalories(calories);
-      } catch (error) {
-        console.error("Error parsing profile data:", error);
-      }
+    // Get user profile from profile hook for calories calculation
+    if (profile) {
+      // Calculate calories
+      const bmr = calculateBMR(profile);
+      const calories = calculateDailyCalories(profile, bmr);
+      setUserCalories(calories);
     }
 
     // Load workouts from localStorage
@@ -116,7 +104,7 @@ const Dashboard = () => {
         console.error("Error loading workouts:", error);
       }
     }
-  }, []);
+  }, [profile]);
 
   // Calculate BMR using Mifflin-St Jeor formula (same as in Profile.tsx)
   const calculateBMR = (data: any) => {
@@ -264,7 +252,7 @@ const Dashboard = () => {
           title={t("weight")}
           value={currentWeight ? `${currentWeight} kg` : "No data"}
           icon={Weight}
-          description={userTargetWeight ? `${t("target")}: ${userTargetWeight} kg` : "Set target weight"}
+          description={profile?.target_weight ? `${t("target")}: ${profile.target_weight} kg` : "Set target weight"}
           onClick={navigateToWeightProgress}
         />
       </div>
