@@ -14,6 +14,7 @@ import { format, parse, isValid, startOfWeek, endOfWeek } from 'date-fns';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Workout } from '@/types/workout';
+import { useWeightData } from '@/hooks/useWeightData';
 
 const meals = [
   {
@@ -51,10 +52,10 @@ const getActivityOptions = (t: (key: string) => string) => [
 const Dashboard = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { weightData } = useWeightData();
   const [date, setDate] = useState<Date>(new Date());
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showStepsConnection, setShowStepsConnection] = useState(false);
-  const [userWeight, setUserWeight] = useState<number | null>(null);
   const [userTargetWeight, setUserTargetWeight] = useState<number | null>(null);
   const [userCalories, setUserCalories] = useState<number>(2200);
   const [dailySteps, setDailySteps] = useState<number>(8546);
@@ -62,23 +63,12 @@ const Dashboard = () => {
   const [totalWorkoutsPlanned, setTotalWorkoutsPlanned] = useState(5);
   const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
 
-  useEffect(() => {
-    // Get weight data from localStorage for stats card
-    const savedWeightHistory = localStorage.getItem('weightHistory');
-    if (savedWeightHistory) {
-      try {
-        const parsedHistory = JSON.parse(savedWeightHistory);
-        
-        // Set current weight from the latest entry
-        if (parsedHistory.length > 0) {
-          const latestWeight = parsedHistory[parsedHistory.length - 1].value;
-          setUserWeight(latestWeight);
-        }
-      } catch (error) {
-        console.error("Error parsing weight history:", error);
-      }
-    }
+  // Get current weight from weightData hook
+  const currentWeight = weightData.length > 0 
+    ? weightData[weightData.length - 1].value 
+    : null;
 
+  useEffect(() => {
     // Get target weight from localStorage
     const savedTargetWeight = localStorage.getItem('targetWeight');
     if (savedTargetWeight) {
@@ -272,7 +262,7 @@ const Dashboard = () => {
         />
         <StatsCard
           title={t("weight")}
-          value={userWeight ? `${userWeight} kg` : "No data"}
+          value={currentWeight ? `${currentWeight} kg` : "No data"}
           icon={Weight}
           description={userTargetWeight ? `${t("target")}: ${userTargetWeight} kg` : "Set target weight"}
           onClick={navigateToWeightProgress}
