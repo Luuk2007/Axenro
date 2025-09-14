@@ -36,10 +36,13 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     }
   }, []);
 
-  // Save custom ratios to localStorage
+  // Save custom ratios to localStorage and trigger updates in other components
   const saveRatios = (ratios: { protein: number; carbs: number; fat: number }) => {
     localStorage.setItem('customMacroRatios', JSON.stringify(ratios));
     setCustomRatios(ratios);
+    
+    // Trigger a custom event to notify other components of the change
+    window.dispatchEvent(new CustomEvent('macroRatiosChanged', { detail: ratios }));
   };
 
   // Handle slider changes and auto-adjust other values to ensure total = 100%
@@ -76,10 +79,13 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     saveRatios(newRatios);
   };
 
-  // Reset to default ratios
+  // Reset to default ratios and notify other components
   const resetToDefaults = () => {
     localStorage.removeItem('customMacroRatios');
     setCustomRatios(null);
+    
+    // Trigger a custom event to notify other components of the change
+    window.dispatchEvent(new CustomEvent('macroRatiosChanged', { detail: null }));
   };
 
   // Use centralized macro calculation functions, but with custom ratios support

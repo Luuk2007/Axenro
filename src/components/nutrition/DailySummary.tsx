@@ -30,26 +30,39 @@ export default function DailySummary({ className, meals = [], selectedDate = new
   
   // Load user profile and nutrition targets
   useEffect(() => {
-    // Try to load nutrition goals from user profile
-    const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      try {
-        const profileData: ProfileData = JSON.parse(savedProfile);
-        
-        // Calculate macros using centralized function
-        const macroGoals = calculateMacroGoals(profileData);
-        
-        // Update the macro targets
-        setMacroTargets(prevState => ({
-          calories: { ...prevState.calories, goal: macroGoals.calories },
-          protein: { ...prevState.protein, goal: macroGoals.protein },
-          carbs: { ...prevState.carbs, goal: macroGoals.carbs },
-          fat: { ...prevState.fat, goal: macroGoals.fat },
-        }));
-      } catch (error) {
-        console.error("Error loading nutrition goals:", error);
+    const loadMacroGoals = () => {
+      const savedProfile = localStorage.getItem("userProfile");
+      if (savedProfile) {
+        try {
+          const profileData: ProfileData = JSON.parse(savedProfile);
+          
+          // Calculate macros using centralized function
+          const macroGoals = calculateMacroGoals(profileData);
+          
+          // Update the macro targets
+          setMacroTargets(prevState => ({
+            calories: { ...prevState.calories, goal: macroGoals.calories },
+            protein: { ...prevState.protein, goal: macroGoals.protein },
+            carbs: { ...prevState.carbs, goal: macroGoals.carbs },
+            fat: { ...prevState.fat, goal: macroGoals.fat },
+          }));
+        } catch (error) {
+          console.error("Error loading nutrition goals:", error);
+        }
       }
-    }
+    };
+    
+    // Load initial values
+    loadMacroGoals();
+    
+    // Listen for both storage changes and custom events
+    window.addEventListener('storage', loadMacroGoals);
+    window.addEventListener('macroRatiosChanged', loadMacroGoals);
+    
+    return () => {
+      window.removeEventListener('storage', loadMacroGoals);
+      window.removeEventListener('macroRatiosChanged', loadMacroGoals);
+    };
   }, []);
 
   // Calculate macros from provided meals or from localStorage if not provided

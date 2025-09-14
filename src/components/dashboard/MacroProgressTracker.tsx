@@ -68,6 +68,55 @@ export default function MacroProgressTracker() {
         console.error("Error parsing profile data:", error);
       }
     }
+    
+    // Listen for custom macro ratio changes
+    const handleStorageChange = () => {
+      const savedProfile = localStorage.getItem("userProfile");
+      if (savedProfile) {
+        try {
+          const profileData: ProfileData = JSON.parse(savedProfile);
+          const macroGoals = calculateMacroGoals(profileData);
+          
+          setMacroTargets(prevState => ({
+            calories: { ...prevState.calories, goal: macroGoals.calories },
+            protein: { ...prevState.protein, goal: macroGoals.protein },
+            carbs: { ...prevState.carbs, goal: macroGoals.carbs },
+            fat: { ...prevState.fat, goal: macroGoals.fat },
+          }));
+        } catch (error) {
+          console.error("Error updating macros:", error);
+        }
+      }
+    };
+    
+    // Listen for custom macro ratio changes
+    const handleMacroRatiosChange = () => {
+      const savedProfile = localStorage.getItem("userProfile");
+      if (savedProfile) {
+        try {
+          const profileData: ProfileData = JSON.parse(savedProfile);
+          const macroGoals = calculateMacroGoals(profileData);
+          
+          setMacroTargets(prevState => ({
+            calories: { ...prevState.calories, goal: macroGoals.calories },
+            protein: { ...prevState.protein, goal: macroGoals.protein },
+            carbs: { ...prevState.carbs, goal: macroGoals.carbs },
+            fat: { ...prevState.fat, goal: macroGoals.fat },
+          }));
+        } catch (error) {
+          console.error("Error updating macros:", error);
+        }
+      }
+    };
+    
+    // Listen for both storage changes and custom events
+    window.addEventListener('storage', handleMacroRatiosChange);
+    window.addEventListener('macroRatiosChanged', handleMacroRatiosChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleMacroRatiosChange);
+      window.removeEventListener('macroRatiosChanged', handleMacroRatiosChange);
+    };
   }, []);
   
   // Load and calculate consumed nutrition data
