@@ -269,7 +269,7 @@ const Dashboard = () => {
         />
       </div>
 
-      <MacroProgressTracker selectedDate={date} />
+      <MacroProgressTracker />
 
       <div className="grid gap-6 md:grid-cols-2 items-start">
         <div className="h-[400px]">
