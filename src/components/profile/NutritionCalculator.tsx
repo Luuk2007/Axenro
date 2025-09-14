@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { ProfileFormValues } from './ProfileForm';
-import { getDefaultRatios, calculateDailyCalories, calculateMacros, getMacroRatios, type ProfileData } from '@/utils/macroCalculations';
+import { getDefaultRatios, calculateMacroGoals, getMacroRatios, type ProfileData } from '@/utils/macroCalculations';
 
 interface NutritionCalculatorProps {
   profile: ProfileFormValues;
@@ -43,6 +43,13 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     
     // Trigger a custom event to notify other components of the change
     window.dispatchEvent(new CustomEvent('macroRatiosChanged', { detail: ratios }));
+    
+    // Also save updated profile to trigger recalculation
+    const savedProfile = localStorage.getItem("userProfile");
+    if (savedProfile) {
+      const profileData = JSON.parse(savedProfile);
+      localStorage.setItem("userProfile", JSON.stringify(profileData));
+    }
   };
 
   // Handle slider changes and auto-adjust other values to ensure total = 100%
@@ -86,21 +93,22 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     
     // Trigger a custom event to notify other components of the change
     window.dispatchEvent(new CustomEvent('macroRatiosChanged', { detail: null }));
+    
+    // Also trigger profile update to recalculate
+    const savedProfile = localStorage.getItem("userProfile");
+    if (savedProfile) {
+      const profileData = JSON.parse(savedProfile);
+      localStorage.setItem("userProfile", JSON.stringify(profileData));
+    }
   };
 
-  // Use centralized macro calculation functions, but with custom ratios support
-  const calculateMacrosWithCustomRatios = (calories: number, goal: string = "maintain") => {
-    const ratios = customRatios || getDefaultRatios(goal);
-    
-    const protein = Math.round((calories * (ratios.protein / 100)) / 4); // 4 calories per gram of protein
-    const fats = Math.round((calories * (ratios.fat / 100)) / 9); // 9 calories per gram of fat
-    const carbs = Math.round((calories * (ratios.carbs / 100)) / 4); // 4 calories per gram of carbs
-    
-    return { protein, fats, carbs };
-  };
+  // Use centralized macro calculation function
+  const macroGoals = React.useMemo(() => {
+    return calculateMacroGoals(profile as ProfileData);
+  }, [profile, customRatios]);
 
-  const calories = calculateDailyCalories(profile as ProfileData);
-  const macros = calculateMacrosWithCustomRatios(calories, profile?.goal || "maintain");
+  const calories = macroGoals.calories;
+  const macros = { protein: macroGoals.protein, carbs: macroGoals.carbs, fats: macroGoals.fat };
   const currentRatios = customRatios || getDefaultRatios(profile?.goal || "maintain");
 
   return (
