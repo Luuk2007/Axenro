@@ -60,6 +60,7 @@ const Dashboard = () => {
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showStepsConnection, setShowStepsConnection] = useState(false);
   const [userCalories, setUserCalories] = useState<number>(2200);
+  const [consumedCalories, setConsumedCalories] = useState<number>(0);
   const [dailySteps, setDailySteps] = useState<number>(8546);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [totalWorkoutsPlanned, setTotalWorkoutsPlanned] = useState(5);
@@ -92,6 +93,42 @@ const Dashboard = () => {
       setUserCalories(calories);
     }
 
+    // Load consumed calories from today's food log
+    const loadConsumedCalories = async () => {
+      try {
+        const today = format(new Date(), 'yyyy-MM-dd');
+        const savedData = localStorage.getItem(`foodLog_${today}`);
+        
+        if (savedData) {
+          const allFoodItems = JSON.parse(savedData);
+          const consumed = allFoodItems.reduce((total: number, item: any) => {
+            return total + (Number(item.calories) || 0);
+          }, 0);
+          setConsumedCalories(Math.round(consumed));
+        } else {
+          setConsumedCalories(0);
+        }
+      } catch (error) {
+        console.error('Error loading consumed calories:', error);
+        setConsumedCalories(0);
+      }
+    };
+
+    loadConsumedCalories();
+
+    // Listen for food log updates
+    const handleStorageChange = () => {
+      loadConsumedCalories();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [profile]);
+
+  useEffect(() => {
     // Load workouts from localStorage
     const storedWorkouts = localStorage.getItem("workouts");
     if (storedWorkouts) {
@@ -118,7 +155,7 @@ const Dashboard = () => {
         console.error("Error loading workouts:", error);
       }
     }
-  }, [profile]);
+  }, []);
 
 
   const navigateToNutrition = () => {
@@ -196,9 +233,9 @@ const Dashboard = () => {
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title={t("Daily calories")}
-          value={userCalories ? userCalories.toString() : "1,840"}
+          value={consumedCalories.toString()}
           icon={Flame}
-          description={`${t("target")}: ${userCalories ? userCalories : 2200}`}
+          description={`${t("target")}: ${userCalories || 2200}`}
           onClick={navigateToNutrition}
         />
         <StatsCard
