@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
@@ -111,37 +110,52 @@ export default function MacroProgressTracker() {
       try {
         let allFoodItems: any[] = [];
         
-        if (isAuthenticated) {
+        if (isAuthenticated && userId) {
           // Load from database
           const logs = await getFoodLogs(today);
           allFoodItems = logs.map((log: FoodLogEntry) => log.food_item);
         } else {
-          // Load from localStorage
+          // Load from localStorage (but only if not authenticated)
           const savedData = localStorage.getItem(`foodLog_${today}`);
           if (savedData) {
-            allFoodItems = JSON.parse(savedData);
+            try {
+              allFoodItems = JSON.parse(savedData);
+            } catch (parseError) {
+              console.error('Error parsing food log data:', parseError);
+              allFoodItems = [];
+            }
           }
         }
         
-        // Calculate consumed macros
+        // Calculate consumed macros - ensure we handle empty arrays correctly
         const consumed = allFoodItems.reduce((total: any, item: any) => {
+          // Make sure item exists and has valid data
+          if (!item) return total;
+          
           return {
-            calories: total.calories + (item.calories || 0),
-            protein: total.protein + (item.protein || 0),
-            carbs: total.carbs + (item.carbs || 0),
-            fat: total.fat + (item.fat || 0),
+            calories: total.calories + (Number(item.calories) || 0),
+            protein: total.protein + (Number(item.protein) || 0),
+            carbs: total.carbs + (Number(item.carbs) || 0),
+            fat: total.fat + (Number(item.fat) || 0),
           };
         }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
         
         // Update consumed values
         setMacroTargets(prevState => ({
-          calories: { ...prevState.calories, consumed: consumed.calories },
-          protein: { ...prevState.protein, consumed: consumed.protein },
-          carbs: { ...prevState.carbs, consumed: consumed.carbs },
-          fat: { ...prevState.fat, consumed: consumed.fat },
+          calories: { ...prevState.calories, consumed: Math.round(consumed.calories) },
+          protein: { ...prevState.protein, consumed: Math.round(consumed.protein * 10) / 10 },
+          carbs: { ...prevState.carbs, consumed: Math.round(consumed.carbs * 10) / 10 },
+          fat: { ...prevState.fat, consumed: Math.round(consumed.fat * 10) / 10 },
         }));
       } catch (error) {
         console.error('Error loading consumed nutrition:', error);
+        // Reset to 0 on error
+        setMacroTargets(prevState => ({
+          calories: { ...prevState.calories, consumed: 0 },
+          protein: { ...prevState.protein, consumed: 0 },
+          carbs: { ...prevState.carbs, consumed: 0 },
+          fat: { ...prevState.fat, consumed: 0 },
+        }));
       }
     };
 

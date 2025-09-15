@@ -46,7 +46,7 @@ const Profile = () => {
       weight: dbProfile.weight || 0,
       activityLevel: (dbProfile.activity_level as 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active') || 'moderate',
       fitnessGoal: (dbProfile.fitness_goal as 'lose' | 'maintain' | 'gain') || 'maintain',
-      targetWeight: dbProfile.target_weight || 0,
+      targetWeight: dbProfile.target_weight || undefined,
       exerciseFrequency: (dbProfile.exercise_frequency as '0-1' | '2-3' | '4-5' | '6+') || '2-3'
     };
   };
