@@ -83,6 +83,9 @@ export const calculateBMR = (data: ProfileData): number => {
 export const calculateDailyCalories = (data: ProfileData): number => {
   const bmr = calculateBMR(data);
   
+  console.log('calculateDailyCalories: Input data:', data);
+  console.log('calculateDailyCalories: Calculated BMR:', bmr);
+  
   if (bmr === 0) {
     return 2200; // Default fallback
   }
@@ -91,6 +94,9 @@ export const calculateDailyCalories = (data: ProfileData): number => {
   let activityMultiplier = 1.2; // Sedentary default
   const activityLevel = data?.activityLevel;
   const exerciseFreq = data?.exerciseFrequency || "0-1";
+  
+  console.log('calculateDailyCalories: Activity level:', activityLevel);
+  console.log('calculateDailyCalories: Exercise frequency:', exerciseFreq);
   
   if (activityLevel) {
     // Use activityLevel if available (newer, more accurate)
@@ -131,7 +137,11 @@ export const calculateDailyCalories = (data: ProfileData): number => {
     }
   }
   
+  console.log('calculateDailyCalories: Activity multiplier:', activityMultiplier);
+  
   let calories = Math.round(bmr * activityMultiplier);
+  
+  console.log('calculateDailyCalories: Calories before goal adjustment:', calories);
   
   // Adjust based on fitness goal
   const fitnessGoal = data?.fitnessGoal || "maintain";
@@ -147,6 +157,8 @@ export const calculateDailyCalories = (data: ProfileData): number => {
       // No adjustment needed
       break;
   }
+  
+  console.log('calculateDailyCalories: Final calories:', calories);
   
   return calories;
 };

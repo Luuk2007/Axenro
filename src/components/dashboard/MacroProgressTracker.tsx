@@ -61,8 +61,12 @@ export default function MacroProgressTracker() {
           fitnessGoal: dbProfile.fitness_goal,
         };
       
+      console.log('MacroProgressTracker: ProfileData being used for calculation:', profileData);
+      
       // Calculate macros using centralized function
       const macroGoals = calculateMacroGoals(profileData);
+      
+      console.log('MacroProgressTracker: Calculated macro goals:', macroGoals);
       
       // Update the macro targets
       setMacroTargets({
