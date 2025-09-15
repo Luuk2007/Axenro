@@ -116,15 +116,24 @@ const Dashboard = () => {
 
     loadConsumedCalories();
 
-    // Listen for food log updates
-    const handleStorageChange = () => {
+    // Listen for food log updates (custom event)
+    const handleFoodLogUpdate = () => {
       loadConsumedCalories();
     };
 
+    // Listen for storage changes (other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key && e.key.startsWith('foodLog_')) {
+        loadConsumedCalories();
+      }
+    };
+
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('foodLogUpdated', handleFoodLogUpdate);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('foodLogUpdated', handleFoodLogUpdate);
     };
   }, [profile]);
 

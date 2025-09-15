@@ -261,6 +261,9 @@ const Nutrition = () => {
             setMeals(updatedMeals);
             setRefreshTrigger(prev => prev + 1);
             toast.success(`${foodItem.name} ${t('updated successfully')}`);
+            
+            // Dispatch custom event to notify other components
+            window.dispatchEvent(new CustomEvent('foodLogUpdated'));
           }
         } catch (error) {
           console.error('Error updating food log:', error);
@@ -289,6 +292,9 @@ const Nutrition = () => {
           // Trigger a refresh of the summary
           setRefreshTrigger(prev => prev + 1);
           toast.success(`${foodItem.name} ${t('added to meal plan')}`);
+          
+          // Dispatch custom event to notify other components
+          window.dispatchEvent(new CustomEvent('foodLogUpdated'));
         } catch (error) {
           console.error('Error saving food log:', error);
           toast.error(t('errorSavingData'));
@@ -329,6 +335,9 @@ const Nutrition = () => {
           setMeals(updatedMeals);
           // Trigger a refresh of the summary
           setRefreshTrigger(prev => prev + 1);
+          
+          // Dispatch custom event to notify other components
+          window.dispatchEvent(new CustomEvent('foodLogUpdated'));
         } catch (error) {
           console.error('Error deleting food log:', error);
           toast.error(t('errorDeletingData'));
