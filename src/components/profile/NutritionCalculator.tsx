@@ -54,7 +54,7 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
 
   // Handle slider changes and auto-adjust other values to ensure total = 100%
   const handleRatioChange = (macroType: 'protein' | 'carbs' | 'fat', newValue: number) => {
-    const currentRatios = customRatios || getDefaultRatios(profile?.goal || "maintain");
+    const currentRatios = customRatios || getDefaultRatios(profile?.fitnessGoal || "maintain");
     const remaining = 100 - newValue;
     
     // Distribute the remaining percentage between the other two macros
@@ -109,7 +109,7 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
 
   const calories = macroGoals.calories;
   const macros = { protein: macroGoals.protein, carbs: macroGoals.carbs, fats: macroGoals.fat };
-  const currentRatios = customRatios || getDefaultRatios(profile?.goal || "maintain");
+  const currentRatios = customRatios || getDefaultRatios(profile?.fitnessGoal || "maintain");
 
   return (
     <Card>

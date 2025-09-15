@@ -16,7 +16,7 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
   const { measurementSystem } = useMeasurementSystem();
   
   // Safely access property with optional chaining to prevent errors
-  const showTargetWeight = profile?.goal !== "maintain";
+  const showTargetWeight = profile?.fitnessGoal !== "maintain";
   
   // Function to capitalize the first letter
   const capitalize = (str: string) => {
@@ -66,9 +66,9 @@ const UserStatsDisplay: React.FC<UserStatsDisplayProps> = ({ profile }) => {
             <Heart className="h-4 w-4 text-muted-foreground" />
             <dt className="font-medium">{t("Goal")}:</dt>
             <dd>
-              {profile?.goal === "gain"
+              {profile?.fitnessGoal === "gain"
                 ? t("Gain weight")
-                : profile?.goal === "lose"
+                : profile?.fitnessGoal === "lose"
                 ? t("Lose weight")
                 : t("Maintain weight")}
             </dd>

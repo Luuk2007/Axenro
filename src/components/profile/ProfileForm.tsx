@@ -34,7 +34,6 @@ export interface ProfileFormValues {
   fitnessGoal: "lose" | "maintain" | "gain";
   targetWeight?: number;
   exerciseFrequency?: "0-1" | "2-3" | "4-5" | "6+";
-  goal?: "lose" | "maintain" | "gain";
 }
 
 // Empty default values for new users
@@ -46,8 +45,7 @@ export const emptyDefaultValues: Partial<ProfileFormValues> = {
   weight: undefined,
   activityLevel: undefined,
   fitnessGoal: undefined,
-  exerciseFrequency: undefined,
-  goal: undefined
+  exerciseFrequency: undefined
 };
 
 // Default values for fallback when creating profiles
@@ -59,8 +57,7 @@ export const defaultValues: ProfileFormValues = {
   weight: 75,
   activityLevel: "moderate",
   fitnessGoal: "maintain",
-  exerciseFrequency: "2-3",
-  goal: "maintain"
+  exerciseFrequency: "2-3"
 };
 
 interface ProfileFormProps {
@@ -99,7 +96,6 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
       .max(300, "Target weight must be less than 300kg")
       .optional(),
     exerciseFrequency: z.enum(["0-1", "2-3", "4-5", "6+"]).optional(),
-    goal: z.enum(["lose", "maintain", "gain"]).optional(),
   });
 
   // Convert stored metric values to display values
@@ -124,8 +120,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
       weight: undefined,
       activityLevel: undefined,
       fitnessGoal: undefined,
-      exerciseFrequency: undefined,
-      goal: undefined
+      exerciseFrequency: undefined
     } : getDisplayValues(initialValues),
   });
 
@@ -316,11 +311,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             <FormItem>
               <FormLabel>{t("Goal")}</FormLabel>
               <Select 
-                onValueChange={(value: "lose" | "maintain" | "gain") => {
-                  field.onChange(value);
-                  // Also update the goal to keep in sync with fitnessGoal
-                  form.setValue("goal", value);
-                }}
+                onValueChange={field.onChange}
                 value={field.value || ""}
               >
                 <FormControl>
