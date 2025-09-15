@@ -20,12 +20,12 @@ export interface ProfileData {
   age?: number;
   gender?: string;
   exerciseFrequency?: string;
-  goal?: string;
+  fitnessGoal?: string;
 }
 
-// Get default macro ratios based on goal
-export const getDefaultRatios = (goal: string = "maintain"): MacroRatios => {
-  switch (goal) {
+// Get default macro ratios based on fitness goal
+export const getDefaultRatios = (fitnessGoal: string = "maintain"): MacroRatios => {
+  switch (fitnessGoal) {
     case "gain":
       return { protein: 30, carbs: 45, fat: 25 };
     case "lose":
@@ -38,7 +38,7 @@ export const getDefaultRatios = (goal: string = "maintain"): MacroRatios => {
 };
 
 // Get macro ratios (custom if available, otherwise default)
-export const getMacroRatios = (goal: string = "maintain"): MacroRatios => {
+export const getMacroRatios = (fitnessGoal: string = "maintain"): MacroRatios => {
   try {
     const savedRatios = localStorage.getItem('customMacroRatios');
     if (savedRatios) {
@@ -57,7 +57,7 @@ export const getMacroRatios = (goal: string = "maintain"): MacroRatios => {
     console.error('Error loading custom macro ratios:', error);
   }
   
-  return getDefaultRatios(goal);
+  return getDefaultRatios(fitnessGoal);
 };
 
 // Calculate BMR using Mifflin-St Jeor formula
@@ -109,10 +109,10 @@ export const calculateDailyCalories = (data: ProfileData): number => {
   
   let calories = Math.round(bmr * activityMultiplier);
   
-  // Adjust based on goal
-  const goal = data?.goal || "maintain";
+  // Adjust based on fitness goal
+  const fitnessGoal = data?.fitnessGoal || "maintain";
   
-  switch (goal) {
+  switch (fitnessGoal) {
     case "gain":
       calories += 500;
       break;
@@ -128,8 +128,8 @@ export const calculateDailyCalories = (data: ProfileData): number => {
 };
 
 // Calculate macro breakdown based on calorie needs and ratios
-export const calculateMacros = (calories: number, goal: string = "maintain"): Omit<MacroGoals, 'calories'> => {
-  const ratios = getMacroRatios(goal);
+export const calculateMacros = (calories: number, fitnessGoal: string = "maintain"): Omit<MacroGoals, 'calories'> => {
+  const ratios = getMacroRatios(fitnessGoal);
   
   const protein = Math.round((calories * (ratios.protein / 100)) / 4); // 4 calories per gram of protein
   const fat = Math.round((calories * (ratios.fat / 100)) / 9); // 9 calories per gram of fat
@@ -141,7 +141,7 @@ export const calculateMacros = (calories: number, goal: string = "maintain"): Om
 // Calculate complete macro goals (calories + macros)
 export const calculateMacroGoals = (profileData: ProfileData): MacroGoals => {
   const calories = calculateDailyCalories(profileData);
-  const macros = calculateMacros(calories, profileData.goal);
+  const macros = calculateMacros(calories, profileData.fitnessGoal);
   
   return {
     calories,

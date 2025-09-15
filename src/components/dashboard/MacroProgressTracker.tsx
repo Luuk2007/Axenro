@@ -235,7 +235,7 @@ export default function MacroProgressTracker() {
               if (savedProfile) {
                 try {
                   const profileData = JSON.parse(savedProfile);
-                  ratios = getMacroRatios(profileData.goal);
+                  ratios = getMacroRatios(profileData.fitnessGoal);
                 } catch (error) {
                   console.error("Error getting ratios:", error);
                 }
