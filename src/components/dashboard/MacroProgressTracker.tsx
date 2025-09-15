@@ -51,14 +51,15 @@ export default function MacroProgressTracker() {
     // Get profile data from database
     if (!profileLoading && dbProfile) {
       // Convert database profile to ProfileData format
-      const profileData: ProfileData = {
-        weight: dbProfile.weight,
-        height: dbProfile.height,
-        age: dbProfile.age,
-        gender: dbProfile.gender,
-        exerciseFrequency: dbProfile.exercise_frequency,
-        fitnessGoal: dbProfile.fitness_goal,
-      };
+        const profileData: ProfileData = {
+          weight: dbProfile.weight,
+          height: dbProfile.height,
+          age: dbProfile.age,
+          gender: dbProfile.gender,
+          activityLevel: dbProfile.activity_level,
+          exerciseFrequency: dbProfile.exercise_frequency,
+          fitnessGoal: dbProfile.fitness_goal,
+        };
       
       // Calculate macros using centralized function
       const macroGoals = calculateMacroGoals(profileData);

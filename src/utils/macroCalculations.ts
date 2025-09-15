@@ -19,6 +19,7 @@ export interface ProfileData {
   height?: number;
   age?: number;
   gender?: string;
+  activityLevel?: string;
   exerciseFrequency?: string;
   fitnessGoal?: string;
 }
@@ -86,25 +87,48 @@ export const calculateDailyCalories = (data: ProfileData): number => {
     return 2200; // Default fallback
   }
   
-  // Apply activity multiplier
+  // Apply activity multiplier - prioritize activityLevel over exerciseFrequency
   let activityMultiplier = 1.2; // Sedentary default
+  const activityLevel = data?.activityLevel;
   const exerciseFreq = data?.exerciseFrequency || "0-1";
   
-  switch (exerciseFreq) {
-    case "0-1":
-    case "0-2":
-      activityMultiplier = 1.375; // Light activity
-      break;
-    case "2-3":
-    case "3-5":
-      activityMultiplier = 1.55; // Moderate activity
-      break;
-    case "4-5":
-      activityMultiplier = 1.65; // Active
-      break;
-    case "6+":
-      activityMultiplier = 1.725; // Very active
-      break;
+  if (activityLevel) {
+    // Use activityLevel if available (newer, more accurate)
+    switch (activityLevel) {
+      case "sedentary":
+        activityMultiplier = 1.2;
+        break;
+      case "light":
+        activityMultiplier = 1.375;
+        break;
+      case "moderate":
+        activityMultiplier = 1.55;
+        break;
+      case "active":
+        activityMultiplier = 1.725;
+        break;
+      case "very_active":
+        activityMultiplier = 1.9;
+        break;
+    }
+  } else {
+    // Fall back to exerciseFrequency for backwards compatibility
+    switch (exerciseFreq) {
+      case "0-1":
+      case "0-2":
+        activityMultiplier = 1.375; // Light activity
+        break;
+      case "2-3":
+      case "3-5":
+        activityMultiplier = 1.55; // Moderate activity
+        break;
+      case "4-5":
+        activityMultiplier = 1.65; // Active
+        break;
+      case "6+":
+        activityMultiplier = 1.725; // Very active
+        break;
+    }
   }
   
   let calories = Math.round(bmr * activityMultiplier);
