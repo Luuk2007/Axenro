@@ -73,8 +73,22 @@ const Dashboard = () => {
   useEffect(() => {
     // Get user profile from profile hook for calories calculation
     if (profile) {
+      // Convert profile to ProfileData format (same as MacroProgressTracker)
+      const profileData: ProfileData = {
+        weight: profile.weight,
+        height: profile.height,
+        age: profile.age,
+        gender: profile.gender,
+        activityLevel: profile.activity_level,
+        exerciseFrequency: profile.exercise_frequency,
+        fitnessGoal: profile.fitness_goal,
+      };
+      
+      console.log('Dashboard: Profile data for calculation:', profileData);
+      
       // Calculate calories using centralized function
-      const calories = calculateDailyCalories(profile as ProfileData);
+      const calories = calculateDailyCalories(profileData);
+      console.log('Dashboard: Calculated calories:', calories);
       setUserCalories(calories);
     }
 
