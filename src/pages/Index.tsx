@@ -17,6 +17,7 @@ import { Workout } from '@/types/workout';
 import { useWeightData } from '@/hooks/useWeightData';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { calculateDailyCalories, type ProfileData } from '@/utils/macroCalculations';
+import { supabase } from '@/integrations/supabase/client';
 
 const meals = [
   {
@@ -65,11 +66,32 @@ const Dashboard = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [totalWorkoutsPlanned, setTotalWorkoutsPlanned] = useState(5);
   const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   // Get current weight from weightData hook
   const currentWeight = weightData.length > 0 
     ? weightData[weightData.length - 1].value 
     : null;
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+      setUserId(user?.id || null);
+    };
+    
+    checkAuth();
+    
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session?.user);
+      setUserId(session?.user?.id || null);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     // Get user profile from profile hook for calories calculation
@@ -97,16 +119,47 @@ const Dashboard = () => {
     const loadConsumedCalories = async () => {
       try {
         const today = format(new Date(), 'yyyy-MM-dd');
-        const savedData = localStorage.getItem(`foodLog_${today}`);
         
-        if (savedData) {
-          const allFoodItems = JSON.parse(savedData);
-          const consumed = allFoodItems.reduce((total: number, item: any) => {
-            return total + (Number(item.calories) || 0);
-          }, 0);
-          setConsumedCalories(Math.round(consumed));
+        if (isAuthenticated && userId) {
+          // Load from database if authenticated
+          const { data: logs, error } = await supabase
+            .from('food_logs')
+            .select('food_item')
+            .eq('user_id', userId)
+            .eq('date', today);
+
+          if (error) {
+            console.error('Error loading food logs from database:', error);
+            // Fallback to localStorage
+            const savedData = localStorage.getItem(`foodLog_${today}`);
+            if (savedData) {
+              const allFoodItems = JSON.parse(savedData);
+              const consumed = allFoodItems.reduce((total: number, item: any) => {
+                return total + (Number(item.calories) || 0);
+              }, 0);
+              setConsumedCalories(Math.round(consumed));
+            } else {
+              setConsumedCalories(0);
+            }
+          } else {
+            // Calculate consumed calories from database logs
+            const consumed = logs.reduce((total: number, log: any) => {
+              return total + (Number(log.food_item?.calories) || 0);
+            }, 0);
+            setConsumedCalories(Math.round(consumed));
+          }
         } else {
-          setConsumedCalories(0);
+          // Load from localStorage if not authenticated
+          const savedData = localStorage.getItem(`foodLog_${today}`);
+          if (savedData) {
+            const allFoodItems = JSON.parse(savedData);
+            const consumed = allFoodItems.reduce((total: number, item: any) => {
+              return total + (Number(item.calories) || 0);
+            }, 0);
+            setConsumedCalories(Math.round(consumed));
+          } else {
+            setConsumedCalories(0);
+          }
         }
       } catch (error) {
         console.error('Error loading consumed calories:', error);
@@ -135,7 +188,7 @@ const Dashboard = () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('foodLogUpdated', handleFoodLogUpdate);
     };
-  }, [profile]);
+  }, [profile, isAuthenticated, userId]);
 
   useEffect(() => {
     // Load workouts from localStorage
