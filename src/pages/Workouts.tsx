@@ -24,9 +24,10 @@ const Workouts = () => {
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
   
-  // Show personal records tab logic: Only show when we're certain user has access (pro/premium)
+  // Show personal records and statistics tab logic: Only show when we're certain user has access (pro/premium)
   // Gate rendering until subscription is initialized to avoid flicker
   const canAccessPersonalRecords = initialized && (currentTier === 'pro' || currentTier === 'premium');
+  const canAccessStatistics = initialized && (currentTier === 'pro' || currentTier === 'premium');
   
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
@@ -133,7 +134,7 @@ const Workouts = () => {
 
       {initialized && (
         <Tabs defaultValue="workouts">
-          <TabsList className={`grid w-full ${canAccessPersonalRecords ? 'grid-cols-4' : 'grid-cols-3'}`}>
+          <TabsList className={`grid w-full ${canAccessPersonalRecords ? 'grid-cols-4' : (canAccessStatistics ? 'grid-cols-3' : 'grid-cols-2')}`}>
             <TabsTrigger value="workouts">
               <Dumbbell className="h-4 w-4 mr-2" />
               {t("Workouts")}
@@ -142,10 +143,12 @@ const Workouts = () => {
               <Dumbbell className="h-4 w-4 mr-2" />
               {t("Calendar")}
             </TabsTrigger>
-            <TabsTrigger value="statistics">
-              <BarChart className="h-4 w-4 mr-2" />
-              {isMobile ? t("Stats") : t("Statistics")}
-            </TabsTrigger>
+            {canAccessStatistics && (
+              <TabsTrigger value="statistics">
+                <BarChart className="h-4 w-4 mr-2" />
+                {isMobile ? t("Stats") : t("Statistics")}
+              </TabsTrigger>
+            )}
             {canAccessPersonalRecords && (
               <TabsTrigger value="personal-records">
                 <Trophy className="h-4 w-4 mr-2" />
@@ -167,9 +170,11 @@ const Workouts = () => {
             <WorkoutCalendar workouts={workouts} />
           </TabsContent>
           
-          <TabsContent value="statistics" className="mt-6">
-            <WorkoutStatistics workouts={workouts} />
-          </TabsContent>
+          {canAccessStatistics && (
+            <TabsContent value="statistics" className="mt-6">
+              <WorkoutStatistics workouts={workouts} />
+            </TabsContent>
+          )}
           
           {canAccessPersonalRecords && (
             <TabsContent value="personal-records" className="mt-6">

@@ -12,6 +12,7 @@ interface WorkoutStatisticsProps {
 interface ExerciseStats {
   name: string;
   maxWeight: number;
+  maxReps: number;
   totalSets: number;
   lastPerformed: string;
   muscleGroup?: string;
@@ -28,14 +29,20 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
       workout.exercises.forEach((exercise) => {
         const key = exercise.name.toLowerCase();
         
-        // Find max weight for this exercise in this workout
-        const maxWeightInWorkout = Math.max(
-          ...exercise.sets
-            .filter(set => set.weight > 0 && !set.isCardio)
-            .map(set => set.weight)
-        );
+        // Find max weight set for this exercise in this workout and its reps
+        let maxWeightSet = null;
+        let maxWeightInWorkout = -Infinity;
+        
+        exercise.sets
+          .filter(set => set.weight > 0 && !set.isCardio)
+          .forEach(set => {
+            if (set.weight > maxWeightInWorkout) {
+              maxWeightInWorkout = set.weight;
+              maxWeightSet = set;
+            }
+          });
 
-        if (maxWeightInWorkout === -Infinity) return; // Skip if no weights recorded
+        if (maxWeightInWorkout === -Infinity || !maxWeightSet) return; // Skip if no weights recorded
 
         const existing = exerciseMap.get(key);
         
@@ -43,14 +50,17 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
           exerciseMap.set(key, {
             name: exercise.name,
             maxWeight: maxWeightInWorkout,
+            maxReps: maxWeightSet.reps,
             totalSets: exercise.sets.length,
             lastPerformed: workout.date,
             muscleGroup: exercise.muscleGroup
           });
         } else {
+          const shouldUpdate = maxWeightInWorkout > existing.maxWeight;
           exerciseMap.set(key, {
             ...existing,
-            maxWeight: Math.max(existing.maxWeight, maxWeightInWorkout),
+            maxWeight: shouldUpdate ? maxWeightInWorkout : existing.maxWeight,
+            maxReps: shouldUpdate ? maxWeightSet.reps : existing.maxReps,
             totalSets: existing.totalSets + exercise.sets.length,
             lastPerformed: new Date(workout.date) > new Date(existing.lastPerformed) 
               ? workout.date 
@@ -111,13 +121,17 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <TrendingUp className="h-5 w-5" />
-        <h2 className="text-xl font-semibold">{t("Exercise Statistics")}</h2>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            {t("Exercise Statistics")}
+          </CardTitle>
+        </CardHeader>
+      </Card>
       
       <div className="grid gap-4">
-        {exerciseStats.map((stat, index) => (
+        {exerciseStats.map((stat) => (
           <Card key={stat.name} className="transition-colors hover:bg-muted/50">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -133,7 +147,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
                   
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
                     <div>
-                      <span className="font-medium text-foreground">{stat.maxWeight} kg</span>
+                      <span className="font-medium text-foreground">{stat.maxWeight} kg x {stat.maxReps} reps</span>
                       <br />
                       <span>{t("Max Weight")}</span>
                     </div>
@@ -148,11 +162,6 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
                       <span>{t("Last Performed")}</span>
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex flex-col items-center justify-center ml-4">
-                  <div className="text-2xl font-bold text-primary">#{index + 1}</div>
-                  <div className="text-xs text-muted-foreground">{t("Rank")}</div>
                 </div>
               </div>
             </CardContent>
