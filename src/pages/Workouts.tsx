@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import PersonalRecords from "@/components/workouts/PersonalRecords";
-import { Dumbbell, Trophy, Plus } from "lucide-react";
+import WorkoutStatistics from "@/components/workouts/WorkoutStatistics";
+import { Dumbbell, Trophy, Plus, BarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import CreateWorkout from "@/components/workouts/CreateWorkout";
@@ -132,7 +133,7 @@ const Workouts = () => {
 
       {initialized && (
         <Tabs defaultValue="workouts">
-          <TabsList className={`grid w-full ${canAccessPersonalRecords ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          <TabsList className={`grid w-full ${canAccessPersonalRecords ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="workouts">
               <Dumbbell className="h-4 w-4 mr-2" />
               {t("Workouts")}
@@ -140,6 +141,10 @@ const Workouts = () => {
             <TabsTrigger value="calendar">
               <Dumbbell className="h-4 w-4 mr-2" />
               {t("Calendar")}
+            </TabsTrigger>
+            <TabsTrigger value="statistics">
+              <BarChart className="h-4 w-4 mr-2" />
+              {isMobile ? t("Stats") : t("Statistics")}
             </TabsTrigger>
             {canAccessPersonalRecords && (
               <TabsTrigger value="personal-records">
@@ -160,6 +165,10 @@ const Workouts = () => {
           
           <TabsContent value="calendar" className="mt-6">
             <WorkoutCalendar workouts={workouts} />
+          </TabsContent>
+          
+          <TabsContent value="statistics" className="mt-6">
+            <WorkoutStatistics workouts={workouts} />
           </TabsContent>
           
           {canAccessPersonalRecords && (
