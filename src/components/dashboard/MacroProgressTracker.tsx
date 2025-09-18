@@ -166,10 +166,11 @@ export default function MacroProgressTracker({ selectedDate = new Date() }: Macr
 
     loadConsumedNutrition();
     
-    // Set up interval to refresh data every 30 seconds
-    const interval = setInterval(loadConsumedNutrition, 30000);
-    
-    return () => clearInterval(interval);
+    // Don't set up interval for non-current dates to avoid constant refreshing
+    if (selectedDate.toDateString() === new Date().toDateString()) {
+      const interval = setInterval(loadConsumedNutrition, 30000);
+      return () => clearInterval(interval);
+    }
   }, [isAuthenticated, userId, selectedDate]);
 
   

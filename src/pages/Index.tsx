@@ -323,7 +323,7 @@ const Dashboard = () => {
         />
       </div>
 
-      <MacroProgressTracker key={format(date, 'yyyy-MM-dd')} selectedDate={date} />
+      <MacroProgressTracker selectedDate={date} />
 
       <div className="grid gap-6 md:grid-cols-2 items-start">
         <div className="h-[400px]">
@@ -335,7 +335,6 @@ const Dashboard = () => {
         
         <div className="max-h-[400px]">
           <MealsList
-            key={`meals-${format(date, 'yyyy-MM-dd')}`}
             title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} meals`}
             meals={meals}
             onViewAll={navigateToNutrition}
