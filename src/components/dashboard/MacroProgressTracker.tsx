@@ -21,7 +21,11 @@ const defaultMacroTargets: MacroData = {
   fat: { consumed: 0, goal: 73, unit: 'g' },
 };
 
-export default function MacroProgressTracker() {
+interface MacroProgressTrackerProps {
+  selectedDate?: Date;
+}
+
+export default function MacroProgressTracker({ selectedDate = new Date() }: MacroProgressTrackerProps) {
   const { t } = useLanguage();
   const { profile: dbProfile, loading: profileLoading } = useUserProfile();
   const [macroTargets, setMacroTargets] = useState<MacroData>(defaultMacroTargets);
@@ -106,18 +110,18 @@ export default function MacroProgressTracker() {
   // Load and calculate consumed nutrition data
   useEffect(() => {
     const loadConsumedNutrition = async () => {
-      const today = new Date().toISOString().split('T')[0];
+      const dateString = selectedDate.toISOString().split('T')[0];
       
       try {
         let allFoodItems: any[] = [];
         
         if (isAuthenticated && userId) {
           // Load from database
-          const logs = await getFoodLogs(today);
+          const logs = await getFoodLogs(dateString);
           allFoodItems = logs.map((log: FoodLogEntry) => log.food_item);
         } else {
           // Load from localStorage (but only if not authenticated)
-          const savedData = localStorage.getItem(`foodLog_${today}`);
+          const savedData = localStorage.getItem(`foodLog_${dateString}`);
           if (savedData) {
             try {
               allFoodItems = JSON.parse(savedData);
@@ -166,7 +170,7 @@ export default function MacroProgressTracker() {
     const interval = setInterval(loadConsumedNutrition, 30000);
     
     return () => clearInterval(interval);
-  }, [isAuthenticated, userId]);
+  }, [isAuthenticated, userId, selectedDate]);
 
   
   const calculatePercentage = (consumed: number, goal: number) => {

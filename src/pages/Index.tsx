@@ -115,10 +115,10 @@ const Dashboard = () => {
       setUserCalories(calories);
     }
 
-    // Load consumed calories from today's food log
+    // Load consumed calories from selected date's food log
     const loadConsumedCalories = async () => {
       try {
-        const today = format(new Date(), 'yyyy-MM-dd');
+        const selectedDate = format(date, 'yyyy-MM-dd');
         
         if (isAuthenticated && userId) {
           // Load from database if authenticated
@@ -126,12 +126,12 @@ const Dashboard = () => {
             .from('food_logs')
             .select('food_item')
             .eq('user_id', userId)
-            .eq('date', today);
+            .eq('date', selectedDate);
 
           if (error) {
             console.error('Error loading food logs from database:', error);
             // Fallback to localStorage
-            const savedData = localStorage.getItem(`foodLog_${today}`);
+            const savedData = localStorage.getItem(`foodLog_${selectedDate}`);
             if (savedData) {
               const allFoodItems = JSON.parse(savedData);
               const consumed = allFoodItems.reduce((total: number, item: any) => {
@@ -150,7 +150,7 @@ const Dashboard = () => {
           }
         } else {
           // Load from localStorage if not authenticated
-          const savedData = localStorage.getItem(`foodLog_${today}`);
+          const savedData = localStorage.getItem(`foodLog_${selectedDate}`);
           if (savedData) {
             const allFoodItems = JSON.parse(savedData);
             const consumed = allFoodItems.reduce((total: number, item: any) => {
@@ -188,7 +188,7 @@ const Dashboard = () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('foodLogUpdated', handleFoodLogUpdate);
     };
-  }, [profile, isAuthenticated, userId]);
+  }, [profile, isAuthenticated, userId, date]);
 
   useEffect(() => {
     // Load workouts from localStorage
@@ -323,7 +323,7 @@ const Dashboard = () => {
         />
       </div>
 
-      <MacroProgressTracker />
+      <MacroProgressTracker selectedDate={date} />
 
       <div className="grid gap-6 md:grid-cols-2 items-start">
         <div className="h-[400px]">
@@ -335,9 +335,10 @@ const Dashboard = () => {
         
         <div className="max-h-[400px]">
           <MealsList
-            title={t("Today meals")}
+            title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} meals`}
             meals={meals}
             onViewAll={navigateToNutrition}
+            selectedDate={date}
           />
         </div>
       </div>
