@@ -129,10 +129,10 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
       <DialogHeader className="p-4 pb-3 text-center">
         <DialogTitle className="text-xl font-semibold flex items-center justify-center gap-2">
           <Bot className="h-5 w-5" />
-          AI Meal Analyzer
+          {t("AI Meal Analyzer")}
         </DialogTitle>
         <DialogDescription>
-          Describe what you ate and get AI-powered nutritional analysis
+          {t("Describe what you ate and get AI-powered nutritional analysis")}
         </DialogDescription>
       </DialogHeader>
       
@@ -140,7 +140,7 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
         {/* Meal Description */}
         <div>
           <Label htmlFor="meal-description" className="text-sm font-medium">
-            What did you eat?
+            {t("What did you eat?")}
           </Label>
           <Textarea
             id="meal-description"
@@ -161,12 +161,12 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
           {analyzing ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Analyzing with AI...
+              {t("Analyzing with AI...")}
             </>
           ) : (
             <>
               <Bot className="mr-2 h-4 w-4" />
-              Analyze with AI
+              {t("Analyze with AI")}
             </>
           )}
         </Button>
@@ -174,28 +174,28 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
         {/* Results */}
         {nutritionResult && (
           <div className="mt-4 p-4 bg-secondary/30 rounded-lg">
-            <h3 className="text-center text-lg font-semibold mb-3">Nutrition Analysis</h3>
+            <h3 className="text-center text-lg font-semibold mb-3">{t("Nutrition Analysis")}</h3>
             
             <div className="grid grid-cols-4 gap-2 text-center mb-3">
               <div>
                 <div className="text-lg font-bold text-green-600">
                   {nutritionResult.carbs}g
                 </div>
-                <div className="text-xs text-muted-foreground">Carbs</div>
+                <div className="text-xs text-muted-foreground">{t("Carbs")}</div>
               </div>
               
               <div>
                 <div className="text-lg font-bold text-orange-500">
                   {nutritionResult.fat}g
                 </div>
-                <div className="text-xs text-muted-foreground">Fat</div>
+                <div className="text-xs text-muted-foreground">{t("Fat")}</div>
               </div>
               
               <div>
                 <div className="text-lg font-bold text-blue-600">
                   {nutritionResult.protein}g
                 </div>
-                <div className="text-xs text-muted-foreground">Protein</div>
+                <div className="text-xs text-muted-foreground">{t("Protein")}</div>
               </div>
               
               <div>
@@ -208,7 +208,7 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
 
             <div className="text-center">
               <span className={`text-xs ${getConfidenceColor(nutritionResult.confidence)}`}>
-                Confidence: {nutritionResult.confidence}
+                {t("Confidence")}: {t(nutritionResult.confidence)}
               </span>
             </div>
 
@@ -225,19 +225,19 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
           <>
             <div>
               <Label htmlFor="custom-meal-name" className="text-sm font-medium">
-                Custom Meal Name
+                {t("Custom Meal Name")}
               </Label>
               <Input
                 id="custom-meal-name"
                 value={customMealName}
                 onChange={(e) => setCustomMealName(e.target.value)}
-                placeholder="Enter a name for this meal"
+                placeholder={t("Enter a name for this meal")}
                 className="mt-1"
               />
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Add to Meal</Label>
+              <Label className="text-sm font-medium">{t("Add to Meal")}</Label>
               <Select value={selectedMealId} onValueChange={setSelectedMealId}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -258,7 +258,7 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
               disabled={!customMealName.trim()}
             >
               <Check className="mr-2 h-4 w-4" />
-              Save to Today's Meals
+              {t("Save to Today's Meals")}
             </Button>
           </>
         )}

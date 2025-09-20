@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X, Camera, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useBarcodeScanner } from '@/hooks/useBarcodeScanner';
 import { fetchProductByBarcode, ProductDetails } from '@/services/openFoodFactsService';
 
@@ -13,6 +14,7 @@ interface BarcodeScannerProps {
 }
 
 const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [manualBarcode, setManualBarcode] = useState('');
@@ -137,12 +139,12 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
   return (
     <DialogContent className="sm:max-w-md p-0 overflow-hidden">
       <DialogHeader className="sr-only">
-        <DialogTitle>Scan Barcode</DialogTitle>
+        <DialogTitle>{t("Scan Barcode")}</DialogTitle>
       </DialogHeader>
       
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-center px-4 py-3 border-b border-border">
-          <h3 className="font-medium text-lg">Scan Barcode</h3>
+          <h3 className="font-medium text-lg">{t("Scan Barcode")}</h3>
         </div>
         
         {/* Always render the scanner container but hide it when not scanning */}
@@ -161,7 +163,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
             {loading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-20">
                 <Loader2 className="h-8 w-8 text-white animate-spin mb-2" />
-                <p className="text-white text-sm">Processing barcode...</p>
+                <p className="text-white text-sm">{t("Processing barcode...")}</p>
               </div>
             )}
             
@@ -171,7 +173,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
                 <AlertCircle className="h-10 w-10 text-red-400 mb-2" />
                 <p className="text-white mb-4 text-sm">{error}</p>
                 <Button onClick={() => setError(null)} size="sm" variant="secondary">
-                  Try Again
+                  {t("Try Again")}
                 </Button>
               </div>
             )}
@@ -203,11 +205,11 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
             <div className="absolute top-4 left-4 right-4 z-15">
               <div className="bg-black/80 text-white p-3 rounded-lg text-sm text-center backdrop-blur-sm">
                 {isInitializing ? (
-                  <span className="text-yellow-400">● Initializing high-quality camera...</span>
+                  <span className="text-yellow-400">● {t("● Initializing high-quality camera...")}</span>
                 ) : cameraActive ? (
-                  <span className="text-green-400">● Camera Active - Hold steady and center barcode</span>
+                  <span className="text-green-400">● {t("● Camera Active - Hold steady and center barcode")}</span>
                 ) : (
-                  <span className="text-yellow-400">● Starting camera...</span>
+                  <span className="text-yellow-400">● {t("● Starting camera...")}</span>
                 )}
               </div>
             </div>
@@ -216,7 +218,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
             <div className="absolute bottom-0 left-0 right-0 p-4 text-sm text-center bg-gradient-to-t from-black/80 to-transparent text-white z-15">
               <p className="flex items-center justify-center gap-2 mb-3">
                 <Camera className="h-4 w-4" />
-                {cameraActive ? 'Scanning automatically - keep barcode in focus' : 'Starting enhanced camera...'}
+                {cameraActive ? t("Scanning automatically - keep barcode in focus") : t("Starting enhanced camera...")}
               </p>
               <Button 
                 onClick={stopScanner} 
@@ -224,7 +226,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
                 size="sm"
                 className="bg-white/10 border-white/20 text-white hover:bg-white/20"
               >
-                Stop Camera
+                {t("Stop Camera")}
               </Button>
             </div>
           </div>
@@ -232,9 +234,9 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
           <div className="p-6 text-center space-y-4">
             <Camera className="h-16 w-16 mx-auto text-gray-400" />
             <div>
-              <h3 className="text-lg font-medium mb-2">Ready to Scan</h3>
+              <h3 className="text-lg font-medium mb-2">{t("Ready to Scan")}</h3>
               <p className="text-gray-600 text-sm mb-4">
-                Point your camera at a product barcode to scan it automatically
+                {t("Point your camera at a product barcode to scan it automatically")}
               </p>
             </div>
             
@@ -256,17 +258,17 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
                 {isInitializing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Starting Enhanced Camera...
+                    {t("Starting Enhanced Camera...")}
                   </>
                 ) : loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
+                    {t("Processing barcode...")}
                   </>
                 ) : (
                   <>
                     <Camera className="mr-2 h-4 w-4" />
-                    Start High-Quality Camera
+                    {t("Start High-Quality Camera")}
                   </>
                 )}
               </Button>
@@ -277,7 +279,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
                   variant="outline" 
                   className="w-full"
                 >
-                  Reload to Grant Camera Access
+                  {t("Reload to Grant Camera Access")}
                 </Button>
               )}
             </div>
@@ -287,13 +289,13 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or</span>
+                <span className="bg-background px-2 text-muted-foreground">{t("Or")}</span>
               </div>
             </div>
             
             <div className="space-y-2">
               <Input
-                placeholder="Enter barcode manually"
+                placeholder={t("Enter barcode manually")}
                 value={manualBarcode}
                 onChange={(e) => setManualBarcode(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleManualSubmit()}
@@ -304,7 +306,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
                 className="w-full"
                 disabled={!manualBarcode.trim() || loading}
               >
-                Search Product
+                {t("Search Product")}
               </Button>
             </div>
           </div>

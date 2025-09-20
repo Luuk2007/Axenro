@@ -413,7 +413,7 @@ const Nutrition = () => {
       options.push({
         key: 'barcode',
         icon: Camera,
-        label: "Scan Barcode",
+        label: t("Scan Barcode"),
         action: () => {
           setShowMealOptionsModal(false);
           handleScanBarcode();
@@ -426,7 +426,7 @@ const Nutrition = () => {
       options.push({
         key: 'ai',
         icon: Bot,
-        label: "AI Meal Analyzer",
+        label: t("AI Meal Analyzer"),
         action: () => {
           setShowMealOptionsModal(false);
           handleAIMealAnalyzer();
@@ -466,8 +466,8 @@ const Nutrition = () => {
                   <DialogTitle>{t("Add food")}</DialogTitle>
                   <DialogDescription>
                     {test_subscription_tier === 'pro' 
-                      ? "Search for a product or scan a barcode"
-                      : "Search for a product, scan, or analyze with AI"
+                      ? t("Search for a product or scan a barcode")
+                      : t("Search for a product, scan, or analyze with AI")
                     }
                   </DialogDescription>
                 </DialogHeader>

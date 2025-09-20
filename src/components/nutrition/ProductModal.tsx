@@ -101,7 +101,7 @@ const ProductModal = ({
   return (
     <DialogContent className="sm:max-w-md mx-auto p-0 overflow-hidden">
       <DialogHeader className="sr-only">
-        <DialogTitle>Scanned Product</DialogTitle>
+        <DialogTitle>{t("Product Details")}</DialogTitle>
       </DialogHeader>
       
       <div className="flex flex-col">
@@ -115,7 +115,7 @@ const ProductModal = ({
           </button>
           <h3 className="font-medium text-lg flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Product Found
+            {t("Product Found")}
           </h3>
         </div>
         
@@ -123,13 +123,13 @@ const ProductModal = ({
           <div className="bg-green-50 p-3 rounded-md">
             <div className="flex items-center justify-between">
               <p className="text-green-800 text-sm flex-1">
-                ✅ Barcode: {product.id}
+                ✅ {t("Barcode matches")}: {product.id}
               </p>
               <button 
                 onClick={onScanAgain} 
                 className="text-green-600 text-sm whitespace-nowrap hover:underline"
               >
-                Scan Different
+                {t("Scan Different")}
               </button>
             </div>
           </div>
@@ -161,18 +161,18 @@ const ProductModal = ({
           
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <p className="font-medium">Serving Size</p>
+              <p className="font-medium">{t("Serving Size")}</p>
               <div className="bg-gray-100 rounded-md px-4 py-2 text-right">
                 <span>{product.servingSize}</span>
               </div>
             </div>
 
             <div className="border-t pt-4">
-              <h3 className="font-medium mb-3">Adjust Serving</h3>
+              <h3 className="font-medium mb-3">{t("Adjust Serving")}</h3>
               
               <div className="flex gap-3 mb-4">
                 <div className="flex-1">
-                  <label className="text-sm text-muted-foreground mb-1 block">Amount</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">{t("Amount")}</label>
                   <Input 
                     type="number"
                     value={amount}
@@ -184,7 +184,7 @@ const ProductModal = ({
                 </div>
                 
                 <div className="flex-1">
-                  <label className="text-sm text-muted-foreground mb-1 block">Unit</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">{t("Unit")}</label>
                   <Select value={unit} onValueChange={setUnit}>
                     <SelectTrigger>
                       <SelectValue />
@@ -201,7 +201,7 @@ const ProductModal = ({
               </div>
               
               <div className="flex justify-between items-center mb-4">
-                <p className="font-medium">Number of Servings</p>
+                <p className="font-medium">{t("Number of servings")}</p>
                 <div className="flex items-center bg-gray-100 rounded-md px-2">
                   <button 
                     className="p-1 hover:bg-gray-200 rounded"
@@ -229,7 +229,7 @@ const ProductModal = ({
             </div>
             
             <div className="flex justify-between items-center">
-              <p className="font-medium">Add to Meal</p>
+              <p className="font-medium">{t("Add to Meal")}</p>
               <Select value={selectedMealId} onValueChange={setSelectedMealId}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select meal" />
@@ -244,8 +244,8 @@ const ProductModal = ({
           </div>
           
           <div className="border rounded-md p-4">
-            <h3 className="font-medium mb-2">Nutrition Facts</h3>
-            <p className="text-xs text-muted-foreground mb-3">Per adjusted serving</p>
+            <h3 className="font-medium mb-2">{t("Nutrition Facts")}</h3>
+            <p className="text-xs text-muted-foreground mb-3">{t("Per adjusted serving")}</p>
             
             <div className="flex items-stretch space-x-4">
               <div className="bg-white rounded-full w-24 h-24 flex-shrink-0 flex flex-col items-center justify-center shadow-sm border border-gray-200">
@@ -273,21 +273,21 @@ const ProductModal = ({
                     <div className="text-xl font-semibold">
                       {Math.round(adjustedNutrition.carbs * 10) / 10}g
                     </div>
-                    <div className="text-xs text-gray-500">Carbs</div>
+                    <div className="text-xs text-gray-500">{t("Carbs")}</div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-xl font-semibold">
                       {Math.round(adjustedNutrition.fat * 10) / 10}g
                     </div>
-                    <div className="text-xs text-gray-500">Fat</div>
+                    <div className="text-xs text-gray-500">{t("Fat")}</div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-xl font-semibold">
                       {Math.round(adjustedNutrition.protein * 10) / 10}g
                     </div>
-                    <div className="text-xs text-gray-500">Protein</div>
+                    <div className="text-xs text-gray-500">{t("Protein")}</div>
                   </div>
                 </div>
               </div>
@@ -297,10 +297,10 @@ const ProductModal = ({
           <div className="pt-4 space-y-2">
             <Button className="w-full" onClick={handleConfirmProduct}>
               <Check className="mr-2 h-4 w-4" />
-              Add to {meals.find(m => m.id === selectedMealId)?.name || 'Meal'}
+              {t("Add to meal plan")} {meals.find(m => m.id === selectedMealId)?.name || t("meals")}
             </Button>
             <Button variant="outline" className="w-full" onClick={onClose}>
-              Cancel
+              {t("cancel")}
             </Button>
           </div>
         </div>

@@ -141,4 +141,51 @@ export const nutritionTranslations: Translations = {
   
   // Additional translation for meal selection placeholder
   "Select the meal": "Selecteer de maaltijd",
+  
+  // Add Food Dialog translations
+  "Edit food": "Voedsel bewerken",
+  "Search foods": "Zoek voedsel",
+  "Number of servings": "Aantal porties",
+  "Nutrition summary": "Voedingssamenvatting",
+  "Update meal": "Maaltijd bijwerken",
+  "Type to search": "Typ om te zoeken",
+  "No results found": "Geen resultaten gevonden",
+  
+  // Barcode Scanner translations
+  "Scan Barcode": "Barcode scannen",
+  "Processing barcode...": "Barcode verwerken...",
+  "Try Again": "Probeer opnieuw",
+  "Ready to Scan": "Klaar om te scannen",
+  "Point your camera at a product barcode to scan it automatically": "Richt je camera op een productbarcode om deze automatisch te scannen",
+  "Starting Enhanced Camera...": "Verbeterde camera starten...",
+  "Start High-Quality Camera": "Start hoogwaardige camera",
+  "Reload to Grant Camera Access": "Herlaad om cameratoegang te verlenen",
+  "Or": "Of",
+  "Enter barcode manually": "Voer barcode handmatig in",
+  "Search Product": "Zoek product",
+  "● Initializing high-quality camera...": "● Hoogwaardige camera initialiseren...",
+  "● Camera Active - Hold steady and center barcode": "● Camera actief - Houd stabiel en centreer barcode",
+  "● Starting camera...": "● Camera starten...",
+  "Scanning automatically - keep barcode in focus": "Scannen automatisch - houd barcode scherp",
+  "Starting enhanced camera...": "Verbeterde camera starten...",
+  "Stop Camera": "Stop camera",
+  
+  // Main nutrition page translations
+  "Search for a product or scan a barcode": "Zoek naar een product of scan een barcode",
+  "Search for a product, scan, or analyze with AI": "Zoek naar een product, scan, of analyseer met AI",
+  "Add food": "Voedsel toevoegen",
+  
+  // Product Modal translations
+  "Product Details": "Productdetails",
+  "Barcode matches": "Barcode komt overeen met",
+  "Add to meal plan": "Toevoegen aan maaltijdplan",
+  "Scan again": "Opnieuw scannen",
+  "Product Found": "Product gevonden",
+  "Scan Different": "Scan anders",
+  "Serving Size": "Portiegrootte",
+  "Adjust Serving": "Portie aanpassen",
+  "Amount": "Hoeveelheid",
+  "Unit": "Eenheid",
+  "Nutrition Facts": "Voedingswaarden",
+  "Per adjusted serving": "Per aangepaste portie",
 };

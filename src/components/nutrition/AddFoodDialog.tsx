@@ -207,7 +207,7 @@ const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }:
 
           {/* Portion Size */}
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-foreground mb-2">{t("Portion size")}</h3>
+            <h3 className="text-sm font-medium text-foreground mb-2">{t("Portion Size")}</h3>
             
             <div className="flex gap-2 mb-3">
               <div className="flex-1">
@@ -413,7 +413,7 @@ const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }:
           </div>
           
           <div className="flex justify-end pt-2">
-            <Button variant="outline" onClick={onClose} size="sm">{t("Cancel")}</Button>
+            <Button variant="outline" onClick={onClose} size="sm">{t("cancel")}</Button>
           </div>
         </div>
       )}
