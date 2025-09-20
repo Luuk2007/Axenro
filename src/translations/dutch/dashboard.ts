@@ -17,12 +17,32 @@ export const dashboardTranslations: Translations = {
   meals: "Maaltijden",
   addActivity: "Activiteit toevoegen",
   
+  // Dashboard stats cards
+  "Daily calories": "Dagelijkse calorieën",
+  "Daily steps": "Dagelijkse stappen",
+  target: "doel",
+  workouts: "trainingen",
+  completed: "voltooid",
+  weight: "gewicht",
+  "Today meals": "Vandaag maaltijden",
+  
+  // General UI
+  viewAll: "Bekijk alles",
+  exercises: "oefeningen",
+  
+  // Activity types
+  running: "Hardlopen",
+  strengthTraining: "Krachttraining",
+  cycling: "Fietsen",
+  swimming: "Zwemmen",
+  yoga: "Yoga",
+  walking: "Wandelen",
+  
   // Missing dashboard specific translations
   dailyNutritionTracker: "Dagelijkse Voedingstracker",
   remainingToday: "resterend vandaag",
   kcal: "kcal",
   dailyMacroRecommendations: "Dagelijkse Macro Aanbevelingen",
-  viewAll: "Bekijk alles",
   remaining: "resterend",
   startTracking: "Begin met bijhouden",
   noMealsTracked: "Geen maaltijden bijgehouden vandaag",

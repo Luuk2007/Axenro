@@ -101,10 +101,21 @@ export const nutritionTranslations: Translations = {
   servings: "Porties",
   
   // Daily Nutrition Tracker translations
+  "Daily nutrition tracker": "Dagelijkse Voedingstracker",
+  "Calories": "Calorieën",
+  "Protein": "Eiwitten",
+  "Carbs": "Koolhydraten", 
+  "Fat": "Vetten",
+  "Daily macro recommendations": "Dagelijkse macro aanbevelingen",
   dailyNutritionTracker: "Dagelijkse Voedingstracker",
   remainingToday: "resterend vandaag",
   kcal: "kcal",
   dailyMacroRecommendations: "Dagelijkse Macro Aanbevelingen",
+  
+  // Additional dashboard translations
+  "No meals tracked": "Geen maaltijden bijgehouden",
+  "Add meal": "Maaltijd toevoegen",
+  viewAll: "Bekijk alles",
   
   // New AI Meal Analyzer translations
   "AI Meal Analyzer": "AI Maaltijdanalyse",

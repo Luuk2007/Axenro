@@ -335,7 +335,7 @@ const Dashboard = () => {
         
         <div className="max-h-[400px]">
           <MealsList
-            title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} meals`}
+            title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} ${t("meals")}`}
             meals={meals}
             onViewAll={navigateToNutrition}
             selectedDate={date}

@@ -71,6 +71,10 @@ export const commonTranslations: Translations = {
   password: "Wachtwoord",
   username: "Gebruikersnaam",
   
+  // Additional translations for dashboard
+  "No data": "Geen gegevens",
+  "Set target weight": "Stel streefgewicht in",
+  
   // Measurements
   "No measurements enabled": "Geen metingen ingeschakeld",
   "Enable measurements in Settings": "Schakel metingen in via Instellingen",
