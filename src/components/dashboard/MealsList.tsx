@@ -8,6 +8,7 @@ import { getAvailableMeals, MealData, FoodItem } from '@/types/nutrition';
 import { getFoodLogs } from '@/services/openFoodFactsService';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 
 interface MealItemData {
   id: string;
@@ -45,7 +46,7 @@ export default function MealsList({ title, className, onViewAll, selectedDate = 
     const loadSelectedDateMeals = async () => {
       setIsLoading(true);
       try {
-        const dateString = selectedDate.toISOString().split('T')[0];
+        const dateString = format(selectedDate, 'yyyy-MM-dd');
         let mealData: MealData[] = [];
 
         if (isAuthenticated) {

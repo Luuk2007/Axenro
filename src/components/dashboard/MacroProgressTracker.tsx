@@ -6,6 +6,7 @@ import { getFoodLogs } from '@/services/openFoodFactsService';
 import { FoodLogEntry } from '@/types/nutrition';
 import { calculateMacroGoals, getMacroRatios, type ProfileData } from '@/utils/macroCalculations';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { format } from 'date-fns';
 
 type MacroData = {
   calories: { consumed: number; goal: number; unit: string };
@@ -110,7 +111,7 @@ export default function MacroProgressTracker({ selectedDate = new Date() }: Macr
   // Load and calculate consumed nutrition data
   useEffect(() => {
     const loadConsumedNutrition = async () => {
-      const dateString = selectedDate.toISOString().split('T')[0];
+      const dateString = format(selectedDate, 'yyyy-MM-dd');
       
       try {
         let allFoodItems: any[] = [];
