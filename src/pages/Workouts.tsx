@@ -15,7 +15,6 @@ import WorkoutList from "@/components/workouts/WorkoutList";
 import WorkoutCalendar from "@/components/workouts/WorkoutCalendar";
 import { Workout } from "@/types/workout";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useWorkouts } from "@/hooks/useWorkouts";
 
 const Workouts = () => {
   const { t } = useLanguage();
@@ -30,12 +29,29 @@ const Workouts = () => {
   const canAccessPersonalRecords = initialized && (currentTier === 'pro' || currentTier === 'premium');
   const canAccessStatistics = initialized && (currentTier === 'pro' || currentTier === 'premium');
   
-  const { workouts, saveWorkout, deleteWorkout, loading } = useWorkouts();
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
   const [showWorkoutDetails, setShowWorkoutDetails] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
   const [workoutToDelete, setWorkoutToDelete] = useState<string | null>(null);
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
+
+  useEffect(() => {
+    // Load workouts from localStorage
+    const storedWorkouts = localStorage.getItem("workouts");
+    if (storedWorkouts) {
+      try {
+        setWorkouts(JSON.parse(storedWorkouts));
+      } catch (error) {
+        console.error("Error loading workouts:", error);
+      }
+    }
+  }, []);
+
+  const saveWorkouts = (updatedWorkouts: Workout[]) => {
+    localStorage.setItem("workouts", JSON.stringify(updatedWorkouts));
+    setWorkouts(updatedWorkouts);
+  };
 
   const handleCreateWorkout = (name: string, exercises: any[], date: string) => {
     // Mark all sets as completed automatically
@@ -54,7 +70,10 @@ const Workouts = () => {
         completed: true
       };
 
-      saveWorkout(updatedWorkout);
+      const updatedWorkouts = workouts.map(workout => 
+        workout.id === editingWorkout.id ? updatedWorkout : workout
+      );
+      saveWorkouts(updatedWorkouts);
       toast.success(t("workoutUpdated"));
       setEditingWorkout(null);
     } else {
@@ -67,7 +86,8 @@ const Workouts = () => {
         completed: true
       };
 
-      saveWorkout(newWorkout);
+      const updatedWorkouts = [...workouts, newWorkout];
+      saveWorkouts(updatedWorkouts);
       toast.success(t("Workout saved"));
     }
     
@@ -91,7 +111,8 @@ const Workouts = () => {
   const confirmDeleteWorkout = () => {
     if (!workoutToDelete) return;
     
-    deleteWorkout(workoutToDelete);
+    const updatedWorkouts = workouts.filter(workout => workout.id !== workoutToDelete);
+    saveWorkouts(updatedWorkouts);
     toast.success(t("Workout deleted"));
     setWorkoutToDelete(null);
   };
