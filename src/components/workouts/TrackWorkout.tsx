@@ -13,7 +13,8 @@ import { Calendar, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
 import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
-import { convertWeight, getWeightUnit, formatWeight } from "@/utils/unitConversions";
+import { convertWeight, getWeightUnit, formatWeight, convertDistance, getDistanceUnit, formatDistance } from "@/utils/unitConversions";
+import { isCardioExercise } from "@/utils/workoutUtils";
 
 interface TrackWorkoutProps {
   open: boolean;
@@ -42,15 +43,17 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
         </DialogHeader>
         <div className="space-y-6 py-4">
           {workout.exercises.map((exercise, exerciseIndex) => {
-            const isCardio = exercise.muscleGroup === "cardio";
+            const isCardio = isCardioExercise(exercise);
             
             return (
               <div key={`${exercise.id}-${exerciseIndex}`} className="border rounded-md p-4">
                 <h4 className="font-medium mb-4">{exercise.name}</h4>
                 
                 {exercise.sets.map((set, setIndex) => {
-                  // Convert weight from metric (stored) to display system
+                  // Convert weight from metric (stored) to display system for strength
+                  // For cardio: weight = distance, reps = duration
                   const displayWeight = set.weight ? convertWeight(set.weight, 'metric', measurementSystem) : 0;
+                  const displayDistance = set.weight ? convertDistance(set.weight, 'metric', measurementSystem) : 0;
                   
                   return (
                     <div 
@@ -58,16 +61,24 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
                       className="flex items-center justify-between p-2 mb-2 rounded bg-green-50 border border-green-100"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="font-medium">Set {setIndex + 1}</div>
-                        <div>
-                          {isCardio ? 
-                            `${set.reps} ${t("minutes")}` : 
-                            `${set.reps} ${t("reps")}`}
-                        </div>
-                        {!isCardio && (
-                          <div>
-                            {`${formatWeight(displayWeight, measurementSystem)} ${getWeightUnit(measurementSystem)}`}
-                          </div>
+                        {isCardio ? (
+                          <>
+                            <div className="font-medium">Session {setIndex + 1}</div>
+                            <div>{set.reps} {t("minutes")}</div>
+                            {set.weight > 0 && (
+                              <div>
+                                {formatDistance(displayDistance, measurementSystem)} {getDistanceUnit(measurementSystem)}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <div className="font-medium">Set {setIndex + 1}</div>
+                            <div>{set.reps} {t("reps")}</div>
+                            <div>
+                              {formatWeight(displayWeight, measurementSystem)} {getWeightUnit(measurementSystem)}
+                            </div>
+                          </>
                         )}
                       </div>
                       

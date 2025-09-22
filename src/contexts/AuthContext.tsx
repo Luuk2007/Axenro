@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
-import { useLanguage } from './LanguageContext';
+// import { useLanguage } from './LanguageContext';
 
 interface AuthContextType {
   session: Session | null;
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  // const { t } = useLanguage();
 
   useEffect(() => {
     // Get initial session
@@ -127,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       resetAuthAttempts();
-      toast.success(t("loginSuccess"));
+      toast.success("Login successful!");
       navigate('/');
       return { error: null };
     } catch (error: any) {
@@ -164,8 +164,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       resetAuthAttempts();
-      toast.success(t("signupSuccess"));
-      toast.info(t("checkEmailConfirmation"));
+      toast.success("Signup successful!");
+      toast.info("Please check your email for confirmation.");
       return { error: null };
     } catch (error: any) {
       incrementAuthAttempts();
@@ -181,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       keysToRemove.forEach(key => localStorage.removeItem(key));
       
       await supabase.auth.signOut();
-      toast.success(t("loggedOut"));
+      toast.success("Logged out");
       navigate('/');
     } catch (error: any) {
       toast.error(error.message);
@@ -199,7 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error };
       }
       
-      toast.success(t("resetEmailSent"));
+      toast.success("Password reset email sent!");
       return { error: null };
     } catch (error: any) {
       toast.error(error.message);

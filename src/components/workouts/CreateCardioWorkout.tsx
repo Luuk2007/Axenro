@@ -64,6 +64,7 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
     const exercisesForStorage = exercises.map(exercise => ({
       id: exercise.id,
       name: exercise.name,
+      muscleGroup: 'cardio', // Mark as cardio exercise
       sets: [
         {
           id: 1,

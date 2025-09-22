@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Calendar, Edit } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
+import { getWorkoutSummary } from "@/utils/workoutUtils";
 
 interface WorkoutListProps {
   workouts: Workout[];
@@ -28,6 +29,21 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
     );
   }
 
+  const renderWorkoutSummary = (workout: Workout) => {
+    const summary = getWorkoutSummary(workout);
+    
+    switch (summary.type) {
+      case 'cardio':
+        return `${summary.exerciseCount} cardio ${summary.exerciseCount === 1 ? 'exercise' : 'exercises'}, ${summary.duration} min total`;
+      case 'strength':
+        return `${summary.exerciseCount} ${t("exercises")}, ${summary.sets} ${t("sets")}`;
+      case 'mixed':
+        return `${summary.exerciseCount} ${t("exercises")} (${summary.sets} ${t("sets")}, ${summary.duration} min cardio)`;
+      default:
+        return `${workout.exercises.length} ${t("exercises")}`;
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {workouts.map(workout => (
@@ -40,7 +56,7 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
             </div>
           </div>
           <div className="text-sm text-muted-foreground mb-4">
-            {workout.exercises.length} {t("exercises")}, {workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)} {t("sets")}
+            {renderWorkoutSummary(workout)}
             <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
               {t("completed")}
             </span>

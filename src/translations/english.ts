@@ -267,4 +267,11 @@ export const english = {
   "Edit cardio workout": "Edit Cardio Workout",
   "Create a new cardio workout session": "Create a new cardio workout session",
   "Edit your cardio session": "Edit your cardio session",
+  "close": "Close",
+  "minutes": "Minutes",
+  "Best Session": "Best Session",
+  "Total Sessions": "Total Sessions",
+  "Max Weight": "Max Weight",
+  "Total Sets": "Total Sets",
+  "Last Performed": "Last Performed",
 };

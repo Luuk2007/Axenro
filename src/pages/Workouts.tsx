@@ -104,8 +104,13 @@ const Workouts = () => {
   };
 
   const handleEditWorkout = (workout: Workout) => {
+    const isCardio = workout.exercises.some(ex => ex.muscleGroup === 'cardio');
     setEditingWorkout(workout);
-    setShowWorkoutForm(true);
+    if (isCardio) {
+      setShowCardioForm(true);
+    } else {
+      setShowWorkoutForm(true);
+    }
   };
 
   const handleDeleteWorkout = (workoutId: string) => {

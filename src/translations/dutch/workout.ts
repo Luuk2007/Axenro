@@ -281,5 +281,11 @@ export const workoutTranslations = {
   "My Cardio Session": "Mijn Cardio Sessie",
   "Edit cardio workout": "Cardio Training Bewerken",
   "Create a new cardio workout session": "Maak een nieuwe cardio training sessie aan",
-  "Edit your cardio session": "Bewerk je cardio sessie"
+  "Edit your cardio session": "Bewerk je cardio sessie",
+  close: "Sluiten",
+  "Best Session": "Beste Sessie",
+  "Total Sessions": "Totale Sessies",
+  "Max Weight": "Max Gewicht",
+  "Total Sets": "Totale Sets",
+  "Last Performed": "Laatst Uitgevoerd"
 };
