@@ -144,22 +144,6 @@ export const english = {
   // AI Features
   "Axenro AI": "Axenro AI",
   "Your personal AI-powered fitness and nutrition assistant. Get customized workout plans, meal planning, progress analysis, and expert guidance.": "Your personal AI-powered fitness and nutrition assistant. Get customized workout plans, meal planning, progress analysis, and expert guidance.",
-  
-  // Workout Creation
-  "Select Workout Type": "Select Workout Type",
-  "Choose the type of workout you want to create": "Choose the type of workout you want to create",
-  "Strength Training": "Strength Training",
-  "Weight lifting, resistance exercises with sets and reps": "Weight lifting, resistance exercises with sets and reps",
-  "Cardio": "Cardio",
-  "Running, cycling, swimming and other cardio activities": "Running, cycling, swimming and other cardio activities",
-  "Create Cardio Workout": "Create Cardio Workout",
-  "Edit Cardio Workout": "Edit Cardio Workout",
-  "Edit your cardio session": "Edit your cardio session",
-  "Track your cardio activities with time and distance": "Track your cardio activities with time and distance",
-  "Cardio Session": "Cardio Session",
-  "Cardio Activities": "Cardio Activities",
-  "Select exercise": "Select exercise",
-  "No cardio activities added": "No cardio activities added",
   "Workout Coach": "Workout Coach",
   "Workout": "Workout",
   "Meal Planner": "Meal Planner",

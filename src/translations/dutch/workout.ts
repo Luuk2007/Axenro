@@ -264,21 +264,5 @@ export const workoutTranslations = {
   mostImproved: "Meest verbeterd",
   completed: "Voltooid",
   planned: "Gepland",
-  selectDate: "Selecteer datum",
-  
-  // Workout Type Selection
-  "Select Workout Type": "Selecteer Workout Type",
-  "Choose the type of workout you want to create": "Kies het type workout dat je wilt maken",
-  "Strength Training": "Krachttraining",
-  "Weight lifting, resistance exercises with sets and reps": "Gewichtheffen, weerstandsoefeningen met sets en herhalingen",
-  "Cardio": "Cardio",
-  "Running, cycling, swimming and other cardio activities": "Hardlopen, fietsen, zwemmen en andere cardio-activiteiten",
-  "Create Cardio Workout": "Maak Cardio Workout",
-  "Edit Cardio Workout": "Bewerk Cardio Workout",
-  "Edit your cardio session": "Bewerk je cardio sessie",
-  "Track your cardio activities with time and distance": "Volg je cardio-activiteiten met tijd en afstand",
-  "Cardio Session": "Cardio Sessie",
-  "Cardio Activities": "Cardio Activiteiten",
-  "Select exercise": "Selecteer oefening",
-  "No cardio activities added": "Geen cardio-activiteiten toegevoegd"
+  selectDate: "Selecteer datum"
 };

@@ -16,8 +16,6 @@ import WorkoutCalendar from "@/components/workouts/WorkoutCalendar";
 import { Workout } from "@/types/workout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useWorkouts } from "@/hooks/useWorkouts";
-import WorkoutTypeSelectionModal from "@/components/workouts/WorkoutTypeSelectionModal";
-import CreateCardioWorkout from "@/components/workouts/CreateCardioWorkout";
 
 const Workouts = () => {
   const { t } = useLanguage();
@@ -33,9 +31,7 @@ const Workouts = () => {
   const canAccessStatistics = initialized && (currentTier === 'pro' || currentTier === 'premium');
   
   const { workouts, saveWorkout, deleteWorkout, loading } = useWorkouts();
-  const [showWorkoutTypeSelection, setShowWorkoutTypeSelection] = useState(false);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
-  const [showCardioForm, setShowCardioForm] = useState(false);
   const [showWorkoutDetails, setShowWorkoutDetails] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
   const [workoutToDelete, setWorkoutToDelete] = useState<string | null>(null);
@@ -100,26 +96,16 @@ const Workouts = () => {
     setWorkoutToDelete(null);
   };
 
-  const handleWorkoutTypeSelect = (type: 'strength' | 'cardio') => {
-    if (type === 'strength') {
-      setShowWorkoutForm(true);
-    } else {
-      setShowCardioForm(true);
-    }
-  };
-
   const handleCloseWorkoutForm = () => {
     setShowWorkoutForm(false);
-    setShowCardioForm(false);
     setEditingWorkout(null);
-    setShowWorkoutTypeSelection(false);
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t("workouts")}</h1>
-        <Button onClick={() => setShowWorkoutTypeSelection(true)}>
+        <Button onClick={() => setShowWorkoutForm(true)}>
           <Plus className="h-4 w-4 mr-2" />
           {t("createWorkout")}
         </Button>
@@ -178,21 +164,8 @@ const Workouts = () => {
       )}
 
       {/* Component dialogs */}
-      <WorkoutTypeSelectionModal
-        open={showWorkoutTypeSelection}
-        onOpenChange={setShowWorkoutTypeSelection}
-        onSelectType={handleWorkoutTypeSelect}
-      />
-
-      <CreateWorkout
+      <CreateWorkout 
         open={showWorkoutForm}
-        onOpenChange={handleCloseWorkoutForm}
-        onSaveWorkout={handleCreateWorkout}
-        editingWorkout={editingWorkout}
-      />
-
-      <CreateCardioWorkout
-        open={showCardioForm}
         onOpenChange={handleCloseWorkoutForm}
         onSaveWorkout={handleCreateWorkout}
         editingWorkout={editingWorkout}
