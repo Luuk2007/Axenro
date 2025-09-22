@@ -264,5 +264,22 @@ export const workoutTranslations = {
   mostImproved: "Meest verbeterd",
   completed: "Voltooid",
   planned: "Gepland",
-  selectDate: "Selecteer datum"
+  selectDate: "Selecteer datum",
+  
+  // Workout Type Selection
+  selectWorkoutType: "Selecteer Training Type",
+  chooseWorkoutTypeDescription: "Kies het type training dat je wilt aanmaken",
+  strengthTraining: "Krachttraining",
+  strengthTrainingDescription: "Gewichtheffen, weerstandsoefeningen en spieropbouw trainingen",
+  cardioTraining: "Cardio Training",
+  cardioTrainingDescription: "Hardlopen, fietsen en cardiovasculaire uithoudingsoefeningen",
+  createCardioWorkout: "Cardio Training Aanmaken",
+  cardioExercises: "Cardio Oefeningen",
+  selectCardioExercise: "Selecteer cardio oefening",
+  "Duration": "Duur",
+  "Distance": "Afstand",
+  "My Cardio Session": "Mijn Cardio Sessie",
+  "Edit cardio workout": "Cardio Training Bewerken",
+  "Create a new cardio workout session": "Maak een nieuwe cardio training sessie aan",
+  "Edit your cardio session": "Bewerk je cardio sessie"
 };

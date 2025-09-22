@@ -132,6 +132,5 @@ export const muscleGroups = [
   { value: "shoulders", label: "Shoulders" },
   { value: "arms", label: "Arms" },
   { value: "legs", label: "Legs" },
-  { value: "core", label: "Core" },
-  { value: "cardio", label: "Cardio" }
+  { value: "core", label: "Core" }
 ];

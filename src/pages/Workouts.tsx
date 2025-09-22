@@ -9,6 +9,8 @@ import { Dumbbell, Trophy, Plus, BarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import CreateWorkout from "@/components/workouts/CreateWorkout";
+import CreateCardioWorkout from "@/components/workouts/CreateCardioWorkout";
+import WorkoutTypeSelectionModal from "@/components/workouts/WorkoutTypeSelectionModal";
 import DeleteWorkoutDialog from "@/components/workouts/DeleteWorkoutDialog";
 import TrackWorkout from "@/components/workouts/TrackWorkout";
 import WorkoutList from "@/components/workouts/WorkoutList";
@@ -30,7 +32,9 @@ const Workouts = () => {
   const canAccessStatistics = initialized && (currentTier === 'pro' || currentTier === 'premium');
   
   const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [showWorkoutTypeModal, setShowWorkoutTypeModal] = useState(false);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
+  const [showCardioForm, setShowCardioForm] = useState(false);
   const [showWorkoutDetails, setShowWorkoutDetails] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
   const [workoutToDelete, setWorkoutToDelete] = useState<string | null>(null);
@@ -117,8 +121,21 @@ const Workouts = () => {
     setWorkoutToDelete(null);
   };
 
+  const handleWorkoutTypeSelect = (type: 'strength' | 'cardio') => {
+    if (type === 'strength') {
+      setShowWorkoutForm(true);
+    } else {
+      setShowCardioForm(true);
+    }
+  };
+
   const handleCloseWorkoutForm = () => {
     setShowWorkoutForm(false);
+    setEditingWorkout(null);
+  };
+
+  const handleCloseCardioForm = () => {
+    setShowCardioForm(false);
     setEditingWorkout(null);
   };
 
@@ -126,7 +143,7 @@ const Workouts = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t("workouts")}</h1>
-        <Button onClick={() => setShowWorkoutForm(true)}>
+        <Button onClick={() => setShowWorkoutTypeModal(true)}>
           <Plus className="h-4 w-4 mr-2" />
           {t("createWorkout")}
         </Button>
@@ -185,9 +202,22 @@ const Workouts = () => {
       )}
 
       {/* Component dialogs */}
+      <WorkoutTypeSelectionModal
+        open={showWorkoutTypeModal}
+        onOpenChange={setShowWorkoutTypeModal}
+        onSelectType={handleWorkoutTypeSelect}
+      />
+
       <CreateWorkout 
         open={showWorkoutForm}
         onOpenChange={handleCloseWorkoutForm}
+        onSaveWorkout={handleCreateWorkout}
+        editingWorkout={editingWorkout}
+      />
+
+      <CreateCardioWorkout
+        open={showCardioForm}
+        onOpenChange={handleCloseCardioForm}
         onSaveWorkout={handleCreateWorkout}
         editingWorkout={editingWorkout}
       />

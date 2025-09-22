@@ -250,4 +250,21 @@ export const english = {
   "Progress analysis completed!": "Progress analysis completed!",
   "Failed to analyze progress": "Failed to analyze progress",
   "Failed to send message": "Failed to send message",
+  
+  // Workout Type Selection
+  "selectWorkoutType": "Select Workout Type",
+  "chooseWorkoutTypeDescription": "Choose the type of workout you want to create",
+  "strengthTraining": "Strength Training",
+  "strengthTrainingDescription": "Weight lifting, resistance exercises, and muscle building workouts",
+  "cardioTraining": "Cardio Training", 
+  "cardioTrainingDescription": "Running, cycling, and cardiovascular endurance exercises",
+  "createCardioWorkout": "Create Cardio Workout",
+  "cardioExercises": "Cardio Exercises",
+  "selectCardioExercise": "Select cardio exercise",
+  "Duration": "Duration",
+  "Distance": "Distance",
+  "My Cardio Session": "My Cardio Session",
+  "Edit cardio workout": "Edit Cardio Workout",
+  "Create a new cardio workout session": "Create a new cardio workout session",
+  "Edit your cardio session": "Edit your cardio session",
 };
