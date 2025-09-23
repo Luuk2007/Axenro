@@ -142,13 +142,13 @@ const WeightTracker = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className="space-y-6 w-full">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>{t("Weight Progress")}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className={`grid gap-4 mb-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
+        <CardContent className="w-full px-4">
+          <div className={`grid gap-4 mb-6 w-full ${isMobile ? 'grid-cols-1 space-y-2' : 'grid-cols-1 md:grid-cols-3'}`}>
             {currentWeight && (
               <div className="text-center p-4 bg-primary/5 rounded-lg">
                 <p className="text-sm text-muted-foreground">{t("Current Weight")}</p>
@@ -172,9 +172,9 @@ const WeightTracker = () => {
           </div>
 
           {displayWeightData.length > 0 && (
-            <div className={`mb-6 ${isMobile ? 'h-[200px]' : 'h-64'}`}>
+            <div className={`mb-6 w-full ${isMobile ? 'h-[200px]' : 'h-64'}`}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={displayWeightData}>
+                <LineChart data={displayWeightData} margin={{ left: isMobile ? 10 : 20, right: isMobile ? 10 : 20 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="date" 
@@ -202,19 +202,19 @@ const WeightTracker = () => {
             </div>
           )}
 
-          <div className="space-y-4">
-            <div className={`gap-4 items-end ${isMobile ? 'flex flex-col space-y-4' : 'flex'}`}>
-              <div className={`flex-1 ${isMobile ? 'text-center' : ''}`}>
+          <div className="space-y-4 w-full">
+            <div className={`w-full ${isMobile ? 'space-y-4' : 'flex gap-4 items-end'}`}>
+              <div className={`${isMobile ? 'w-full' : 'flex-1'}`}>
                 <Label htmlFor="date" className={isMobile ? 'block text-center mb-2' : ''}>{t("Date")}</Label>
                 <Input
                   id="date"
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className={isMobile ? 'text-center' : ''}
+                  className={`w-full ${isMobile ? 'text-center' : ''}`}
                 />
               </div>
-              <div className={`flex-1 ${isMobile ? 'text-center' : ''}`}>
+              <div className={`${isMobile ? 'w-full' : 'flex-1'}`}>
                 <Label htmlFor="weight" className={isMobile ? 'block text-center mb-2' : ''}>{t("Weight")} ({weightUnit})</Label>
                 <Input
                   id="weight"
@@ -223,10 +223,10 @@ const WeightTracker = () => {
                   placeholder={`Enter weight in ${weightUnit}`}
                   value={newWeight}
                   onChange={(e) => setNewWeight(e.target.value)}
-                  className={isMobile ? 'text-center' : ''}
+                  className={`w-full ${isMobile ? 'text-center' : ''}`}
                 />
               </div>
-              <Button onClick={handleAddWeight} className={isMobile ? 'w-full' : ''}>
+              <Button onClick={handleAddWeight} className={`${isMobile ? 'w-full mt-2' : ''}`}>
                 {t("Add Entry")}
               </Button>
             </div>
@@ -235,19 +235,19 @@ const WeightTracker = () => {
       </Card>
 
       {displayWeightData.length > 0 && (
-        <Card>
+        <Card className="w-full">
           <CardHeader>
             <CardTitle>{t("Weight History")}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className={`space-y-2 overflow-y-auto ${isMobile ? 'max-h-48' : 'max-h-64'}`}>
+          <CardContent className="w-full px-4">
+            <div className={`space-y-2 overflow-y-auto w-full ${isMobile ? 'max-h-48' : 'max-h-64'}`}>
               {displayWeightData.slice().reverse().map((entry) => (
-                <div key={entry.date} className={`flex items-center justify-between p-2 border rounded ${isMobile ? 'flex-col space-y-2' : ''}`}>
-                  <div className={isMobile ? 'text-center' : ''}>
+                <div key={entry.date} className={`flex items-center justify-between p-2 border rounded w-full ${isMobile ? 'flex-col space-y-2' : ''}`}>
+                  <div className={`${isMobile ? 'text-center w-full' : ''}`}>
                     <p className="font-medium">{formatDate(entry.date)}</p>
                     <p className="text-sm text-muted-foreground">{entry.value.toFixed(1)} {weightUnit}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className={`flex gap-2 ${isMobile ? 'justify-center' : ''}`}>
                     <Button
                       variant="ghost"
                       size="sm"
