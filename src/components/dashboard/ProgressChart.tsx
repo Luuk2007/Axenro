@@ -78,11 +78,11 @@ export default function ProgressChart({
       
       {sortedData.length > 0 ? (
         <div className="flex-1 p-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={sortedData}
-              margin={{ top: 10, right: 10, left: 35, bottom: 0 }}
-            >
+           <ResponsiveContainer width="100%" height="100%">
+             <AreaChart
+               data={sortedData}
+               margin={{ top: 10, right: 15, left: 40, bottom: 20 }}
+             >
               <defs>
                 <linearGradient id={`gradient-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={color} stopOpacity={0.3} />

@@ -438,17 +438,17 @@ export default function Progress() {
                     <CardTitle>{t("Measurement Trends")}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Tabs defaultValue={enabledMeasurementTypes[0]?.id} className="w-full">
-                      <TabsList className={`mb-4 ${isMobile ? 'grid grid-cols-2 w-full' : 'flex flex-wrap'}`}>
-                        {enabledMeasurementTypes.map(type => {
-                          const hasData = getMeasurementsByType(type.id).length > 0;
-                          return (
-                            <TabsTrigger key={type.id} value={type.id} disabled={!hasData} className={isMobile ? 'text-xs' : ''}>
-                              {isMobile ? getDisplayName(type) : `${getDisplayName(type)} ${hasData ? `(${getMeasurementsByType(type.id).length})` : ''}`}
-                            </TabsTrigger>
-                          );
-                        })}
-                      </TabsList>
+                     <Tabs defaultValue={enabledMeasurementTypes[0]?.id} className="w-full">
+                       <TabsList className={`mb-4 w-full ${isMobile ? 'grid h-auto p-2' : 'flex flex-wrap'}`} style={isMobile ? { gridTemplateColumns: `repeat(${Math.min(enabledMeasurementTypes.length, 2)}, 1fr)` } : undefined}>
+                         {enabledMeasurementTypes.map(type => {
+                           const hasData = getMeasurementsByType(type.id).length > 0;
+                           return (
+                             <TabsTrigger key={type.id} value={type.id} disabled={!hasData} className={isMobile ? 'text-xs py-2 px-1' : ''}>
+                               {isMobile ? getDisplayName(type) : `${getDisplayName(type)} ${hasData ? `(${getMeasurementsByType(type.id).length})` : ''}`}
+                             </TabsTrigger>
+                           );
+                         })}
+                       </TabsList>
                       
                       {enabledMeasurementTypes.map(type => (
                         <TabsContent key={type.id} value={type.id}>
