@@ -67,18 +67,42 @@ export const useWorkouts = () => {
     }
 
     try {
-      const { error } = await supabase
+      // Check if workout already exists
+      const { data: existingWorkout } = await supabase
         .from('workouts')
-        .upsert({
-          user_id: user.id,
-          workout_id: workout.id,
-          name: workout.name,
-          date: workout.date,
-          exercises: workout.exercises,
-          completed: workout.completed
-        }, {
-          onConflict: 'user_id,workout_id'
-        });
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('workout_id', workout.id)
+        .single();
+
+      let error;
+      if (existingWorkout) {
+        // Update existing workout
+        const { error: updateError } = await supabase
+          .from('workouts')
+          .update({
+            name: workout.name,
+            date: workout.date,
+            exercises: workout.exercises,
+            completed: workout.completed
+          })
+          .eq('user_id', user.id)
+          .eq('workout_id', workout.id);
+        error = updateError;
+      } else {
+        // Insert new workout
+        const { error: insertError } = await supabase
+          .from('workouts')
+          .insert({
+            user_id: user.id,
+            workout_id: workout.id,
+            name: workout.name,
+            date: workout.date,
+            exercises: workout.exercises,
+            completed: workout.completed
+          });
+        error = insertError;
+      }
 
       if (error) {
         console.error('Error saving workout:', error);
