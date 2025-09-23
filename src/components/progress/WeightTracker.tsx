@@ -204,17 +204,18 @@ const WeightTracker = () => {
 
           <div className="space-y-4">
             <div className={`gap-4 items-end ${isMobile ? 'flex flex-col space-y-4' : 'flex'}`}>
-              <div className="flex-1">
-                <Label htmlFor="date">{t("Date")}</Label>
+              <div className={`flex-1 ${isMobile ? 'text-center' : ''}`}>
+                <Label htmlFor="date" className={isMobile ? 'block text-center mb-2' : ''}>{t("Date")}</Label>
                 <Input
                   id="date"
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
+                  className={isMobile ? 'text-center' : ''}
                 />
               </div>
-              <div className="flex-1">
-                <Label htmlFor="weight">{t("Weight")} ({weightUnit})</Label>
+              <div className={`flex-1 ${isMobile ? 'text-center' : ''}`}>
+                <Label htmlFor="weight" className={isMobile ? 'block text-center mb-2' : ''}>{t("Weight")} ({weightUnit})</Label>
                 <Input
                   id="weight"
                   type="number"
@@ -222,6 +223,7 @@ const WeightTracker = () => {
                   placeholder={`Enter weight in ${weightUnit}`}
                   value={newWeight}
                   onChange={(e) => setNewWeight(e.target.value)}
+                  className={isMobile ? 'text-center' : ''}
                 />
               </div>
               <Button onClick={handleAddWeight} className={isMobile ? 'w-full' : ''}>
