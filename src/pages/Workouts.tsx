@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useWorkouts } from "@/hooks/useWorkouts";
 import PersonalRecords from "@/components/workouts/PersonalRecords";
 import WorkoutStatistics from "@/components/workouts/WorkoutStatistics";
 import { Dumbbell, Trophy, Plus, BarChart } from "lucide-react";
@@ -22,6 +23,7 @@ const Workouts = () => {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
   const { test_mode, test_subscription_tier, subscription_tier, loading: subscriptionLoading, initialized } = useSubscription();
+  const { workouts, saveWorkout, deleteWorkout, loading: workoutsLoading } = useWorkouts();
   
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
@@ -31,7 +33,6 @@ const Workouts = () => {
   const canAccessPersonalRecords = initialized && (currentTier === 'pro' || currentTier === 'premium');
   const canAccessStatistics = initialized && (currentTier === 'pro' || currentTier === 'premium');
   
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [showWorkoutTypeModal, setShowWorkoutTypeModal] = useState(false);
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
   const [showCardioForm, setShowCardioForm] = useState(false);
@@ -40,24 +41,8 @@ const Workouts = () => {
   const [workoutToDelete, setWorkoutToDelete] = useState<string | null>(null);
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
 
-  useEffect(() => {
-    // Load workouts from localStorage
-    const storedWorkouts = localStorage.getItem("workouts");
-    if (storedWorkouts) {
-      try {
-        setWorkouts(JSON.parse(storedWorkouts));
-      } catch (error) {
-        console.error("Error loading workouts:", error);
-      }
-    }
-  }, []);
 
-  const saveWorkouts = (updatedWorkouts: Workout[]) => {
-    localStorage.setItem("workouts", JSON.stringify(updatedWorkouts));
-    setWorkouts(updatedWorkouts);
-  };
-
-  const handleCreateWorkout = (name: string, exercises: any[], date: string) => {
+  const handleCreateWorkout = async (name: string, exercises: any[], date: string) => {
     // Mark all sets as completed automatically
     const completedExercises = exercises.map(exercise => ({
       ...exercise,
@@ -74,10 +59,7 @@ const Workouts = () => {
         completed: true
       };
 
-      const updatedWorkouts = workouts.map(workout => 
-        workout.id === editingWorkout.id ? updatedWorkout : workout
-      );
-      saveWorkouts(updatedWorkouts);
+      await saveWorkout(updatedWorkout);
       toast.success(t("workoutUpdated"));
       setEditingWorkout(null);
     } else {
@@ -90,12 +72,12 @@ const Workouts = () => {
         completed: true
       };
 
-      const updatedWorkouts = [...workouts, newWorkout];
-      saveWorkouts(updatedWorkouts);
+      await saveWorkout(newWorkout);
       toast.success(t("Workout saved"));
     }
     
     setShowWorkoutForm(false);
+    setShowCardioForm(false);
   };
 
   const handleViewWorkout = (workout: Workout) => {
@@ -117,11 +99,10 @@ const Workouts = () => {
     setWorkoutToDelete(workoutId);
   };
   
-  const confirmDeleteWorkout = () => {
+  const confirmDeleteWorkout = async () => {
     if (!workoutToDelete) return;
     
-    const updatedWorkouts = workouts.filter(workout => workout.id !== workoutToDelete);
-    saveWorkouts(updatedWorkouts);
+    await deleteWorkout(workoutToDelete);
     toast.success(t("Workout deleted"));
     setWorkoutToDelete(null);
   };
