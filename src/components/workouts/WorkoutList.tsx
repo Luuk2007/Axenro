@@ -34,7 +34,7 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
     
     switch (summary.type) {
       case 'cardio':
-        return `${summary.exerciseCount} cardio ${summary.exerciseCount === 1 ? 'exercise' : 'exercises'}, ${summary.duration} min total`;
+        return `${summary.exerciseCount} cardio ${summary.exerciseCount === 1 ? t("exercise") : t("exercises")}, ${summary.duration} min total`;
       case 'strength':
         return `${summary.exerciseCount} ${t("exercises")}, ${summary.sets} ${t("sets")}`;
       case 'mixed':

@@ -156,9 +156,9 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
           <Dumbbell className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground text-center">
-            {t("No workout data available yet. Complete some workouts to see your statistics!")}
-          </p>
+          <DialogDescription>
+            {t("noWorkoutDataAvailableYet")}
+          </DialogDescription>
         </CardContent>
       </Card>
     );
@@ -170,7 +170,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
         <CardContent className="flex flex-col items-center justify-center py-12">
           <TrendingUp className="h-12 w-12 text-muted-foreground mb-4" />
           <p className="text-muted-foreground text-center">
-            {t("No exercise statistics available. Add some workouts to track progress!")}
+            {t("noExerciseStatsAvailable")}
           </p>
         </CardContent>
       </Card>

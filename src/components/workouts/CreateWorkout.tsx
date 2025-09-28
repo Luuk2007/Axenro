@@ -266,7 +266,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                             className="w-full h-8"
                           >
                             <Plus className="h-3 w-3 mr-1" />
-                            Add Set
+                            {t("Add Set")}
                           </Button>
                         </div>
                       </CardContent>

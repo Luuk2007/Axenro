@@ -88,12 +88,12 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
 
   const handleAddCustomExercise = async () => {
     if (!customExerciseName.trim()) {
-      toast.error("Please enter an exercise name");
+      toast.error(t("Please enter an exercise name"));
       return;
     }
 
     if (selectedMuscleGroup === "all") {
-      toast.error("Please select a muscle group first");
+      toast.error(t("Please select a muscle group first"));
       return;
     }
 
@@ -118,7 +118,7 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
       };
 
       onAddExercise(exerciseData);
-      toast.success("Custom exercise added successfully");
+      toast.success(t("Custom exercise added successfully"));
       
       // Reset form
       setCustomExerciseName("");
@@ -136,13 +136,13 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Muscle Group</label>
+            <label className="text-sm font-medium">{t("Muscle Group")}</label>
             <Select value={selectedMuscleGroup} onValueChange={setSelectedMuscleGroup}>
               <SelectTrigger>
-                <SelectValue placeholder="Select muscle group" />
+                <SelectValue placeholder={t("Select muscle group")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Exercises</SelectItem>
+                <SelectItem value="all">{t("All Exercises")}</SelectItem>
                 {muscleGroups.map((group) => (
                   <SelectItem key={group.value} value={group.value}>
                     {group.label}
@@ -190,12 +190,12 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
 
           {selectedMuscleGroup !== "all" && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Add Custom Exercise</label>
+              <label className="text-sm font-medium">{t("Add Custom Exercise")}</label>
               <div className="flex gap-2">
                 <Input
                   value={customExerciseName}
                   onChange={(e) => setCustomExerciseName(e.target.value)}
-                  placeholder="Enter exercise name..."
+                  placeholder={t("Enter exercise name...")}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       handleAddCustomExercise();
