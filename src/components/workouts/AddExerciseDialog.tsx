@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getAllExercises, muscleGroups } from "@/types/workout";
+import { exerciseDatabase, muscleGroups } from "@/types/workout";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { toast } from "sonner";
 
@@ -35,38 +35,24 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
   onAddExercise 
 }) => {
   const { t } = useLanguage();
-  const { addCustomExercise } = useCustomExercises();
+  const { customExercises, addCustomExercise } = useCustomExercises();
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("all");
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
   const [customExerciseName, setCustomExerciseName] = useState<string>("");
-  const [allExercises, setAllExercises] = useState(getAllExercises());
+  
+  // Combine default exercises with custom exercises
+  const allExercises = React.useMemo(() => {
+    const defaultExercises = Object.entries(exerciseDatabase).flatMap(
+      ([group, exercises]) => exercises.map(ex => ({ ...ex, muscleGroup: group }))
+    );
+    
+    return [...defaultExercises, ...customExercises];
+  }, [customExercises]);
+  
   const [filteredExercises, setFilteredExercises] = useState(allExercises);
 
-  // Listen for custom exercise changes
+  // Update filtered exercises when allExercises or selectedMuscleGroup changes
   useEffect(() => {
-    const handleExercisesChanged = () => {
-      const updatedExercises = getAllExercises();
-      setAllExercises(updatedExercises);
-      
-      // Re-filter exercises if a muscle group is selected
-      if (selectedMuscleGroup === "all") {
-        setFilteredExercises(updatedExercises);
-      } else {
-        setFilteredExercises(
-          updatedExercises.filter(ex => ex.muscleGroup === selectedMuscleGroup)
-        );
-      }
-    };
-
-    window.addEventListener('exercisesChanged', handleExercisesChanged);
-    
-    return () => {
-      window.removeEventListener('exercisesChanged', handleExercisesChanged);
-    };
-  }, [selectedMuscleGroup]);
-
-  useEffect(() => {
-    // Filter exercises based on selected muscle group
     if (selectedMuscleGroup === "all") {
       setFilteredExercises(allExercises);
     } else {

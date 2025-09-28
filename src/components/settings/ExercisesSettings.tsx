@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { exerciseDatabase } from '@/types/workout';
 import { useSubscription } from "@/hooks/useSubscription";
+import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { getSubscriptionLimits, formatUsageText, canAddMore } from "@/utils/subscriptionLimits";
 
 interface CustomExercise {
@@ -20,24 +21,8 @@ interface CustomExercise {
 const ExercisesSettings = () => {
   const { t } = useLanguage();
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
+  const { customExercises, addCustomExercise, deleteCustomExercise, loading: exercisesLoading } = useCustomExercises();
   
-  const [customExercises, setCustomExercises] = useState<CustomExercise[]>(() => {
-    const saved = localStorage.getItem('customExercises');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // Ensure all custom exercises have IDs
-        return parsed.map((exercise: any, index: number) => ({
-          id: exercise.id || `custom-${Date.now()}-${index}`,
-          name: exercise.name,
-          muscleGroup: exercise.muscleGroup
-        }));
-      } catch (error) {
-        console.error('Error parsing custom exercises:', error);
-      }
-    }
-    return [];
-  });
   const [newExerciseName, setNewExerciseName] = useState('');
   const [newMuscleGroup, setNewMuscleGroup] = useState('');
   const [exercisesOpen, setExercisesOpen] = useState(false);
@@ -57,7 +42,7 @@ const ExercisesSettings = () => {
     return exerciseDatabase[muscleGroup as keyof typeof exerciseDatabase] || [];
   };
 
-  const addCustomExercise = () => {
+  const handleAddCustomExercise = async () => {
     if (!newExerciseName.trim()) {
       toast.error(t("Please enter an exercise name"));
       return;
@@ -74,27 +59,24 @@ const ExercisesSettings = () => {
       return;
     }
 
-    const newExercise: CustomExercise = {
-      id: `custom-${Date.now()}`,
+    const newExercise = await addCustomExercise({
       name: newExerciseName.trim(),
       muscleGroup: newMuscleGroup
-    };
+    });
 
-    const updatedExercises = [...customExercises, newExercise];
-    setCustomExercises(updatedExercises);
-    localStorage.setItem('customExercises', JSON.stringify(updatedExercises));
-    setNewExerciseName('');
-    setNewMuscleGroup('');
-    
-    // Dispatch event to notify other components
-    window.dispatchEvent(new Event('exercisesChanged'));
-    toast.success(t("Exercise added successfully"));
+    if (newExercise) {
+      setNewExerciseName('');
+      setNewMuscleGroup('');
+      setShowExistingExercises(false);
+      
+      // Dispatch event to notify other components
+      window.dispatchEvent(new Event('exercisesChanged'));
+      toast.success(t("Exercise added successfully"));
+    }
   };
 
-  const removeCustomExercise = (index: number) => {
-    const updatedExercises = customExercises.filter((_, i) => i !== index);
-    setCustomExercises(updatedExercises);
-    localStorage.setItem('customExercises', JSON.stringify(updatedExercises));
+  const handleRemoveCustomExercise = async (exerciseId: string) => {
+    await deleteCustomExercise(exerciseId);
     
     // Dispatch event to notify other components
     window.dispatchEvent(new Event('exercisesChanged'));
@@ -122,8 +104,8 @@ const ExercisesSettings = () => {
             <div className="space-y-2">
               <h3 className="font-medium text-sm">{t("Custom exercises")}</h3>
               <div className="space-y-2">
-                {customExercises.map((exercise, index) => (
-                  <div key={exercise.id || index} className="flex items-center justify-between p-2 border rounded">
+                {customExercises.map((exercise) => (
+                  <div key={exercise.id} className="flex items-center justify-between p-2 border rounded">
                     <div>
                       <span className="font-medium text-sm">{exercise.name}</span>
                       <span className="text-xs text-muted-foreground ml-2">
@@ -133,7 +115,7 @@ const ExercisesSettings = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeCustomExercise(index)}
+                      onClick={() => handleRemoveCustomExercise(exercise.id)}
                       className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
                     >
                       <X className="h-3 w-3" />
@@ -207,9 +189,9 @@ const ExercisesSettings = () => {
                   </div>
                 )}
                 <Button 
-                  onClick={addCustomExercise} 
+                  onClick={handleAddCustomExercise} 
                   className="w-full h-9"
-                  disabled={!canAddMoreExercises || loading}
+                  disabled={!canAddMoreExercises || loading || exercisesLoading}
                 >
                   {t("Add Exercise")}
                 </Button>
