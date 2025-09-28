@@ -254,17 +254,19 @@ const Dashboard = () => {
         <div className="flex items-center gap-2">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="hidden md:flex">
+              <Button variant="outline" size="sm" className="flex">
                 <Calendar className="mr-2 h-4 w-4" />
-                {format(date, 'PPP')}
+                <span className="hidden sm:inline">{format(date, 'PPP')}</span>
+                <span className="sm:hidden">{format(date, 'MMM d')}</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
+            <PopoverContent className="w-auto p-0" align="end">
               <CalendarComponent
                 mode="single"
                 selected={date}
                 onSelect={(date) => date && setDate(date)}
                 initialFocus
+                className="p-3 pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
