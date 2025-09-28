@@ -20,6 +20,7 @@ import {
 import { Plus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAllExercises, muscleGroups } from "@/types/workout";
+import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { toast } from "sonner";
 
 interface AddExerciseDialogProps {
@@ -34,6 +35,7 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
   onAddExercise 
 }) => {
   const { t } = useLanguage();
+  const { addCustomExercise } = useCustomExercises();
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("all");
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
   const [customExerciseName, setCustomExerciseName] = useState<string>("");
@@ -98,7 +100,7 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
     onOpenChange(false);
   };
 
-  const handleAddCustomExercise = () => {
+  const handleAddCustomExercise = async () => {
     if (!customExerciseName.trim()) {
       toast.error("Please enter an exercise name");
       return;
@@ -109,50 +111,35 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
       return;
     }
 
-    // Get existing custom exercises
-    const customExercisesData = localStorage.getItem('customExercises');
-    let customExercises = [];
-    
-    if (customExercisesData) {
-      try {
-        customExercises = JSON.parse(customExercisesData);
-      } catch (error) {
-        console.error('Error parsing custom exercises:', error);
-      }
-    }
-
-    // Create new exercise
-    const newExercise = {
-      id: `custom-${Date.now()}`,
+    // Create new exercise using the hook
+    const newExercise = await addCustomExercise({
       name: customExerciseName.trim(),
       muscleGroup: selectedMuscleGroup
-    };
+    });
 
-    // Add to custom exercises
-    const updatedExercises = [...customExercises, newExercise];
-    localStorage.setItem('customExercises', JSON.stringify(updatedExercises));
-    
-    // Dispatch event to notify other components
-    window.dispatchEvent(new Event('exercisesChanged'));
-    
-    // Create exercise data with default sets and add it
-    const exerciseData = {
-      ...newExercise,
-      sets: [
-        { id: '1', reps: 12, weight: 0, completed: false },
-        { id: '2', reps: 12, weight: 0, completed: false },
-        { id: '3', reps: 12, weight: 0, completed: false }
-      ]
-    };
+    if (newExercise) {
+      // Dispatch event to notify other components
+      window.dispatchEvent(new Event('exercisesChanged'));
+      
+      // Create exercise data with default sets and add it
+      const exerciseData = {
+        ...newExercise,
+        sets: [
+          { id: '1', reps: 12, weight: 0, completed: false },
+          { id: '2', reps: 12, weight: 0, completed: false },
+          { id: '3', reps: 12, weight: 0, completed: false }
+        ]
+      };
 
-    onAddExercise(exerciseData);
-    toast.success("Custom exercise added successfully");
-    
-    // Reset form
-    setCustomExerciseName("");
-    setSelectedExerciseId("");
-    setSelectedMuscleGroup("all");
-    onOpenChange(false);
+      onAddExercise(exerciseData);
+      toast.success("Custom exercise added successfully");
+      
+      // Reset form
+      setCustomExerciseName("");
+      setSelectedExerciseId("");
+      setSelectedMuscleGroup("all");
+      onOpenChange(false);
+    }
   };
 
   return (

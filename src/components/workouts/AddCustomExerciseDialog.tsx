@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { toast } from "sonner";
 
 interface AddCustomExerciseDialogProps {
@@ -37,6 +38,7 @@ const AddCustomExerciseDialog: React.FC<AddCustomExerciseDialogProps> = ({
   preselectedMuscleGroup
 }) => {
   const { t } = useLanguage();
+  const { addCustomExercise } = useCustomExercises();
   const [exerciseName, setExerciseName] = useState('');
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(preselectedMuscleGroup || '');
 
@@ -46,7 +48,7 @@ const AddCustomExerciseDialog: React.FC<AddCustomExerciseDialogProps> = ({
     }
   }, [preselectedMuscleGroup]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!exerciseName.trim()) {
       toast.error("Please enter an exercise name");
       return;
@@ -57,41 +59,26 @@ const AddCustomExerciseDialog: React.FC<AddCustomExerciseDialogProps> = ({
       return;
     }
 
-    // Get existing custom exercises
-    const customExercisesData = localStorage.getItem('customExercises');
-    let customExercises = [];
-    
-    if (customExercisesData) {
-      try {
-        customExercises = JSON.parse(customExercisesData);
-      } catch (error) {
-        console.error('Error parsing custom exercises:', error);
-      }
-    }
-
-    // Create new exercise
-    const newExercise = {
-      id: `custom-${Date.now()}`,
+    // Create new exercise using the hook
+    const newExercise = await addCustomExercise({
       name: exerciseName.trim(),
       muscleGroup: selectedMuscleGroup
-    };
+    });
 
-    // Add to custom exercises
-    const updatedExercises = [...customExercises, newExercise];
-    localStorage.setItem('customExercises', JSON.stringify(updatedExercises));
-    
-    // Dispatch event to notify other components
-    window.dispatchEvent(new Event('exercisesChanged'));
-    
-    // Notify parent component
-    onCustomExerciseAdded(newExercise);
-    
-    toast.success("Custom exercise added successfully");
-    
-    // Reset form
-    setExerciseName('');
-    setSelectedMuscleGroup(preselectedMuscleGroup || '');
-    onOpenChange(false);
+    if (newExercise) {
+      // Dispatch event to notify other components
+      window.dispatchEvent(new Event('exercisesChanged'));
+      
+      // Notify parent component
+      onCustomExerciseAdded(newExercise);
+      
+      toast.success("Custom exercise added successfully");
+      
+      // Reset form
+      setExerciseName('');
+      setSelectedMuscleGroup(preselectedMuscleGroup || '');
+      onOpenChange(false);
+    }
   };
 
   const handleClose = () => {
