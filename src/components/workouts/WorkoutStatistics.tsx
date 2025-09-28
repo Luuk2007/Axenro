@@ -156,9 +156,9 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
           <Dumbbell className="h-12 w-12 text-muted-foreground mb-4" />
-          <DialogDescription>
+          <p className="text-muted-foreground text-center">
             {t("noWorkoutDataAvailableYet")}
-          </DialogDescription>
+          </p>
         </CardContent>
       </Card>
     );
