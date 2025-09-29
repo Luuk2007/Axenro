@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useWorkouts } from "@/hooks/useWorkouts";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import PersonalRecords from "@/components/workouts/PersonalRecords";
 import WorkoutStatistics from "@/components/workouts/WorkoutStatistics";
 import { Dumbbell, Trophy, Plus, BarChart } from "lucide-react";
@@ -26,6 +27,7 @@ const Workouts = () => {
   const isMobile = useIsMobile();
   const { test_mode, test_subscription_tier, subscription_tier, loading: subscriptionLoading, initialized } = useSubscription();
   const { workouts, saveWorkout, deleteWorkout, loading: workoutsLoading } = useWorkouts();
+  const { profile } = useUserProfile();
   
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
@@ -133,8 +135,9 @@ const Workouts = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t("workouts")}</h1>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={() => setShowWeeklyGoal(true)}>
-            <Target className="h-4 w-4" />
+          <Button variant="outline" onClick={() => setShowWeeklyGoal(true)}>
+            <Target className="h-4 w-4 mr-2" />
+            {profile?.weekly_workout_goal || 3}x {t("per week")}
           </Button>
           <Button onClick={() => setShowWorkoutTypeModal(true)}>
             <Plus className="h-4 w-4 mr-2" />
