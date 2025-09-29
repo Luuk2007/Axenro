@@ -18,7 +18,6 @@ import { useWeightData } from '@/hooks/useWeightData';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { calculateDailyCalories, type ProfileData } from '@/utils/macroCalculations';
 import { supabase } from '@/integrations/supabase/client';
-import { useWorkouts } from '@/hooks/useWorkouts';
 
 const meals = [
   {
@@ -58,13 +57,14 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { weightData } = useWeightData();
   const { profile } = useUserProfile();
-  const { workouts: allWorkouts } = useWorkouts();
   const [date, setDate] = useState<Date>(new Date());
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showStepsConnection, setShowStepsConnection] = useState(false);
   const [userCalories, setUserCalories] = useState<number>(2200);
   const [consumedCalories, setConsumedCalories] = useState<number>(0);
   const [dailySteps, setDailySteps] = useState<number>(8546);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [totalWorkoutsPlanned, setTotalWorkoutsPlanned] = useState(5);
   const [workoutsThisWeek, setWorkoutsThisWeek] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -191,28 +191,33 @@ const Dashboard = () => {
   }, [profile, isAuthenticated, userId, date]);
 
   useEffect(() => {
-    // Calculate workouts this week from allWorkouts
-    const currentDate = new Date();
-    const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Start from Monday
-    const currentWeekEnd = endOfWeek(currentDate, { weekStartsOn: 1 }); // End on Sunday
-    
-    const workoutDates = allWorkouts
-      .filter((workout: Workout) => workout.completed)
-      .map((workout: Workout) => {
-        try {
-          return parse(workout.date, "yyyy-MM-dd", new Date());
-        } catch {
-          return null;
-        }
-      })
-      .filter((date): date is Date => date !== null && isValid(date));
-    
-    const weeklyWorkouts = workoutDates.filter((date: Date) => 
-      date >= currentWeekStart && date <= currentWeekEnd
-    ).length;
-    
-    setWorkoutsThisWeek(weeklyWorkouts);
-  }, [allWorkouts]);
+    // Load workouts from localStorage
+    const storedWorkouts = localStorage.getItem("workouts");
+    if (storedWorkouts) {
+      try {
+        const parsedWorkouts = JSON.parse(storedWorkouts);
+        setWorkouts(parsedWorkouts);
+        
+        // Calculate workouts this week
+        const currentDate = new Date();
+        const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Start from Monday
+        const currentWeekEnd = endOfWeek(currentDate, { weekStartsOn: 1 }); // End on Sunday
+        
+        const workoutDates = parsedWorkouts
+          .filter((workout: Workout) => workout.completed)
+          .map((workout: Workout) => parse(workout.date, "yyyy-MM-dd", new Date()))
+          .filter((date: Date) => isValid(date));
+        
+        const weeklyWorkouts = workoutDates.filter((date: Date) => 
+          date >= currentWeekStart && date <= currentWeekEnd
+        ).length;
+        
+        setWorkoutsThisWeek(weeklyWorkouts);
+      } catch (error) {
+        console.error("Error loading workouts:", error);
+      }
+    }
+  }, []);
 
 
   const navigateToNutrition = () => {
@@ -306,9 +311,9 @@ const Dashboard = () => {
         />
         <StatsCard
           title={`${t("workouts")}`}
-          value={`${workoutsThisWeek}/${profile?.weekly_workout_goal || 3}`}
+          value={`${workoutsThisWeek}/${totalWorkoutsPlanned}`}
           icon={Dumbbell}
-          description={`${Math.round((workoutsThisWeek / (profile?.weekly_workout_goal || 3)) * 100)}% ${t("completed")}`}
+          description={`${Math.round((workoutsThisWeek / totalWorkoutsPlanned) * 100)}% ${t("completed")}`}
           onClick={navigateToWorkouts}
         />
         <StatsCard

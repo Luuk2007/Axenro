@@ -274,18 +274,4 @@ export const english = {
   "Max Weight": "Max Weight",
   "Total Sets": "Total Sets",
   "Last Performed": "Last Performed",
-  
-  // Weekly goal setting
-  "weeklyWorkoutGoal": "Weekly Workout Goal",
-  "setWeeklyGoalDescription": "Set how many times you want to workout per week",
-  "workoutsPerWeek": "Workouts per week",
-  "saving": "Saving...",
-  "Recent workouts": "Recent workouts",
-  "No workouts completed": "No workouts completed",
-  "Complete your first workout to see it here": "Complete your first workout to see it here",
-  "Start workout": "Start workout",
-  "recent workouts": "recent workouts",
-  "View progress": "View progress",
-  "Today": "Today",
-  "Yesterday": "Yesterday",
 };
