@@ -18,6 +18,8 @@ import WorkoutList from "@/components/workouts/WorkoutList";
 import WorkoutCalendar from "@/components/workouts/WorkoutCalendar";
 import { Workout } from "@/types/workout";
 import { useIsMobile } from "@/hooks/use-mobile";
+import WeeklyGoalSetting from "@/components/workouts/WeeklyGoalSetting";
+import { Target } from "lucide-react";
 
 const Workouts = () => {
   const { t } = useLanguage();
@@ -40,6 +42,7 @@ const Workouts = () => {
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null);
   const [workoutToDelete, setWorkoutToDelete] = useState<string | null>(null);
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
+  const [showWeeklyGoal, setShowWeeklyGoal] = useState(false);
 
 
   const handleCreateWorkout = async (name: string, exercises: any[], date: string) => {
@@ -129,10 +132,15 @@ const Workouts = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t("workouts")}</h1>
-        <Button onClick={() => setShowWorkoutTypeModal(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          {t("createWorkout")}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="icon" onClick={() => setShowWeeklyGoal(true)}>
+            <Target className="h-4 w-4" />
+          </Button>
+          <Button onClick={() => setShowWorkoutTypeModal(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            {t("createWorkout")}
+          </Button>
+        </div>
       </div>
 
       {initialized && (
@@ -222,6 +230,11 @@ const Workouts = () => {
           if (!open) setWorkoutToDelete(null);
         }}
         onConfirmDelete={confirmDeleteWorkout}
+      />
+
+      <WeeklyGoalSetting
+        open={showWeeklyGoal}
+        onOpenChange={setShowWeeklyGoal}
       />
     </div>
   );

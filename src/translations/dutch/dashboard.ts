@@ -57,4 +57,9 @@ export const dashboardTranslations: Translations = {
   "View progress": "Bekijk voortgang",
   Today: "Vandaag",
   Yesterday: "Gisteren",
+  "Weekly workout goal": "Wekelijks workout doel",
+  "How many times per week do you want to workout?": "Hoe vaak per week wil je trainen?",
+  "workout per week": "workout per week",
+  "workouts per week": "workouts per week",
+  "Weekly goal updated": "Wekelijks doel bijgewerkt",
 };

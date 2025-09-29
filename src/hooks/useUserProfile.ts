@@ -13,6 +13,7 @@ export interface UserProfileData {
   fitness_goal?: string;
   target_weight?: number;
   exercise_frequency?: string;
+  weekly_workout_goal?: number;
 }
 
 export const useUserProfile = () => {
@@ -59,6 +60,7 @@ export const useUserProfile = () => {
           fitness_goal: data.fitness_goal,
           target_weight: data.target_weight,
           exercise_frequency: data.exercise_frequency,
+          weekly_workout_goal: (data as any).weekly_workout_goal,
         };
         setProfile(profileData);
         
@@ -95,6 +97,7 @@ export const useUserProfile = () => {
           fitness_goal: profileData.fitness_goal,
           target_weight: profileData.target_weight,
           exercise_frequency: profileData.exercise_frequency,
+          weekly_workout_goal: profileData.weekly_workout_goal,
         }, {
           onConflict: 'user_id'
         });
