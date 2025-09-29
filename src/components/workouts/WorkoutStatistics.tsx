@@ -20,6 +20,7 @@ interface ExerciseStats {
   maxDuration?: number;
   totalSets: number;
   lastPerformed: string;
+  maxWeightDate?: string;
   muscleGroup?: string;
   isCardio: boolean;
 }
@@ -99,6 +100,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
               maxReps: maxWeightSet.reps,
               totalSets: exercise.sets.length,
               lastPerformed: workout.date,
+              maxWeightDate: workout.date,
               muscleGroup: exercise.muscleGroup,
               isCardio: false
             });
@@ -108,6 +110,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
               ...existing,
               maxWeight: shouldUpdate ? maxWeightInWorkout : existing.maxWeight,
               maxReps: shouldUpdate ? maxWeightSet.reps : existing.maxReps,
+              maxWeightDate: shouldUpdate ? workout.date : existing.maxWeightDate,
               totalSets: existing.totalSets + exercise.sets.length,
               lastPerformed: new Date(workout.date) > new Date(existing.lastPerformed) 
                 ? workout.date 
@@ -227,7 +230,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
                             {formatWeight(convertWeight(stat.maxWeight || 0, 'metric', measurementSystem), measurementSystem)} {getWeightUnit(measurementSystem)} x {stat.maxReps} reps
                           </span>
                           <br />
-                          <span>{t("Max Weight")}</span>
+                          <span>{t("Max Weight")}{stat.maxWeightDate && ` (${formatDate(stat.maxWeightDate)})`}</span>
                         </div>
                         <div>
                           <span className="font-medium text-foreground">{stat.totalSets}</span>
