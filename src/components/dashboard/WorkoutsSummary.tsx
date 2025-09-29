@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { Workout } from '@/types/workout';
 import { format, parseISO, isValid } from 'date-fns';
+import { useWorkouts } from '@/hooks/useWorkouts';
 
 interface WorkoutsSummaryProps {
   title?: string;
@@ -16,50 +17,22 @@ interface WorkoutsSummaryProps {
 export default function WorkoutsSummary({ title, className, onViewAll }: WorkoutsSummaryProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { workouts: allWorkouts, loading } = useWorkouts();
   const [recentWorkouts, setRecentWorkouts] = useState<Workout[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadRecentWorkouts = () => {
-      setIsLoading(true);
-      try {
-        const storedWorkouts = localStorage.getItem("workouts");
-        if (storedWorkouts) {
-          const parsedWorkouts: Workout[] = JSON.parse(storedWorkouts);
-          
-          // Filter completed workouts and sort by date (most recent first)
-          const completedWorkouts = parsedWorkouts
-            .filter(workout => workout.completed)
-            .sort((a, b) => {
-              const dateA = new Date(a.date);
-              const dateB = new Date(b.date);
-              return dateB.getTime() - dateA.getTime();
-            })
-            .slice(0, 4); // Show only the 4 most recent workouts
-          
-          setRecentWorkouts(completedWorkouts);
-        }
-      } catch (error) {
-        console.error('Error loading workouts:', error);
-        setRecentWorkouts([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadRecentWorkouts();
+    // Filter completed workouts and sort by date (most recent first)
+    const completedWorkouts = allWorkouts
+      .filter(workout => workout.completed)
+      .sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB.getTime() - dateA.getTime();
+      })
+      .slice(0, 4); // Show only the 4 most recent workouts
     
-    // Listen for workout changes
-    const handleWorkoutsChanged = () => {
-      loadRecentWorkouts();
-    };
-
-    window.addEventListener('workoutsChanged', handleWorkoutsChanged);
-    
-    return () => {
-      window.removeEventListener('workoutsChanged', handleWorkoutsChanged);
-    };
-  }, []);
+    setRecentWorkouts(completedWorkouts);
+  }, [allWorkouts]);
 
   const formatWorkoutDate = (dateString: string): string => {
     try {
@@ -107,7 +80,7 @@ export default function WorkoutsSummary({ title, className, onViewAll }: Workout
     return [];
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className={cn("glassy-card rounded-xl card-shadow hover-scale h-[400px] flex flex-col", className)}>
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
