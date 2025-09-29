@@ -16,6 +16,7 @@ import DeleteWorkoutDialog from "@/components/workouts/DeleteWorkoutDialog";
 import TrackWorkout from "@/components/workouts/TrackWorkout";
 import WorkoutList from "@/components/workouts/WorkoutList";
 import WorkoutCalendar from "@/components/workouts/WorkoutCalendar";
+import WeeklyGoalSetting from "@/components/workouts/WeeklyGoalSetting";
 import { Workout } from "@/types/workout";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -134,6 +135,8 @@ const Workouts = () => {
           {t("createWorkout")}
         </Button>
       </div>
+
+      <WeeklyGoalSetting />
 
       {initialized && (
         <Tabs defaultValue="workouts">

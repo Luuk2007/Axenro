@@ -697,6 +697,7 @@ export type Database = {
           target_weight: number | null
           updated_at: string
           user_id: string
+          weekly_workout_goal: number | null
           weight: number | null
         }
         Insert: {
@@ -712,6 +713,7 @@ export type Database = {
           target_weight?: number | null
           updated_at?: string
           user_id: string
+          weekly_workout_goal?: number | null
           weight?: number | null
         }
         Update: {
@@ -727,6 +729,7 @@ export type Database = {
           target_weight?: number | null
           updated_at?: string
           user_id?: string
+          weekly_workout_goal?: number | null
           weight?: number | null
         }
         Relationships: []
