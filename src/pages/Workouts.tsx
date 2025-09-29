@@ -136,7 +136,6 @@ const Workouts = () => {
         <h1 className="text-2xl font-semibold">{t("workouts")}</h1>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowWeeklyGoal(true)}>
-            <Target className="h-4 w-4 mr-2" />
             {profile?.weekly_workout_goal || 3}x {t("per week")}
           </Button>
           <Button onClick={() => setShowWorkoutTypeModal(true)}>
