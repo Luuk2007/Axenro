@@ -108,6 +108,29 @@ export const useDeletedMeals = () => {
 
   useEffect(() => {
     loadDeletedMeals();
+
+    // Set up real-time subscription for authenticated users
+    if (!user) return;
+
+    const channel = supabase
+      .channel('deleted-meals-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'deleted_meals',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          loadDeletedMeals();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   return {

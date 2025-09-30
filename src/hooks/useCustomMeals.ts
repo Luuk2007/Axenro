@@ -130,6 +130,29 @@ export const useCustomMeals = () => {
 
   useEffect(() => {
     loadCustomMeals();
+
+    // Set up real-time subscription for authenticated users
+    if (!user) return;
+
+    const channel = supabase
+      .channel('custom-meals-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'custom_meals',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => {
+          loadCustomMeals();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   return {
