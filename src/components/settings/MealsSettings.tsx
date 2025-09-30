@@ -9,37 +9,15 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { getAvailableMeals } from '@/types/nutrition';
 import { useSubscription } from "@/hooks/useSubscription";
 import { getSubscriptionLimits, formatUsageText, canAddMore } from "@/utils/subscriptionLimits";
-
-interface CustomMeal {
-  id: string;
-  name: string;
-  isDefault?: boolean;
-  order?: number;
-}
+import { useCustomMeals } from "@/hooks/useCustomMeals";
+import { useDeletedMeals } from "@/hooks/useDeletedMeals";
 
 const MealsSettings = () => {
   const { t } = useLanguage();
-  const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
+  const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading: subscriptionLoading } = useSubscription();
+  const { customMeals, loading: customMealsLoading, addCustomMeal: addCustomMealHook, deleteCustomMeal } = useCustomMeals();
+  const { deletedMeals, loading: deletedMealsLoading, markMealAsDeleted, restoreMeal } = useDeletedMeals();
   
-  const [customMeals, setCustomMeals] = useState<CustomMeal[]>(() => {
-    const saved = localStorage.getItem('customMeals');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return parsed.map((meal, index) => {
-            if (typeof meal === 'string') {
-              return { id: `custom-${index}`, name: meal };
-            }
-            return meal;
-          });
-        }
-      } catch (error) {
-        console.error('Error parsing custom meals:', error);
-      }
-    }
-    return [];
-  });
   const [newMealName, setNewMealName] = useState('');
   const [mealsOpen, setMealsOpen] = useState(false);
   const [availableMeals, setAvailableMeals] = useState(() => getAvailableMeals());
@@ -63,21 +41,12 @@ const MealsSettings = () => {
     };
   }, []);
 
-  // Check if there are deleted default meals
-  const hasDeletedDefaultMeals = () => {
-    const deletedMealsData = localStorage.getItem('deletedMeals');
-    if (deletedMealsData) {
-      try {
-        const deletedMealIds = JSON.parse(deletedMealsData);
-        return deletedMealIds.length > 0;
-      } catch (error) {
-        return false;
-      }
-    }
-    return false;
-  };
+  // Refresh available meals when custom meals or deleted meals change
+  useEffect(() => {
+    setAvailableMeals(getAvailableMeals());
+  }, [customMeals, deletedMeals]);
 
-  const addCustomMeal = () => {
+  const handleAddCustomMeal = async () => {
     if (!newMealName.trim()) {
       toast.error(t("Please enter a meal name"));
       return;
@@ -89,69 +58,41 @@ const MealsSettings = () => {
       return;
     }
 
-    const newMeal: CustomMeal = {
-      id: `custom-${Date.now()}`,
-      name: newMealName.trim()
-    };
+    const result = await addCustomMealHook({
+      name: newMealName.trim(),
+      orderIndex: customMeals.length
+    });
 
-    const updatedMeals = [...customMeals, newMeal];
-    setCustomMeals(updatedMeals);
-    localStorage.setItem('customMeals', JSON.stringify(updatedMeals));
-    setNewMealName('');
-    toast.success(t("Meal added successfully"));
-    
-    // Refresh available meals
-    setAvailableMeals(getAvailableMeals());
-  };
-
-  const removeCustomMeal = (index: number) => {
-    const updatedMeals = customMeals.filter((_, i) => i !== index);
-    setCustomMeals(updatedMeals);
-    localStorage.setItem('customMeals', JSON.stringify(updatedMeals));
-    toast.success(t("Meal removed successfully"));
-    
-    // Refresh available meals
-    setAvailableMeals(getAvailableMeals());
-  };
-
-  const removeDefaultMeal = (mealId: string) => {
-    // Get current deleted meals list
-    const deletedMealsData = localStorage.getItem('deletedMeals');
-    let deletedMealIds = [];
-    
-    if (deletedMealsData) {
-      try {
-        deletedMealIds = JSON.parse(deletedMealsData);
-      } catch (error) {
-        console.error('Error parsing deleted meals:', error);
-      }
+    if (result) {
+      setNewMealName('');
+      toast.success(t("Meal added successfully"));
+      window.dispatchEvent(new Event('mealsChanged'));
     }
-    
-    // Add this meal to deleted list
-    deletedMealIds.push(mealId);
-    localStorage.setItem('deletedMeals', JSON.stringify(deletedMealIds));
-    
-    // Immediately update available meals
-    setAvailableMeals(getAvailableMeals());
-    
-    // Trigger meals change event
+  };
+
+  const handleRemoveCustomMeal = async (mealId: string) => {
+    await deleteCustomMeal(mealId);
+    toast.success(t("Meal removed successfully"));
+    window.dispatchEvent(new Event('mealsChanged'));
+  };
+
+  const handleRemoveDefaultMeal = async (mealId: string) => {
+    await markMealAsDeleted(mealId);
     window.dispatchEvent(new Event('mealsChanged'));
     toast.success(t("Meal removed successfully"));
   };
 
-  const restoreDefaultMeals = () => {
-    // Clear the deleted meals list
-    localStorage.removeItem('deletedMeals');
-    
-    // Immediately update available meals
-    setAvailableMeals(getAvailableMeals());
-    
-    // Trigger meals change event
+  const handleRestoreDefaultMeals = async () => {
+    // Restore all deleted meals
+    for (const mealId of deletedMeals) {
+      await restoreMeal(mealId);
+    }
     window.dispatchEvent(new Event('mealsChanged'));
     toast.success(t("Default meals restored successfully"));
   };
 
   const showUpgradePrompt = !canAddMoreMeals && limits.customMeals !== -1;
+  const loading = subscriptionLoading || customMealsLoading || deletedMealsLoading;
 
   return (
     <Card>
@@ -184,7 +125,7 @@ const MealsSettings = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeCustomMeal(customMeals.findIndex(cm => cm.id === meal.id))}
+                        onClick={() => handleRemoveCustomMeal(meal.id)}
                         className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
                       >
                         <X className="h-3 w-3" />
@@ -193,7 +134,7 @@ const MealsSettings = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeDefaultMeal(meal.id)}
+                        onClick={() => handleRemoveDefaultMeal(meal.id)}
                         className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
                       >
                         <X className="h-3 w-3" />
@@ -204,10 +145,10 @@ const MealsSettings = () => {
               </div>
             </div>
 
-            {hasDeletedDefaultMeals() && (
+            {deletedMeals.length > 0 && (
               <div className="pt-2">
                 <Button
-                  onClick={restoreDefaultMeals}
+                  onClick={handleRestoreDefaultMeals}
                   variant="outline"
                   size="sm"
                   className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
@@ -243,12 +184,12 @@ const MealsSettings = () => {
                   placeholder={t("Enter meal name")}
                   value={newMealName}
                   onChange={(e) => setNewMealName(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && canAddMoreMeals && addCustomMeal()}
+                  onKeyPress={(e) => e.key === 'Enter' && canAddMoreMeals && handleAddCustomMeal()}
                   className="text-sm h-9"
                   disabled={!canAddMoreMeals}
                 />
                 <Button 
-                  onClick={addCustomMeal} 
+                  onClick={handleAddCustomMeal} 
                   size="sm" 
                   className="h-9"
                   disabled={!canAddMoreMeals || loading}

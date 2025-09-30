@@ -11,7 +11,7 @@ export const useDeletedMeals = () => {
   const loadDeletedMeals = async () => {
     if (!user) {
       // For non-authenticated users, load from localStorage
-      const savedDeleted = localStorage.getItem('deletedDefaultMeals');
+      const savedDeleted = localStorage.getItem('deletedMeals');
       if (savedDeleted) {
         try {
           const parsedDeleted = JSON.parse(savedDeleted);
@@ -51,7 +51,7 @@ export const useDeletedMeals = () => {
       // For non-authenticated users, save to localStorage
       const updatedDeleted = [...deletedMeals, mealId];
       setDeletedMeals(updatedDeleted);
-      localStorage.setItem('deletedDefaultMeals', JSON.stringify(updatedDeleted));
+      localStorage.setItem('deletedMeals', JSON.stringify(updatedDeleted));
       return;
     }
 
@@ -72,7 +72,7 @@ export const useDeletedMeals = () => {
       
       // Also save to localStorage as backup
       const updatedDeleted = [...deletedMeals, mealId];
-      localStorage.setItem('deletedDefaultMeals', JSON.stringify(updatedDeleted));
+      localStorage.setItem('deletedMeals', JSON.stringify(updatedDeleted));
     } catch (error) {
       console.error('Error marking meal as deleted:', error);
     }
@@ -82,7 +82,7 @@ export const useDeletedMeals = () => {
     if (!user) {
       const updatedDeleted = deletedMeals.filter(id => id !== mealId);
       setDeletedMeals(updatedDeleted);
-      localStorage.setItem('deletedDefaultMeals', JSON.stringify(updatedDeleted));
+      localStorage.setItem('deletedMeals', JSON.stringify(updatedDeleted));
       return;
     }
 
@@ -100,7 +100,7 @@ export const useDeletedMeals = () => {
 
       const updatedDeleted = deletedMeals.filter(id => id !== mealId);
       setDeletedMeals(updatedDeleted);
-      localStorage.setItem('deletedDefaultMeals', JSON.stringify(updatedDeleted));
+      localStorage.setItem('deletedMeals', JSON.stringify(updatedDeleted));
     } catch (error) {
       console.error('Error restoring meal:', error);
     }
