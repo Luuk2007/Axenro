@@ -41,6 +41,10 @@ export const commonTranslations: Translations = {
   // Navigation
   home: "Home",
   dashboard: "Dashboard",
+  nutrition: "Voeding",
+  workouts: "Trainingen",
+  progress: "Voortgang",
+  challenges: "Uitdagingen",
   profile: "Profiel",
   settings: "Instellingen",
   help: "Help",
