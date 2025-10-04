@@ -320,7 +320,7 @@ const Dashboard = () => {
           />
         </div>
         
-        <div className="max-h-[400px]">
+        <div className="h-[400px]">
           <MealsList
             title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} ${t("meals")}`}
             meals={meals}
