@@ -150,19 +150,8 @@ export default function MealsList({ title, className, onViewAll, selectedDate = 
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
           <h3 className="font-medium tracking-tight">{title}</h3>
         </div>
-        <div className="divide-y divide-border">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center justify-between p-4 animate-pulse">
-              <div className="flex items-center space-x-4">
-                <div className="rounded-lg bg-muted h-9 w-9" />
-                <div className="h-5 bg-muted rounded w-32" />
-              </div>
-              <div className="flex flex-col items-end gap-1">
-                <div className="h-5 bg-muted rounded w-16" />
-                <div className="h-3 bg-muted rounded w-12" />
-              </div>
-            </div>
-          ))}
+        <div className="flex items-center justify-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </div>
     );

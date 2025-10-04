@@ -15,7 +15,6 @@ import { useUserProfile, UserProfileData } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
 import BMICalculator from "@/components/profile/BMICalculator";
 import ProfileForm, { ProfileFormValues, defaultValues, emptyDefaultValues } from "@/components/profile/ProfileForm";
-import ProfileFormSkeleton from "@/components/profile/ProfileFormSkeleton";
 import UserStatsDisplay from "@/components/profile/UserStatsDisplay";
 import NutritionCalculator from "@/components/profile/NutritionCalculator";
 import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
@@ -105,9 +104,9 @@ const Profile = () => {
           console.log('Profile: Found localStorage data, migrating', parsedProfile);
           setInitialValues(parsedProfile);
           
-          // Migrate localStorage data to database (silently, without toast)
+          // Migrate localStorage data to database
           const dbProfileData = convertFormToDbProfile(parsedProfile);
-          saveProfile(dbProfileData, true);
+          saveProfile(dbProfileData);
           
           // Clear localStorage after migration
           localStorage.removeItem("userProfile");
@@ -215,9 +214,11 @@ const Profile = () => {
             </CardHeader>
             <CardContent>
               {profileLoading ? (
-                <ProfileFormSkeleton />
+                <div className="py-10 text-center">
+                  <p className="text-muted-foreground">Loading profile...</p>
+                </div>
               ) : (
-                <ProfileForm
+                <ProfileForm 
                   onSubmit={handleSubmit} 
                   initialValues={initialValues}
                   isNewUser={isNewUser}
@@ -243,8 +244,8 @@ const Profile = () => {
             </>
           ) : profileLoading ? (
             <Card>
-              <CardContent className="py-10">
-                <ProfileFormSkeleton />
+              <CardContent className="py-10 text-center">
+                <p className="text-muted-foreground">Loading profile...</p>
               </CardContent>
             </Card>
           ) : (

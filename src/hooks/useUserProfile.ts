@@ -74,14 +74,12 @@ export const useUserProfile = () => {
     }
   };
 
-  const saveProfile = async (profileData: UserProfileData, silent: boolean = false) => {
+  const saveProfile = async (profileData: UserProfileData) => {
     if (!user) {
       // For non-authenticated users, save to localStorage only
       localStorage.setItem("userProfile", JSON.stringify(profileData));
       setProfile(profileData);
-      if (!silent) {
-        toast.success("Profile updated locally");
-      }
+      toast.success("Profile updated locally");
       return;
     }
 
@@ -106,9 +104,7 @@ export const useUserProfile = () => {
 
       if (error) {
         console.error('Error saving profile:', error);
-        if (!silent) {
-          toast.error('Failed to save profile');
-        }
+        toast.error('Failed to save profile');
         return;
       }
 
@@ -117,14 +113,10 @@ export const useUserProfile = () => {
       // Also save to localStorage as backup
       localStorage.setItem("userProfile", JSON.stringify(profileData));
       
-      if (!silent) {
-        toast.success('Profile updated successfully');
-      }
+      toast.success('Profile updated successfully');
     } catch (error) {
       console.error('Error saving profile:', error);
-      if (!silent) {
-        toast.error('Failed to save profile');
-      }
+      toast.error('Failed to save profile');
     }
   };
 
