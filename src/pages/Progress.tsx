@@ -346,28 +346,41 @@ export default function Progress() {
                 <CardTitle>{t("Body measurements")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {enabledMeasurementTypes.map(type => {
-                  const latestMeasurement = getLatestMeasurement(type.id);
-                  
-                  return (
-                    <div key={type.id} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{getDisplayName(type)}</span>
-                      <span className="text-sm">
-                        {latestMeasurement ? `${latestMeasurement.value} ${type.unit}` : '—'}
-                      </span>
-                    </div>
-                  );
-                })}
-                
-                {enabledMeasurementTypes.length === 0 && (
-                  <div className="text-center py-4">
-                    <p className="text-muted-foreground text-sm">
-                      {t("No measurements enabled")}
-                    </p>
-                    <p className="text-muted-foreground text-xs mt-1">
-                      {t("Enable measurements in Settings")}
-                    </p>
-                  </div>
+                {measurementsLoading ? (
+                  <>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="flex items-center justify-between animate-pulse">
+                        <div className="h-4 bg-muted rounded w-20" />
+                        <div className="h-4 bg-muted rounded w-16" />
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    {enabledMeasurementTypes.map(type => {
+                      const latestMeasurement = getLatestMeasurement(type.id);
+                      
+                      return (
+                        <div key={type.id} className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{getDisplayName(type)}</span>
+                          <span className="text-sm">
+                            {latestMeasurement ? `${latestMeasurement.value} ${type.unit}` : '—'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    
+                    {enabledMeasurementTypes.length === 0 && (
+                      <div className="text-center py-4">
+                        <p className="text-muted-foreground text-sm">
+                          {t("No measurements enabled")}
+                        </p>
+                        <p className="text-muted-foreground text-xs mt-1">
+                          {t("Enable measurements in Settings")}
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>

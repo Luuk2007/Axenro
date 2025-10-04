@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
 import { calculateMacroGoals, type ProfileData } from '@/utils/macroCalculations';
+import DailySummarySkeleton from './DailySummarySkeleton';
 
 type MacroData = {
   calories: { consumed: number; goal: number; unit: string };
@@ -26,11 +27,13 @@ interface DailySummaryProps {
 
 export default function DailySummary({ className, meals = [], selectedDate = new Date(), refreshTrigger = 0 }: DailySummaryProps) {
   const { t } = useLanguage();
-  const [macroTargets, setMacroTargets] = useState<MacroData>(defaultMacroTargets);
+  const [macroTargets, setMacroTargets] = useState<MacroData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Load user profile and nutrition targets
   useEffect(() => {
     const loadMacroGoals = () => {
+      setIsLoading(true);
       const savedProfile = localStorage.getItem("userProfile");
       if (savedProfile) {
         try {
@@ -40,16 +43,20 @@ export default function DailySummary({ className, meals = [], selectedDate = new
           const macroGoals = calculateMacroGoals(profileData);
           
           // Update the macro targets
-          setMacroTargets(prevState => ({
-            calories: { ...prevState.calories, goal: macroGoals.calories },
-            protein: { ...prevState.protein, goal: macroGoals.protein },
-            carbs: { ...prevState.carbs, goal: macroGoals.carbs },
-            fat: { ...prevState.fat, goal: macroGoals.fat },
-          }));
+          setMacroTargets({
+            calories: { consumed: 0, goal: macroGoals.calories, unit: '' },
+            protein: { consumed: 0, goal: macroGoals.protein, unit: 'g' },
+            carbs: { consumed: 0, goal: macroGoals.carbs, unit: 'g' },
+            fat: { consumed: 0, goal: macroGoals.fat, unit: 'g' },
+          });
         } catch (error) {
           console.error("Error loading nutrition goals:", error);
+          setMacroTargets(defaultMacroTargets);
         }
+      } else {
+        setMacroTargets(defaultMacroTargets);
       }
+      setIsLoading(false);
     };
     
     // Load initial values
@@ -79,12 +86,12 @@ export default function DailySummary({ className, meals = [], selectedDate = new
       }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
       
       // Update state with consumed values
-      setMacroTargets(prevState => ({
+      setMacroTargets(prevState => prevState ? ({
         calories: { ...prevState.calories, consumed: consumed.calories },
         protein: { ...prevState.protein, consumed: consumed.protein },
         carbs: { ...prevState.carbs, consumed: consumed.carbs },
         fat: { ...prevState.fat, consumed: consumed.fat },
-      }));
+      }) : null);
     };
 
     if (meals && meals.length > 0) {
@@ -105,12 +112,12 @@ export default function DailySummary({ className, meals = [], selectedDate = new
         }
       } else {
         // Reset consumed values if no food log found
-        setMacroTargets(prevState => ({
+        setMacroTargets(prevState => prevState ? ({
           calories: { ...prevState.calories, consumed: 0 },
           protein: { ...prevState.protein, consumed: 0 },
           carbs: { ...prevState.carbs, consumed: 0 },
           fat: { ...prevState.fat, consumed: 0 },
-        }));
+        }) : null);
       }
     }
   }, [meals, selectedDate, refreshTrigger]);
@@ -118,6 +125,10 @@ export default function DailySummary({ className, meals = [], selectedDate = new
   const calculatePercentage = (consumed: number, goal: number) => {
     return Math.min(Math.round((consumed / goal) * 100), 100);
   };
+
+  if (isLoading || !macroTargets) {
+    return <DailySummarySkeleton className={className} />;
+  }
 
   return (
     <div className={`grid grid-cols-1 gap-3 ${className}`}>

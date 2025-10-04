@@ -7,6 +7,7 @@ import { FoodLogEntry } from '@/types/nutrition';
 import { calculateMacroGoals, getMacroRatios, type ProfileData } from '@/utils/macroCalculations';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { format } from 'date-fns';
+import MacroProgressSkeleton from './MacroProgressSkeleton';
 
 type MacroData = {
   calories: { consumed: number; goal: number; unit: string };
@@ -29,7 +30,7 @@ interface MacroProgressTrackerProps {
 export default function MacroProgressTracker({ selectedDate = new Date() }: MacroProgressTrackerProps) {
   const { t } = useLanguage();
   const { profile: dbProfile, loading: profileLoading } = useUserProfile();
-  const [macroTargets, setMacroTargets] = useState<MacroData>(defaultMacroTargets);
+  const [macroTargets, setMacroTargets] = useState<MacroData | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   
@@ -178,6 +179,11 @@ export default function MacroProgressTracker({ selectedDate = new Date() }: Macr
   const calculatePercentage = (consumed: number, goal: number) => {
     return Math.min(Math.round((consumed / goal) * 100), 100);
   };
+  
+  // Show skeleton while loading profile or if no macro targets yet
+  if (profileLoading || !macroTargets) {
+    return <MacroProgressSkeleton />;
+  }
   
   return (
     <div className="glassy-card rounded-xl overflow-hidden card-shadow">

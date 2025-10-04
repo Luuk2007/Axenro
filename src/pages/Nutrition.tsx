@@ -495,9 +495,9 @@ const Nutrition = () => {
           onDateChange={setSelectedDate}
         />
         
-        {/* Daily Summary */}
+        {/* Daily Summary - Only show when not in initial loading state */}
         <DailySummary 
-          className="mb-6" 
+          className="mb-6"
           meals={meals}
           selectedDate={selectedDate}
           refreshTrigger={refreshTrigger}

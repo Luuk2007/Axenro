@@ -5,8 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import StatsCard from '@/components/dashboard/StatsCard';
+import StatsCardSkeleton from '@/components/dashboard/StatsCardSkeleton';
 import MacroProgressTracker from '@/components/dashboard/MacroProgressTracker';
+import MacroProgressSkeleton from '@/components/dashboard/MacroProgressSkeleton';
 import MealsList from '@/components/dashboard/MealsList';
+import MealsListSkeleton from '@/components/dashboard/MealsListSkeleton';
 import WorkoutsSummary from '@/components/dashboard/WorkoutsSummary';
 import StepsConnectionModal from '@/components/dashboard/StepsConnectionModal';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -62,11 +65,12 @@ const Dashboard = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showStepsConnection, setShowStepsConnection] = useState(false);
-  const [userCalories, setUserCalories] = useState<number>(2200);
-  const [consumedCalories, setConsumedCalories] = useState<number>(0);
-  const [dailySteps, setDailySteps] = useState<number>(8546);
+  const [userCalories, setUserCalories] = useState<number | null>(null);
+  const [consumedCalories, setConsumedCalories] = useState<number | null>(null);
+  const [dailySteps, setDailySteps] = useState<number>(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   // Calculate workouts this week
   const weeklyGoal = profile?.weekly_workout_goal || 3;
@@ -107,29 +111,31 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    // Get user profile from profile hook for calories calculation
-    if (profile) {
-      // Convert profile to ProfileData format (same as MacroProgressTracker)
-      const profileData: ProfileData = {
-        weight: profile.weight,
-        height: profile.height,
-        age: profile.age,
-        gender: profile.gender,
-        activityLevel: profile.activity_level,
-        exerciseFrequency: profile.exercise_frequency,
-        fitnessGoal: profile.fitness_goal,
-      };
+    const loadData = async () => {
+      setIsLoadingStats(true);
       
-      console.log('Dashboard: Profile data for calculation:', profileData);
-      
-      // Calculate calories using centralized function
-      const calories = calculateDailyCalories(profileData);
-      console.log('Dashboard: Calculated calories:', calories);
-      setUserCalories(calories);
-    }
+      // Get user profile from profile hook for calories calculation
+      if (profile) {
+        // Convert profile to ProfileData format (same as MacroProgressTracker)
+        const profileData: ProfileData = {
+          weight: profile.weight,
+          height: profile.height,
+          age: profile.age,
+          gender: profile.gender,
+          activityLevel: profile.activity_level,
+          exerciseFrequency: profile.exercise_frequency,
+          fitnessGoal: profile.fitness_goal,
+        };
+        
+        console.log('Dashboard: Profile data for calculation:', profileData);
+        
+        // Calculate calories using centralized function
+        const calories = calculateDailyCalories(profileData);
+        console.log('Dashboard: Calculated calories:', calories);
+        setUserCalories(calories);
+      }
 
-    // Load consumed calories from selected date's food log
-    const loadConsumedCalories = async () => {
+      // Load consumed calories from selected date's food log
       try {
         const selectedDate = format(date, 'yyyy-MM-dd');
         
@@ -177,20 +183,22 @@ const Dashboard = () => {
       } catch (error) {
         console.error('Error loading consumed calories:', error);
         setConsumedCalories(0);
+      } finally {
+        setIsLoadingStats(false);
       }
     };
 
-    loadConsumedCalories();
+    loadData();
 
     // Listen for food log updates (custom event)
     const handleFoodLogUpdate = () => {
-      loadConsumedCalories();
+      loadData();
     };
 
     // Listen for storage changes (other tabs)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key && e.key.startsWith('foodLog_')) {
-        loadConsumedCalories();
+        loadData();
       }
     };
 
@@ -280,13 +288,18 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title={t("Daily calories")}
-          value={consumedCalories.toString()}
-          icon={Flame}
-          description={`${t("target")}: ${userCalories || 2200}`}
-          onClick={navigateToNutrition}
-        />
+        {isLoadingStats || consumedCalories === null ? (
+          <StatsCardSkeleton icon={Flame} />
+        ) : (
+          <StatsCard
+            title={t("Daily calories")}
+            value={consumedCalories.toString()}
+            icon={Flame}
+            description={`${t("target")}: ${userCalories || 2200}`}
+            onClick={navigateToNutrition}
+          />
+        )}
+        
         <StatsCard
           title={`${t("Daily steps")}`}
           value={dailySteps.toLocaleString()}
@@ -294,6 +307,7 @@ const Dashboard = () => {
           description={`${t("target")}: 10,000`}
           onClick={handleOpenStepsConnection}
         />
+        
         <StatsCard
           title={`${t("workouts")}`}
           value={`${workoutsThisWeek}/${weeklyGoal}`}
@@ -301,6 +315,7 @@ const Dashboard = () => {
           description={`${Math.round((workoutsThisWeek / weeklyGoal) * 100)}% ${t("completed")}`}
           onClick={navigateToWorkouts}
         />
+        
         <StatsCard
           title={t("weight")}
           value={currentWeight ? `${currentWeight} kg` : "No data"}
@@ -310,7 +325,11 @@ const Dashboard = () => {
         />
       </div>
 
-      <MacroProgressTracker selectedDate={date} />
+      {isLoadingStats ? (
+        <MacroProgressSkeleton />
+      ) : (
+        <MacroProgressTracker selectedDate={date} />
+      )}
 
       <div className="grid gap-6 md:grid-cols-2 items-start">
         <div className="h-[400px]">
@@ -321,12 +340,18 @@ const Dashboard = () => {
         </div>
         
         <div className="max-h-[400px]">
-          <MealsList
-            title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} ${t("meals")}`}
-            meals={meals}
-            onViewAll={navigateToNutrition}
-            selectedDate={date}
-          />
+          {isLoadingStats ? (
+            <MealsListSkeleton 
+              title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} ${t("meals")}`}
+            />
+          ) : (
+            <MealsList
+              title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} ${t("meals")}`}
+              meals={meals}
+              onViewAll={navigateToNutrition}
+              selectedDate={date}
+            />
+          )}
         </div>
       </div>
 
