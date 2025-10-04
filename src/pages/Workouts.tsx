@@ -131,14 +131,14 @@ const Workouts = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in overflow-x-hidden">
-      <div className="flex items-center justify-between flex-wrap gap-2">
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t("workouts")}</h1>
-        <div className="flex gap-2 flex-wrap">
-          <Button variant="outline" onClick={() => setShowWeeklyGoal(true)} className="whitespace-nowrap">
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowWeeklyGoal(true)}>
             {profile?.weekly_workout_goal || 3}x {isMobile ? "" : t("per week")}
           </Button>
-          <Button onClick={() => setShowWorkoutTypeModal(true)} className="whitespace-nowrap">
+          <Button onClick={() => setShowWorkoutTypeModal(true)}>
             <Plus className="h-4 w-4 mr-2" />
             {t("createWorkout")}
           </Button>
@@ -148,24 +148,24 @@ const Workouts = () => {
       {initialized && (
         <Tabs defaultValue="workouts">
           <TabsList className={`grid w-full ${canAccessPersonalRecords ? 'grid-cols-4' : (canAccessStatistics ? 'grid-cols-3' : 'grid-cols-2')}`}>
-            <TabsTrigger value="workouts" className="text-xs sm:text-sm truncate">
-              <Dumbbell className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
-              <span className="truncate">{t("Workouts")}</span>
+            <TabsTrigger value="workouts">
+              <Dumbbell className="h-4 w-4 mr-2" />
+              {t("Workouts")}
             </TabsTrigger>
-            <TabsTrigger value="calendar" className="text-xs sm:text-sm truncate">
-              <Dumbbell className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
-              <span className="truncate">{t("Calendar")}</span>
+            <TabsTrigger value="calendar">
+              <Dumbbell className="h-4 w-4 mr-2" />
+              {t("Calendar")}
             </TabsTrigger>
             {canAccessStatistics && (
-              <TabsTrigger value="statistics" className="text-xs sm:text-sm truncate">
-                <BarChart className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
-                <span className="truncate">{isMobile ? t("Stats") : t("Statistics")}</span>
+              <TabsTrigger value="statistics">
+                <BarChart className="h-4 w-4 mr-2" />
+                {isMobile ? t("Stats") : t("Statistics")}
               </TabsTrigger>
             )}
             {canAccessPersonalRecords && (
-              <TabsTrigger value="personal-records" className="text-xs sm:text-sm truncate">
-                <Trophy className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
-                <span className="truncate">{isMobile ? "PR's" : t("Personal records")}</span>
+              <TabsTrigger value="personal-records">
+                <Trophy className="h-4 w-4 mr-2" />
+                {isMobile ? "PR's" : t("Personal records")}
               </TabsTrigger>
             )}
           </TabsList>
