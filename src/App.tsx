@@ -14,7 +14,6 @@ import Workouts from "@/pages/Workouts";
 import Progress from "@/pages/Progress";
 import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
-import Challenges from "@/pages/Challenges";
 import NotFound from "@/pages/NotFound";
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import TermsConditionsPage from "@/pages/TermsConditionsPage";
@@ -73,7 +72,6 @@ function App() {
                     <Route path="nutrition" element={<Nutrition />} />
                     <Route path="workouts" element={<Workouts />} />
                     <Route path="progress" element={<Progress />} />
-                    <Route path="challenges" element={<Challenges />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="settings" element={<Settings />} />
                     <Route path="privacypolicy" element={<PrivacyPolicyPage />} />

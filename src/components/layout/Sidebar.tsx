@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils, Sparkles, Trophy } from 'lucide-react';
+import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils, Sparkles } from 'lucide-react';
 import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SubscriptionModal from '@/components/subscription/SubscriptionModal';
@@ -41,11 +41,6 @@ const navItems: NavItem[] = [
     titleKey: "progress",
     href: '/progress',
     icon: BarChart3,
-  },
-  {
-    titleKey: "challenges",
-    href: '/challenges',
-    icon: Trophy,
   },
   {
     titleKey: "profile",

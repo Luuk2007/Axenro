@@ -233,168 +233,6 @@ export type Database = {
         }
         Relationships: []
       }
-      challenge_badges: {
-        Row: {
-          badge_type: Database["public"]["Enums"]["badge_type"]
-          challenge_id: string
-          completion_percentage: number
-          created_at: string
-          earned_at: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          badge_type: Database["public"]["Enums"]["badge_type"]
-          challenge_id: string
-          completion_percentage: number
-          created_at?: string
-          earned_at?: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          badge_type?: Database["public"]["Enums"]["badge_type"]
-          challenge_id?: string
-          completion_percentage?: number
-          created_at?: string
-          earned_at?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenge_badges_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      challenge_interactions: {
-        Row: {
-          comment_text: string | null
-          created_at: string
-          id: string
-          interaction_type: Database["public"]["Enums"]["interaction_type"]
-          target_user_id: string
-          user_challenge_id: string
-          user_id: string
-        }
-        Insert: {
-          comment_text?: string | null
-          created_at?: string
-          id?: string
-          interaction_type: Database["public"]["Enums"]["interaction_type"]
-          target_user_id: string
-          user_challenge_id: string
-          user_id: string
-        }
-        Update: {
-          comment_text?: string | null
-          created_at?: string
-          id?: string
-          interaction_type?: Database["public"]["Enums"]["interaction_type"]
-          target_user_id?: string
-          user_challenge_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenge_interactions_user_challenge_id_fkey"
-            columns: ["user_challenge_id"]
-            isOneToOne: false
-            referencedRelation: "user_challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      challenge_progress: {
-        Row: {
-          completed_at: string
-          created_at: string
-          day_number: number
-          id: string
-          notes: string | null
-          photo_url: string | null
-          user_challenge_id: string
-        }
-        Insert: {
-          completed_at?: string
-          created_at?: string
-          day_number: number
-          id?: string
-          notes?: string | null
-          photo_url?: string | null
-          user_challenge_id: string
-        }
-        Update: {
-          completed_at?: string
-          created_at?: string
-          day_number?: number
-          id?: string
-          notes?: string | null
-          photo_url?: string | null
-          user_challenge_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenge_progress_user_challenge_id_fkey"
-            columns: ["user_challenge_id"]
-            isOneToOne: false
-            referencedRelation: "user_challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      challenges: {
-        Row: {
-          badge_bronze_threshold: number
-          badge_gold_threshold: number
-          badge_silver_threshold: number
-          category: string
-          created_at: string
-          creator_id: string | null
-          description: string
-          difficulty_level: Database["public"]["Enums"]["challenge_difficulty"]
-          duration_days: number
-          id: string
-          is_public: boolean
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          badge_bronze_threshold?: number
-          badge_gold_threshold?: number
-          badge_silver_threshold?: number
-          category?: string
-          created_at?: string
-          creator_id?: string | null
-          description: string
-          difficulty_level?: Database["public"]["Enums"]["challenge_difficulty"]
-          duration_days: number
-          id?: string
-          is_public?: boolean
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          badge_bronze_threshold?: number
-          badge_gold_threshold?: number
-          badge_silver_threshold?: number
-          category?: string
-          created_at?: string
-          creator_id?: string | null
-          description?: string
-          difficulty_level?: Database["public"]["Enums"]["challenge_difficulty"]
-          duration_days?: number
-          id?: string
-          is_public?: boolean
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       cookie_consent: {
         Row: {
           analytics_cookies: boolean
@@ -821,50 +659,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_challenges: {
-        Row: {
-          challenge_id: string
-          completed_at: string | null
-          created_at: string
-          current_day: number
-          id: string
-          joined_at: string
-          status: Database["public"]["Enums"]["challenge_status"]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          challenge_id: string
-          completed_at?: string | null
-          created_at?: string
-          current_day?: number
-          id?: string
-          joined_at?: string
-          status?: Database["public"]["Enums"]["challenge_status"]
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          challenge_id?: string
-          completed_at?: string | null
-          created_at?: string
-          current_day?: number
-          id?: string
-          joined_at?: string
-          status?: Database["public"]["Enums"]["challenge_status"]
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_challenges_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_preferences: {
         Row: {
           created_at: string
@@ -903,7 +697,6 @@ export type Database = {
           target_weight: number | null
           updated_at: string
           user_id: string
-          weekly_workout_goal: number | null
           weight: number | null
         }
         Insert: {
@@ -919,7 +712,6 @@ export type Database = {
           target_weight?: number | null
           updated_at?: string
           user_id: string
-          weekly_workout_goal?: number | null
           weight?: number | null
         }
         Update: {
@@ -935,7 +727,6 @@ export type Database = {
           target_weight?: number | null
           updated_at?: string
           user_id?: string
-          weekly_workout_goal?: number | null
           weight?: number | null
         }
         Relationships: []
@@ -1110,10 +901,7 @@ export type Database = {
       }
     }
     Enums: {
-      badge_type: "bronze" | "silver" | "gold"
-      challenge_difficulty: "easy" | "medium" | "hard"
-      challenge_status: "active" | "completed" | "abandoned"
-      interaction_type: "like" | "comment" | "cheer"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1240,11 +1028,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      badge_type: ["bronze", "silver", "gold"],
-      challenge_difficulty: ["easy", "medium", "hard"],
-      challenge_status: ["active", "completed", "abandoned"],
-      interaction_type: ["like", "comment", "cheer"],
-    },
+    Enums: {},
   },
 } as const

@@ -4,7 +4,6 @@ export const english = {
   "nutrition": "Nutrition",
   "workouts": "Workouts",
   "progress": "Progress",
-  "challenges": "Challenges",
   "profile": "Profile",
   "settings": "Settings",
   "dashboardGreeting": "Good {timeOfDay}, {name}!",
