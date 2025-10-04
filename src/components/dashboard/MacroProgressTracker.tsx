@@ -92,12 +92,15 @@ export default function MacroProgressTracker({ selectedDate = new Date() }: Macr
         };
         const macroGoals = calculateMacroGoals(profileData);
         
-        setMacroTargets(prevState => ({
-          calories: { ...prevState.calories, goal: macroGoals.calories },
-          protein: { ...prevState.protein, goal: macroGoals.protein },
-          carbs: { ...prevState.carbs, goal: macroGoals.carbs },
-          fat: { ...prevState.fat, goal: macroGoals.fat },
-        }));
+        setMacroTargets(prevState => {
+          if (!prevState) return null;
+          return {
+            calories: { ...prevState.calories, goal: macroGoals.calories },
+            protein: { ...prevState.protein, goal: macroGoals.protein },
+            carbs: { ...prevState.carbs, goal: macroGoals.carbs },
+            fat: { ...prevState.fat, goal: macroGoals.fat },
+          };
+        });
       }
     };
     
@@ -147,22 +150,28 @@ export default function MacroProgressTracker({ selectedDate = new Date() }: Macr
           };
         }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
         
-        // Update consumed values
-        setMacroTargets(prevState => ({
-          calories: { ...prevState.calories, consumed: Math.round(consumed.calories) },
-          protein: { ...prevState.protein, consumed: Math.round(consumed.protein * 10) / 10 },
-          carbs: { ...prevState.carbs, consumed: Math.round(consumed.carbs * 10) / 10 },
-          fat: { ...prevState.fat, consumed: Math.round(consumed.fat * 10) / 10 },
-        }));
+        // Update consumed values - only if we have macro targets initialized
+        setMacroTargets(prevState => {
+          if (!prevState) return null;
+          return {
+            calories: { ...prevState.calories, consumed: Math.round(consumed.calories) },
+            protein: { ...prevState.protein, consumed: Math.round(consumed.protein * 10) / 10 },
+            carbs: { ...prevState.carbs, consumed: Math.round(consumed.carbs * 10) / 10 },
+            fat: { ...prevState.fat, consumed: Math.round(consumed.fat * 10) / 10 },
+          };
+        });
       } catch (error) {
         console.error('Error loading consumed nutrition:', error);
-        // Reset to 0 on error
-        setMacroTargets(prevState => ({
-          calories: { ...prevState.calories, consumed: 0 },
-          protein: { ...prevState.protein, consumed: 0 },
-          carbs: { ...prevState.carbs, consumed: 0 },
-          fat: { ...prevState.fat, consumed: 0 },
-        }));
+        // Reset to 0 on error - only if we have macro targets initialized
+        setMacroTargets(prevState => {
+          if (!prevState) return null;
+          return {
+            calories: { ...prevState.calories, consumed: 0 },
+            protein: { ...prevState.protein, consumed: 0 },
+            carbs: { ...prevState.carbs, consumed: 0 },
+            fat: { ...prevState.fat, consumed: 0 },
+          };
+        });
       }
     };
 
