@@ -34,7 +34,7 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[75vh] overflow-y-auto">
+      <DialogContent className="max-w-md max-h-[75vh] overflow-y-auto mx-4 sm:mx-auto">
         <DialogHeader>
           <DialogTitle>{workout.name}</DialogTitle>
           <DialogDescription className="flex items-center gap-2 mt-2">
