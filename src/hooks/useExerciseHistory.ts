@@ -27,7 +27,7 @@ export const useExerciseHistory = (exerciseId: string) => {
           // Fetch from Supabase for authenticated users
           const { data, error } = await supabase
             .from('workouts')
-            .select('exercises, date')
+            .select('exercises, date, name')
             .eq('user_id', user.id)
             .order('date', { ascending: false });
 
@@ -39,13 +39,19 @@ export const useExerciseHistory = (exerciseId: string) => {
 
           // Search through workouts to find the most recent occurrence of this exercise
           if (data) {
+            console.log('Searching through', data.length, 'workouts for exercise:', exerciseId);
             for (const workout of data) {
               const exercises = workout.exercises as Exercise[];
-              const foundExercise = exercises?.find(
-                (ex: Exercise) => ex.id === exerciseId
+              if (!exercises || !Array.isArray(exercises)) continue;
+              
+              // Try to find by ID first, then by name as fallback
+              const foundExercise = exercises.find(
+                (ex: Exercise) => ex.id === exerciseId || 
+                  (ex.name && exerciseId && ex.name.toLowerCase().includes(exerciseId.toLowerCase()))
               );
               
               if (foundExercise && foundExercise.sets && foundExercise.sets.length > 0) {
+                console.log('Found exercise history:', foundExercise.name, 'from workout:', workout.name);
                 setLastExercise({
                   sets: foundExercise.sets,
                   date: workout.date
@@ -53,6 +59,7 @@ export const useExerciseHistory = (exerciseId: string) => {
                 return;
               }
             }
+            console.log('No history found for exercise:', exerciseId);
           }
         } else {
           // Fallback to localStorage for non-authenticated users
@@ -65,12 +72,18 @@ export const useExerciseHistory = (exerciseId: string) => {
               new Date(b.date).getTime() - new Date(a.date).getTime()
             );
             
+            console.log('Searching through', sortedWorkouts.length, 'local workouts for exercise:', exerciseId);
             for (const workout of sortedWorkouts) {
-              const foundExercise = workout.exercises?.find(
-                (ex: Exercise) => ex.id === exerciseId
+              const exercises = workout.exercises;
+              if (!exercises || !Array.isArray(exercises)) continue;
+              
+              const foundExercise = exercises.find(
+                (ex: Exercise) => ex.id === exerciseId ||
+                  (ex.name && exerciseId && ex.name.toLowerCase().includes(exerciseId.toLowerCase()))
               );
               
               if (foundExercise && foundExercise.sets && foundExercise.sets.length > 0) {
+                console.log('Found local exercise history:', foundExercise.name);
                 setLastExercise({
                   sets: foundExercise.sets,
                   date: workout.date
@@ -78,6 +91,7 @@ export const useExerciseHistory = (exerciseId: string) => {
                 return;
               }
             }
+            console.log('No local history found for exercise:', exerciseId);
           }
         }
         
