@@ -150,6 +150,7 @@ export const nutritionTranslations: Translations = {
   "Update meal": "Maaltijd bijwerken",
   "Type to search": "Typ om te zoeken",
   "No results found": "Geen resultaten gevonden",
+  "Recently added": "Recent toegevoegd",
   
   // Barcode Scanner translations
   "Scan Barcode": "Barcode scannen",

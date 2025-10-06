@@ -4,10 +4,11 @@ import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/c
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Loader2, Minus } from 'lucide-react';
+import { Plus, Search, Loader2, Minus, Clock } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { searchProductsByName, ProductDetails } from '@/services/openFoodFactsService';
 import { calculateNutritionForUnit } from '@/services/foodTypeAnalyzer';
+import { useRecentFoods } from '@/hooks/useRecentFoods';
 
 interface Meal {
   id: string;
@@ -25,6 +26,7 @@ interface AddFoodDialogProps {
 
 const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }: AddFoodDialogProps) => {
   const { t, language } = useLanguage();
+  const { recentFoods, addRecentFood } = useRecentFoods();
   const [searchValue, setSearchValue] = useState('');
   const [apiResults, setApiResults] = useState<ProductDetails[]>([]);
   const [searching, setSearching] = useState(false);
@@ -157,8 +159,49 @@ const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }:
         imageUrl: selectedProduct.imageUrl
       };
       
+      // Save to recent foods
+      addRecentFood({
+        id: foodItem.id,
+        name: foodItem.name,
+        brand: foodItem.brand,
+        imageUrl: foodItem.imageUrl,
+        calories: foodItem.calories,
+        protein: foodItem.protein,
+        carbs: foodItem.carbs,
+        fat: foodItem.fat,
+        servingSize: foodItem.servingSize,
+        amount: foodItem.amount,
+        unit: foodItem.unit,
+        servings: foodItem.servings
+      });
+      
       onAddFood(foodItem);
     }
+  };
+
+  const handleSelectRecentFood = (recentFood: any) => {
+    const mockProduct: ProductDetails = {
+      id: recentFood.id,
+      name: recentFood.name,
+      description: recentFood.name,
+      brand: recentFood.brand || '',
+      imageUrl: recentFood.imageUrl || null,
+      servingSize: recentFood.servingSize,
+      servings: recentFood.servings,
+      amount: recentFood.amount,
+      unit: recentFood.unit,
+      nutrition: {
+        calories: recentFood.calories,
+        protein: recentFood.protein,
+        carbs: recentFood.carbs,
+        fat: recentFood.fat
+      }
+    };
+    
+    setSelectedProduct(mockProduct);
+    setServings(recentFood.servings);
+    setAmount(recentFood.amount);
+    setUnit(recentFood.unit);
   };
 
   const getAvailableUnits = () => {
@@ -358,6 +401,47 @@ const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }:
               </div>
             </div>
           </div>
+
+          {/* Recent Foods Section */}
+          {!searchValue && recentFoods.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <label className="text-sm font-medium text-muted-foreground">{t("Recently added")}</label>
+              </div>
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                {recentFoods.map(food => (
+                  <div 
+                    key={food.id} 
+                    className="flex items-center justify-between bg-secondary/30 p-2 rounded-md cursor-pointer hover:bg-secondary/50 transition-colors"
+                    onClick={() => handleSelectRecentFood(food)}
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {food.imageUrl && (
+                        <img 
+                          src={food.imageUrl} 
+                          alt={food.name} 
+                          className="w-8 h-8 object-contain rounded flex-shrink-0"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{food.name}</p>
+                        {food.brand && (
+                          <p className="text-xs text-muted-foreground truncate">{food.brand}</p>
+                        )}
+                        <div className="text-xs text-muted-foreground">
+                          {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | F: {food.fat}g
+                        </div>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           
           <div className="max-h-64 overflow-y-auto">
             {apiResults.length > 0 && (
