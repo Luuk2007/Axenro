@@ -42,8 +42,6 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
   const [customExerciseName, setCustomExerciseName] = useState<string>("");
   
-  const { lastExercise, loading: historyLoading } = useExerciseHistory(selectedExerciseId);
-  
   // Combine default exercises with custom exercises
   const allExercises = React.useMemo(() => {
     const defaultExercises = Object.entries(exerciseDatabase).flatMap(
@@ -52,6 +50,13 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
     
     return [...defaultExercises, ...customExercises];
   }, [customExercises]);
+  
+  // Get the selected exercise name for history lookup
+  const selectedExercise = React.useMemo(() => {
+    return allExercises.find(ex => ex.id === selectedExerciseId);
+  }, [selectedExerciseId, allExercises]);
+  
+  const { lastExercise, loading: historyLoading } = useExerciseHistory(selectedExercise?.name || "");
   
   const [filteredExercises, setFilteredExercises] = useState(allExercises);
 
@@ -67,11 +72,7 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
   }, [selectedMuscleGroup, allExercises]);
 
   const handleAddExercise = () => {
-    if (!selectedExerciseId) return;
-    
-    // Find the selected exercise
-    const selectedExercise = allExercises.find(ex => ex.id === selectedExerciseId);
-    if (!selectedExercise) return;
+    if (!selectedExerciseId || !selectedExercise) return;
 
     // Use last exercise data if available, otherwise use defaults
     const sets = lastExercise?.sets && lastExercise.sets.length > 0

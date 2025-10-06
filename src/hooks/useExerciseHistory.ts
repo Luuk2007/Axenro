@@ -8,13 +8,13 @@ interface ExerciseHistoryResult {
   date: string;
 }
 
-export const useExerciseHistory = (exerciseId: string) => {
+export const useExerciseHistory = (exerciseName: string) => {
   const { user } = useAuth();
   const [lastExercise, setLastExercise] = useState<ExerciseHistoryResult | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!exerciseId) {
+    if (!exerciseName) {
       setLastExercise(null);
       return;
     }
@@ -39,15 +39,14 @@ export const useExerciseHistory = (exerciseId: string) => {
 
           // Search through workouts to find the most recent occurrence of this exercise
           if (data) {
-            console.log('Searching through', data.length, 'workouts for exercise:', exerciseId);
+            console.log('Searching through', data.length, 'workouts for exercise:', exerciseName);
             for (const workout of data) {
               const exercises = workout.exercises as Exercise[];
               if (!exercises || !Array.isArray(exercises)) continue;
               
-              // Try to find by ID first, then by name as fallback
+              // Match by name (case-insensitive)
               const foundExercise = exercises.find(
-                (ex: Exercise) => ex.id === exerciseId || 
-                  (ex.name && exerciseId && ex.name.toLowerCase().includes(exerciseId.toLowerCase()))
+                (ex: Exercise) => ex.name && ex.name.toLowerCase() === exerciseName.toLowerCase()
               );
               
               if (foundExercise && foundExercise.sets && foundExercise.sets.length > 0) {
@@ -59,7 +58,7 @@ export const useExerciseHistory = (exerciseId: string) => {
                 return;
               }
             }
-            console.log('No history found for exercise:', exerciseId);
+            console.log('No history found for exercise:', exerciseName);
           }
         } else {
           // Fallback to localStorage for non-authenticated users
@@ -72,14 +71,13 @@ export const useExerciseHistory = (exerciseId: string) => {
               new Date(b.date).getTime() - new Date(a.date).getTime()
             );
             
-            console.log('Searching through', sortedWorkouts.length, 'local workouts for exercise:', exerciseId);
+            console.log('Searching through', sortedWorkouts.length, 'local workouts for exercise:', exerciseName);
             for (const workout of sortedWorkouts) {
               const exercises = workout.exercises;
               if (!exercises || !Array.isArray(exercises)) continue;
               
               const foundExercise = exercises.find(
-                (ex: Exercise) => ex.id === exerciseId ||
-                  (ex.name && exerciseId && ex.name.toLowerCase().includes(exerciseId.toLowerCase()))
+                (ex: Exercise) => ex.name && ex.name.toLowerCase() === exerciseName.toLowerCase()
               );
               
               if (foundExercise && foundExercise.sets && foundExercise.sets.length > 0) {
@@ -91,7 +89,7 @@ export const useExerciseHistory = (exerciseId: string) => {
                 return;
               }
             }
-            console.log('No local history found for exercise:', exerciseId);
+            console.log('No local history found for exercise:', exerciseName);
           }
         }
         
@@ -106,7 +104,7 @@ export const useExerciseHistory = (exerciseId: string) => {
     };
 
     fetchLastExercise();
-  }, [exerciseId, user]);
+  }, [exerciseName, user]);
 
   return { lastExercise, loading };
 };
