@@ -17,11 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Plus, History } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { exerciseDatabase, muscleGroups } from "@/types/workout";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
+import { useExerciseHistory } from "@/hooks/useExerciseHistory";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 interface AddExerciseDialogProps {
   open: boolean;
@@ -39,6 +41,8 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("all");
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
   const [customExerciseName, setCustomExerciseName] = useState<string>("");
+  
+  const { lastExercise, loading: historyLoading } = useExerciseHistory(selectedExerciseId);
   
   // Combine default exercises with custom exercises
   const allExercises = React.useMemo(() => {
@@ -69,14 +73,24 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
     const selectedExercise = allExercises.find(ex => ex.id === selectedExerciseId);
     if (!selectedExercise) return;
 
-    // Create exercise data with default sets
+    // Use last exercise data if available, otherwise use defaults
+    const sets = lastExercise?.sets && lastExercise.sets.length > 0
+      ? lastExercise.sets.map((set, index) => ({
+          id: String(index + 1),
+          reps: set.reps,
+          weight: set.weight,
+          completed: false
+        }))
+      : [
+          { id: '1', reps: 12, weight: 0, completed: false },
+          { id: '2', reps: 12, weight: 0, completed: false },
+          { id: '3', reps: 12, weight: 0, completed: false }
+        ];
+
+    // Create exercise data with sets from history or defaults
     const exerciseData = {
       ...selectedExercise,
-      sets: [
-        { id: '1', reps: 12, weight: 0, completed: false },
-        { id: '2', reps: 12, weight: 0, completed: false },
-        { id: '3', reps: 12, weight: 0, completed: false }
-      ]
+      sets
     };
 
     onAddExercise(exerciseData);
@@ -186,6 +200,27 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
                 )}
               </SelectContent>
             </Select>
+            
+            {/* Show last exercise info */}
+            {selectedExerciseId && lastExercise && (
+              <div className="flex items-start gap-2 p-3 bg-secondary/30 rounded-md text-sm">
+                <History className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-foreground">{t("Last performed")}: {format(new Date(lastExercise.date), 'MMM d, yyyy')}</p>
+                  <p className="text-muted-foreground text-xs mt-1">
+                    {lastExercise.sets.length} {t("sets")} - {lastExercise.sets.map(s => `${s.reps} reps × ${s.weight}kg`).join(', ')}
+                  </p>
+                  <p className="text-muted-foreground text-xs mt-1 italic">{t("These values will be pre-filled")}</p>
+                </div>
+              </div>
+            )}
+            
+            {selectedExerciseId && !lastExercise && !historyLoading && (
+              <div className="flex items-start gap-2 p-3 bg-secondary/30 rounded-md text-sm">
+                <History className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <p className="text-muted-foreground text-xs">{t("No previous history for this exercise")}</p>
+              </div>
+            )}
           </div>
 
           {selectedMuscleGroup !== "all" && (

@@ -77,5 +77,9 @@ export const workoutTranslations = {
   "Dancing": "Dansen",
   "Boxing": "Boksen",
   "Workout saved": "Training opgeslagen",
-  "Workout deleted": "Training verwijderd"
+  "Workout deleted": "Training verwijderd",
+  "Last performed": "Laatst uitgevoerd",
+  "sets": "sets",
+  "These values will be pre-filled": "Deze waardes worden vooraf ingevuld",
+  "No previous history for this exercise": "Geen eerdere geschiedenis voor deze oefening"
 };
