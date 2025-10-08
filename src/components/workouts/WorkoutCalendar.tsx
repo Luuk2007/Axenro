@@ -188,20 +188,20 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
         {/* Calendar Section */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <CardTitle className="flex items-center gap-2">
                 <CalendarIcon className="h-5 w-5" />
                 {t("Workout calendar")}
               </CardTitle>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-between sm:justify-end gap-4">
                 <div className="flex gap-2 text-xs">
                   <div className="flex items-center gap-1">
                     <div className="w-3 h-3 rounded bg-green-600"></div>
-                    <span>Completed</span>
+                    <span className="hidden sm:inline">Completed</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <div className="w-3 h-3 rounded bg-blue-500"></div>
-                    <span>Planned</span>
+                    <span className="hidden sm:inline">Planned</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
