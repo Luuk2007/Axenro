@@ -234,12 +234,29 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                   }
                   
                   /* Hide calendar built-in navigation completely */
-                  .workout-calendar .rdp-nav {
+                  .workout-calendar .rdp-nav,
+                  .workout-calendar .rdp-nav_button,
+                  .workout-calendar .rdp-button_previous,
+                  .workout-calendar .rdp-button_next,
+                  .workout-calendar button[name="previous-month"],
+                  .workout-calendar button[name="next-month"] {
                     display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    pointer-events: none !important;
                   }
                   
                   .workout-calendar .rdp-month {
                     padding-top: 0 !important;
+                  }
+                  
+                  .workout-calendar .rdp-caption {
+                    position: relative !important;
+                  }
+                  
+                  .workout-calendar .rdp-caption_label {
+                    width: 100% !important;
+                    text-align: center !important;
                   }
                   
                   .workout-calendar .rdp-day_button {
