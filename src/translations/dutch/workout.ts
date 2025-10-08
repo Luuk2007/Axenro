@@ -2,7 +2,7 @@ export const workoutTranslations = {
   title: "Trainingen",
   workouts: "Trainingen",
   "Workouts": "Trainingen",
-  createWorkout: "Training Aanmaken",
+  createWorkout: "Aanmaken",
   "Edit workout": "Training Bewerken",
   "Update workout": "Training Bijwerken",
   "Workout name": "Training Naam",
