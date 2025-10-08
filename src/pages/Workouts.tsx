@@ -140,7 +140,7 @@ const Workouts = () => {
           </Button>
           <Button onClick={() => setShowWorkoutTypeModal(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Aanmaken
+            {t("createWorkout")}
           </Button>
         </div>
       </div>
