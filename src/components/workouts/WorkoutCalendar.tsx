@@ -4,13 +4,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Workout } from "@/types/workout";
 import { PlannedWorkout, getPlannedWorkouts } from "@/types/plannedWorkout";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek, subMonths, addMonths } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getMonthlyStats, getWeeklyStats } from "@/utils/workoutCalculations";
 import WorkoutProgressPanel from "./WorkoutProgressPanel";
-import { CheckCircle2, Calendar as CalendarIcon, Dumbbell } from "lucide-react";
+import { CheckCircle2, Calendar as CalendarIcon, Dumbbell, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface WorkoutCalendarProps {
   workouts: Workout[];
@@ -19,9 +20,18 @@ interface WorkoutCalendarProps {
 const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   const { t } = useLanguage();
   const currentDate = new Date();
-  const previousMonthDate = subMonths(currentDate, 1);
+  const [currentMonth, setCurrentMonth] = React.useState<Date>(currentDate);
+  const previousMonthDate = subMonths(currentMonth, 1);
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(currentDate);
   const [plannedWorkouts, setPlannedWorkouts] = React.useState<PlannedWorkout[]>(getPlannedWorkouts());
+
+  const handlePreviousMonth = () => {
+    setCurrentMonth(subMonths(currentMonth, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(addMonths(currentMonth, 1));
+  };
   
   console.log("All workouts:", workouts);
   console.log("Completed workouts:", workouts.filter(w => w.completed));
@@ -183,14 +193,34 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                 <CalendarIcon className="h-5 w-5" />
                 {t("Workout calendar")}
               </CardTitle>
-              <div className="flex gap-2 text-xs">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded bg-green-600"></div>
-                  <span>Completed</span>
+              <div className="flex items-center gap-4">
+                <div className="flex gap-2 text-xs">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded bg-green-600"></div>
+                    <span>Completed</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded bg-blue-500"></div>
+                    <span>Planned</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded bg-blue-500"></div>
-                  <span>Planned</span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={handlePreviousMonth}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={handleNextMonth}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -259,10 +289,12 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                     selected={selectedDate}
                     onSelect={setSelectedDate}
                     month={previousMonthDate}
+                    onMonthChange={() => {}}
                     className="rounded-md border-0"
                     modifiers={modifiers}
                     modifiersClassNames={modifiersClassNames}
                     weekStartsOn={1}
+                    showOutsideDays={false}
                   />
                 </div>
                 
@@ -272,11 +304,13 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                     mode="single"
                     selected={selectedDate}
                     onSelect={setSelectedDate}
-                    month={currentDate}
+                    month={currentMonth}
+                    onMonthChange={() => {}}
                     className="rounded-md border-0"
                     modifiers={modifiers}
                     modifiersClassNames={modifiersClassNames}
                     weekStartsOn={1}
+                    showOutsideDays={false}
                   />
                 </div>
               </div>
