@@ -3,12 +3,14 @@ import React from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import { Workout } from "@/types/workout";
 import { PlannedWorkout, getPlannedWorkouts } from "@/types/plannedWorkout";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getMonthlyStats, getWeeklyStats } from "@/utils/workoutCalculations";
 import WorkoutProgressPanel from "./WorkoutProgressPanel";
+import { CheckCircle2, Calendar as CalendarIcon, Dumbbell } from "lucide-react";
 
 interface WorkoutCalendarProps {
   workouts: Workout[];
@@ -113,146 +115,166 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     bothWorkouts: "bothWorkouts"
   };
 
-  // Custom day content with tooltips for hover information
-  const DayContent = ({ date, ...props }: { date: Date }) => {
-    const dayWorkouts = getWorkoutsForDate(date);
-    const dayPlannedWorkouts = getPlannedWorkoutsForDate(date);
-    const hasWorkout = dayWorkouts.length > 0;
-    const hasPlannedWorkout = dayPlannedWorkouts.length > 0;
-
-    if (!hasWorkout && !hasPlannedWorkout) {
-      return <span>{date.getDate()}</span>;
-    }
-
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span>{date.getDate()}</span>
-          </TooltipTrigger>
-          <TooltipContent>
-            <div className="max-w-48">
-              {hasWorkout && (
-                <div>
-                  <div className="font-medium text-green-600 mb-1">Voltooid:</div>
-                  {dayWorkouts.map((workout, index) => (
-                    <div key={workout.id} className="text-xs mb-1">
-                      <div className="font-medium">{workout.name}</div>
-                      <div className="text-muted-foreground">
-                        {workout.exercises.length} {t("exercises")}
-                      </div>
-                      {index < dayWorkouts.length - 1 && <hr className="my-1" />}
-                    </div>
-                  ))}
-                </div>
-              )}
-              {hasPlannedWorkout && (
-                <div className={hasWorkout ? "mt-2 pt-2 border-t" : ""}>
-                  <div className="font-medium text-blue-600 mb-1">Gepland:</div>
-                  {dayPlannedWorkouts.map((workout, index) => (
-                    <div key={workout.id} className="text-xs mb-1">
-                      <div className="font-medium">{workout.name}</div>
-                      {workout.notes && (
-                        <div className="text-muted-foreground">{workout.notes}</div>
-                      )}
-                      {index < dayPlannedWorkouts.length - 1 && <hr className="my-1" />}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  };
+  // Get workouts for selected date to display below calendar
+  const selectedDateWorkouts = selectedDate ? getWorkoutsForDate(selectedDate) : [];
+  const selectedDatePlanned = selectedDate ? getPlannedWorkoutsForDate(selectedDate) : [];
 
   const handlePlanWorkout = () => {
     setPlannedWorkouts(getPlannedWorkouts());
   };
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("Workout calendar")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left side - Calendar and Stats */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Enhanced Statistics Cards */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
-                <div className="text-sm text-muted-foreground">{t("Workouts this week")}</div>
-                <div className="text-3xl font-bold mt-1">{weeklyStats.totalWorkouts}</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {weeklyStats.weekComparison}
+    <div className="space-y-4">
+      {/* Compact Statistics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 border-blue-200/50 dark:border-blue-800/50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Dumbbell className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <div className="text-xs text-muted-foreground">{t("Workouts this week")}</div>
+            </div>
+            <div className="text-2xl font-bold mt-1">{weeklyStats.totalWorkouts}</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              {weeklyStats.weekComparison}
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/20 border-green-200/50 dark:border-green-800/50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <div className="text-xs text-muted-foreground">{t("Workouts this month")}</div>
+            </div>
+            <div className="text-2xl font-bold mt-1">{monthlyStats.totalWorkouts}</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              {monthlyStats.monthComparison}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/20 border-purple-200/50 dark:border-purple-800/50">
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground">Total Exercises</div>
+            <div className="text-2xl font-bold mt-1">
+              {workouts.reduce((sum, w) => sum + (w.exercises?.length || 0), 0)}
+            </div>
+            <div className="text-xs text-muted-foreground mt-0.5">All time</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/20 border-orange-200/50 dark:border-orange-800/50">
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground">Planned Workouts</div>
+            <div className="text-2xl font-bold mt-1">{plannedWorkouts.length}</div>
+            <div className="text-xs text-muted-foreground mt-0.5">Upcoming</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Calendar Section */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5" />
+                {t("Workout calendar")}
+              </CardTitle>
+              <div className="flex gap-2 text-xs">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded bg-green-600"></div>
+                  <span>Completed</span>
                 </div>
-              </div>
-              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md">
-                <div className="text-sm text-muted-foreground">{t("Workouts this month")}</div>
-                <div className="text-3xl font-bold mt-1">{monthlyStats.totalWorkouts}</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {monthlyStats.monthComparison}
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded bg-blue-500"></div>
+                  <span>Planned</span>
                 </div>
               </div>
             </div>
-            
-            {/* Calendar with custom styling for workout days */}
+          </CardHeader>
+          <CardContent>
             <div className="workout-calendar">
               <style dangerouslySetInnerHTML={{
                 __html: `
-                  /* Override all default styles for completed workout days */
-                  .workout-calendar .rdp-day.completedWorkout .rdp-day_button,
-                  .workout-calendar .rdp-day .rdp-day_button.completedWorkout {
-                    background-color: rgb(22 163 74) !important;
-                    color: white !important;
-                    font-weight: 600 !important;
-                    border: none !important;
-                    border-radius: 6px !important;
-                    box-shadow: none !important;
-                  }
-                  .workout-calendar .rdp-day.completedWorkout .rdp-day_button:hover,
-                  .workout-calendar .rdp-day .rdp-day_button.completedWorkout:hover {
-                    background-color: rgb(21 128 61) !important;
+                  .workout-calendar .rdp {
+                    width: 100%;
                   }
                   
-                  /* Override all default styles for planned workout days */
-                  .workout-calendar .rdp-day.plannedWorkout .rdp-day_button,
-                  .workout-calendar .rdp-day .rdp-day_button.plannedWorkout {
-                    background-color: rgb(59 130 246) !important;
+                  .workout-calendar .rdp-day_button {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    min-height: 40px;
+                    border-radius: 8px;
+                    transition: all 0.2s;
+                  }
+                  
+                  /* Completed workout days */
+                  .workout-calendar .completedWorkout {
+                    background-color: hsl(142 71% 45%) !important;
+                    color: white !important;
+                    font-weight: 600 !important;
+                    position: relative;
+                  }
+                  
+                  .workout-calendar .completedWorkout:hover {
+                    background-color: hsl(142 71% 35%) !important;
+                    transform: scale(1.05);
+                  }
+                  
+                  .workout-calendar .completedWorkout::after {
+                    content: '✓';
+                    position: absolute;
+                    top: 2px;
+                    right: 2px;
+                    font-size: 10px;
+                    line-height: 1;
+                  }
+                  
+                  /* Planned workout days */
+                  .workout-calendar .plannedWorkout {
+                    background-color: hsl(217 91% 60%) !important;
                     color: white !important;
                     font-weight: 500 !important;
-                    border: none !important;
-                    border-radius: 6px !important;
-                    box-shadow: none !important;
-                  }
-                  .workout-calendar .rdp-day.plannedWorkout .rdp-day_button:hover,
-                  .workout-calendar .rdp-day .rdp-day_button.plannedWorkout:hover {
-                    background-color: rgb(37 99 235) !important;
+                    position: relative;
                   }
                   
-                  /* Override all default styles for days with both workouts */
-                  .workout-calendar .rdp-day.bothWorkouts .rdp-day_button,
-                  .workout-calendar .rdp-day .rdp-day_button.bothWorkouts {
-                    background: linear-gradient(135deg, rgb(22 163 74), rgb(59 130 246)) !important;
+                  .workout-calendar .plannedWorkout:hover {
+                    background-color: hsl(217 91% 50%) !important;
+                    transform: scale(1.05);
+                  }
+                  
+                  .workout-calendar .plannedWorkout::after {
+                    content: '○';
+                    position: absolute;
+                    top: 2px;
+                    right: 2px;
+                    font-size: 10px;
+                    line-height: 1;
+                  }
+                  
+                  /* Days with both completed and planned workouts */
+                  .workout-calendar .bothWorkouts {
+                    background: linear-gradient(135deg, hsl(142 71% 45%), hsl(217 91% 60%)) !important;
                     color: white !important;
                     font-weight: 600 !important;
-                    border: none !important;
-                    border-radius: 6px !important;
-                    box-shadow: none !important;
-                  }
-                  .workout-calendar .rdp-day.bothWorkouts .rdp-day_button:hover,
-                  .workout-calendar .rdp-day .rdp-day_button.bothWorkouts:hover {
-                    background: linear-gradient(135deg, rgb(21 128 61), rgb(37 99 235)) !important;
+                    position: relative;
                   }
                   
-                  /* Additional override for any selected states */
-                  .workout-calendar .rdp-day_button[aria-selected="true"].completedWorkout {
-                    background-color: rgb(22 163 74) !important;
+                  .workout-calendar .bothWorkouts:hover {
+                    background: linear-gradient(135deg, hsl(142 71% 35%), hsl(217 91% 50%)) !important;
+                    transform: scale(1.05);
                   }
-                  .workout-calendar .rdp-day_button[data-selected="true"].completedWorkout {
-                    background-color: rgb(22 163 74) !important;
+                  
+                  .workout-calendar .bothWorkouts::after {
+                    content: '✓○';
+                    position: absolute;
+                    top: 2px;
+                    right: 2px;
+                    font-size: 9px;
+                    line-height: 1;
                   }
                 `
               }} />
@@ -260,27 +282,71 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                 mode="single"
                 selected={selectedDate}
                 onSelect={setSelectedDate}
-                className="p-0"
+                className="rounded-md border-0"
                 modifiers={modifiers}
                 modifiersClassNames={modifiersClassNames}
                 weekStartsOn={1}
-                components={{
-                  Day: ({ date }) => <DayContent date={date} />
-                }}
               />
             </div>
-          </div>
 
-          {/* Right side - Progress Panel */}
-          <div className="lg:col-span-1">
-            <WorkoutProgressPanel 
-              workouts={workouts} 
-              onPlanWorkout={handlePlanWorkout}
-            />
-          </div>
+            {/* Selected Date Details */}
+            {selectedDate && (selectedDateWorkouts.length > 0 || selectedDatePlanned.length > 0) && (
+              <div className="mt-4 p-4 bg-muted rounded-lg space-y-3">
+                <div className="font-semibold text-sm flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4" />
+                  {format(selectedDate, "MMMM d, yyyy")}
+                </div>
+                
+                {selectedDateWorkouts.length > 0 && (
+                  <div>
+                    <div className="text-xs font-medium text-green-600 dark:text-green-400 mb-2 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Completed Workouts
+                    </div>
+                    <div className="space-y-2">
+                      {selectedDateWorkouts.map((workout) => (
+                        <Card key={workout.id} className="p-3">
+                          <div className="font-medium text-sm">{workout.name}</div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {workout.exercises.length} exercises
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {selectedDatePlanned.length > 0 && (
+                  <div>
+                    <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2">
+                      Planned Workouts
+                    </div>
+                    <div className="space-y-2">
+                      {selectedDatePlanned.map((workout) => (
+                        <Card key={workout.id} className="p-3">
+                          <div className="font-medium text-sm">{workout.name}</div>
+                          {workout.notes && (
+                            <div className="text-xs text-muted-foreground mt-1">{workout.notes}</div>
+                          )}
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Right side - Progress Panel */}
+        <div className="lg:col-span-1">
+          <WorkoutProgressPanel 
+            workouts={workouts} 
+            onPlanWorkout={handlePlanWorkout}
+          />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
