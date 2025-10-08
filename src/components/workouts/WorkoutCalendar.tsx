@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Badge } from "@/components/ui/badge";
 import { Workout } from "@/types/workout";
 import { PlannedWorkout, getPlannedWorkouts } from "@/types/plannedWorkout";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek, subMonths, addMonths } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getMonthlyStats, getWeeklyStats } from "@/utils/workoutCalculations";
 import WorkoutProgressPanel from "./WorkoutProgressPanel";
@@ -19,6 +19,7 @@ interface WorkoutCalendarProps {
 const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   const { t } = useLanguage();
   const currentDate = new Date();
+  const previousMonthDate = subMonths(currentDate, 1);
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(currentDate);
   const [plannedWorkouts, setPlannedWorkouts] = React.useState<PlannedWorkout[]>(getPlannedWorkouts());
   
@@ -248,15 +249,37 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                   }
                 `
               }} />
-              <Calendar 
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                className="rounded-md border-0"
-                modifiers={modifiers}
-                modifiersClassNames={modifiersClassNames}
-                weekStartsOn={1}
-              />
+              
+              {/* Two calendars side by side */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Previous Month Calendar */}
+                <div>
+                  <Calendar 
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    month={previousMonthDate}
+                    className="rounded-md border-0"
+                    modifiers={modifiers}
+                    modifiersClassNames={modifiersClassNames}
+                    weekStartsOn={1}
+                  />
+                </div>
+                
+                {/* Current Month Calendar */}
+                <div>
+                  <Calendar 
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    month={currentDate}
+                    className="rounded-md border-0"
+                    modifiers={modifiers}
+                    modifiersClassNames={modifiersClassNames}
+                    weekStartsOn={1}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Selected Date Details */}
