@@ -216,7 +216,6 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                     background-color: hsl(142 71% 45%) !important;
                     color: white !important;
                     font-weight: 600 !important;
-                    position: relative;
                   }
                   
                   .workout-calendar .completedWorkout:hover {
@@ -224,21 +223,11 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                     transform: scale(1.05);
                   }
                   
-                  .workout-calendar .completedWorkout::after {
-                    content: '✓';
-                    position: absolute;
-                    top: 2px;
-                    right: 2px;
-                    font-size: 10px;
-                    line-height: 1;
-                  }
-                  
                   /* Planned workout days */
                   .workout-calendar .plannedWorkout {
                     background-color: hsl(217 91% 60%) !important;
                     color: white !important;
                     font-weight: 500 !important;
-                    position: relative;
                   }
                   
                   .workout-calendar .plannedWorkout:hover {
@@ -246,35 +235,16 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                     transform: scale(1.05);
                   }
                   
-                  .workout-calendar .plannedWorkout::after {
-                    content: '○';
-                    position: absolute;
-                    top: 2px;
-                    right: 2px;
-                    font-size: 10px;
-                    line-height: 1;
-                  }
-                  
                   /* Days with both completed and planned workouts */
                   .workout-calendar .bothWorkouts {
                     background: linear-gradient(135deg, hsl(142 71% 45%), hsl(217 91% 60%)) !important;
                     color: white !important;
                     font-weight: 600 !important;
-                    position: relative;
                   }
                   
                   .workout-calendar .bothWorkouts:hover {
                     background: linear-gradient(135deg, hsl(142 71% 35%), hsl(217 91% 50%)) !important;
                     transform: scale(1.05);
-                  }
-                  
-                  .workout-calendar .bothWorkouts::after {
-                    content: '✓○';
-                    position: absolute;
-                    top: 2px;
-                    right: 2px;
-                    font-size: 9px;
-                    line-height: 1;
                   }
                 `
               }} />
