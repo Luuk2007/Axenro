@@ -233,15 +233,13 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                     width: 100%;
                   }
                   
-                  /* Hide calendar navigation on mobile, show only on desktop */
-                  @media (max-width: 767px) {
-                    .workout-calendar .rdp-nav {
-                      display: none !important;
-                    }
-                    
-                    .workout-calendar .rdp-month {
-                      padding-top: 0 !important;
-                    }
+                  /* Hide calendar built-in navigation completely */
+                  .workout-calendar .rdp-nav {
+                    display: none !important;
+                  }
+                  
+                  .workout-calendar .rdp-month {
+                    padding-top: 0 !important;
                   }
                   
                   .workout-calendar .rdp-day_button {
