@@ -194,14 +194,14 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                 {t("Workout calendar")}
               </CardTitle>
               <div className="flex items-center justify-between sm:justify-end gap-4">
-                <div className="flex gap-2 text-xs">
-                  <div className="flex items-center gap-1">
+                <div className="flex gap-3 text-xs">
+                  <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-green-600"></div>
-                    <span className="hidden sm:inline">Completed</span>
+                    <span>Completed</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-blue-500"></div>
-                    <span className="hidden sm:inline">Planned</span>
+                    <span>Planned</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -231,6 +231,17 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                 __html: `
                   .workout-calendar .rdp {
                     width: 100%;
+                  }
+                  
+                  /* Hide calendar navigation on mobile, show only on desktop */
+                  @media (max-width: 767px) {
+                    .workout-calendar .rdp-nav {
+                      display: none !important;
+                    }
+                    
+                    .workout-calendar .rdp-month {
+                      padding-top: 0 !important;
+                    }
                   }
                   
                   .workout-calendar .rdp-day_button {
