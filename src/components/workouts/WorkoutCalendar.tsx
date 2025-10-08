@@ -280,10 +280,10 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                 `
               }} />
               
-              {/* Two calendars side by side */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Previous Month Calendar */}
-                <div>
+              {/* Two calendars side by side on desktop, one on mobile */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Previous Month Calendar - Hidden on mobile */}
+                <div className="hidden md:block">
                   <Calendar 
                     mode="single"
                     selected={selectedDate}
