@@ -14,7 +14,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
 import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
 import { convertWeight, getWeightUnit, formatWeight, convertDistance, getDistanceUnit, formatDistance } from "@/utils/unitConversions";
-import { isCardioExercise } from "@/utils/workoutUtils";
+import { isCardioExercise, formatDuration } from "@/utils/workoutUtils";
 
 interface TrackWorkoutProps {
   open: boolean;
@@ -64,7 +64,7 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
                         {isCardio ? (
                           <>
                             <div className="font-medium">Session {setIndex + 1}</div>
-                            <div>{set.reps} {t("minutes")}</div>
+                            <div>{formatDuration(set.reps)}</div>
                             {set.weight > 0 && (
                               <div>
                                 {formatDistance(displayDistance, measurementSystem)} {getDistanceUnit(measurementSystem)}

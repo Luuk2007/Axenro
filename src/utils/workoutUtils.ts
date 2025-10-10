@@ -15,13 +15,13 @@ export const getWorkoutSummary = (workout: Workout) => {
   
   if (hasCardio && strengthExercises.length === 0) {
     // Pure cardio workout
-    const totalDuration = cardioExercises.reduce((sum, ex) => 
+    const totalDurationSeconds = cardioExercises.reduce((sum, ex) => 
       sum + (ex.sets[0]?.reps || 0), 0
     );
     return {
       type: 'cardio',
       exerciseCount: cardioExercises.length,
-      duration: totalDuration,
+      duration: totalDurationSeconds,
       sets: null
     };
   } else if (!hasCardio) {
@@ -36,14 +36,24 @@ export const getWorkoutSummary = (workout: Workout) => {
   } else {
     // Mixed workout
     const totalSets = strengthExercises.reduce((sum, ex) => sum + ex.sets.length, 0);
-    const totalDuration = cardioExercises.reduce((sum, ex) => 
+    const totalDurationSeconds = cardioExercises.reduce((sum, ex) => 
       sum + (ex.sets[0]?.reps || 0), 0
     );
     return {
       type: 'mixed',
       exerciseCount: workout.exercises.length,
       sets: totalSets,
-      duration: totalDuration
+      duration: totalDurationSeconds
     };
   }
+};
+
+export const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  
+  if (secs === 0) {
+    return `${mins}m`;
+  }
+  return `${mins}m ${secs}s`;
 };

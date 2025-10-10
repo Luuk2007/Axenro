@@ -6,7 +6,7 @@ import { Workout } from "@/types/workout";
 import { TrendingUp, Dumbbell } from "lucide-react";
 import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
 import { convertWeight, getWeightUnit, formatWeight, convertDistance, getDistanceUnit, formatDistance } from "@/utils/unitConversions";
-import { isCardioExercise } from "@/utils/workoutUtils";
+import { isCardioExercise, formatDuration } from "@/utils/workoutUtils";
 
 interface WorkoutStatisticsProps {
   workouts: Workout[];
@@ -211,7 +211,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
                       <>
                         <div>
                           <span className="font-medium text-foreground">
-                            {stat.maxDuration || 0} min
+                            {formatDuration(stat.maxDuration || 0)}
                             {stat.maxDistance ? ` - ${formatDistance(convertDistance(stat.maxDistance, 'metric', measurementSystem), measurementSystem)} ${getDistanceUnit(measurementSystem)}` : ''}
                           </span>
                           <br />

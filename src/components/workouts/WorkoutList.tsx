@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Calendar, Edit } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
-import { getWorkoutSummary } from "@/utils/workoutUtils";
+import { getWorkoutSummary, formatDuration } from "@/utils/workoutUtils";
 
 interface WorkoutListProps {
   workouts: Workout[];
@@ -34,11 +34,11 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
     
     switch (summary.type) {
       case 'cardio':
-        return `${summary.exerciseCount} cardio ${summary.exerciseCount === 1 ? t("exercise") : t("exercises")}, ${summary.duration} min total`;
+        return `${summary.exerciseCount} cardio ${summary.exerciseCount === 1 ? t("exercise") : t("exercises")}, ${formatDuration(summary.duration || 0)} total`;
       case 'strength':
         return `${summary.exerciseCount} ${t("exercises")}, ${summary.sets} ${t("sets")}`;
       case 'mixed':
-        return `${summary.exerciseCount} ${t("exercises")} (${summary.sets} ${t("sets")}, ${summary.duration} min cardio)`;
+        return `${summary.exerciseCount} ${t("exercises")} (${summary.sets} ${t("sets")}, ${formatDuration(summary.duration || 0)} cardio)`;
       default:
         return `${workout.exercises.length} ${t("exercises")}`;
     }

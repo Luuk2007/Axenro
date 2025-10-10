@@ -88,7 +88,7 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
     const newExercise = {
       id: Date.now().toString(),
       name: '',
-      duration: 30, // Default 30 minutes
+      duration: 1800, // Default 30 minutes (in seconds)
       distance: 0
     };
     setExercises(prev => [...prev, newExercise]);
@@ -187,16 +187,39 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
                         </Button>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="text-xs font-medium block mb-1">{t("Duration")} (min)</label>
-                          <Input
-                            type="number"
-                            value={exercise.duration?.toString() || ''}
-                            onChange={(e) => handleUpdateExercise(index, 'duration', parseInt(e.target.value) || 0)}
-                            className="h-8"
-                            placeholder="30"
-                          />
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs font-medium block mb-1">{t("Duration")} (min)</label>
+                            <Input
+                              type="number"
+                              value={Math.floor((exercise.duration || 0) / 60).toString()}
+                              onChange={(e) => {
+                                const mins = parseInt(e.target.value) || 0;
+                                const secs = (exercise.duration || 0) % 60;
+                                handleUpdateExercise(index, 'duration', mins * 60 + secs);
+                              }}
+                              className="h-8"
+                              placeholder="30"
+                              min="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium block mb-1">{t("Duration")} (sec)</label>
+                            <Input
+                              type="number"
+                              value={((exercise.duration || 0) % 60).toString()}
+                              onChange={(e) => {
+                                const mins = Math.floor((exercise.duration || 0) / 60);
+                                const secs = parseInt(e.target.value) || 0;
+                                handleUpdateExercise(index, 'duration', mins * 60 + secs);
+                              }}
+                              className="h-8"
+                              placeholder="0"
+                              min="0"
+                              max="59"
+                            />
+                          </div>
                         </div>
                         <div>
                           <label className="text-xs font-medium block mb-1">{t("Distance")} ({getDistanceUnit(measurementSystem)})</label>
