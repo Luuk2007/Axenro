@@ -176,17 +176,14 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
               />
             </div>
             
-            <div>
+            <div className="w-full overflow-hidden">
               <label className="text-sm font-medium block mb-2">{t("Date")}</label>
-              <div className="relative w-full">
-                <Input
-                  type="date"
-                  value={workoutDate}
-                  onChange={(e) => setWorkoutDate(e.target.value)}
-                  className="pl-10 w-full"
-                />
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-              </div>
+              <Input
+                type="date"
+                value={workoutDate}
+                onChange={(e) => setWorkoutDate(e.target.value)}
+                className="w-full"
+              />
             </div>
             
             <div>
