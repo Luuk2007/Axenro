@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, TrendingDown, Plus, Dumbbell, Target, Calendar } from 'lucide-react';
 import { Workout } from '@/types/workout';
-import { PlannedWorkout, getPlannedWorkouts } from '@/types/plannedWorkout';
+import { usePlannedWorkouts } from '@/hooks/usePlannedWorkouts';
 import { getExerciseProgress, getWeeklyStats } from '@/utils/workoutCalculations';
 import { format, parse } from 'date-fns';
 import PlanWorkoutDialog from './PlanWorkoutDialog';
@@ -16,13 +16,13 @@ interface WorkoutProgressPanelProps {
 
 const WorkoutProgressPanel = ({ workouts, onPlanWorkout }: WorkoutProgressPanelProps) => {
   const [showPlanDialog, setShowPlanDialog] = useState(false);
-  const [plannedWorkouts, setPlannedWorkouts] = useState<PlannedWorkout[]>(getPlannedWorkouts());
+  const { plannedWorkouts } = usePlannedWorkouts();
 
   const exerciseProgress = getExerciseProgress(workouts);
   const weeklyStats = getWeeklyStats(workouts);
 
   const handleWorkoutPlanned = () => {
-    setPlannedWorkouts(getPlannedWorkouts());
+    // Workouts will refresh automatically via react-query
     if (onPlanWorkout) {
       onPlanWorkout();
     }

@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Workout } from "@/types/workout";
-import { PlannedWorkout, getPlannedWorkouts } from "@/types/plannedWorkout";
+import { usePlannedWorkouts } from "@/hooks/usePlannedWorkouts";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek, subMonths, addMonths } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getMonthlyStats, getWeeklyStats } from "@/utils/workoutCalculations";
@@ -23,7 +23,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   const [currentMonth, setCurrentMonth] = React.useState<Date>(currentDate);
   const previousMonthDate = subMonths(currentMonth, 1);
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(currentDate);
-  const [plannedWorkouts, setPlannedWorkouts] = React.useState<PlannedWorkout[]>(getPlannedWorkouts());
+  const { plannedWorkouts } = usePlannedWorkouts();
 
   const handlePreviousMonth = () => {
     setCurrentMonth(subMonths(currentMonth, 1));
@@ -131,7 +131,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   const selectedDatePlanned = selectedDate ? getPlannedWorkoutsForDate(selectedDate) : [];
 
   const handlePlanWorkout = () => {
-    setPlannedWorkouts(getPlannedWorkouts());
+    // Workouts will refresh automatically via react-query
   };
   
   return (

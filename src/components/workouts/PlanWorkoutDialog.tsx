@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { PlannedWorkout, savePlannedWorkouts, getPlannedWorkouts } from '@/types/plannedWorkout';
+import { usePlannedWorkouts } from '@/hooks/usePlannedWorkouts';
 import { toast } from 'sonner';
 
 interface PlanWorkoutDialogProps {
@@ -20,6 +20,7 @@ interface PlanWorkoutDialogProps {
 
 const PlanWorkoutDialog = ({ open, onOpenChange, onWorkoutPlanned }: PlanWorkoutDialogProps) => {
   const { t } = useLanguage();
+  const { addPlannedWorkout } = usePlannedWorkouts();
   const [name, setName] = useState('');
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [notes, setNotes] = useState('');
@@ -30,19 +31,13 @@ const PlanWorkoutDialog = ({ open, onOpenChange, onWorkoutPlanned }: PlanWorkout
       return;
     }
 
-    const newPlannedWorkout: PlannedWorkout = {
-      id: Date.now().toString(),
+    addPlannedWorkout({
       name,
       date: format(date, 'yyyy-MM-dd'),
-      muscleGroups: [], // Could be expanded later
+      muscle_groups: [],
       notes
-    };
+    });
 
-    const existingPlanned = getPlannedWorkouts();
-    const updatedPlanned = [...existingPlanned, newPlannedWorkout];
-    savePlannedWorkouts(updatedPlanned);
-
-    toast.success('Workout planned successfully');
     onWorkoutPlanned();
     onOpenChange(false);
     
