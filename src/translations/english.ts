@@ -283,5 +283,14 @@ export const english = {
   "Last performed": "Last performed",
   "sets": "sets",
   "These values will be pre-filled": "These values will be pre-filled",
-  "No previous history for this exercise": "No previous history for this exercise"
+  "No previous history for this exercise": "No previous history for this exercise",
+  "Exercise History": "Exercise History",
+  "Average Performance": "Average Performance",
+  "Progress": "Progress",
+  "Personal Record": "Personal Record",
+  "No history available": "No history available",
+  "Newest First": "Newest First",
+  "Oldest First": "Oldest First",
+  "Session History": "Session History",
+  "Best Set": "Best Set"
 };

@@ -81,5 +81,14 @@ export const workoutTranslations = {
   "Last performed": "Laatst uitgevoerd",
   "sets": "sets",
   "These values will be pre-filled": "Deze waardes worden vooraf ingevuld",
-  "No previous history for this exercise": "Geen eerdere geschiedenis voor deze oefening"
+  "No previous history for this exercise": "Geen eerdere geschiedenis voor deze oefening",
+  "Exercise History": "Oefening Geschiedenis",
+  "Average Performance": "Gemiddelde Prestatie",
+  "Progress": "Voortgang",
+  "Personal Record": "Persoonlijk Record",
+  "No history available": "Geen geschiedenis beschikbaar",
+  "Newest First": "Nieuwste Eerst",
+  "Oldest First": "Oudste Eerst",
+  "Session History": "Sessie Geschiedenis",
+  "Best Set": "Beste Set"
 };

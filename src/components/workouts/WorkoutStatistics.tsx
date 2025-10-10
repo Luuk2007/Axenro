@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
-import { TrendingUp, Dumbbell } from "lucide-react";
+import { TrendingUp, Dumbbell, ChevronRight } from "lucide-react";
 import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
 import { convertWeight, getWeightUnit, formatWeight, convertDistance, getDistanceUnit, formatDistance } from "@/utils/unitConversions";
 import { isCardioExercise, formatDuration } from "@/utils/workoutUtils";
+import ExerciseProgressModal from "./ExerciseProgressModal";
 
 interface WorkoutStatisticsProps {
   workouts: Workout[];
@@ -28,6 +29,15 @@ interface ExerciseStats {
 const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
   const { t } = useLanguage();
   const { measurementSystem } = useMeasurementSystem();
+  const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [selectedExerciseIsCardio, setSelectedExerciseIsCardio] = useState(false);
+
+  const handleExerciseClick = (exerciseName: string, isCardio: boolean) => {
+    setSelectedExercise(exerciseName);
+    setSelectedExerciseIsCardio(isCardio);
+    setShowProgressModal(true);
+  };
 
   // Analyze workouts to get exercise statistics
   const getExerciseStatistics = (): ExerciseStats[] => {
@@ -193,7 +203,11 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
       
       <div className="grid gap-4">
         {exerciseStats.map((stat) => (
-          <Card key={stat.name} className="transition-colors hover:bg-muted/50">
+          <Card 
+            key={stat.name} 
+            className="transition-colors hover:bg-muted/50 cursor-pointer"
+            onClick={() => handleExerciseClick(stat.name, stat.isCardio)}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
@@ -246,11 +260,23 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
                     </div>
                   </div>
                 </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* Exercise Progress Modal */}
+      {selectedExercise && (
+        <ExerciseProgressModal
+          exerciseName={selectedExercise}
+          workouts={workouts}
+          open={showProgressModal}
+          onOpenChange={setShowProgressModal}
+          isCardio={selectedExerciseIsCardio}
+        />
+      )}
     </div>
   );
 };
