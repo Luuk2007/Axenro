@@ -8,7 +8,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (type === "number") {
         // Allow empty values and don't convert to 0
-        const value = e.target.value;
+        let value = e.target.value;
         if (value === "") {
           // For controlled components, we need to pass the empty string
           if (onChange) {
@@ -24,10 +24,26 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           return;
         }
         
+        // Replace comma with period for decimal input (European format support)
+        value = value.replace(',', '.');
+        
         // Only allow numeric input (including decimal point)
         if (!/^-?\d*\.?\d*$/.test(value)) {
           return; // Don't update if invalid
         }
+        
+        // Update the event with the normalized value
+        if (onChange) {
+          const syntheticEvent = {
+            ...e,
+            target: {
+              ...e.target,
+              value: value
+            }
+          };
+          onChange(syntheticEvent as React.ChangeEvent<HTMLInputElement>);
+        }
+        return;
       }
       
       if (onChange) {
@@ -44,7 +60,8 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         )}
         ref={ref}
         onChange={handleChange}
-        inputMode={type === "number" ? "numeric" : undefined}
+        inputMode={type === "number" ? "decimal" : undefined}
+        step={type === "number" ? "any" : undefined}
         {...props}
       />
     )
