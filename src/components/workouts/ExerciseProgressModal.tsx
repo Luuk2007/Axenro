@@ -160,7 +160,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col p-0 pt-6 px-4 sm:px-6">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col !p-4 sm:!p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl pr-8">
             <TrendingUp className="h-5 w-5 flex-shrink-0" />
