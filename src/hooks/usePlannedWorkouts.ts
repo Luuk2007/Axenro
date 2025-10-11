@@ -15,7 +15,7 @@ export interface PlannedWorkout {
 export const usePlannedWorkouts = () => {
   const queryClient = useQueryClient();
 
-  // Fetch all planned workouts
+  // Fetch all planned workouts - optimized caching
   const { data: plannedWorkouts = [], isLoading } = useQuery({
     queryKey: ['planned-workouts'],
     queryFn: async () => {
@@ -39,6 +39,8 @@ export const usePlannedWorkouts = () => {
         created_at: workout.created_at
       }));
     },
+    staleTime: 3 * 60 * 1000, // 3 minutes
+    gcTime: 10 * 60 * 1000,
   });
 
   // Add new planned workout

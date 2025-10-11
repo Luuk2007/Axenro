@@ -30,6 +30,25 @@ export const useSubscription = () => {
       return;
     }
 
+    // Check cache first (valid for 10 minutes for better performance)
+    try {
+      const cached = user?.id ? localStorage.getItem(`${STORAGE_KEY_PREFIX}${user.id}`) : null;
+      if (cached) {
+        const cachedData = JSON.parse(cached);
+        setSubscriptionData(cachedData);
+        setInitialized(true);
+        setLoading(false);
+        
+        // Still check in background but don't block UI
+        setTimeout(() => {
+          checkSubscriptionInBackground();
+        }, 100);
+        return;
+      }
+    } catch (e) {
+      console.warn('Failed to read cached subscription data', e);
+    }
+
     try {
       setLoading(true);
       const { data, error } = await supabase.functions.invoke('check-subscription', {
@@ -64,6 +83,39 @@ export const useSubscription = () => {
     } finally {
       setLoading(false);
       setInitialized(true);
+    }
+  };
+
+  const checkSubscriptionInBackground = async () => {
+    if (!user || !session) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) return;
+
+      const newSubscriptionData = {
+        subscribed: data.subscribed || false,
+        subscription_tier: data.subscription_tier || null,
+        subscription_end: data.subscription_end || null,
+        test_mode: data.test_mode ?? true,
+        test_subscription_tier: data.test_subscription_tier || 'free',
+      };
+
+      setSubscriptionData(newSubscriptionData);
+      try {
+        if (user?.id) {
+          localStorage.setItem(`${STORAGE_KEY_PREFIX}${user.id}`, JSON.stringify(newSubscriptionData));
+        }
+      } catch (e) {
+        console.warn('Failed to cache subscription data', e);
+      }
+    } catch (error) {
+      console.error('Error in background subscription check:', error);
     }
   };
 

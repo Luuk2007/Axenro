@@ -58,7 +58,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { weightData } = useWeightData();
   const { profile } = useUserProfile();
-  const { workouts: allWorkouts } = useWorkouts();
+  const { workouts: allWorkouts, loading: workoutsLoading } = useWorkouts();
   const [date, setDate] = useState<Date>(new Date());
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showStepsConnection, setShowStepsConnection] = useState(false);
@@ -180,6 +180,9 @@ const Dashboard = () => {
       }
     };
 
+    // Only load on mount and when date changes, not on every profile update
+    if (!profile) return;
+    
     loadConsumedCalories();
 
     // Listen for food log updates (custom event)
@@ -201,7 +204,7 @@ const Dashboard = () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('foodLogUpdated', handleFoodLogUpdate);
     };
-  }, [profile, isAuthenticated, userId, date]);
+  }, [isAuthenticated, userId, date]); // Removed profile dependency
 
 
 
