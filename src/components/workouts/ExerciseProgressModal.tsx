@@ -161,7 +161,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col px-4 sm:px-6">
-        <DialogHeader className="px-0">
+        <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl pr-8">
             <TrendingUp className="h-5 w-5 flex-shrink-0" />
             <span className="truncate">{exerciseName} - {t("Exercise History")}</span>
@@ -169,7 +169,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
         </DialogHeader>
 
         {/* Statistics Summary */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4 px-0">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
           <Card>
             <CardContent className="p-3 sm:p-4 text-center">
               <div className="text-xl sm:text-2xl font-bold text-primary">
@@ -222,7 +222,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
         </div>
 
         {/* Sort Toggle */}
-        <div className="flex items-center justify-between pb-2 px-0">
+        <div className="flex items-center justify-between pb-2">
           <h3 className="text-sm font-medium">{t("Session History")}</h3>
           <Button
             variant="outline"
@@ -243,7 +243,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
               {t("No history available")}
             </div>
           ) : (
-            <div className="space-y-3 px-0">
+            <div className="space-y-3">
               {exerciseHistory.map((entry, index) => (
                 <Card
                   key={`${entry.date}-${index}`}
