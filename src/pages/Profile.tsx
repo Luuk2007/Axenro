@@ -18,6 +18,10 @@ import ProfileForm, { ProfileFormValues, defaultValues, emptyDefaultValues } fro
 import UserStatsDisplay from "@/components/profile/UserStatsDisplay";
 import NutritionCalculator from "@/components/profile/NutritionCalculator";
 import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
+import { useAIAvatar } from "@/hooks/useAIAvatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Loader2, Sparkles, RefreshCw } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -27,6 +31,7 @@ const Profile = () => {
   const [initialValues, setInitialValues] = useState<Partial<ProfileFormValues>>(emptyDefaultValues);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string>('');
   const [hasMigratedLocalStorage, setHasMigratedLocalStorage] = useState(false);
+  const { avatarUrl, avatarStatus, loading: avatarLoading, generateAvatar } = useAIAvatar();
   
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
@@ -195,17 +200,88 @@ const Profile = () => {
         
         <TabsContent value="profile" className="space-y-6">
           {user && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("Profile picture")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ProfilePictureUpload
-                  currentImageUrl={profilePictureUrl}
-                  onImageUpdate={handleProfilePictureUpdate}
-                />
-              </CardContent>
-            </Card>
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("Profile picture")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ProfilePictureUpload
+                    currentImageUrl={profilePictureUrl}
+                    onImageUpdate={handleProfilePictureUpdate}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* AI Avatar Section */}
+              {profilePictureUrl && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      {t('Your AI Avatar')}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Sparkles className="h-4 w-4 text-primary" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>{t('Avatar Tooltip')}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+                      {/* Original Photo */}
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-sm text-muted-foreground">Original</p>
+                        <Avatar className="h-24 w-24 border-2 border-border">
+                          <AvatarImage src={profilePictureUrl} alt="Original" />
+                        </Avatar>
+                      </div>
+
+                      {/* Arrow or divider */}
+                      <div className="hidden sm:flex items-center">
+                        <div className="h-px w-8 bg-border"></div>
+                      </div>
+
+                      {/* AI Generated Avatar */}
+                      <div className="flex flex-col items-center gap-2">
+                        <p className="text-sm text-muted-foreground">AI Coach</p>
+                        <Avatar className="h-24 w-24 border-2 border-primary/30">
+                          {avatarUrl && <AvatarImage src={avatarUrl} alt="AI Avatar" />}
+                          <AvatarFallback className="bg-primary/10">
+                            {avatarStatus === 'generating' || avatarLoading ? (
+                              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            ) : (
+                              <Sparkles className="h-8 w-8 text-primary" />
+                            )}
+                          </AvatarFallback>
+                        </Avatar>
+                        {avatarStatus === 'generating' && (
+                          <p className="text-xs text-muted-foreground">Generating...</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Regenerate Button */}
+                    <div className="mt-4 flex justify-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => generateAvatar(profilePictureUrl)}
+                        disabled={avatarLoading || avatarStatus === 'generating'}
+                        className="gap-2"
+                      >
+                        <RefreshCw className={`h-4 w-4 ${avatarLoading ? 'animate-spin' : ''}`} />
+                        {t('Regenerate Avatar')}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
           )}
 
           <Card>

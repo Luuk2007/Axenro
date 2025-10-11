@@ -109,4 +109,15 @@ export const aiTranslations: Translations = {
   "Progress analysis completed!": "Voortgangsanalyse voltooid!",
   "Failed to analyze progress": "Voortgangsanalyse mislukt",
   "Failed to send message": "Verzenden bericht mislukt",
+
+  // AI Avatar
+  "Your AI Coach": "Jouw AI Coach",
+  "Generating your AI Coach…": "Jouw AI Coach genereren…",
+  "Avatar generation failed": "Avatar generatie mislukt",
+  "Regenerate Avatar": "Avatar opnieuw genereren",
+  "Chat with me": "Chat met mij",
+  "Your AI Avatar": "Jouw AI Avatar",
+  "Weekly Summary": "Weekoverzicht",
+  "Recent Achievements": "Recente prestaties",
+  "Avatar Tooltip": "Jouw AI Avatar is je persoonlijke Axenro Coach — het past zich aan jouw voortgang aan en motiveert je dagelijks.",
 };
