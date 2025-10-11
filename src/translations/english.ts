@@ -167,6 +167,24 @@ export const english = {
   "Chat with our AI experts about fitness, nutrition, and health topics": "Chat with our AI experts about fitness, nutrition, and health topics",
   "Please sign in to access AI features": "Please sign in to access AI features",
   
+  // AI Meal Analyzer
+  "AI Meal Analyzer": "AI Meal Analyzer",
+  "Describe what you ate and get AI-powered nutritional analysis": "Describe what you ate and get AI-powered nutritional analysis",
+  "What did you eat?": "What did you eat?",
+  "Analyzing with AI...": "Analyzing with AI...",
+  "Analyze with AI": "Analyze with AI",
+  "Nutrition Analysis": "Nutrition Analysis",
+  "Calculation Breakdown": "Calculation Breakdown",
+  "Custom Meal Name": "Custom Meal Name",
+  "Enter a name for this meal": "Enter a name for this meal",
+  "Add to Meal": "Add to Meal",
+  "Save to Today's Meals": "Save to Today's Meals",
+  "Please describe what you ate": "Please describe what you ate",
+  "Please analyze the meal first": "Please analyze the meal first",
+  "Please enter a custom meal name": "Please enter a custom meal name",
+  "Failed to analyze meal. Please try again.": "Failed to analyze meal. Please try again.",
+  "An error occurred while analyzing the meal": "An error occurred while analyzing the meal",
+  
   // Workout Coach
   "Training Goals": "Training Goals",
   "e.g., Build muscle, lose weight, increase strength...": "e.g., Build muscle, lose weight, increase strength...",

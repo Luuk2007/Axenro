@@ -33,23 +33,40 @@ serve(async (req) => {
 
     console.log('Analyzing meal:', mealDescription, 'Portion size:', portionSize);
 
-    // Create a detailed prompt for nutritional analysis
-    const prompt = `Analyze the following meal description and provide nutritional information per serving. 
-    
-Meal: "${mealDescription}"
-Portion size multiplier: ${portionSize}
+    // Create a detailed prompt for nutritional analysis with better handling of multiple foods
+    const systemPrompt = `You are a professional nutritionist with expertise in food analysis. 
+Your task is to analyze meal descriptions and provide accurate nutritional estimates.
 
-Please provide a JSON response with the following structure:
-{
-  "calories": number,
-  "protein": number (in grams),
-  "carbs": number (in grams),
-  "fat": number (in grams),
-  "confidence": "high" | "medium" | "low",
-  "notes": "brief explanation of estimation"
-}
+CRITICAL INSTRUCTIONS FOR MULTIPLE FOODS:
+1. When multiple foods are mentioned, analyze EACH item separately first
+2. Calculate the nutrition for each food item individually
+3. Sum up all the values to get the TOTAL nutrition
+4. Show your breakdown in the notes
 
-Consider standard serving sizes and multiply by the portion size provided. Be realistic with estimates based on typical ingredients and preparation methods. If the description is vague, make reasonable assumptions and indicate lower confidence.`;
+ACCURACY GUIDELINES:
+- Use standard portion sizes (e.g., 1 slice of bread = 30g, 100g chicken breast, 1 medium apple = 180g)
+- For quantities like "2 slices" or "3 eggs", multiply the standard portion
+- Account for cooking methods (fried vs grilled affects calories)
+- Be conservative with estimates if unclear
+
+CONFIDENCE LEVELS:
+- "high": Specific quantities and common foods (e.g., "2 slices whole wheat bread")
+- "medium": General descriptions (e.g., "chicken sandwich")
+- "low": Vague descriptions (e.g., "some pasta")`;
+
+    const userPrompt = `Analyze this meal and provide total nutritional values:
+
+Meal Description: "${mealDescription}"
+Portion Multiplier: ${portionSize}x
+
+Instructions:
+1. Identify all food items in the description
+2. Calculate nutrition for each item separately
+3. Multiply each by the portion multiplier (${portionSize})
+4. Sum all values for the total
+5. In notes, briefly show your breakdown (e.g., "Bread: 150cal + Chicken: 200cal + Cheese: 100cal = 450cal total")
+
+Provide accurate totals in the response.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -62,15 +79,60 @@ Consider standard serving sizes and multiply by the portion size provided. Be re
         messages: [
           {
             role: 'system',
-            content: 'You are a nutrition expert. Analyze meal descriptions and provide accurate nutritional estimates in JSON format. Always respond with valid JSON only.'
+            content: systemPrompt
           },
           {
             role: 'user',
-            content: prompt
+            content: userPrompt
           }
         ],
-        max_tokens: 500,
-        temperature: 0.3,
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "provide_nutrition_analysis",
+              description: "Provide detailed nutritional analysis for a meal",
+              parameters: {
+                type: "object",
+                properties: {
+                  calories: {
+                    type: "number",
+                    description: "Total calories for the entire meal"
+                  },
+                  protein: {
+                    type: "number",
+                    description: "Total protein in grams"
+                  },
+                  carbs: {
+                    type: "number",
+                    description: "Total carbohydrates in grams"
+                  },
+                  fat: {
+                    type: "number",
+                    description: "Total fat in grams"
+                  },
+                  confidence: {
+                    type: "string",
+                    enum: ["high", "medium", "low"],
+                    description: "Confidence level of the estimate"
+                  },
+                  notes: {
+                    type: "string",
+                    description: "Brief breakdown showing individual food items and their contributions to the total"
+                  }
+                },
+                required: ["calories", "protein", "carbs", "fat", "confidence", "notes"],
+                additionalProperties: false
+              }
+            }
+          }
+        ],
+        tool_choice: {
+          type: "function",
+          function: { name: "provide_nutrition_analysis" }
+        },
+        max_tokens: 800,
+        temperature: 0.2,
       }),
     });
 
@@ -83,17 +145,26 @@ Consider standard serving sizes and multiply by the portion size provided. Be re
     }
 
     const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    console.log('Full AI Response:', JSON.stringify(data, null, 2));
 
-    console.log('AI Response:', aiResponse);
-
-    // Parse the JSON response from AI
+    // Extract nutrition data from tool call response
     let nutritionData;
     try {
-      nutritionData = JSON.parse(aiResponse);
+      const toolCall = data.choices[0]?.message?.tool_calls?.[0];
+      
+      if (!toolCall || !toolCall.function || !toolCall.function.arguments) {
+        console.error('No tool call in response:', data);
+        return new Response(JSON.stringify({ error: 'Invalid AI response format' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      nutritionData = JSON.parse(toolCall.function.arguments);
+      console.log('Parsed nutrition data:', nutritionData);
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
-      return new Response(JSON.stringify({ error: 'Invalid response from AI' }), {
+      return new Response(JSON.stringify({ error: 'Failed to parse AI response' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

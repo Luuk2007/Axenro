@@ -144,7 +144,7 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
           </Label>
           <Textarea
             id="meal-description"
-            placeholder="e.g., 2 slices of bread with chicken and cheese"
+            placeholder="e.g., 2 slices of whole wheat bread, 100g grilled chicken breast, 1 slice of cheese, 1 apple"
             value={mealDescription}
             onChange={(e) => setMealDescription(e.target.value)}
             className="mt-1 min-h-[80px]"
@@ -173,49 +173,57 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
 
         {/* Results */}
         {nutritionResult && (
-          <div className="mt-4 p-4 bg-secondary/30 rounded-lg">
+          <div className="mt-4 p-4 bg-secondary/30 rounded-lg space-y-3">
             <h3 className="text-center text-lg font-semibold mb-3">{t("Nutrition Analysis")}</h3>
             
-            <div className="grid grid-cols-4 gap-2 text-center mb-3">
-              <div>
-                <div className="text-lg font-bold text-green-600">
+            {/* Main nutrition grid */}
+            <div className="grid grid-cols-4 gap-2 text-center">
+              <div className="bg-background/50 p-2 rounded">
+                <div className="text-xl font-bold text-green-600">
                   {nutritionResult.carbs}g
                 </div>
                 <div className="text-xs text-muted-foreground">{t("Carbs")}</div>
               </div>
               
-              <div>
-                <div className="text-lg font-bold text-orange-500">
+              <div className="bg-background/50 p-2 rounded">
+                <div className="text-xl font-bold text-orange-500">
                   {nutritionResult.fat}g
                 </div>
                 <div className="text-xs text-muted-foreground">{t("Fat")}</div>
               </div>
               
-              <div>
-                <div className="text-lg font-bold text-blue-600">
+              <div className="bg-background/50 p-2 rounded">
+                <div className="text-xl font-bold text-blue-600">
                   {nutritionResult.protein}g
                 </div>
                 <div className="text-xs text-muted-foreground">{t("Protein")}</div>
               </div>
               
-              <div>
-                <div className="text-lg font-bold text-blue-500">
+              <div className="bg-background/50 p-2 rounded">
+                <div className="text-xl font-bold text-blue-500">
                   {nutritionResult.calories}
                 </div>
                 <div className="text-xs text-muted-foreground">Cal</div>
               </div>
             </div>
 
-            <div className="text-center">
-              <span className={`text-xs ${getConfidenceColor(nutritionResult.confidence)}`}>
+            {/* Confidence indicator */}
+            <div className="text-center py-1">
+              <span className={`text-xs font-medium ${getConfidenceColor(nutritionResult.confidence)}`}>
                 {t("Confidence")}: {t(nutritionResult.confidence)}
               </span>
             </div>
 
+            {/* Breakdown notes */}
             {nutritionResult.notes && (
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                {nutritionResult.notes}
-              </p>
+              <div className="bg-background/70 p-3 rounded border border-border">
+                <p className="text-xs font-medium text-muted-foreground mb-1">
+                  {t("Calculation Breakdown")}:
+                </p>
+                <p className="text-xs text-foreground leading-relaxed">
+                  {nutritionResult.notes}
+                </p>
+              </div>
             )}
           </div>
         )}

@@ -125,6 +125,7 @@ export const nutritionTranslations: Translations = {
   "Analyze with AI": "Analyseer met AI",
   "Analyzing with AI...": "Analyseren met AI...",
   "Nutrition Analysis": "Voedingsanalyse",
+  "Calculation Breakdown": "Berekeningsuitsplitsing",
   "Confidence": "Betrouwbaarheid",
   "Custom Meal Name": "Aangepaste Maaltijdnaam",
   "Enter a name for this meal": "Voer een naam in voor deze maaltijd",
