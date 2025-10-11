@@ -694,35 +694,20 @@ export type Database = {
       }
       profiles: {
         Row: {
-          ai_avatar_generated_at: string | null
-          ai_avatar_status: string | null
-          ai_avatar_url: string | null
           full_name: string | null
           id: string
-          last_motivation_generated_at: string | null
-          last_motivation_message: string | null
           profile_picture_url: string | null
           updated_at: string | null
         }
         Insert: {
-          ai_avatar_generated_at?: string | null
-          ai_avatar_status?: string | null
-          ai_avatar_url?: string | null
           full_name?: string | null
           id: string
-          last_motivation_generated_at?: string | null
-          last_motivation_message?: string | null
           profile_picture_url?: string | null
           updated_at?: string | null
         }
         Update: {
-          ai_avatar_generated_at?: string | null
-          ai_avatar_status?: string | null
-          ai_avatar_url?: string | null
           full_name?: string | null
           id?: string
-          last_motivation_generated_at?: string | null
-          last_motivation_message?: string | null
           profile_picture_url?: string | null
           updated_at?: string | null
         }

@@ -79,21 +79,6 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
       }));
       
       toast.success('Profile picture updated successfully');
-      
-      // Trigger AI avatar generation
-      toast.info('Generating your AI Coach avatar...');
-      
-      try {
-        const { error: avatarError } = await supabase.functions.invoke('generate-ai-avatar', {
-          body: { profilePictureUrl: imageUrl }
-        });
-        
-        if (avatarError) {
-          console.error('AI avatar generation error:', avatarError);
-        }
-      } catch (error) {
-        console.error('Failed to trigger avatar generation:', error);
-      }
     } catch (error: any) {
       console.error('Error uploading image:', error);
       toast.error('Failed to upload image');

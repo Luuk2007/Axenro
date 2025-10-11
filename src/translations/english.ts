@@ -185,17 +185,6 @@ export const english = {
   "Failed to analyze meal. Please try again.": "Failed to analyze meal. Please try again.",
   "An error occurred while analyzing the meal": "An error occurred while analyzing the meal",
   
-  // AI Avatar
-  "Your AI Coach": "Your AI Coach",
-  "Generating your AI Coach…": "Generating your AI Coach…",
-  "Avatar generation failed": "Avatar generation failed",
-  "Regenerate Avatar": "Regenerate Avatar",
-  "Chat with me": "Chat with me",
-  "Your AI Avatar": "Your AI Avatar",
-  "Weekly Summary": "Weekly Summary",
-  "Recent Achievements": "Recent Achievements",
-  "Avatar Tooltip": "Your AI Avatar is your personal Axenro Coach — it adapts to your progress and motivates you daily.",
-  
   // Workout Coach
   "Training Goals": "Training Goals",
   "e.g., Build muscle, lose weight, increase strength...": "e.g., Build muscle, lose weight, increase strength...",

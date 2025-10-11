@@ -7,8 +7,6 @@ import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SubscriptionModal from '@/components/subscription/SubscriptionModal';
 import { useSubscription } from '@/hooks/useSubscription';
-import AvatarCoach from './AvatarCoach';
-import AICoachModal from './AICoachModal';
 
 type NavItem = {
   titleKey: TranslationKeys;
@@ -66,7 +64,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const navigate = useNavigate();
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
-  const [coachModalOpen, setCoachModalOpen] = useState(false);
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
   
   // Monitor theme changes
@@ -199,9 +196,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
             </ul>
           </nav>
           
-          {/* AI Avatar Coach Section */}
-          <AvatarCoach onAvatarClick={() => setCoachModalOpen(true)} />
-          
           {/* Bottom section with legal links and subscription plan */}
           <div className="mt-auto">
             {/* Legal links section */}
@@ -239,11 +233,6 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
       <SubscriptionModal 
         open={subscriptionModalOpen} 
         onOpenChange={setSubscriptionModalOpen} 
-      />
-      
-      <AICoachModal
-        open={coachModalOpen}
-        onOpenChange={setCoachModalOpen}
       />
     </>
   );
