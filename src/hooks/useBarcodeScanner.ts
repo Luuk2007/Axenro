@@ -140,7 +140,7 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
             }
           },
           locator: {
-            patchSize: "medium",
+            patchSize: "large",
             halfSample: false, // Keep full resolution for better accuracy
             debug: {
               showCanvas: false,
@@ -160,17 +160,22 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
           // Increase worker count for better performance
           numOfWorkers: Math.min(navigator.hardwareConcurrency || 4, 8),
           // Increase frequency for faster scanning
-          frequency: 20,
+          frequency: 30,
           decoder: {
             readers: [
               "ean_reader",
-              "ean_8_reader", 
+              "ean_8_reader",
+              "upc_reader",
+              "upc_e_reader",
               "code_128_reader",
               "code_39_reader",
+              "code_39_vin_reader",
               "codabar_reader",
-              "i2of5_reader"
+              "i2of5_reader",
+              "2of5_reader",
+              "code_93_reader"
             ],
-            // Optimize decoder settings for speed
+            // Optimize decoder settings for speed and accuracy
             multiple: false,
             debug: {
               drawBoundingBox: false,
@@ -202,22 +207,33 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
         });
       });
 
-      // Set up barcode detection with confidence filtering
+      // Set up barcode detection with improved confidence filtering
       Quagga.onDetected((data) => {
         const code = data.codeResult.code;
-        const confidence = data.codeResult.decodedCodes.reduce((acc, code) => acc + code.error || 0, 0) / data.codeResult.decodedCodes.length;
         
-        console.log('Barcode detected:', code, 'Confidence:', confidence);
+        // Calculate average error rate (lower is better)
+        const errors = data.codeResult.decodedCodes
+          .map(c => c.error || 0)
+          .filter(e => e !== undefined);
+        const avgError = errors.length > 0 
+          ? errors.reduce((acc, err) => acc + err, 0) / errors.length 
+          : 1;
         
-        // Only process barcodes with good confidence (lower error rate is better)
-        if (confidence < 0.25 && !processedBarcodes.current.has(code)) {
+        console.log('Barcode detected:', code, 'Average error:', avgError);
+        
+        // More lenient threshold for better detection (0.35 instead of 0.25)
+        // Also check if barcode has valid length (typical barcodes are 8, 12, or 13 digits)
+        const isValidLength = code && (code.length === 8 || code.length === 12 || code.length === 13 || code.length === 14);
+        
+        if (avgError < 0.35 && isValidLength && !processedBarcodes.current.has(code)) {
           processedBarcodes.current.add(code);
+          console.log('Processing valid barcode:', code);
           onDetected(code);
           
           // Clear the processed barcode after a shorter delay for faster rescanning
           setTimeout(() => {
             processedBarcodes.current.delete(code);
-          }, 1000);
+          }, 800);
         }
       });
 
