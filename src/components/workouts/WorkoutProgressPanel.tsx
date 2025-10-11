@@ -1,40 +1,17 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, Plus, Dumbbell, Target, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target } from 'lucide-react';
 import { Workout } from '@/types/workout';
-import { usePlannedWorkouts } from '@/hooks/usePlannedWorkouts';
 import { getExerciseProgress, getWeeklyStats } from '@/utils/workoutCalculations';
-import { format, parse } from 'date-fns';
-import PlanWorkoutDialog from './PlanWorkoutDialog';
 
 interface WorkoutProgressPanelProps {
   workouts: Workout[];
-  onPlanWorkout?: () => void;
 }
 
-const WorkoutProgressPanel = ({ workouts, onPlanWorkout }: WorkoutProgressPanelProps) => {
-  const [showPlanDialog, setShowPlanDialog] = useState(false);
-  const { plannedWorkouts } = usePlannedWorkouts();
-
+const WorkoutProgressPanel = ({ workouts }: WorkoutProgressPanelProps) => {
   const exerciseProgress = getExerciseProgress(workouts);
   const weeklyStats = getWeeklyStats(workouts);
-
-  const handleWorkoutPlanned = () => {
-    // Workouts will refresh automatically via react-query
-    if (onPlanWorkout) {
-      onPlanWorkout();
-    }
-  };
-
-  const upcomingWorkouts = plannedWorkouts
-    .filter(workout => {
-      const workoutDate = parse(workout.date, 'yyyy-MM-dd', new Date());
-      return workoutDate >= new Date();
-    })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .slice(0, 3);
 
   return (
     <div className="h-full flex flex-col space-y-4">
@@ -108,56 +85,6 @@ const WorkoutProgressPanel = ({ workouts, onPlanWorkout }: WorkoutProgressPanelP
           </div>
         </CardContent>
       </Card>
-
-      {/* Planned Workouts */}
-      <Card className="flex-1">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Geplande Trainingen
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {upcomingWorkouts.length > 0 ? (
-            <div className="space-y-2">
-              {upcomingWorkouts.map((workout) => {
-                const workoutDate = parse(workout.date, 'yyyy-MM-dd', new Date());
-                return (
-                  <div key={workout.id} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <Dumbbell className="h-3 w-3 text-blue-500" />
-                      <span className="font-medium">{workout.name}</span>
-                    </div>
-                    <span className="text-muted-foreground">
-                      {format(workoutDate, 'dd/MM')}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-xs text-muted-foreground mb-2">
-              Geen geplande trainingen
-            </div>
-          )}
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-full text-xs h-7"
-            onClick={() => setShowPlanDialog(true)}
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            Training Plannen
-          </Button>
-        </CardContent>
-      </Card>
-
-      <PlanWorkoutDialog
-        open={showPlanDialog}
-        onOpenChange={setShowPlanDialog}
-        onWorkoutPlanned={handleWorkoutPlanned}
-      />
     </div>
   );
 };
