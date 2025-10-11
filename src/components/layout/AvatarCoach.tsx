@@ -19,45 +19,50 @@ const AvatarCoach: React.FC<AvatarCoachProps> = ({ onAvatarClick }) => {
   const isGenerating = avatarStatus === 'generating' || loading;
 
   return (
-    <div className="px-4 py-3 border-t border-border">
+    <div className="border-t border-border">
       <div 
         onClick={onAvatarClick}
         className={cn(
-          "cursor-pointer hover:bg-accent/50 rounded-lg p-3 transition-all duration-300",
+          "cursor-pointer hover:bg-accent/50 transition-all duration-300 relative overflow-hidden group",
           "avatar-coach-enter"
         )}
       >
-        <div className="flex flex-col items-center gap-3">
-          {/* Avatar */}
-          <div className="relative">
-            <Avatar className={cn(
-              "h-14 w-14 border-2 border-primary/30 transition-all",
-              !isGenerating && "hover:scale-105"
-            )}>
-              {avatarUrl && <AvatarImage src={avatarUrl} alt="AI Coach" />}
-              <AvatarFallback className="bg-primary/10">
-                {isGenerating ? (
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                ) : (
-                  <Sparkles className="h-6 w-6 text-primary" />
-                )}
-              </AvatarFallback>
-            </Avatar>
+        <div className="flex flex-col">
+          {/* Full-body 3D Avatar */}
+          <div className="relative w-full aspect-[9/16] bg-gradient-to-b from-background to-accent/20">
+            {isGenerating ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                <p className="text-xs text-muted-foreground text-center px-4">
+                  ✨ Creating your 3D coach...
+                </p>
+              </div>
+            ) : avatarUrl ? (
+              <img 
+                src={avatarUrl} 
+                alt="AI Coach" 
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Sparkles className="h-12 w-12 text-primary/50" />
+              </div>
+            )}
           </div>
 
-          {/* Status or Motivation Message */}
-          {isGenerating ? (
-            <p className="text-xs text-muted-foreground text-center leading-relaxed">
-              ✨ Creating your coach...
-            </p>
-          ) : motivation ? (
-            <p className="text-xs text-muted-foreground text-center leading-relaxed max-w-[160px]">
-              {motivation}
-            </p>
-          ) : (
-            <p className="text-xs text-muted-foreground text-center leading-relaxed">
-              💪 Your AI Coach
-            </p>
+          {/* Motivation Message Overlay */}
+          {!isGenerating && (
+            <div className="px-3 py-2 bg-gradient-to-t from-background/95 to-transparent">
+              {motivation ? (
+                <p className="text-xs text-foreground text-center leading-relaxed font-medium">
+                  {motivation}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                  💪 Your AI Coach
+                </p>
+              )}
+            </div>
           )}
         </div>
       </div>

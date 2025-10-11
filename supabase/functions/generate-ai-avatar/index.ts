@@ -66,7 +66,7 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: 'Generate a simplified, cartoon-style fitness coach avatar from this photo. Style: friendly, energetic, digital illustration, clean lines, vibrant colors suitable for a fitness app. Make it recognizable but stylized. Keep the facial features similar but more cartoonish and appealing.'
+                text: 'Generate a full-body 3D character of a fitness coach from this photo. Style: 3D rendered, athletic build, friendly pose, wearing modern athletic/fitness attire, standing in a confident stance. The character should be recognizable from the photo but stylized as a 3D digital fitness coach. Vertical composition suitable for a sidebar (9:16 aspect ratio). Clean background with subtle gradient. Professional 3D rendering style like Pixar or modern mobile game characters.'
               },
               {
                 type: 'image_url',
