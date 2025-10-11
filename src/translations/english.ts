@@ -291,6 +291,8 @@ export const english = {
   "No history available": "No history available",
   "Newest First": "Newest First",
   "Oldest First": "Oldest First",
+  "Newest": "Newest",
+  "Oldest": "Oldest",
   "Session History": "Session History",
   "Best Set": "Best Set"
 };

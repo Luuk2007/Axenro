@@ -160,19 +160,19 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <TrendingUp className="h-5 w-5" />
-            {exerciseName} - {t("Exercise History")}
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col px-4 sm:px-6">
+        <DialogHeader className="px-0">
+          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl pr-8">
+            <TrendingUp className="h-5 w-5 flex-shrink-0" />
+            <span className="truncate">{exerciseName} - {t("Exercise History")}</span>
           </DialogTitle>
         </DialogHeader>
 
         {/* Statistics Summary */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4 px-0">
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-primary">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-bold text-primary">
                 {totalSessions}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -181,8 +181,8 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-primary">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-bold text-primary break-all">
                 {isCardio
                   ? formatDuration(bestPerformance)
                   : `${formatWeight(convertWeight(bestPerformance, "metric", measurementSystem), measurementSystem)} ${getWeightUnit(measurementSystem)}`}
@@ -193,8 +193,8 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-primary">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-bold text-primary break-all">
                 {isCardio
                   ? formatDuration(Math.round(averagePerformance))
                   : `${formatWeight(convertWeight(averagePerformance, "metric", measurementSystem), measurementSystem)} ${getWeightUnit(measurementSystem)}`}
@@ -205,9 +205,9 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
+            <CardContent className="p-3 sm:p-4 text-center">
               <div
-                className={`text-2xl font-bold ${
+                className={`text-xl sm:text-2xl font-bold ${
                   progressPercentage >= 0 ? "text-green-600" : "text-red-600"
                 }`}
               >
@@ -222,27 +222,28 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
         </div>
 
         {/* Sort Toggle */}
-        <div className="flex items-center justify-between pb-2">
+        <div className="flex items-center justify-between pb-2 px-0">
           <h3 className="text-sm font-medium">{t("Session History")}</h3>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setSortNewestFirst(!sortNewestFirst)}
-            className="gap-2"
+            className="gap-1 sm:gap-2 text-xs sm:text-sm"
           >
-            <ArrowUpDown className="h-4 w-4" />
-            {sortNewestFirst ? t("Newest First") : t("Oldest First")}
+            <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">{sortNewestFirst ? t("Newest First") : t("Oldest First")}</span>
+            <span className="sm:hidden">{sortNewestFirst ? t("Newest") : t("Oldest")}</span>
           </Button>
         </div>
 
         {/* History List */}
-        <ScrollArea className="flex-1 pr-4">
+        <ScrollArea className="flex-1 pr-2 sm:pr-4">
           {exerciseHistory.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               {t("No history available")}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 px-0">
               {exerciseHistory.map((entry, index) => (
                 <Card
                   key={`${entry.date}-${index}`}
@@ -252,26 +253,28 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
                       : ""
                   }
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">
-                          {formatDate(entry.date)}
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex flex-col gap-2 mb-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="font-medium text-sm sm:text-base">
+                            {formatDate(entry.date)}
+                          </span>
+                        </div>
+                        <span className="text-xs sm:text-sm text-muted-foreground truncate">
+                          {entry.workoutName}
                         </span>
-                        {entry.isPersonalRecord && (
-                          <Badge
-                            variant="default"
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <Award className="h-3 w-3 mr-1" />
-                            {t("Personal Record")}
-                          </Badge>
-                        )}
                       </div>
-                      <span className="text-sm text-muted-foreground">
-                        {entry.workoutName}
-                      </span>
+                      {entry.isPersonalRecord && (
+                        <Badge
+                          variant="default"
+                          className="bg-green-600 hover:bg-green-700 w-fit"
+                        >
+                          <Award className="h-3 w-3 mr-1" />
+                          {t("Personal Record")}
+                        </Badge>
+                      )}
                     </div>
 
                     {isCardio ? (
@@ -324,12 +327,12 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
                             reps
                           </span>
                         </div>
-                        <div className="flex flex-wrap gap-2 mt-2">
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2">
                           {entry.sets.map((set, setIndex) => (
                             <Badge
                               key={setIndex}
                               variant="secondary"
-                              className="text-xs"
+                              className="text-xs break-all"
                             >
                               {formatWeight(
                                 convertWeight(

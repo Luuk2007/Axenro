@@ -89,6 +89,8 @@ export const workoutTranslations = {
   "No history available": "Geen geschiedenis beschikbaar",
   "Newest First": "Nieuwste Eerst",
   "Oldest First": "Oudste Eerst",
+  "Newest": "Nieuwste",
+  "Oldest": "Oudste",
   "Session History": "Sessie Geschiedenis",
   "Best Set": "Beste Set"
 };
