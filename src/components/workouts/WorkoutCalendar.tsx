@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Workout } from "@/types/workout";
-import { usePlannedWorkouts } from "@/hooks/usePlannedWorkouts";
+
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek, subMonths, addMonths } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getMonthlyStats, getWeeklyStats } from "@/utils/workoutCalculations";
@@ -23,7 +23,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   const [currentMonth, setCurrentMonth] = React.useState<Date>(currentDate);
   const previousMonthDate = subMonths(currentMonth, 1);
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(currentDate);
-  const { plannedWorkouts } = usePlannedWorkouts();
+  
 
   const handlePreviousMonth = () => {
     setCurrentMonth(subMonths(currentMonth, 1));
@@ -55,10 +55,24 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   
   console.log("Final workout dates:", workoutDates);
   
-  // Get planned workout dates
-  const plannedDates = plannedWorkouts.map(workout => {
-    return parse(workout.date, "yyyy-MM-dd", new Date());
-  }).filter(date => isValid(date));
+  // Helper function to check if a workout is cardio
+  const isCardioWorkout = (workout: Workout) => {
+    return workout.exercises.some(exercise => 
+      exercise.sets.some(set => set.isCardio)
+    );
+  };
+  
+  // Get cardio workout dates
+  const cardioWorkoutDates = workouts
+    .filter(workout => workout.completed && isCardioWorkout(workout))
+    .map(workout => parse(workout.date, "yyyy-MM-dd", new Date()))
+    .filter(date => isValid(date));
+  
+  // Get strength workout dates
+  const strengthWorkoutDates = workouts
+    .filter(workout => workout.completed && !isCardioWorkout(workout))
+    .map(workout => parse(workout.date, "yyyy-MM-dd", new Date()))
+    .filter(date => isValid(date));
   
   // Get statistics with comparisons
   const weeklyStats = getWeeklyStats(workouts);
@@ -83,11 +97,23 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     });
   };
 
-  // Function to get planned workouts for a specific date
-  const getPlannedWorkoutsForDate = (date: Date) => {
-    return plannedWorkouts.filter(workout => {
+  // Function to get cardio workouts for a specific date
+  const getCardioWorkoutsForDate = (date: Date) => {
+    return workouts.filter(workout => {
       const workoutDate = parse(workout.date, "yyyy-MM-dd", new Date());
-      return date.getDate() === workoutDate.getDate() && 
+      return workout.completed && isCardioWorkout(workout) &&
+        date.getDate() === workoutDate.getDate() && 
+        date.getMonth() === workoutDate.getMonth() && 
+        date.getFullYear() === workoutDate.getFullYear();
+    });
+  };
+
+  // Function to get strength workouts for a specific date
+  const getStrengthWorkoutsForDate = (date: Date) => {
+    return workouts.filter(workout => {
+      const workoutDate = parse(workout.date, "yyyy-MM-dd", new Date());
+      return workout.completed && !isCardioWorkout(workout) &&
+        date.getDate() === workoutDate.getDate() && 
         date.getMonth() === workoutDate.getMonth() && 
         date.getFullYear() === workoutDate.getFullYear();
     });
@@ -100,35 +126,35 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
            date1.getFullYear() === date2.getFullYear();
   };
 
-  // Check for dates that have both completed and planned workouts
-  const getBothWorkoutDates = () => {
-    return workoutDates.filter(workoutDate => 
-      plannedDates.some(plannedDate => isSameDay(workoutDate, plannedDate))
+  // Check for dates that have both cardio and strength workouts
+  const getBothWorkoutTypeDates = () => {
+    return cardioWorkoutDates.filter(cardioDate => 
+      strengthWorkoutDates.some(strengthDate => isSameDay(cardioDate, strengthDate))
     );
   };
 
   const modifiers = {
-    completedWorkout: workoutDates.filter(workoutDate => 
-      !plannedDates.some(plannedDate => isSameDay(workoutDate, plannedDate))
+    cardioWorkout: cardioWorkoutDates.filter(cardioDate => 
+      !strengthWorkoutDates.some(strengthDate => isSameDay(cardioDate, strengthDate))
     ),
-    plannedWorkout: plannedDates.filter(plannedDate => 
-      !workoutDates.some(workoutDate => isSameDay(workoutDate, plannedDate))
+    strengthWorkout: strengthWorkoutDates.filter(strengthDate => 
+      !cardioWorkoutDates.some(cardioDate => isSameDay(cardioDate, strengthDate))
     ),
-    bothWorkouts: getBothWorkoutDates()
+    bothWorkouts: getBothWorkoutTypeDates()
   };
 
   console.log("Calendar modifiers:", modifiers);
 
   // Create modifiers for the calendar with CSS class names
   const modifiersClassNames = {
-    completedWorkout: "completedWorkout",
-    plannedWorkout: "plannedWorkout", 
+    cardioWorkout: "cardioWorkout",
+    strengthWorkout: "strengthWorkout", 
     bothWorkouts: "bothWorkouts"
   };
 
   // Get workouts for selected date to display below calendar
-  const selectedDateWorkouts = selectedDate ? getWorkoutsForDate(selectedDate) : [];
-  const selectedDatePlanned = selectedDate ? getPlannedWorkoutsForDate(selectedDate) : [];
+  const selectedDateCardio = selectedDate ? getCardioWorkoutsForDate(selectedDate) : [];
+  const selectedDateStrength = selectedDate ? getStrengthWorkoutsForDate(selectedDate) : [];
 
   const handlePlanWorkout = () => {
     // Workouts will refresh automatically via react-query
@@ -176,9 +202,9 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
 
         <Card className="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/20 border-orange-200/50 dark:border-orange-800/50">
           <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">Planned Workouts</div>
-            <div className="text-2xl font-bold mt-1">{plannedWorkouts.length}</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Upcoming</div>
+            <div className="text-xs text-muted-foreground">Total Workouts</div>
+            <div className="text-2xl font-bold mt-1">{workouts.filter(w => w.completed).length}</div>
+            <div className="text-xs text-muted-foreground mt-0.5">All time</div>
           </CardContent>
         </Card>
       </div>
@@ -197,11 +223,11 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                 <div className="flex gap-3 text-xs">
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-green-600"></div>
-                    <span>Completed</span>
+                    <span>Strength</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-blue-500"></div>
-                    <span>Planned</span>
+                    <span>Cardio</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -268,31 +294,31 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                     transition: all 0.2s;
                   }
                   
-                  /* Completed workout days */
-                  .workout-calendar .completedWorkout {
+                  /* Strength workout days */
+                  .workout-calendar .strengthWorkout {
                     background-color: hsl(142 71% 45%) !important;
                     color: white !important;
                     font-weight: 600 !important;
                   }
                   
-                  .workout-calendar .completedWorkout:hover {
+                  .workout-calendar .strengthWorkout:hover {
                     background-color: hsl(142 71% 35%) !important;
                     transform: scale(1.05);
                   }
                   
-                  /* Planned workout days */
-                  .workout-calendar .plannedWorkout {
+                  /* Cardio workout days */
+                  .workout-calendar .cardioWorkout {
                     background-color: hsl(217 91% 60%) !important;
                     color: white !important;
                     font-weight: 500 !important;
                   }
                   
-                  .workout-calendar .plannedWorkout:hover {
+                  .workout-calendar .cardioWorkout:hover {
                     background-color: hsl(217 91% 50%) !important;
                     transform: scale(1.05);
                   }
                   
-                  /* Days with both completed and planned workouts */
+                  /* Days with both cardio and strength workouts */
                   .workout-calendar .bothWorkouts {
                     background: linear-gradient(135deg, hsl(142 71% 45%), hsl(217 91% 60%)) !important;
                     color: white !important;
@@ -343,21 +369,21 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
             </div>
 
             {/* Selected Date Details */}
-            {selectedDate && (selectedDateWorkouts.length > 0 || selectedDatePlanned.length > 0) && (
+            {selectedDate && (selectedDateCardio.length > 0 || selectedDateStrength.length > 0) && (
               <div className="mt-4 p-4 bg-muted rounded-lg space-y-3">
                 <div className="font-semibold text-sm flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4" />
                   {format(selectedDate, "MMMM d, yyyy")}
                 </div>
                 
-                {selectedDateWorkouts.length > 0 && (
+                {selectedDateStrength.length > 0 && (
                   <div>
                     <div className="text-xs font-medium text-green-600 dark:text-green-400 mb-2 flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      Completed Workouts
+                      Strength Workouts
                     </div>
                     <div className="space-y-2">
-                      {selectedDateWorkouts.map((workout) => (
+                      {selectedDateStrength.map((workout) => (
                         <Card key={workout.id} className="p-3">
                           <div className="font-medium text-sm">{workout.name}</div>
                           <div className="text-xs text-muted-foreground mt-1">
@@ -369,18 +395,19 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                   </div>
                 )}
                 
-                {selectedDatePlanned.length > 0 && (
+                {selectedDateCardio.length > 0 && (
                   <div>
-                    <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2">
-                      Planned Workouts
+                    <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Cardio Workouts
                     </div>
                     <div className="space-y-2">
-                      {selectedDatePlanned.map((workout) => (
+                      {selectedDateCardio.map((workout) => (
                         <Card key={workout.id} className="p-3">
                           <div className="font-medium text-sm">{workout.name}</div>
-                          {workout.notes && (
-                            <div className="text-xs text-muted-foreground mt-1">{workout.notes}</div>
-                          )}
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {workout.exercises.length} exercises
+                          </div>
                         </Card>
                       ))}
                     </div>
