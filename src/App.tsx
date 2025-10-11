@@ -7,37 +7,24 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CookieProvider } from "@/contexts/CookieContext";
 import Layout from "@/components/layout/Layout";
+import Index from "@/pages/Index";
+import AxenroAI from "@/pages/AxenroAI";
+import Nutrition from "@/pages/Nutrition";
+import Workouts from "@/pages/Workouts";
+import Progress from "@/pages/Progress";
+import Profile from "@/pages/Profile";
+import Settings from "@/pages/Settings";
+import NotFound from "@/pages/NotFound";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
+import TermsConditionsPage from "@/pages/TermsConditionsPage";
+import PasswordResetPage from "@/pages/PasswordResetPage";
+import CookiePreferencesPage from "@/pages/CookiePreferencesPage";
 import CookieConsentModal from "@/components/cookies/CookieConsentModal";
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import PasswordResetModal from "@/components/auth/PasswordResetModal";
 
-// Lazy load pages for code splitting and faster initial load
-const Index = lazy(() => import("@/pages/Index"));
-const AxenroAI = lazy(() => import("@/pages/AxenroAI"));
-const Nutrition = lazy(() => import("@/pages/Nutrition"));
-const Workouts = lazy(() => import("@/pages/Workouts"));
-const Progress = lazy(() => import("@/pages/Progress"));
-const Profile = lazy(() => import("@/pages/Profile"));
-const Settings = lazy(() => import("@/pages/Settings"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
-const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
-const TermsConditionsPage = lazy(() => import("@/pages/TermsConditionsPage"));
-const PasswordResetPage = lazy(() => import("@/pages/PasswordResetPage"));
-const CookiePreferencesPage = lazy(() => import("@/pages/CookiePreferencesPage"));
-
-// Configure QueryClient with optimized defaults for better caching
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh longer
-      gcTime: 10 * 60 * 1000, // 10 minutes - keep unused data cached
-      refetchOnWindowFocus: false, // Don't refetch on window focus
-      refetchOnMount: false, // Don't refetch on mount if data is fresh
-      retry: 1, // Only retry once on failure
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 function App() {
   const [showPasswordReset, setShowPasswordReset] = useState(false);
@@ -78,24 +65,22 @@ function App() {
           <BrowserRouter>
             <AuthProvider>
               <CookieProvider>
-                <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
-                  <Routes>
-                    <Route path="/" element={<Layout />}>
-                      <Route index element={<Index />} />
-                      <Route path="axenro-ai" element={<AxenroAI />} />
-                      <Route path="nutrition" element={<Nutrition />} />
-                      <Route path="workouts" element={<Workouts />} />
-                      <Route path="progress" element={<Progress />} />
-                      <Route path="profile" element={<Profile />} />
-                      <Route path="settings" element={<Settings />} />
-                      <Route path="privacypolicy" element={<PrivacyPolicyPage />} />
-                      <Route path="termsandconditions" element={<TermsConditionsPage />} />
-                      <Route path="resetyourpassword" element={<PasswordResetPage />} />
-                      <Route path="cookiepreferences" element={<CookiePreferencesPage />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Route>
-                  </Routes>
-                </Suspense>
+                <Routes>
+                  <Route path="/" element={<Layout />}>
+                    <Route index element={<Index />} />
+                    <Route path="axenro-ai" element={<AxenroAI />} />
+                    <Route path="nutrition" element={<Nutrition />} />
+                    <Route path="workouts" element={<Workouts />} />
+                    <Route path="progress" element={<Progress />} />
+                    <Route path="profile" element={<Profile />} />
+                    <Route path="settings" element={<Settings />} />
+                    <Route path="privacypolicy" element={<PrivacyPolicyPage />} />
+                    <Route path="termsandconditions" element={<TermsConditionsPage />} />
+                    <Route path="resetyourpassword" element={<PasswordResetPage />} />
+                    <Route path="cookiepreferences" element={<CookiePreferencesPage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Route>
+                </Routes>
                 
                 <CookieConsentModal />
                 <PasswordResetModal 

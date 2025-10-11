@@ -25,12 +25,7 @@ export const useWorkouts = () => {
       return;
     }
 
-    // Only set loading if we don't have cached data
-    const hasCachedData = workouts.length > 0;
-    if (!hasCachedData) {
-      setLoading(true);
-    }
-    
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('workouts')
@@ -52,12 +47,6 @@ export const useWorkouts = () => {
           completed: item.completed
         }));
         setWorkouts(formattedWorkouts);
-        // Cache in localStorage for faster subsequent loads
-        try {
-          localStorage.setItem('workouts_cache', JSON.stringify(formattedWorkouts));
-        } catch (e) {
-          console.warn('Failed to cache workouts');
-        }
       }
     } catch (error) {
       console.error('Error loading workouts:', error);
@@ -170,18 +159,6 @@ export const useWorkouts = () => {
   };
 
   useEffect(() => {
-    // Load from cache immediately for instant display
-    const cached = localStorage.getItem('workouts_cache');
-    if (cached && user) {
-      try {
-        const cachedWorkouts = JSON.parse(cached);
-        setWorkouts(cachedWorkouts);
-      } catch (e) {
-        console.warn('Failed to parse cached workouts');
-      }
-    }
-    
-    // Then load fresh data in background
     loadWorkouts();
   }, [user]);
 

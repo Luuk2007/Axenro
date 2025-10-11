@@ -25,9 +25,9 @@ import { Target } from "lucide-react";
 const Workouts = () => {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  const { test_mode, test_subscription_tier, subscription_tier, initialized } = useSubscription();
+  const { test_mode, test_subscription_tier, subscription_tier, loading: subscriptionLoading, initialized } = useSubscription();
   const { workouts, saveWorkout, deleteWorkout, loading: workoutsLoading } = useWorkouts();
-  const { profile, loading: profileLoading } = useUserProfile();
+  const { profile } = useUserProfile();
   
   // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
