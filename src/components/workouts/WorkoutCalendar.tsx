@@ -10,7 +10,6 @@ import { Workout } from "@/types/workout";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isValid, parse, startOfWeek, endOfWeek, subMonths, addMonths } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getMonthlyStats, getWeeklyStats } from "@/utils/workoutCalculations";
-import WorkoutProgressPanel from "./WorkoutProgressPanel";
 import { CheckCircle2, Calendar as CalendarIcon, Dumbbell, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface WorkoutCalendarProps {
@@ -53,12 +52,11 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
       return valid;
     });
   
-  console.log("Final workout dates:", workoutDates);
   
   // Helper function to check if a workout is cardio
   const isCardioWorkout = (workout: Workout) => {
     return workout.exercises.some(exercise => 
-      exercise.sets.some(set => set.isCardio)
+      exercise.muscleGroup === 'cardio'
     );
   };
   
@@ -156,9 +154,6 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
   const selectedDateCardio = selectedDate ? getCardioWorkoutsForDate(selectedDate) : [];
   const selectedDateStrength = selectedDate ? getStrengthWorkoutsForDate(selectedDate) : [];
 
-  const handlePlanWorkout = () => {
-    // Workouts will refresh automatically via react-query
-  };
   
   return (
     <div className="space-y-4">
@@ -210,48 +205,46 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Calendar Section */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5" />
-                {t("Workout calendar")}
-              </CardTitle>
-              <div className="flex items-center justify-between sm:justify-end gap-4">
-                <div className="flex gap-3 text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded bg-green-600"></div>
-                    <span>Strength</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded bg-blue-500"></div>
-                    <span>Cardio</span>
-                  </div>
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5" />
+              {t("Workout calendar")}
+            </CardTitle>
+            <div className="flex items-center justify-between sm:justify-end gap-4">
+              <div className="flex gap-3 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-green-600"></div>
+                  <span>Strength</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={handlePreviousMonth}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={handleNextMonth}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-blue-500"></div>
+                  <span>Cardio</span>
                 </div>
               </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={handlePreviousMonth}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={handleNextMonth}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+        </CardHeader>
+        <CardContent>
             <div className="workout-calendar">
               <style dangerouslySetInnerHTML={{
                 __html: `
@@ -415,17 +408,8 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                 )}
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Right side - Progress Panel */}
-        <div className="lg:col-span-1">
-          <WorkoutProgressPanel 
-            workouts={workouts} 
-            onPlanWorkout={handlePlanWorkout}
-          />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
