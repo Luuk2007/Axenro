@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { LoginPrompt } from "@/components/auth/LoginPrompt";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useUserProfile, UserProfileData } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
@@ -183,6 +184,7 @@ const Profile = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {!user && <LoginPrompt />}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t("profile")}</h1>
       </div>

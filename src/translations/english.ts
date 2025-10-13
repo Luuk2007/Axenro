@@ -1,5 +1,8 @@
 
 export const english = {
+  "Log in": "Log in",
+  "Sign up": "Sign up",
+  "Log in to save your changes": "Log in to save your changes",
   "dashboard": "Dashboard",
   "nutrition": "Nutrition",
   "workouts": "Workouts",

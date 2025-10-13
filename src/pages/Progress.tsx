@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { LoginPrompt } from '@/components/auth/LoginPrompt';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -43,6 +45,7 @@ interface MeasurementType {
 
 export default function Progress() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const isMobile = useIsMobile();
   const { subscription_tier, test_mode, test_subscription_tier, loading: subscriptionLoading, initialized } = useSubscription();
   
@@ -264,6 +267,7 @@ export default function Progress() {
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {!user && <LoginPrompt />}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("progress")}</h1>

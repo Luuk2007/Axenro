@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { LoginPrompt } from "@/components/auth/LoginPrompt";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -24,6 +26,7 @@ import { Target } from "lucide-react";
 
 const Workouts = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const isMobile = useIsMobile();
   const { test_mode, test_subscription_tier, subscription_tier, loading: subscriptionLoading, initialized } = useSubscription();
   const { workouts, saveWorkout, deleteWorkout, loading: workoutsLoading } = useWorkouts();
@@ -132,6 +135,7 @@ const Workouts = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {!user && <LoginPrompt />}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t("workouts")}</h1>
         <div className="flex gap-2">

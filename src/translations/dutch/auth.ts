@@ -2,6 +2,9 @@
 import { Translations } from "../types";
 
 export const authTranslations: Translations = {
+  "Log in": "Inloggen",
+  "Sign up": "Registreren",
+  "Log in to save your changes": "Log in om je wijzigingen op te slaan",
   // Auth related
   email: "E-mail",
   password: "Wachtwoord",

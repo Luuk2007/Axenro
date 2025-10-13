@@ -10,6 +10,7 @@ import MealsList from '@/components/dashboard/MealsList';
 import WorkoutsSummary from '@/components/dashboard/WorkoutsSummary';
 import StepsConnectionModal from '@/components/dashboard/StepsConnectionModal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { LoginPrompt } from '@/components/auth/LoginPrompt';
 import { format, parse, isValid, startOfWeek, endOfWeek } from 'date-fns';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -234,6 +235,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {!isAuthenticated && <LoginPrompt />}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard")}</h1>
