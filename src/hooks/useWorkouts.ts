@@ -12,16 +12,8 @@ export const useWorkouts = () => {
 
   const loadWorkouts = async () => {
     if (!user) {
-      // For non-authenticated users, load from localStorage as fallback
-      const savedWorkouts = localStorage.getItem('workouts');
-      if (savedWorkouts) {
-        try {
-          const parsedWorkouts = JSON.parse(savedWorkouts);
-          setWorkouts(parsedWorkouts);
-        } catch (error) {
-          console.error('Error parsing workouts:', error);
-        }
-      }
+      // Clear workouts when not authenticated
+      setWorkouts([]);
       return;
     }
 
@@ -57,12 +49,7 @@ export const useWorkouts = () => {
 
   const saveWorkout = async (workout: Workout) => {
     if (!user) {
-      // For non-authenticated users, save to localStorage
-      const existingWorkouts = workouts.filter(w => w.id !== workout.id);
-      const updatedWorkouts = [...existingWorkouts, workout];
-      setWorkouts(updatedWorkouts);
-      localStorage.setItem('workouts', JSON.stringify(updatedWorkouts));
-      toast.success('Workout saved locally');
+      toast.error('Please log in to save workouts');
       return;
     }
 
@@ -127,10 +114,7 @@ export const useWorkouts = () => {
 
   const deleteWorkout = async (workoutId: string) => {
     if (!user) {
-      const updatedWorkouts = workouts.filter(w => w.id !== workoutId);
-      setWorkouts(updatedWorkouts);
-      localStorage.setItem('workouts', JSON.stringify(updatedWorkouts));
-      toast.success('Workout deleted locally');
+      toast.error('Please log in to delete workouts');
       return;
     }
 

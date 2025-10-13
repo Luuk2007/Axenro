@@ -64,7 +64,7 @@ const Dashboard = () => {
   const [showStepsConnection, setShowStepsConnection] = useState(false);
   const [userCalories, setUserCalories] = useState<number>(2200);
   const [consumedCalories, setConsumedCalories] = useState<number>(0);
-  const [dailySteps, setDailySteps] = useState<number>(8546);
+  const [dailySteps, setDailySteps] = useState<number>(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 

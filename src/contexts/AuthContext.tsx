@@ -176,8 +176,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Clear sensitive data from localStorage
-      const keysToRemove = ['auth_attempts', 'health_token_cache', 'userProfile', 'weightData'];
+      // Clear all user data from localStorage
+      const keysToRemove = ['auth_attempts', 'health_token_cache', 'userProfile', 'weightData', 'workouts'];
       keysToRemove.forEach(key => localStorage.removeItem(key));
       
       await supabase.auth.signOut();
