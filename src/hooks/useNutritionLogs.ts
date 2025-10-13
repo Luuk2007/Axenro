@@ -18,17 +18,8 @@ export const useNutritionLogs = () => {
 
   const loadNutritionLogs = async (date?: string) => {
     if (!user) {
-      // For non-authenticated users, load from localStorage
-      const today = date || new Date().toISOString().split('T')[0];
-      const savedLogs = localStorage.getItem(`nutritionLogs_${today}`);
-      if (savedLogs) {
-        try {
-          const parsedLogs = JSON.parse(savedLogs);
-          setNutritionLogs(parsedLogs);
-        } catch (error) {
-          console.error('Error parsing nutrition logs:', error);
-        }
-      }
+      // Clear nutrition logs when not authenticated
+      setNutritionLogs([]);
       return;
     }
 
@@ -68,12 +59,8 @@ export const useNutritionLogs = () => {
 
   const saveNutritionLog = async (logEntry: Omit<NutritionLogEntry, 'id'>) => {
     if (!user) {
-      // For non-authenticated users, save to localStorage
-      const newEntry = { ...logEntry, id: Date.now().toString() };
-      const updatedLogs = [...nutritionLogs, newEntry];
-      setNutritionLogs(updatedLogs);
-      localStorage.setItem(`nutritionLogs_${logEntry.date}`, JSON.stringify(updatedLogs));
-      return newEntry;
+      toast.error('Please log in to save nutrition logs');
+      return null;
     }
 
     try {
@@ -112,10 +99,7 @@ export const useNutritionLogs = () => {
 
   const deleteNutritionLog = async (id: string) => {
     if (!user) {
-      const updatedLogs = nutritionLogs.filter(log => log.id !== id);
-      setNutritionLogs(updatedLogs);
-      const today = new Date().toISOString().split('T')[0];
-      localStorage.setItem(`nutritionLogs_${today}`, JSON.stringify(updatedLogs));
+      toast.error('Please log in to delete nutrition logs');
       return;
     }
 

@@ -23,16 +23,8 @@ export const useUserProfile = () => {
 
   const loadProfile = async () => {
     if (!user) {
-      // For non-authenticated users, load from localStorage as fallback only
-      const savedProfile = localStorage.getItem("userProfile");
-      if (savedProfile) {
-        try {
-          const parsedProfile = JSON.parse(savedProfile);
-          setProfile(parsedProfile);
-        } catch (error) {
-          console.error("Error parsing profile:", error);
-        }
-      }
+      // Clear profile when not authenticated
+      setProfile(null);
       return;
     }
 
@@ -76,10 +68,7 @@ export const useUserProfile = () => {
 
   const saveProfile = async (profileData: UserProfileData) => {
     if (!user) {
-      // For non-authenticated users, save to localStorage only
-      localStorage.setItem("userProfile", JSON.stringify(profileData));
-      setProfile(profileData);
-      toast.success("Profile updated locally");
+      toast.error("Please log in to save your profile");
       return;
     }
 

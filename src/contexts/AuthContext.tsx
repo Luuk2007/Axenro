@@ -177,7 +177,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       // Clear all user data from localStorage
-      const keysToRemove = ['auth_attempts', 'health_token_cache', 'userProfile', 'weightData', 'workouts', 'bodyMeasurements'];
+      const keysToRemove = [
+        'auth_attempts', 
+        'health_token_cache', 
+        'userProfile', 
+        'weightData', 
+        'workouts', 
+        'bodyMeasurements'
+      ];
+      
+      // Also clear nutrition logs (they use dynamic keys)
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('nutritionLogs_') || key.startsWith('foodLog_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
       keysToRemove.forEach(key => localStorage.removeItem(key));
       
       await supabase.auth.signOut();
