@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { LoginPrompt } from "@/components/auth/LoginPrompt";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { useAuth } from "@/contexts/AuthContext";
 import PersonalRecords from "@/components/workouts/PersonalRecords";
 import WorkoutStatistics from "@/components/workouts/WorkoutStatistics";
 import { Dumbbell, Trophy, Plus, BarChart } from "lucide-react";
@@ -27,7 +25,6 @@ import { Target } from "lucide-react";
 const Workouts = () => {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  const { user } = useAuth();
   const { test_mode, test_subscription_tier, subscription_tier, loading: subscriptionLoading, initialized } = useSubscription();
   const { workouts, saveWorkout, deleteWorkout, loading: workoutsLoading } = useWorkouts();
   const { profile } = useUserProfile();
@@ -135,10 +132,6 @@ const Workouts = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {!user && (
-        <LoginPrompt message={t("Log in to create and track your workouts")} />
-      )}
-      
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t("workouts")}</h1>
         <div className="flex gap-2">

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Apple, Camera, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { LoginPrompt } from '@/components/auth/LoginPrompt';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'sonner';
@@ -442,10 +441,6 @@ const Nutrition = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {!isAuthenticated && (
-        <LoginPrompt message={t("Log in to track your meals and save your nutrition data")} />
-      )}
-      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("nutrition")}</h1>

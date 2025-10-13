@@ -8,7 +8,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { LoginPrompt } from "@/components/auth/LoginPrompt";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -184,10 +183,6 @@ const Profile = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {!user && (
-        <LoginPrompt message={t("Log in to save your profile and track your fitness journey")} />
-      )}
-      
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t("profile")}</h1>
       </div>
