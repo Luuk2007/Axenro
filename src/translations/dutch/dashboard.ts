@@ -64,4 +64,10 @@ export const dashboardTranslations: Translations = {
   "Weekly goal updated": "Wekelijks doel bijgewerkt",
   "per week": "per week",
   "Set weekly goal": "Stel wekelijks doel in",
+  "Log in to track your fitness journey and save your progress": "Log in om je fitness journey te volgen en je vooruitgang op te slaan",
+  "Log in to track your meals and save your nutrition data": "Log in om je maaltijden te volgen en je voedingsgegevens op te slaan",
+  "Log in to create and track your workouts": "Log in om je workouts te maken en bij te houden",
+  "Log in to track your progress and measurements": "Log in om je voortgang en metingen bij te houden",
+  "Log in to save your profile and track your fitness journey": "Log in om je profiel op te slaan en je fitness journey te volgen",
+  "Please log in to save your changes": "Log in om je wijzigingen op te slaan",
 };

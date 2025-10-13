@@ -9,6 +9,7 @@ import MacroProgressTracker from '@/components/dashboard/MacroProgressTracker';
 import MealsList from '@/components/dashboard/MealsList';
 import WorkoutsSummary from '@/components/dashboard/WorkoutsSummary';
 import StepsConnectionModal from '@/components/dashboard/StepsConnectionModal';
+import { LoginPrompt } from '@/components/auth/LoginPrompt';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { format, parse, isValid, startOfWeek, endOfWeek } from 'date-fns';
 import { toast } from 'sonner';
@@ -234,6 +235,10 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {!isAuthenticated && (
+        <LoginPrompt message={t("Log in to track your fitness journey and save your progress")} />
+      )}
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard")}</h1>

@@ -3,7 +3,9 @@ import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2, 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LoginPrompt } from '@/components/auth/LoginPrompt';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -44,6 +46,7 @@ interface MeasurementType {
 export default function Progress() {
   const { t } = useLanguage();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   const { subscription_tier, test_mode, test_subscription_tier, loading: subscriptionLoading, initialized } = useSubscription();
   
   // Determine current plan
@@ -264,6 +267,10 @@ export default function Progress() {
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {!user && (
+        <LoginPrompt message={t("Log in to track your progress and measurements")} />
+      )}
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("progress")}</h1>
