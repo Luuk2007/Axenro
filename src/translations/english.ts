@@ -34,6 +34,7 @@ export const english = {
   "workouts per week": "workouts per week",
   "Weekly goal updated": "Weekly goal updated",
   "per week": "per week",
+  "Set weekly goal": "Set weekly goal",
   "Free Plan": "Free Plan",
   "Loading...": "Loading...",
   "Get started with the basics — track your progress for free": "Get started with the basics — track your progress for free",

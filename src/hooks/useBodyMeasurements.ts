@@ -19,16 +19,8 @@ export const useBodyMeasurements = () => {
 
   const loadMeasurements = async () => {
     if (!user) {
-      // For non-authenticated users, load from localStorage
-      const savedMeasurements = localStorage.getItem('bodyMeasurements');
-      if (savedMeasurements) {
-        try {
-          const parsedData = JSON.parse(savedMeasurements);
-          setMeasurements(parsedData);
-        } catch (error) {
-          console.error('Error parsing measurements data:', error);
-        }
-      }
+      // Clear measurements when not authenticated
+      setMeasurements([]);
       return;
     }
 
@@ -63,6 +55,11 @@ export const useBodyMeasurements = () => {
   };
 
   const addMeasurement = async (measurement: Omit<MeasurementEntry, 'id'>) => {
+    if (!user) {
+      toast.error('Please log in to add measurements');
+      return null;
+    }
+
     const newMeasurement = {
       ...measurement,
       id: `${measurement.type}-${Date.now()}`
@@ -73,12 +70,6 @@ export const useBodyMeasurements = () => {
     );
     
     setMeasurements(updatedMeasurements);
-
-    if (!user) {
-      // For non-authenticated users, save to localStorage
-      localStorage.setItem('bodyMeasurements', JSON.stringify(updatedMeasurements));
-      return newMeasurement;
-    }
 
     try {
       const { error } = await supabase
@@ -114,13 +105,13 @@ export const useBodyMeasurements = () => {
   };
 
   const deleteMeasurement = async (id: string) => {
-    const updatedMeasurements = measurements.filter(m => m.id !== id);
-    setMeasurements(updatedMeasurements);
-
     if (!user) {
-      localStorage.setItem('bodyMeasurements', JSON.stringify(updatedMeasurements));
+      toast.error('Please log in to delete measurements');
       return;
     }
+
+    const updatedMeasurements = measurements.filter(m => m.id !== id);
+    setMeasurements(updatedMeasurements);
 
     try {
       const { error } = await supabase

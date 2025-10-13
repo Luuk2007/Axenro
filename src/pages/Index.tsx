@@ -69,8 +69,10 @@ const Dashboard = () => {
   const [userId, setUserId] = useState<string | null>(null);
 
   // Calculate workouts this week
-  const weeklyGoal = profile?.weekly_workout_goal || 3;
+  const weeklyGoal = profile?.weekly_workout_goal;
   const workoutsThisWeek = React.useMemo(() => {
+    if (!isAuthenticated || !weeklyGoal) return 0;
+    
     const currentDate = new Date();
     const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
     const currentWeekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
@@ -80,7 +82,7 @@ const Dashboard = () => {
       const workoutDate = new Date(workout.date);
       return workoutDate >= currentWeekStart && workoutDate <= currentWeekEnd;
     }).length;
-  }, [allWorkouts]);
+  }, [allWorkouts, isAuthenticated, weeklyGoal]);
 
   // Get current weight from weightData hook
   const currentWeight = weightData.length > 0 
@@ -296,9 +298,9 @@ const Dashboard = () => {
         />
         <StatsCard
           title={`${t("workouts")}`}
-          value={`${workoutsThisWeek}/${weeklyGoal}`}
+          value={weeklyGoal ? `${workoutsThisWeek}/${weeklyGoal}` : "—"}
           icon={Dumbbell}
-          description={`${Math.round((workoutsThisWeek / weeklyGoal) * 100)}% ${t("completed")}`}
+          description={weeklyGoal ? `${Math.round((workoutsThisWeek / weeklyGoal) * 100)}% ${t("completed")}` : t("Set weekly goal")}
           onClick={navigateToWorkouts}
         />
         <StatsCard

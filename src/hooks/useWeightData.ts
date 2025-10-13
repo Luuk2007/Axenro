@@ -15,16 +15,8 @@ export const useWeightData = () => {
 
   const loadWeightData = async () => {
     if (!user) {
-      // For non-authenticated users, load from localStorage as fallback only
-      const savedWeightData = localStorage.getItem("weightData");
-      if (savedWeightData) {
-        try {
-          const parsedData = JSON.parse(savedWeightData);
-          setWeightData(parsedData);
-        } catch (error) {
-          console.error("Error parsing weight data:", error);
-        }
-      }
+      // Clear weight data when not authenticated
+      setWeightData([]);
       return;
     }
 
@@ -59,18 +51,16 @@ export const useWeightData = () => {
   };
 
   const addWeightEntry = async (entry: WeightEntry) => {
+    if (!user) {
+      toast.error('Please log in to add weight entries');
+      return;
+    }
+
     const updatedData = [...weightData, entry].sort((a, b) => 
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
     
     setWeightData(updatedData);
-
-    if (!user) {
-      // For non-authenticated users, save to localStorage only
-      localStorage.setItem("weightData", JSON.stringify(updatedData));
-      toast.success('Weight entry added locally');
-      return;
-    }
 
     try {
       const { error } = await supabase
@@ -100,17 +90,16 @@ export const useWeightData = () => {
   };
 
   const updateWeightEntry = async (date: string, newWeight: number) => {
+    if (!user) {
+      toast.error('Please log in to update weight entries');
+      return;
+    }
+
     const updatedData = weightData.map(entry => 
       entry.date === date ? { ...entry, value: newWeight } : entry
     );
     
     setWeightData(updatedData);
-
-    if (!user) {
-      localStorage.setItem("weightData", JSON.stringify(updatedData));
-      toast.success('Weight entry updated locally');
-      return;
-    }
 
     try {
       const { error } = await supabase
@@ -134,14 +123,13 @@ export const useWeightData = () => {
   };
 
   const deleteWeightEntry = async (date: string) => {
-    const updatedData = weightData.filter(entry => entry.date !== date);
-    setWeightData(updatedData);
-
     if (!user) {
-      localStorage.setItem("weightData", JSON.stringify(updatedData));
-      toast.success('Weight entry deleted locally');
+      toast.error('Please log in to delete weight entries');
       return;
     }
+
+    const updatedData = weightData.filter(entry => entry.date !== date);
+    setWeightData(updatedData);
 
     try {
       const { error } = await supabase

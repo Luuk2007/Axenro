@@ -11,7 +11,11 @@ export const useProgressPhotos = () => {
   const [loading, setLoading] = useState(false);
 
   const loadPhotos = async () => {
-    if (!session) return;
+    if (!session) {
+      // Clear photos when not authenticated
+      setPhotos([]);
+      return;
+    }
     
     setLoading(true);
     try {
