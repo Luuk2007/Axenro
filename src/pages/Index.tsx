@@ -142,7 +142,8 @@ const Dashboard = () => {
             .from('food_logs')
             .select('food_item')
             .eq('user_id', userId)
-            .eq('date', selectedDate);
+            .eq('date', selectedDate)
+            .in('meal_id', ['breakfast', 'lunch', 'dinner', 'snack']); // Only valid meal_ids
 
           if (error) {
             console.error('Error loading food logs from database:', error);

@@ -216,7 +216,8 @@ export const getFoodLogs = async (date: string): Promise<FoodLogEntry[]> => {
       .from('food_logs')
       .select('*')
       .eq('user_id', user.user.id)
-      .eq('date', date);
+      .eq('date', date)
+      .in('meal_id', ['breakfast', 'lunch', 'dinner', 'snack']); // Only valid meal_ids
 
     if (error) throw error;
     
