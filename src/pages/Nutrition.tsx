@@ -190,6 +190,18 @@ const Nutrition = () => {
     if (meals.length > 0) {
       loadFoodLogs();
     }
+
+    // Listen for food log updates from AI or other sources
+    const handleFoodLogUpdate = () => {
+      console.log('Food log update event received, refreshing...');
+      setRefreshTrigger(prev => prev + 1);
+    };
+
+    window.addEventListener('foodLogUpdated', handleFoodLogUpdate);
+    
+    return () => {
+      window.removeEventListener('foodLogUpdated', handleFoodLogUpdate);
+    };
   }, [selectedDate, isAuthenticated, userId, refreshTrigger, t]); // Removed meals dependency
 
   // Save food logs to localStorage for demo

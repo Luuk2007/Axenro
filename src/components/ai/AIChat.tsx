@@ -158,6 +158,12 @@ export default function AIChat() {
 
       // Reload chat history to get the updated conversation
       await loadChatHistory();
+      
+      // If the AI successfully added food, dispatch an event to refresh the nutrition page
+      if (data?.response && data.response.includes('Successfully added')) {
+        console.log('AI added food, dispatching foodLogUpdated event');
+        window.dispatchEvent(new CustomEvent('foodLogUpdated'));
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error(t('Failed to send message'));
