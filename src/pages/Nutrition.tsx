@@ -169,14 +169,17 @@ const Nutrition = () => {
           const mealIndex = updatedMeals.findIndex(meal => meal.id === log.meal_id);
           
           if (mealIndex >= 0) {
-            updatedMeals[mealIndex].items.push({
+            const foodItem = {
               ...log.food_item,
+              id: log.id, // Use the database log ID as the item ID
               logId: log.id // Store the log ID for deletion
-            });
+            };
+            console.log('[Nutrition] Adding item to', log.meal_id + ':', { name: foodItem.name, logId: log.id, itemId: foodItem.id });
+            updatedMeals[mealIndex].items.push(foodItem);
           }
         });
         
-        console.log('Updated meals with database data:', updatedMeals);
+        console.log('[Nutrition] Loaded', logs.length, 'food logs from database');
         setMeals(updatedMeals);
       } catch (error) {
         console.error('Error loading food logs:', error);
@@ -323,6 +326,8 @@ const Nutrition = () => {
   };
 
   const handleDeleteFoodItem = async (mealId: string, itemId: string) => {
+    console.log('[Nutrition] Delete requested for:', { mealId, itemId });
+    
     // Create a copy of current meals to avoid direct state mutation
     const updatedMeals = [...meals];
     const mealIndex = updatedMeals.findIndex(meal => meal.id === mealId);
@@ -334,6 +339,7 @@ const Nutrition = () => {
       if (itemIndex >= 0) {
         // Get item before removing (for Supabase deletion)
         const item = updatedMeals[mealIndex].items[itemIndex];
+        console.log('[Nutrition] Found item to delete:', { name: item.name, id: item.id, logId: item.logId });
         
         // Remove the item
         updatedMeals[mealIndex].items.splice(itemIndex, 1);
@@ -341,10 +347,13 @@ const Nutrition = () => {
         try {
           if (isAuthenticated && item.logId) {
             // Delete from Supabase
+            console.log('[Nutrition] Deleting from Supabase with logId:', item.logId);
             await deleteFoodLog(item.logId);
+            toast.success(t('Food item deleted'));
           } else {
             // Update localStorage
             saveFoodLogsToLocalStorage(updatedMeals);
+            toast.success(t('Food item deleted'));
           }
           
           setMeals(updatedMeals);
@@ -357,6 +366,8 @@ const Nutrition = () => {
           console.error('Error deleting food log:', error);
           toast.error(t('errorDeletingData'));
         }
+      } else {
+        console.error('[Nutrition] Item not found with id:', itemId);
       }
     }
   };

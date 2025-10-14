@@ -90,6 +90,7 @@ export default function DailySummary({ className, meals = [], selectedDate = new
     if (meals && meals.length > 0) {
       // If meals are provided, extract all food items
       const allFoodItems = meals.flatMap(meal => meal.items || []);
+      console.log('[DailySummary] Calculating from meals prop:', allFoodItems.length, 'items');
       calculateConsumedMacros(allFoodItems);
     } else {
       // Otherwise load from localStorage
