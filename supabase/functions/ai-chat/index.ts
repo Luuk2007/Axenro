@@ -183,7 +183,7 @@ serve(async (req) => {
             const today = new Date().toISOString().split('T')[0];
             const date = functionArgs.date || today;
             
-            const { error: foodError } = await supabaseUser
+            const { error: foodError } = await supabaseAdmin
               .from('nutrition_logs')
               .insert({
                 user_id: user.id,
@@ -206,7 +206,7 @@ serve(async (req) => {
               toolResults.push(`Successfully added ${functionArgs.food_name} to your ${functionArgs.meal_type} log for ${date}`);
             }
           } else if (functionName === 'add_workout') {
-            const { error: workoutError } = await supabaseUser
+            const { error: workoutError } = await supabaseAdmin
               .from('workouts')
               .insert({
                 user_id: user.id,
