@@ -65,7 +65,7 @@ export default function DailySummary({ className, meals = [], selectedDate = new
     };
   }, []);
 
-  // Calculate macros from provided meals or from localStorage if not provided
+  // Calculate macros ONLY from provided meals prop
   useEffect(() => {
     // Function to calculate consumed macros from food items
     const calculateConsumedMacros = (allFoodItems: any[]) => {
@@ -87,32 +87,21 @@ export default function DailySummary({ className, meals = [], selectedDate = new
       }));
     };
 
+    // ALWAYS use meals prop, never fall back to localStorage
+    // This ensures DailySummary always matches the Nutrition page state
     if (meals && meals.length > 0) {
-      // If meals are provided, extract all food items
       const allFoodItems = meals.flatMap(meal => meal.items || []);
       console.log('[DailySummary] Calculating from meals prop:', allFoodItems.length, 'items');
       calculateConsumedMacros(allFoodItems);
     } else {
-      // Otherwise load from localStorage
-      const dateStr = selectedDate.toISOString().split('T')[0];
-      const savedFoodLog = localStorage.getItem(`foodLog_${dateStr}`);
-      
-      if (savedFoodLog) {
-        try {
-          const foodLog = JSON.parse(savedFoodLog);
-          calculateConsumedMacros(foodLog);
-        } catch (error) {
-          console.error("Error loading food log:", error);
-        }
-      } else {
-        // Reset consumed values if no food log found
-        setMacroTargets(prevState => ({
-          calories: { ...prevState.calories, consumed: 0 },
-          protein: { ...prevState.protein, consumed: 0 },
-          carbs: { ...prevState.carbs, consumed: 0 },
-          fat: { ...prevState.fat, consumed: 0 },
-        }));
-      }
+      // No meals provided or empty meals = reset to 0
+      console.log('[DailySummary] No meals provided, resetting to 0');
+      setMacroTargets(prevState => ({
+        calories: { ...prevState.calories, consumed: 0 },
+        protein: { ...prevState.protein, consumed: 0 },
+        carbs: { ...prevState.carbs, consumed: 0 },
+        fat: { ...prevState.fat, consumed: 0 },
+      }));
     }
   }, [meals, selectedDate, refreshTrigger]);
 
