@@ -23,7 +23,6 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
   const navigate = useNavigate();
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, switchTestPlan, createCheckout } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
-  const [billingFrequency, setBillingFrequency] = useState<'monthly' | 'yearly'>('monthly');
 
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
 
@@ -42,13 +41,10 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         // Refresh the page to ensure all UI elements update
         window.location.reload();
       } else {
-        // Use real Stripe checkout with selected billing interval
-        if (planId !== 'free') {
-          // Map 'yearly' to 'annually' for Stripe
-          const stripeInterval = billingFrequency === 'yearly' ? 'annually' : 'monthly';
-          await createCheckout(planId, stripeInterval);
-          toast.success(t('Redirecting to Stripe checkout...'));
-        }
+        // Use real Stripe checkout
+        const billingInterval = 'monthly'; // Default to monthly for now
+        await createCheckout(planId, billingInterval);
+        toast.success(t('Redirecting to Stripe checkout...'));
       }
     } catch (error) {
       console.error('Plan selection error:', error);
@@ -122,8 +118,8 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
       name: t('Pro'),
       info: t('Advanced fitness tracking'),
       price: {
-        monthly: 4.99,
-        yearly: 49.99,
+        monthly: test_mode ? 0 : 4.99,
+        yearly: test_mode ? 0 : 49.99,
       },
       features: [
         { text: t('Advanced fitness tracking') },
@@ -145,8 +141,8 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
       name: t('Premium'),
       info: t('Complete fitness solution'),
       price: {
-        monthly: 7.99,
-        yearly: 79.99,
+        monthly: test_mode ? 0 : 7.99,
+        yearly: test_mode ? 0 : 79.99,
       },
       features: [
         { text: t('Everything in Pro') },
@@ -190,8 +186,6 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
               : t('Unlock the full potential of your fitness journey with our premium features.')
             }
             className="p-0"
-            frequency={billingFrequency}
-            setFrequency={setBillingFrequency}
           />
         </div>
 

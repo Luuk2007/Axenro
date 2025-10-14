@@ -39,25 +39,17 @@ interface PricingSectionProps extends React.ComponentProps<'div'> {
 	plans: Plan[];
 	heading: string;
 	description?: string;
-	frequency?: FREQUENCY;
-	setFrequency?: React.Dispatch<React.SetStateAction<FREQUENCY>>;
 }
 
 export function PricingSection({
 	plans,
 	heading,
 	description,
-	frequency: externalFrequency,
-	setFrequency: externalSetFrequency,
 	...props
 }: PricingSectionProps) {
-	const [internalFrequency, setInternalFrequency] = React.useState<'monthly' | 'yearly'>(
+	const [frequency, setFrequency] = React.useState<'monthly' | 'yearly'>(
 		'monthly',
 	);
-
-	// Use external frequency if provided, otherwise use internal
-	const frequency = externalFrequency ?? internalFrequency;
-	const setFrequency = externalSetFrequency ?? setInternalFrequency;
 
 	return (
 		<div

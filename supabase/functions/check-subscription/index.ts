@@ -51,23 +51,6 @@ serve(async (req) => {
       .eq("email", user.email)
       .single();
 
-    // Check if user is whitelisted (admin access) - grants full premium access
-    if (existingSubscriber?.is_whitelisted) {
-      logStep("User is whitelisted, granting premium access", { email: user.email });
-      
-      return new Response(JSON.stringify({
-        subscribed: true,
-        subscription_tier: 'premium',
-        subscription_end: null, // No expiration for whitelisted users
-        test_mode: false,
-        test_subscription_tier: 'premium',
-        is_whitelisted: true
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
-
     // If user is in test mode, return test subscription data
     if (existingSubscriber?.test_mode) {
       logStep("User is in test mode, returning test subscription data", { 
