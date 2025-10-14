@@ -8,6 +8,61 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Define AI tools for adding meals and workouts
+const tools = [
+  {
+    type: "function",
+    function: {
+      name: "add_food_log",
+      description: "Add a food/meal to the user's nutrition log for a specific date. Use this when the user asks to log a meal, food item, or track nutrition.",
+      parameters: {
+        type: "object",
+        properties: {
+          food_name: { type: "string", description: "Name of the food item" },
+          calories: { type: "number", description: "Calories in the food" },
+          protein: { type: "number", description: "Protein in grams" },
+          carbs: { type: "number", description: "Carbohydrates in grams" },
+          fat: { type: "number", description: "Fat in grams" },
+          serving_size: { type: "string", description: "Serving size, e.g., '100g' or '1 cup'" },
+          meal_type: { type: "string", enum: ["breakfast", "lunch", "dinner", "snack"], description: "Type of meal" },
+          date: { type: "string", description: "Date in YYYY-MM-DD format, defaults to today" }
+        },
+        required: ["food_name", "calories", "protein", "carbs", "fat", "meal_type"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_workout",
+      description: "Add a workout or exercise to the user's workout log. Use this when the user asks to log a workout, exercise session, or track their training.",
+      parameters: {
+        type: "object",
+        properties: {
+          workout_name: { type: "string", description: "Name of the workout" },
+          workout_type: { type: "string", enum: ["strength", "cardio", "flexibility", "sports"], description: "Type of workout" },
+          duration: { type: "number", description: "Duration in minutes" },
+          exercises: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                sets: { type: "number" },
+                reps: { type: "number" },
+                weight: { type: "number" }
+              }
+            },
+            description: "List of exercises performed"
+          },
+          notes: { type: "string", description: "Additional notes about the workout" }
+        },
+        required: ["workout_name", "workout_type", "duration"]
+      }
+    }
+  }
+];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -16,11 +71,13 @@ serve(async (req) => {
   try {
     const { message, messageType = 'nutrition', userContext, systemPrompt } = await req.json();
 
-    // Create Supabase client with proper auth handling
+    // Create Supabase clients - one with user auth, one with service role for chat history
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get the authorization header
     const authHeader = req.headers.get('Authorization');
@@ -31,24 +88,18 @@ serve(async (req) => {
     // Extract the JWT token from the Authorization header
     const token = authHeader.replace('Bearer ', '');
     
-    // Set the auth token for this request - this ensures RLS works correctly
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    // Authenticate the user
+    const { data: { user }, error: userError } = await supabaseUser.auth.getUser(token);
     
     if (userError || !user) {
       console.error('Auth error:', userError);
       throw new Error('Authentication failed');
     }
 
-    // Set the session for the supabase client to ensure RLS policies work
-    await supabase.auth.setSession({
-      access_token: token,
-      refresh_token: '', // Not needed for this operation
-    });
-
     console.log('Authenticated user:', user.id);
 
     // Get recent chat history for context (last 5 messages)
-    const { data: recentChats } = await supabase
+    const { data: recentChats } = await supabaseAdmin
       .from('ai_chat_history')
       .select('message, response')
       .eq('user_id', user.id)
@@ -98,6 +149,8 @@ serve(async (req) => {
         messages,
         temperature: 0.7,
         max_tokens: 800,
+        tools,
+        tool_choice: 'auto'
       }),
     });
 
@@ -108,12 +161,86 @@ serve(async (req) => {
     }
 
     const aiData = await openAIResponse.json();
-    const response = aiData.choices[0].message.content;
+    const choice = aiData.choices[0];
+    let response = choice.message.content || '';
+    const toolCalls = choice.message.tool_calls;
 
-    console.log('Received response from OpenAI, saving to database');
+    console.log('Received response from OpenAI');
 
-    // Save chat history with proper auth context
-    const { error } = await supabase
+    // Handle tool calls
+    const toolResults = [];
+    if (toolCalls && toolCalls.length > 0) {
+      console.log('Processing tool calls:', toolCalls.length);
+      
+      for (const toolCall of toolCalls) {
+        const functionName = toolCall.function.name;
+        const functionArgs = JSON.parse(toolCall.function.arguments);
+        
+        console.log(`Executing tool: ${functionName}`, functionArgs);
+        
+        try {
+          if (functionName === 'add_food_log') {
+            const today = new Date().toISOString().split('T')[0];
+            const date = functionArgs.date || today;
+            
+            const { error: foodError } = await supabaseUser
+              .from('food_logs')
+              .insert({
+                user_id: user.id,
+                food_item: {
+                  name: functionArgs.food_name,
+                  calories: functionArgs.calories,
+                  protein: functionArgs.protein,
+                  carbs: functionArgs.carbs,
+                  fat: functionArgs.fat,
+                  serving_size: functionArgs.serving_size || '1 serving'
+                },
+                meal_type: functionArgs.meal_type,
+                date: date
+              });
+            
+            if (foodError) {
+              console.error('Error adding food log:', foodError);
+              toolResults.push(`Failed to add food: ${foodError.message}`);
+            } else {
+              toolResults.push(`Successfully added ${functionArgs.food_name} to your ${functionArgs.meal_type} log for ${date}`);
+            }
+          } else if (functionName === 'add_workout') {
+            const { error: workoutError } = await supabaseUser
+              .from('workouts')
+              .insert({
+                user_id: user.id,
+                name: functionArgs.workout_name,
+                type: functionArgs.workout_type,
+                duration: functionArgs.duration,
+                exercises: functionArgs.exercises || [],
+                notes: functionArgs.notes || '',
+                date: new Date().toISOString().split('T')[0]
+              });
+            
+            if (workoutError) {
+              console.error('Error adding workout:', workoutError);
+              toolResults.push(`Failed to add workout: ${workoutError.message}`);
+            } else {
+              toolResults.push(`Successfully logged your ${functionArgs.workout_name} workout`);
+            }
+          }
+        } catch (error) {
+          console.error(`Error executing ${functionName}:`, error);
+          toolResults.push(`Error: ${error.message}`);
+        }
+      }
+      
+      // Add tool results to the response
+      if (toolResults.length > 0) {
+        response = toolResults.join('\n\n') + (response ? '\n\n' + response : '');
+      }
+    }
+
+    console.log('Saving to database');
+
+    // Save chat history using service role to bypass RLS
+    const { error } = await supabaseAdmin
       .from('ai_chat_history')
       .insert({
         user_id: user.id,
@@ -130,7 +257,8 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ 
       success: true, 
-      response: response 
+      response: response,
+      tool_results: toolResults
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
