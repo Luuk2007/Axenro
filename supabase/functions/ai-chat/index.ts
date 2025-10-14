@@ -14,7 +14,7 @@ const tools = [
     type: "function",
     function: {
       name: "add_food_log",
-      description: "Add a food/meal to the user's nutrition log for a specific date. Use this when the user asks to log a meal, food item, or track nutrition.",
+      description: "Add a food/meal to the user's nutrition log. IMPORTANT: Only add ONE food item per function call. If the user mentions multiple items, call this function once for EACH item separately. Never combine multiple items into one call to avoid duplicates.",
       parameters: {
         type: "object",
         properties: {
@@ -183,11 +183,13 @@ serve(async (req) => {
             const today = new Date().toISOString().split('T')[0];
             const date = functionArgs.date || today;
             
+            console.log(`[AI-CHAT] Adding food log: ${functionArgs.food_name} to ${functionArgs.meal_type} on ${date}`);
+            
             const { error: foodError } = await supabaseAdmin
               .from('food_logs')
               .insert({
                 user_id: user.id,
-                meal_id: functionArgs.meal_type, // Use meal_type directly as meal_id
+                meal_id: functionArgs.meal_type,
                 food_item: {
                   name: functionArgs.food_name,
                   calories: functionArgs.calories,
@@ -203,6 +205,7 @@ serve(async (req) => {
               console.error('Error adding food log:', foodError);
               toolResults.push(`Failed to add food: ${foodError.message}`);
             } else {
+              console.log(`[AI-CHAT] Successfully added ${functionArgs.food_name} to database`);
               toolResults.push(`Successfully added ${functionArgs.food_name} to your ${functionArgs.meal_type} log for ${date}`);
             }
           } else if (functionName === 'add_workout') {
@@ -211,11 +214,10 @@ serve(async (req) => {
               .insert({
                 user_id: user.id,
                 name: functionArgs.workout_name,
-                type: functionArgs.workout_type,
-                duration: functionArgs.duration,
+                workout_id: `workout-${Date.now()}`,
                 exercises: functionArgs.exercises || [],
-                notes: functionArgs.notes || '',
-                date: new Date().toISOString().split('T')[0]
+                date: new Date().toISOString().split('T')[0],
+                completed: false
               });
             
             if (workoutError) {
