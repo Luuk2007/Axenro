@@ -183,11 +183,15 @@ serve(async (req) => {
             const today = new Date().toISOString().split('T')[0];
             const date = functionArgs.date || today;
             
+            // Generate a unique meal_id
+            const mealId = `${functionArgs.meal_type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            
             const { error: foodError } = await supabaseAdmin
-              .from('nutrition_logs')
+              .from('food_logs')
               .insert({
                 user_id: user.id,
-                food_data: {
+                meal_id: mealId,
+                food_item: {
                   name: functionArgs.food_name,
                   calories: functionArgs.calories,
                   protein: functionArgs.protein,
@@ -195,7 +199,6 @@ serve(async (req) => {
                   fat: functionArgs.fat,
                   serving_size: functionArgs.serving_size || '1 serving'
                 },
-                meal_type: functionArgs.meal_type,
                 date: date
               });
             
