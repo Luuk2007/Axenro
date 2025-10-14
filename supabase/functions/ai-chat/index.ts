@@ -184,10 +184,10 @@ serve(async (req) => {
             const date = functionArgs.date || today;
             
             const { error: foodError } = await supabaseUser
-              .from('food_logs')
+              .from('nutrition_logs')
               .insert({
                 user_id: user.id,
-                food_item: {
+                food_data: {
                   name: functionArgs.food_name,
                   calories: functionArgs.calories,
                   protein: functionArgs.protein,
