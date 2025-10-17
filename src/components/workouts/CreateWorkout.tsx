@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, X, Calendar, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AddExerciseDialog from './AddExerciseDialog';
@@ -123,16 +122,16 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }));
   };
 
-  const handleUpdateSet = (exerciseId: string, setId: number, field: 'reps' | 'weight' | 'completed' | 'isBodyweight', value: number | boolean | string) => {
+  const handleUpdateSet = (exerciseId: string, setId: number, field: 'reps' | 'weight' | 'completed', value: number | boolean | string) => {
     setExercises(prev => prev.map(exercise => {
       if (exercise.id === exerciseId) {
         return {
           ...exercise,
           sets: exercise.sets.map(set => {
             if (set.id === setId) {
-              if (field === 'completed' || field === 'isBodyweight') {
-                // Ensure boolean fields are always boolean
-                return { ...set, [field]: Boolean(value) };
+              if (field === 'completed') {
+                // Ensure completed is always a boolean
+                return { ...set, completed: Boolean(value) };
               } else if (field === 'reps' || field === 'weight') {
                 if (typeof value === 'string') {
                   // Allow empty string values
@@ -152,10 +151,6 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
       }
       return exercise;
     }));
-  };
-
-  const isPullUpExercise = (exerciseName: string) => {
-    return exerciseName.toLowerCase().includes('pull up') || exerciseName.toLowerCase().includes('pull-up');
   };
 
   return (
@@ -227,54 +222,37 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                         
                         <div className="space-y-2">
                           {exercise.sets.map((set, index) => (
-                            <div key={set.id} className="space-y-2">
-                              <div className="flex items-center gap-2 text-sm">
-                                <span className="w-12 text-muted-foreground">Set {index + 1}</span>
-                                <div className="flex items-center gap-1">
-                                  <Input
-                                    type="number"
-                                    value={set.reps?.toString() || ''}
-                                    onChange={(e) => handleUpdateSet(exercise.id, set.id, 'reps', e.target.value)}
-                                    className="w-16 h-8"
-                                    placeholder="Reps"
-                                  />
-                                  <span className="text-xs text-muted-foreground">reps</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Input
-                                    type="number"
-                                    value={set.weight?.toString() || ''}
-                                    onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
-                                    className="w-16 h-8"
-                                    placeholder={isPullUpExercise(exercise.name) && set.isBodyweight ? "Added" : "Weight"}
-                                  />
-                                  <span className="text-xs text-muted-foreground">{getWeightUnit(measurementSystem)}</span>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleRemoveSet(exercise.id, set.id)}
-                                  className="h-6 w-6 p-0"
-                                  disabled={exercise.sets.length <= 1}
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
+                            <div key={set.id} className="flex items-center gap-2 text-sm">
+                              <span className="w-12 text-muted-foreground">Set {index + 1}</span>
+                              <div className="flex items-center gap-1">
+                                <Input
+                                  type="number"
+                                  value={set.reps?.toString() || ''}
+                                  onChange={(e) => handleUpdateSet(exercise.id, set.id, 'reps', e.target.value)}
+                                  className="w-16 h-8"
+                                  placeholder="Reps"
+                                />
+                                <span className="text-xs text-muted-foreground">reps</span>
                               </div>
-                              {isPullUpExercise(exercise.name) && (
-                                <div className="flex items-center gap-2 ml-14">
-                                  <Checkbox
-                                    id={`bodyweight-${exercise.id}-${set.id}`}
-                                    checked={set.isBodyweight || false}
-                                    onCheckedChange={(checked) => handleUpdateSet(exercise.id, set.id, 'isBodyweight', checked)}
-                                  />
-                                  <label
-                                    htmlFor={`bodyweight-${exercise.id}-${set.id}`}
-                                    className="text-xs text-muted-foreground cursor-pointer"
-                                  >
-                                    Bodyweight
-                                  </label>
-                                </div>
-                              )}
+                              <div className="flex items-center gap-1">
+                                <Input
+                                  type="number"
+                                  value={set.weight?.toString() || ''}
+                                  onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
+                                  className="w-16 h-8"
+                                  placeholder="Weight"
+                                />
+                                <span className="text-xs text-muted-foreground">{getWeightUnit(measurementSystem)}</span>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveSet(exercise.id, set.id)}
+                                className="h-6 w-6 p-0"
+                                disabled={exercise.sets.length <= 1}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
                             </div>
                           ))}
                           
