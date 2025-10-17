@@ -1,17 +1,51 @@
 
 import React, { useState, useEffect } from 'react';
-import { Flame, RotateCcw } from "lucide-react";
+import { Flame, RotateCcw, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { ProfileFormValues } from './ProfileForm';
 import { getDefaultRatios, calculateMacroGoals, getMacroRatios, type ProfileData } from '@/utils/macroCalculations';
+import { cn } from "@/lib/utils";
 
 interface NutritionCalculatorProps {
   profile: ProfileFormValues;
 }
+
+// Preset macro ratio options
+const MACRO_PRESETS = [
+  {
+    id: 'bulking',
+    name: 'Bulking (High Carb)',
+    description: 'Maximize muscle growth',
+    ratios: { protein: 30, carbs: 50, fat: 20 }
+  },
+  {
+    id: 'balanced',
+    name: 'Balanced',
+    description: 'Maintain weight',
+    ratios: { protein: 30, carbs: 40, fat: 30 }
+  },
+  {
+    id: 'cutting',
+    name: 'Cutting (Low Carb)',
+    description: 'Lose fat, preserve muscle',
+    ratios: { protein: 40, carbs: 30, fat: 30 }
+  },
+  {
+    id: 'keto',
+    name: 'Keto',
+    description: 'Very low carb',
+    ratios: { protein: 30, carbs: 10, fat: 60 }
+  },
+  {
+    id: 'high-protein',
+    name: 'High Protein',
+    description: 'Maximum protein intake',
+    ratios: { protein: 40, carbs: 35, fat: 25 }
+  }
+];
 
 const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) => {
   const { t } = useLanguage();
@@ -23,10 +57,14 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     fat: number;
   } | null>(null);
 
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
-  // Load custom ratios from localStorage on component mount
+
+  // Load custom ratios and selected preset from localStorage on component mount
   useEffect(() => {
     const savedRatios = localStorage.getItem('customMacroRatios');
+    const savedPreset = localStorage.getItem('selectedMacroPreset');
+    
     if (savedRatios) {
       try {
         setCustomRatios(JSON.parse(savedRatios));
@@ -34,12 +72,21 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
         console.error('Error loading custom macro ratios:', error);
       }
     }
+    
+    if (savedPreset) {
+      setSelectedPreset(savedPreset);
+    }
   }, []);
 
   // Save custom ratios to localStorage and trigger updates in other components
-  const saveRatios = (ratios: { protein: number; carbs: number; fat: number }) => {
+  const saveRatios = (ratios: { protein: number; carbs: number; fat: number }, presetId?: string) => {
     localStorage.setItem('customMacroRatios', JSON.stringify(ratios));
     setCustomRatios(ratios);
+    
+    if (presetId) {
+      localStorage.setItem('selectedMacroPreset', presetId);
+      setSelectedPreset(presetId);
+    }
     
     // Trigger a custom event to notify other components of the change
     window.dispatchEvent(new CustomEvent('macroRatiosChanged', { detail: ratios }));
@@ -52,44 +99,17 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     }
   };
 
-  // Handle slider changes and auto-adjust other values to ensure total = 100%
-  const handleRatioChange = (macroType: 'protein' | 'carbs' | 'fat', newValue: number) => {
-    const currentRatios = customRatios || getDefaultRatios(profile?.fitnessGoal || "maintain");
-    const remaining = 100 - newValue;
-    
-    // Distribute the remaining percentage between the other two macros
-    // proportionally based on their current values
-    let newRatios = { ...currentRatios };
-    newRatios[macroType] = newValue;
-    
-    const otherMacros = Object.keys(currentRatios).filter(key => key !== macroType) as ('protein' | 'carbs' | 'fat')[];
-    const otherTotal = otherMacros.reduce((sum, key) => sum + currentRatios[key], 0);
-    
-    if (otherTotal > 0) {
-      // Distribute remaining proportionally
-      otherMacros.forEach(key => {
-        newRatios[key] = Math.round((currentRatios[key] / otherTotal) * remaining);
-      });
-      
-      // Ensure total is exactly 100% by adjusting the first "other" macro if needed
-      const total = Object.values(newRatios).reduce((sum, val) => sum + val, 0);
-      if (total !== 100) {
-        newRatios[otherMacros[0]] += (100 - total);
-      }
-    } else {
-      // If other macros are 0, split remaining equally
-      const splitValue = Math.round(remaining / 2);
-      newRatios[otherMacros[0]] = splitValue;
-      newRatios[otherMacros[1]] = remaining - splitValue;
-    }
-    
-    saveRatios(newRatios);
+  // Handle preset selection
+  const handlePresetSelect = (preset: typeof MACRO_PRESETS[0]) => {
+    saveRatios(preset.ratios, preset.id);
   };
 
   // Reset to default ratios and notify other components
   const resetToDefaults = () => {
     localStorage.removeItem('customMacroRatios');
+    localStorage.removeItem('selectedMacroPreset');
     setCustomRatios(null);
+    setSelectedPreset(null);
     
     // Trigger a custom event to notify other components of the change
     window.dispatchEvent(new CustomEvent('macroRatiosChanged', { detail: null }));
@@ -150,10 +170,10 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
             </div>
           </div>
           
-          {/* Macro Ratio Controls */}
+          {/* Macro Ratio Presets */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">{t("Adjust macro ratios")}</h3>
+              <h3 className="text-lg font-medium">{t("Macro split presets")}</h3>
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -165,58 +185,43 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
               </Button>
             </div>
             
-            <div className="space-y-6">
-              {/* Protein Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium">{t("Protein")}</label>
-                  <span className="text-sm text-muted-foreground">{currentRatios.protein}%</span>
-                </div>
-                <Slider
-                  value={[currentRatios.protein]}
-                  onValueChange={(value) => handleRatioChange('protein', value[0])}
-                  max={70}
-                  min={15}
-                  step={1}
-                  className="w-full"
-                />
-              </div>
-              
-              {/* Carbs Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium">{t("Carbs")}</label>
-                  <span className="text-sm text-muted-foreground">{currentRatios.carbs}%</span>
-                </div>
-                <Slider
-                  value={[currentRatios.carbs]}
-                  onValueChange={(value) => handleRatioChange('carbs', value[0])}
-                  max={70}
-                  min={15}
-                  step={1}
-                  className="w-full"
-                />
-              </div>
-              
-              {/* Fat Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium">{t("Fat")}</label>
-                  <span className="text-sm text-muted-foreground">{currentRatios.fat}%</span>
-                </div>
-                <Slider
-                  value={[currentRatios.fat]}
-                  onValueChange={(value) => handleRatioChange('fat', value[0])}
-                  max={50}
-                  min={10}
-                  step={1}
-                  className="w-full"
-                />
-              </div>
-              
-              <div className="text-sm text-muted-foreground text-center">
-                {t("Total")}: {currentRatios.protein + currentRatios.carbs + currentRatios.fat}%
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {MACRO_PRESETS.map((preset) => {
+                const isSelected = selectedPreset === preset.id;
+                return (
+                  <button
+                    key={preset.id}
+                    onClick={() => handlePresetSelect(preset)}
+                    className={cn(
+                      "relative p-4 rounded-lg border-2 text-left transition-all hover:shadow-md",
+                      isSelected 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border bg-card hover:border-primary/50"
+                    )}
+                  >
+                    {isSelected && (
+                      <div className="absolute top-2 right-2">
+                        <Check className="h-5 w-5 text-primary" />
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      <h4 className="font-semibold">{preset.name}</h4>
+                      <p className="text-sm text-muted-foreground">{preset.description}</p>
+                      <div className="flex gap-2 text-xs">
+                        <span className="px-2 py-1 rounded bg-primary/10 text-primary">
+                          P: {preset.ratios.protein}%
+                        </span>
+                        <span className="px-2 py-1 rounded bg-primary/10 text-primary">
+                          C: {preset.ratios.carbs}%
+                        </span>
+                        <span className="px-2 py-1 rounded bg-primary/10 text-primary">
+                          F: {preset.ratios.fat}%
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
