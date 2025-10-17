@@ -5,6 +5,7 @@ export type ExerciseSet = {
   weight: number;
   completed: boolean;
   isCardio?: boolean;
+  isBodyweight?: boolean;
 };
 
 export type Exercise = {
