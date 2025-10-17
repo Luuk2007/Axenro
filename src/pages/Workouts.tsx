@@ -184,7 +184,7 @@ const Workouts = () => {
           </TabsContent>
           
           <TabsContent value="calendar" className="mt-6">
-            <WorkoutCalendar workouts={workouts} />
+            <WorkoutCalendar workouts={workouts} onViewWorkout={handleViewWorkout} />
           </TabsContent>
           
           {canAccessStatistics && (

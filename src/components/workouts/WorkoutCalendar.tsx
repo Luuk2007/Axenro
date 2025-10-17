@@ -15,9 +15,10 @@ import { CheckCircle2, Calendar as CalendarIcon, Dumbbell, ChevronLeft, ChevronR
 
 interface WorkoutCalendarProps {
   workouts: Workout[];
+  onViewWorkout?: (workout: Workout) => void;
 }
 
-const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
+const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorkout }) => {
   const { t } = useLanguage();
   const currentDate = new Date();
   const [currentMonth, setCurrentMonth] = React.useState<Date>(currentDate);
@@ -380,7 +381,11 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                     </div>
                     <div className="space-y-2">
                       {selectedDateStrength.map((workout) => (
-                        <Card key={workout.id} className="p-3">
+                        <Card 
+                          key={workout.id} 
+                          className="p-3 cursor-pointer hover:bg-accent transition-colors"
+                          onClick={() => onViewWorkout?.(workout)}
+                        >
                           <div className="font-medium text-sm">{workout.name}</div>
                           <div className="text-xs text-muted-foreground mt-1">
                             {workout.exercises.length} exercises
@@ -399,7 +404,11 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                     </div>
                     <div className="space-y-2">
                       {selectedDateCardio.map((workout) => (
-                        <Card key={workout.id} className="p-3">
+                        <Card 
+                          key={workout.id} 
+                          className="p-3 cursor-pointer hover:bg-accent transition-colors"
+                          onClick={() => onViewWorkout?.(workout)}
+                        >
                           <div className="font-medium text-sm">{workout.name}</div>
                           <div className="text-xs text-muted-foreground mt-1">
                             {workout.exercises.length} exercises
