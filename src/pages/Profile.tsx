@@ -46,9 +46,9 @@ const Profile = () => {
       height: dbProfile.height || 0,
       weight: dbProfile.weight || 0,
       activityLevel: (dbProfile.activity_level as 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active') || 'moderate',
-      fitnessGoal: (dbProfile.fitness_goal as 'lose' | 'maintain' | 'gain') || 'maintain',
+      fitnessGoal: (dbProfile.fitness_goal as 'lose' | 'maintain' | 'gain') || undefined,
       targetWeight: dbProfile.target_weight || undefined,
-      exerciseFrequency: (dbProfile.exercise_frequency as '0-1' | '2-3' | '4-5' | '6+') || '2-3'
+      exerciseFrequency: (dbProfile.exercise_frequency as '0-1' | '2-3' | '4-5' | '6+') || undefined
     };
   };
 
