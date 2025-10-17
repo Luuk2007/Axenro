@@ -16,34 +16,40 @@ interface NutritionCalculatorProps {
 // Preset macro ratio options
 const MACRO_PRESETS = [
   {
-    id: 'bulking',
-    name: 'Bulking (High Carb)',
-    description: 'Maximize muscle growth',
-    ratios: { protein: 30, carbs: 50, fat: 20 }
-  },
-  {
-    id: 'balanced',
-    name: 'Balanced',
-    description: 'Maintain weight',
-    ratios: { protein: 30, carbs: 40, fat: 30 }
-  },
-  {
     id: 'cutting',
-    name: 'Cutting (Low Carb)',
-    description: 'Lose fat, preserve muscle',
+    name: '🥦 Fat Loss (Cutting)',
+    description: 'High protein, moderate carbs — for getting lean while keeping muscle.',
     ratios: { protein: 40, carbs: 30, fat: 30 }
   },
   {
-    id: 'keto',
-    name: 'Keto',
-    description: 'Very low carb',
-    ratios: { protein: 30, carbs: 10, fat: 60 }
+    id: 'bulking',
+    name: '🍚 Muscle Growth (Bulking)',
+    description: 'Fuel muscle gain with high carbs and solid protein intake.',
+    ratios: { protein: 25, carbs: 55, fat: 20 }
   },
   {
-    id: 'high-protein',
-    name: 'High Protein',
-    description: 'Maximum protein intake',
-    ratios: { protein: 40, carbs: 35, fat: 25 }
+    id: 'recomposition',
+    name: '🥩 High Protein (Recomposition)',
+    description: 'Build muscle and burn fat at the same time with a protein-heavy plan.',
+    ratios: { protein: 45, carbs: 25, fat: 30 }
+  },
+  {
+    id: 'keto',
+    name: '🥑 Keto / Low Carb',
+    description: 'Use fats as your main energy source — ideal for low-carb lifestyles.',
+    ratios: { protein: 25, carbs: 10, fat: 65 }
+  },
+  {
+    id: 'endurance',
+    name: '🍠 Endurance Athlete',
+    description: 'Max energy and performance for long training sessions or endurance sports.',
+    ratios: { protein: 20, carbs: 60, fat: 20 }
+  },
+  {
+    id: 'balanced',
+    name: '🧘 Balanced Lifestyle',
+    description: 'A well-rounded macro split for everyday health and maintenance.',
+    ratios: { protein: 30, carbs: 40, fat: 30 }
   }
 ];
 
