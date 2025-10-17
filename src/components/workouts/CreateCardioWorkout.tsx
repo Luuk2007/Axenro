@@ -61,19 +61,27 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
     if (!workoutName.trim() || exercises.length === 0) return;
     
     // Convert cardio exercises to the standard format
-    const exercisesForStorage = exercises.map(exercise => ({
-      id: exercise.id,
-      name: exercise.name,
-      muscleGroup: 'cardio', // Mark as cardio exercise
-      sets: [
-        {
-          id: 1,
-          reps: exercise.duration, // Store duration as reps
-          weight: exercise.distance ? convertDistance(exercise.distance, measurementSystem, 'metric') : 0, // Store distance as weight
-          completed: true
-        }
-      ]
-    }));
+    const exercisesForStorage = exercises.map(exercise => {
+      const distanceInKm = exercise.distance ? convertDistance(exercise.distance, measurementSystem, 'metric') : 0;
+      const durationInMinutes = exercise.duration / 60;
+      // Calculate pace: minutes per km (only if distance > 0)
+      const pace = distanceInKm > 0 ? durationInMinutes / distanceInKm : 0;
+      
+      return {
+        id: exercise.id,
+        name: exercise.name,
+        muscleGroup: 'cardio', // Mark as cardio exercise
+        sets: [
+          {
+            id: 1,
+            reps: exercise.duration, // Store duration as reps
+            weight: distanceInKm, // Store distance as weight (in km)
+            completed: true,
+            pace: pace // Store calculated pace
+          }
+        ]
+      };
+    });
     
     onSaveWorkout(workoutName, exercisesForStorage, workoutDate);
     

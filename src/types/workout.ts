@@ -5,6 +5,7 @@ export type ExerciseSet = {
   weight: number;
   completed: boolean;
   isCardio?: boolean;
+  pace?: number; // For cardio: minutes per km
 };
 
 export type Exercise = {

@@ -19,9 +19,11 @@ interface ExerciseStats {
   maxReps?: number;
   maxDistance?: number;
   maxDuration?: number;
+  bestPace?: number; // minutes per km
   totalSets: number;
   lastPerformed: string;
   maxWeightDate?: string;
+  bestPaceDate?: string;
   muscleGroup?: string;
   isCardio: boolean;
 }
@@ -52,6 +54,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
           // Handle cardio exercises
           let maxDuration = 0;
           let maxDistance = 0;
+          let bestPaceInSession = Infinity;
           
           exercise.sets.forEach(set => {
             if (set.reps > maxDuration) {
@@ -59,6 +62,10 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
             }
             if (set.weight > maxDistance) {
               maxDistance = set.weight; // Distance stored in weight
+            }
+            // Track best pace (lowest minutes per km)
+            if (set.pace && set.pace > 0 && set.pace < bestPaceInSession) {
+              bestPaceInSession = set.pace;
             }
           });
 
@@ -69,16 +76,21 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
               name: exercise.name,
               maxDuration,
               maxDistance,
+              bestPace: bestPaceInSession !== Infinity ? bestPaceInSession : undefined,
+              bestPaceDate: bestPaceInSession !== Infinity ? workout.date : undefined,
               totalSets: exercise.sets.length,
               lastPerformed: workout.date,
               muscleGroup: exercise.muscleGroup,
               isCardio: true
             });
           } else {
+            const shouldUpdatePace = bestPaceInSession !== Infinity && bestPaceInSession < (existing.bestPace || Infinity);
             exerciseMap.set(key, {
               ...existing,
               maxDuration: Math.max(existing.maxDuration || 0, maxDuration),
               maxDistance: Math.max(existing.maxDistance || 0, maxDistance),
+              bestPace: shouldUpdatePace ? bestPaceInSession : existing.bestPace,
+              bestPaceDate: shouldUpdatePace ? workout.date : existing.bestPaceDate,
               totalSets: existing.totalSets + exercise.sets.length,
               lastPerformed: new Date(workout.date) > new Date(existing.lastPerformed) 
                 ? workout.date 
@@ -133,9 +145,12 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
 
     return Array.from(exerciseMap.values())
       .sort((a, b) => {
-        // Sort cardio by max duration, strength by max weight
+        // Sort cardio by best pace (lower is better), strength by max weight
         if (a.isCardio && b.isCardio) {
-          return (b.maxDuration || 0) - (a.maxDuration || 0);
+          // For pace, lower is better, so sort ascending
+          const aPace = a.bestPace || Infinity;
+          const bPace = b.bestPace || Infinity;
+          return aPace - bPace;
         } else if (!a.isCardio && !b.isCardio) {
           return (b.maxWeight || 0) - (a.maxWeight || 0);
         } else {
@@ -225,11 +240,13 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
                       <>
                         <div>
                           <span className="font-medium text-foreground">
-                            {formatDuration(stat.maxDuration || 0)}
-                            {stat.maxDistance ? ` - ${formatDistance(convertDistance(stat.maxDistance, 'metric', measurementSystem), measurementSystem)} ${getDistanceUnit(measurementSystem)}` : ''}
+                            {stat.bestPace 
+                              ? `${Math.floor(stat.bestPace)}:${String(Math.round((stat.bestPace % 1) * 60)).padStart(2, '0')} /km`
+                              : 'N/A'
+                            }
                           </span>
                           <br />
-                          <span>{t("Best Session")}</span>
+                          <span>{t("Best Pace")}{stat.bestPaceDate && ` (${formatDate(stat.bestPaceDate)})`}</span>
                         </div>
                         <div>
                           <span className="font-medium text-foreground">{stat.totalSets}</span>
