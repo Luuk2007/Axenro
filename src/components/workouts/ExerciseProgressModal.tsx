@@ -39,6 +39,7 @@ interface ExerciseHistoryEntry {
   maxReps?: number;
   maxDuration?: number;
   maxDistance?: number;
+  pace?: number; // minutes per km
   isPersonalRecord: boolean;
 }
 
@@ -57,8 +58,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
   const getExerciseHistory = (): ExerciseHistoryEntry[] => {
     const history: ExerciseHistoryEntry[] = [];
     let globalMaxWeight = 0;
-    let globalMaxDuration = 0;
-    let globalMaxDistance = 0;
+    let globalBestPace = Infinity; // Best pace is lowest value
 
     // First pass: collect all entries
     workouts.forEach((workout) => {
@@ -74,8 +74,13 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
           const maxDistance = Math.max(
             ...exercise.sets.map((set) => set.weight || 0)
           );
-          globalMaxDuration = Math.max(globalMaxDuration, maxDuration);
-          globalMaxDistance = Math.max(globalMaxDistance, maxDistance);
+          
+          // Calculate pace (minutes per km)
+          let pace: number | undefined = undefined;
+          if (maxDuration > 0 && maxDistance > 0) {
+            pace = (maxDuration / 60) / maxDistance;
+            globalBestPace = Math.min(globalBestPace, pace);
+          }
 
           history.push({
             date: workout.date,
@@ -83,6 +88,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             sets: exercise.sets,
             maxDuration,
             maxDistance,
+            pace,
             isPersonalRecord: false,
           });
         } else {
@@ -112,9 +118,8 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
     // Second pass: mark personal records
     history.forEach((entry) => {
       if (isCardio) {
-        entry.isPersonalRecord =
-          entry.maxDuration === globalMaxDuration ||
-          entry.maxDistance === globalMaxDistance;
+        // For cardio, mark as PR if it has the best (lowest) pace
+        entry.isPersonalRecord = entry.pace !== undefined && entry.pace === globalBestPace;
       } else {
         entry.isPersonalRecord = entry.maxWeight === globalMaxWeight;
       }
@@ -132,12 +137,18 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
 
   // Calculate statistics
   const totalSessions = exerciseHistory.length;
+  const bestPace = isCardio
+    ? Math.min(...exerciseHistory.filter(e => e.pace).map((e) => e.pace || Infinity))
+    : 0;
   const bestPerformance = isCardio
-    ? Math.max(...exerciseHistory.map((e) => e.maxDuration || 0))
+    ? bestPace !== Infinity ? bestPace : 0
     : Math.max(...exerciseHistory.map((e) => e.maxWeight || 0));
+  const averagePace = isCardio && exerciseHistory.some(e => e.pace)
+    ? exerciseHistory.filter(e => e.pace).reduce((sum, e) => sum + (e.pace || 0), 0) /
+      exerciseHistory.filter(e => e.pace).length
+    : 0;
   const averagePerformance = isCardio
-    ? exerciseHistory.reduce((sum, e) => sum + (e.maxDuration || 0), 0) /
-      totalSessions
+    ? averagePace
     : exerciseHistory.reduce((sum, e) => sum + (e.maxWeight || 0), 0) /
       totalSessions;
 
@@ -184,11 +195,11 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             <CardContent className="p-3 sm:p-4 text-center">
               <div className="text-xl sm:text-2xl font-bold text-primary break-all">
                 {isCardio
-                  ? formatDuration(bestPerformance)
+                  ? bestPerformance > 0 ? `${Math.floor(bestPerformance)}:${String(Math.round((bestPerformance % 1) * 60)).padStart(2, '0')} /km` : 'N/A'
                   : `${formatWeight(convertWeight(bestPerformance, "metric", measurementSystem), measurementSystem)} ${getWeightUnit(measurementSystem)}`}
               </div>
               <div className="text-xs text-muted-foreground">
-                {t("Best Performance")}
+                {isCardio ? t("Best Pace") : t("Best Performance")}
               </div>
             </CardContent>
           </Card>
@@ -196,11 +207,11 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             <CardContent className="p-3 sm:p-4 text-center">
               <div className="text-xl sm:text-2xl font-bold text-primary break-all">
                 {isCardio
-                  ? formatDuration(Math.round(averagePerformance))
+                  ? averagePerformance > 0 ? `${Math.floor(averagePerformance)}:${String(Math.round((averagePerformance % 1) * 60)).padStart(2, '0')} /km` : 'N/A'
                   : `${formatWeight(convertWeight(averagePerformance, "metric", measurementSystem), measurementSystem)} ${getWeightUnit(measurementSystem)}`}
               </div>
               <div className="text-xs text-muted-foreground">
-                {t("Average Performance")}
+                {isCardio ? t("Average Pace") : t("Average Performance")}
               </div>
             </CardContent>
           </Card>
@@ -279,6 +290,16 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
 
                     {isCardio ? (
                       <div className="space-y-1 text-sm">
+                        {entry.pace && entry.pace > 0 && (
+                          <div>
+                            <span className="text-muted-foreground">
+                              {t("Pace")}:{" "}
+                            </span>
+                            <span className="font-medium">
+                              {Math.floor(entry.pace)}:{String(Math.round((entry.pace % 1) * 60)).padStart(2, '0')} /km
+                            </span>
+                          </div>
+                        )}
                         {entry.maxDuration! > 0 && (
                           <div>
                             <span className="text-muted-foreground">
