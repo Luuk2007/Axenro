@@ -90,7 +90,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
       .min(30, "Weight must be at least 30kg")
       .max(300, "Weight must be less than 300kg"),
     activityLevel: z.enum(["sedentary", "light", "moderate", "active", "very_active"]),
-    fitnessGoal: z.enum(["lose", "maintain", "gain"]),
+    fitnessGoal: z.enum(["lose", "maintain", "gain"]).optional(),
     targetWeight: z.number()
       .min(30, "Target weight must be at least 30kg")
       .max(300, "Target weight must be less than 300kg")
