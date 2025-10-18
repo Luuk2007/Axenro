@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, ChevronDown, ChevronUp, Crown } from "lucide-react";
+import { X, ChevronDown, ChevronUp, Crown, Pencil } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { exerciseDatabase } from '@/types/workout';
 import { useSubscription } from "@/hooks/useSubscription";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
@@ -21,12 +22,16 @@ interface CustomExercise {
 const ExercisesSettings = () => {
   const { t } = useLanguage();
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
-  const { customExercises, addCustomExercise, deleteCustomExercise, loading: exercisesLoading } = useCustomExercises();
+  const { customExercises, addCustomExercise, updateCustomExercise, deleteCustomExercise, loading: exercisesLoading } = useCustomExercises();
   
   const [newExerciseName, setNewExerciseName] = useState('');
   const [newMuscleGroup, setNewMuscleGroup] = useState('');
   const [exercisesOpen, setExercisesOpen] = useState(false);
   const [showExistingExercises, setShowExistingExercises] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingExercise, setEditingExercise] = useState<CustomExercise | null>(null);
+  const [editExerciseName, setEditExerciseName] = useState('');
+  const [editMuscleGroup, setEditMuscleGroup] = useState('');
 
   const muscleGroups = [
     'chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'cardio', 'full body'
@@ -75,6 +80,43 @@ const ExercisesSettings = () => {
     }
   };
 
+  const handleEditExercise = (exercise: CustomExercise) => {
+    setEditingExercise(exercise);
+    setEditExerciseName(exercise.name);
+    setEditMuscleGroup(exercise.muscleGroup);
+    setEditModalOpen(true);
+  };
+
+  const handleUpdateExercise = async () => {
+    if (!editingExercise) return;
+
+    if (!editExerciseName.trim()) {
+      toast.error(t("Please enter an exercise name"));
+      return;
+    }
+
+    if (!editMuscleGroup) {
+      toast.error(t("Please select a muscle group"));
+      return;
+    }
+
+    const success = await updateCustomExercise(editingExercise.id, {
+      name: editExerciseName.trim(),
+      muscleGroup: editMuscleGroup
+    });
+
+    if (success) {
+      setEditModalOpen(false);
+      setEditingExercise(null);
+      setEditExerciseName('');
+      setEditMuscleGroup('');
+      
+      // Dispatch event to notify other components
+      window.dispatchEvent(new Event('exercisesChanged'));
+      toast.success(t("Exercise updated successfully"));
+    }
+  };
+
   const handleRemoveCustomExercise = async (exerciseId: string) => {
     await deleteCustomExercise(exerciseId);
     
@@ -86,8 +128,50 @@ const ExercisesSettings = () => {
   const showUpgradePrompt = !canAddMoreExercises && limits.customExercises !== -1;
 
   return (
-    <Card>
-      <Collapsible open={exercisesOpen} onOpenChange={setExercisesOpen}>
+    <>
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("Edit exercise")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("Exercise name")}</label>
+              <Input
+                placeholder={t("Enter exercise name")}
+                value={editExerciseName}
+                onChange={(e) => setEditExerciseName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("Muscle group")}</label>
+              <Select value={editMuscleGroup} onValueChange={setEditMuscleGroup}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("Select muscle group")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {muscleGroups.map((group) => (
+                    <SelectItem key={group} value={group}>
+                      {t(group)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditModalOpen(false)}>
+              {t("Cancel")}
+            </Button>
+            <Button onClick={handleUpdateExercise}>
+              {t("Save changes")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Card>
+        <Collapsible open={exercisesOpen} onOpenChange={setExercisesOpen}>
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
             <div className="flex items-center justify-between">
@@ -112,14 +196,24 @@ const ExercisesSettings = () => {
                         ({t(exercise.muscleGroup)})
                       </span>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveCustomExercise(exercise.id)}
-                      className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditExercise(exercise)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveCustomExercise(exercise.id)}
+                        className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
                 {customExercises.length === 0 && (
@@ -201,6 +295,7 @@ const ExercisesSettings = () => {
         </CollapsibleContent>
       </Collapsible>
     </Card>
+    </>
   );
 };
 

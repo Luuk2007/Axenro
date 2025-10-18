@@ -113,4 +113,10 @@ export const settingsTranslations: Translations = {
   "Premium plan: unlimited custom meals": "Premium-abonnement: onbeperkt aangepaste maaltijden",
   "Premium plan: unlimited custom exercises": "Premium-abonnement: onbeperkt aangepaste oefeningen",
   "Premium plan: unlimited custom measurements": "Premium-abonnement: onbeperkt aangepaste metingen",
+  
+  // Exercise editing
+  "Edit exercise": "Oefening bewerken",
+  "Exercise name": "Naam oefening",
+  "Cancel": "Annuleren",
+  "Exercise updated successfully": "Oefening succesvol bijgewerkt",
 };

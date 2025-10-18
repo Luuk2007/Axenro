@@ -105,6 +105,45 @@ export const useCustomExercises = () => {
     }
   };
 
+  const updateCustomExercise = async (id: string, exercise: Omit<CustomExercise, 'id'>) => {
+    if (!user) {
+      const updatedExercises = customExercises.map(ex => 
+        ex.id === id ? { ...exercise, id } : ex
+      );
+      setCustomExercises(updatedExercises);
+      localStorage.setItem('customExercises', JSON.stringify(updatedExercises));
+      return true;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('custom_exercises')
+        .update({
+          name: exercise.name,
+          muscle_group: exercise.muscleGroup
+        })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error updating custom exercise:', error);
+        toast.error('Failed to update custom exercise');
+        return false;
+      }
+
+      const updatedExercises = customExercises.map(ex =>
+        ex.id === id ? { ...exercise, id } : ex
+      );
+      setCustomExercises(updatedExercises);
+      localStorage.setItem('customExercises', JSON.stringify(updatedExercises));
+      return true;
+    } catch (error) {
+      console.error('Error updating custom exercise:', error);
+      toast.error('Failed to update custom exercise');
+      return false;
+    }
+  };
+
   const deleteCustomExercise = async (id: string) => {
     if (!user) {
       const updatedExercises = customExercises.filter(ex => ex.id !== id);
@@ -143,6 +182,7 @@ export const useCustomExercises = () => {
     customExercises,
     loading,
     addCustomExercise,
+    updateCustomExercise,
     deleteCustomExercise,
     loadCustomExercises
   };
