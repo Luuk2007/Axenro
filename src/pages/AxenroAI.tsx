@@ -160,6 +160,16 @@ export default function AxenroAI() {
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim() || !session) return;
 
+    // Add user message immediately to chat history
+    const tempMessage: ChatMessage = {
+      id: `temp-${Date.now()}`,
+      message: messageText,
+      response: '',
+      message_type: aiMode,
+      created_at: new Date().toISOString()
+    };
+    setChatHistory(prev => [...prev, tempMessage]);
+    
     setLoading(true);
 
     try {
@@ -183,7 +193,7 @@ export default function AxenroAI() {
 
       console.log('AI response received:', data);
       
-      // Add a small delay to ensure database consistency
+      // Reload chat history to get the actual saved message with response
       setTimeout(async () => {
         await loadChatHistory();
       }, 500);
@@ -191,6 +201,8 @@ export default function AxenroAI() {
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message. Please try again.');
+      // Remove temporary message on error
+      setChatHistory(prev => prev.filter(msg => msg.id !== tempMessage.id));
     } finally {
       setLoading(false);
     }
@@ -296,7 +308,7 @@ export default function AxenroAI() {
         </div>
 
         {/* Chat Window */}
-        <Card className="h-96 overflow-y-auto p-4 space-y-4 bg-background">
+        <Card className="min-h-[calc(100vh-280px)] max-h-[calc(100vh-280px)] overflow-y-auto p-4 space-y-4 bg-background">
           {chatHistory.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <Bot className="mx-auto h-12 w-12 mb-4" />
@@ -359,7 +371,7 @@ export default function AxenroAI() {
               <div className="bg-muted rounded-2xl rounded-tl-md px-4 py-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">AI is thinking...</span>
+                  <span className="text-sm">Thinking...</span>
                 </div>
               </div>
             </div>

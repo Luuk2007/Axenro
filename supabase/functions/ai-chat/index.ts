@@ -8,7 +8,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Define AI tools for adding meals and workouts
+// Define AI tools for interacting with user data
 const tools = [
   {
     type: "function",
@@ -58,6 +58,61 @@ const tools = [
           notes: { type: "string", description: "Additional notes about the workout" }
         },
         required: ["workout_name", "workout_type", "duration"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_nutrition_data",
+      description: "Get the user's nutrition/food logs for analysis. Use this to answer questions about what they've eaten, calories consumed, macros, etc.",
+      parameters: {
+        type: "object",
+        properties: {
+          days: { type: "number", description: "Number of days to retrieve, defaults to 7" },
+          date: { type: "string", description: "Specific date in YYYY-MM-DD format" }
+        }
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_workout_data",
+      description: "Get the user's workout history and exercise data. Use this to answer questions about their training, exercises performed, progress, etc.",
+      parameters: {
+        type: "object",
+        properties: {
+          days: { type: "number", description: "Number of days to retrieve, defaults to 30" }
+        }
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_weight_data",
+      description: "Get the user's weight tracking data. Use this to analyze weight trends, progress towards goals, etc.",
+      parameters: {
+        type: "object",
+        properties: {
+          days: { type: "number", description: "Number of days to retrieve, defaults to 90" }
+        }
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_weight_entry",
+      description: "Add a weight measurement for the user. Use this when they want to log their current weight.",
+      parameters: {
+        type: "object",
+        properties: {
+          weight: { type: "number", description: "Weight value in kg" },
+          date: { type: "string", description: "Date in YYYY-MM-DD format, defaults to today" }
+        },
+        required: ["weight"]
       }
     }
   }
@@ -206,7 +261,7 @@ serve(async (req) => {
               toolResults.push(`Failed to add food: ${foodError.message}`);
             } else {
               console.log(`[AI-CHAT] Successfully added ${functionArgs.food_name} to database`);
-              toolResults.push(`Successfully added ${functionArgs.food_name} to your ${functionArgs.meal_type} log for ${date}`);
+              toolResults.push(`✅ Successfully added ${functionArgs.food_name} to your ${functionArgs.meal_type} log for ${date}`);
             }
           } else if (functionName === 'add_workout') {
             const { error: workoutError } = await supabaseAdmin
@@ -224,7 +279,85 @@ serve(async (req) => {
               console.error('Error adding workout:', workoutError);
               toolResults.push(`Failed to add workout: ${workoutError.message}`);
             } else {
-              toolResults.push(`Successfully logged your ${functionArgs.workout_name} workout`);
+              toolResults.push(`✅ Successfully logged your ${functionArgs.workout_name} workout`);
+            }
+          } else if (functionName === 'get_nutrition_data') {
+            const days = functionArgs.days || 7;
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - days);
+            
+            const { data: foodData, error: foodError } = await supabaseAdmin
+              .from('food_logs')
+              .select('*')
+              .eq('user_id', user.id)
+              .gte('date', startDate.toISOString().split('T')[0])
+              .order('date', { ascending: false });
+            
+            if (foodError) {
+              toolResults.push(`Error retrieving nutrition data: ${foodError.message}`);
+            } else {
+              const summary = foodData.map(log => 
+                `${log.date} - ${log.meal_id}: ${log.food_item.name} (${log.food_item.calories}cal, P:${log.food_item.protein}g, C:${log.food_item.carbs}g, F:${log.food_item.fat}g)`
+              ).join('\n');
+              toolResults.push(`Nutrition data for last ${days} days:\n${summary}`);
+            }
+          } else if (functionName === 'get_workout_data') {
+            const days = functionArgs.days || 30;
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - days);
+            
+            const { data: workoutData, error: workoutError } = await supabaseAdmin
+              .from('workouts')
+              .select('*')
+              .eq('user_id', user.id)
+              .gte('date', startDate.toISOString().split('T')[0])
+              .order('date', { ascending: false });
+            
+            if (workoutError) {
+              toolResults.push(`Error retrieving workout data: ${workoutError.message}`);
+            } else {
+              const summary = workoutData.map(workout => {
+                const exerciseList = workout.exercises.map((ex: any) => 
+                  `${ex.name} (${ex.sets}x${ex.reps}${ex.weight ? ` @ ${ex.weight}kg` : ''})`
+                ).join(', ');
+                return `${workout.date} - ${workout.name}: ${exerciseList}`;
+              }).join('\n');
+              toolResults.push(`Workout data for last ${days} days:\n${summary}`);
+            }
+          } else if (functionName === 'get_weight_data') {
+            const days = functionArgs.days || 90;
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - days);
+            
+            const { data: weightData, error: weightError } = await supabaseAdmin
+              .from('weight_data')
+              .select('*')
+              .eq('user_id', user.id)
+              .gte('date', startDate.toISOString().split('T')[0])
+              .order('date', { ascending: false });
+            
+            if (weightError) {
+              toolResults.push(`Error retrieving weight data: ${weightError.message}`);
+            } else {
+              const summary = weightData.map(w => `${w.date}: ${w.weight}kg`).join('\n');
+              toolResults.push(`Weight data for last ${days} days:\n${summary}`);
+            }
+          } else if (functionName === 'add_weight_entry') {
+            const today = new Date().toISOString().split('T')[0];
+            const date = functionArgs.date || today;
+            
+            const { error: weightError } = await supabaseAdmin
+              .from('weight_data')
+              .insert({
+                user_id: user.id,
+                weight: functionArgs.weight,
+                date: date
+              });
+            
+            if (weightError) {
+              toolResults.push(`Failed to add weight: ${weightError.message}`);
+            } else {
+              toolResults.push(`✅ Successfully logged weight: ${functionArgs.weight}kg for ${date}`);
             }
           }
         } catch (error) {
