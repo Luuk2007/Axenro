@@ -15,6 +15,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ProgressPhoto } from '@/types/progressPhotos';
 import { format } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProgressPhotoCardProps {
   photo: ProgressPhoto;
@@ -39,6 +40,7 @@ export default function ProgressPhotoCard({
   selectionMode,
   subscriptionTier
 }: ProgressPhotoCardProps) {
+  const { t } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   
@@ -109,7 +111,7 @@ export default function ProgressPhotoCard({
           {/* Loading placeholder */}
           {imageUrl && !imageLoaded && !imageError && (
             <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-              <div className="text-gray-400">Loading...</div>
+              <div className="text-gray-400">{t("Loading...")}</div>
             </div>
           )}
 
@@ -118,7 +120,7 @@ export default function ProgressPhotoCard({
             <div className="absolute inset-0 bg-red-50 flex items-center justify-center">
               <div className="text-center text-red-500">
                 <div className="text-2xl mb-2">❌</div>
-                <div className="text-xs">Failed to load</div>
+                <div className="text-xs">{t("Failed to load")}</div>
                 <div className="text-xs mt-1 px-2 break-all">{imageUrl}</div>
               </div>
             </div>
@@ -131,7 +133,7 @@ export default function ProgressPhotoCard({
                 {photo.is_milestone && (
                   <Badge variant="secondary" className="text-xs">
                     <Star className="h-3 w-3 mr-1" />
-                    Milestone
+                    {t("Milestone")}
                   </Badge>
                 )}
                 {photo.is_favorite && (
@@ -162,7 +164,7 @@ export default function ProgressPhotoCard({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => onEdit?.(photo)}>
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    {t("Edit")}
                   </DropdownMenuItem>
                   {isPremium && (
                     <>
@@ -170,13 +172,13 @@ export default function ProgressPhotoCard({
                         onClick={() => onToggleFavorite?.(photo.id, !photo.is_favorite)}
                       >
                         <Heart className={`h-4 w-4 mr-2 ${photo.is_favorite ? 'fill-red-500 text-red-500' : ''}`} />
-                        {photo.is_favorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                        {photo.is_favorite ? t("Remove from Favorites") : t("Add to Favorites")}
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         onClick={() => onToggleMilestone?.(photo.id, !photo.is_milestone)}
                       >
                         <Star className={`h-4 w-4 mr-2 ${photo.is_milestone ? 'fill-yellow-500 text-yellow-500' : ''}`} />
-                        {photo.is_milestone ? 'Remove Milestone' : 'Mark as Milestone'}
+                        {photo.is_milestone ? t("Remove Milestone") : t("Mark as Milestone")}
                       </DropdownMenuItem>
                     </>
                   )}
@@ -185,7 +187,7 @@ export default function ProgressPhotoCard({
                     className="text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+                    {t("Delete")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

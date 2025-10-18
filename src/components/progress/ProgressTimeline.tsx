@@ -3,6 +3,7 @@ import React from 'react';
 import { ProgressPhoto } from '@/types/progressPhotos';
 import ProgressPhotoCard from './ProgressPhotoCard';
 import { format, parseISO, differenceInMonths } from 'date-fns';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProgressTimelineProps {
   photos: ProgressPhoto[];
@@ -19,6 +20,7 @@ export default function ProgressTimeline({
   onToggleFavorite,
   onToggleMilestone
 }: ProgressTimelineProps) {
+  const { t } = useLanguage();
   // Group photos by month
   const groupedPhotos = photos.reduce((groups, photo) => {
     const monthKey = format(parseISO(photo.date), 'yyyy-MM');
@@ -37,8 +39,8 @@ export default function ProgressTimeline({
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
           📸
         </div>
-        <h3 className="text-lg font-medium mb-2">No Progress Photos Yet</h3>
-        <p>Start your transformation journey by adding your first progress photo.</p>
+        <h3 className="text-lg font-medium mb-2">{t("No Progress Photos Yet")}</h3>
+        <p>{t("Start your transformation journey by adding your first progress photo.")}</p>
       </div>
     );
   }
@@ -71,8 +73,8 @@ export default function ProgressTimeline({
                   {format(monthDate, 'MMMM yyyy')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {monthPhotos.length} photo{monthPhotos.length !== 1 ? 's' : ''}
-                  {monthsFromStart > 0 && ` • ${monthsFromStart} months in`}
+                  {monthPhotos.length} {monthPhotos.length !== 1 ? t("multiple_photos") : t("single_photo")}
+                  {monthsFromStart > 0 && ` • ${monthsFromStart} ${t("months in")}`}
                 </p>
               </div>
             </div>
@@ -96,13 +98,13 @@ export default function ProgressTimeline({
             {/* Milestones in this month */}
             {monthPhotos.some(p => p.is_milestone) && (
               <div className="ml-16 mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h4 className="font-medium text-yellow-800 mb-2">🎉 Milestones This Month</h4>
+                <h4 className="font-medium text-yellow-800 mb-2">🎉 {t("Milestones This Month")}</h4>
                 <div className="space-y-1">
                   {monthPhotos
                     .filter(p => p.is_milestone)
                     .map(photo => (
                       <div key={photo.id} className="text-sm text-yellow-700">
-                        {format(parseISO(photo.date), 'MMM d')} - {photo.notes || 'Milestone achieved!'}
+                        {format(parseISO(photo.date), 'MMM d')} - {photo.notes || t("Milestone achieved!")}
                       </div>
                     ))}
                 </div>

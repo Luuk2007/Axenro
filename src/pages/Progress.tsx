@@ -495,7 +495,7 @@ export default function Progress() {
                         className="bg-primary text-primary-foreground hover:bg-primary/90"
                       >
                         <Plus className="mr-2 h-4 w-4" />
-                        Add Photo
+                        {t("Add Photo")}
                       </Button>
                       
                       {isPremium && !selectionMode ? (
@@ -505,7 +505,7 @@ export default function Progress() {
                           disabled={photos.length < 2}
                         >
                           <ArrowLeftRight className="mr-2 h-4 w-4" />
-                          Compare
+                          {t("Compare")}
                         </Button>
                       ) : isPremium && selectionMode ? (
                         <div className="flex gap-2">
@@ -514,10 +514,10 @@ export default function Progress() {
                             disabled={comparisonPhotos.length !== 2}
                             className="bg-green-600 hover:bg-green-700"
                           >
-                            Compare Selected ({comparisonPhotos.length}/2)
+                            {t("Compare Selected")} ({comparisonPhotos.length}/2)
                           </Button>
                           <Button variant="outline" onClick={cancelComparison}>
-                            Cancel
+                            {t("Cancel")}
                           </Button>
                         </div>
                       ) : null}
@@ -547,10 +547,10 @@ export default function Progress() {
                     <div className="flex flex-wrap gap-4 items-center">
                       <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                         <SelectTrigger className="w-40">
-                          <SelectValue placeholder="All Categories" />
+                          <SelectValue placeholder={t("All Categories")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">All Categories</SelectItem>
+                          <SelectItem value="all">{t("All Categories")}</SelectItem>
                           {PHOTO_CATEGORIES.map(cat => (
                             <SelectItem key={cat.value} value={cat.value}>
                               {cat.label}
@@ -562,10 +562,10 @@ export default function Progress() {
                       {allTags.length > 0 && (
                         <Select value={tagFilter} onValueChange={setTagFilter}>
                           <SelectTrigger className="w-40">
-                            <SelectValue placeholder="All Tags" />
+                            <SelectValue placeholder={t("All Tags")} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">All Tags</SelectItem>
+                            <SelectItem value="all">{t("All Tags")}</SelectItem>
                             {allTags.map(tag => (
                               <SelectItem key={tag} value={tag}>
                                 {tag}
@@ -581,7 +581,7 @@ export default function Progress() {
                         onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
                       >
                         <Heart className={`h-4 w-4 mr-1 ${showFavoritesOnly ? 'fill-current' : ''}`} />
-                        Favorites
+                        {t("Favorites")}
                       </Button>
 
                       <Button
@@ -590,7 +590,7 @@ export default function Progress() {
                         onClick={() => setShowMilestonesOnly(!showMilestonesOnly)}
                       >
                         <Star className={`h-4 w-4 mr-1 ${showMilestonesOnly ? 'fill-current' : ''}`} />
-                        Milestones
+                        {t("Milestones")}
                       </Button>
                     </div>
                   )}
@@ -627,8 +627,8 @@ export default function Progress() {
                       <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                         <Filter className="h-8 w-8" />
                       </div>
-                      <h3 className="text-lg font-medium mb-2">No Photos Match Your Filters</h3>
-                      <p>Try adjusting your filters to see more photos.</p>
+                      <h3 className="text-lg font-medium mb-2">{t("No Photos Match Your Filters")}</h3>
+                      <p>{t("Try adjusting your filters to see more photos.")}</p>
                     </div>
                   )}
 
@@ -637,11 +637,11 @@ export default function Progress() {
                       <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                         <Camera className="h-8 w-8" />
                       </div>
-                      <h3 className="text-lg font-medium mb-2">Start Your Progress Journey</h3>
-                      <p className="mb-6">Take your first progress photo to begin tracking your transformation.</p>
+                      <h3 className="text-lg font-medium mb-2">{t("Start Your Progress Journey")}</h3>
+                      <p className="mb-6">{t("Take your first progress photo to begin tracking your transformation.")}</p>
                       <Button onClick={() => setShowAddPhotoDialog(true)}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Add Your First Photo
+                        {t("Add Your First Photo")}
                       </Button>
                     </div>
                   )}
