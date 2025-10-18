@@ -35,29 +35,20 @@ const tools = [
     type: "function",
     function: {
       name: "add_workout",
-      description: "Add a workout or exercise to the user's workout log. Use this when the user asks to log a workout, exercise session, or track their training.",
+      description: "Add a workout or exercise to the user's workout log. For strength training, provide exercise details. For cardio (running, cycling, etc.), provide duration in seconds and distance in km.",
       parameters: {
         type: "object",
         properties: {
-          workout_name: { type: "string", description: "Name of the workout" },
-          workout_type: { type: "string", enum: ["strength", "cardio", "flexibility", "sports"], description: "Type of workout" },
-          duration: { type: "number", description: "Duration in minutes" },
-          exercises: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                name: { type: "string" },
-                sets: { type: "number" },
-                reps: { type: "number" },
-                weight: { type: "number" }
-              }
-            },
-            description: "List of exercises performed"
-          },
-          notes: { type: "string", description: "Additional notes about the workout" }
+          workout_name: { type: "string", description: "Name of the workout (e.g., 'Morning Run', 'Chest Day')" },
+          exercise_name: { type: "string", description: "Name of the primary exercise (e.g., 'Running', 'Bench Press')" },
+          is_cardio: { type: "boolean", description: "True for cardio exercises (running, cycling, etc.), false for strength" },
+          duration_seconds: { type: "number", description: "For cardio: total duration in seconds" },
+          distance_km: { type: "number", description: "For cardio: total distance in kilometers" },
+          sets: { type: "number", description: "For strength: number of sets performed" },
+          reps: { type: "number", description: "For strength: reps per set" },
+          weight_kg: { type: "number", description: "For strength: weight in kilograms per set" }
         },
-        required: ["workout_name", "workout_type", "duration"]
+        required: ["workout_name", "exercise_name"]
       }
     }
   },
@@ -264,15 +255,55 @@ serve(async (req) => {
               toolResults.push(`✅ Successfully added ${functionArgs.food_name} to your ${functionArgs.meal_type} log for ${date}`);
             }
           } else if (functionName === 'add_workout') {
+            // Create proper exercise structure based on workout type
+            const exercises = [];
+            
+            if (functionArgs.is_cardio) {
+              // For cardio: create one exercise with one set containing duration and distance
+              exercises.push({
+                id: functionArgs.exercise_name.toLowerCase().replace(/\s+/g, '-'),
+                name: functionArgs.exercise_name,
+                sets: [
+                  {
+                    id: 1,
+                    reps: functionArgs.duration_seconds || 0,
+                    weight: functionArgs.distance_km || 0,
+                    completed: true,
+                    isCardio: true
+                  }
+                ],
+                muscleGroup: 'cardio'
+              });
+            } else {
+              // For strength: create exercise with multiple sets
+              const numSets = functionArgs.sets || 3;
+              const setArray = [];
+              for (let i = 1; i <= numSets; i++) {
+                setArray.push({
+                  id: i,
+                  reps: functionArgs.reps || 10,
+                  weight: functionArgs.weight_kg || 0,
+                  completed: true
+                });
+              }
+              
+              exercises.push({
+                id: functionArgs.exercise_name.toLowerCase().replace(/\s+/g, '-'),
+                name: functionArgs.exercise_name,
+                sets: setArray,
+                muscleGroup: 'general'
+              });
+            }
+            
             const { error: workoutError } = await supabaseAdmin
               .from('workouts')
               .insert({
                 user_id: user.id,
                 name: functionArgs.workout_name,
                 workout_id: `workout-${Date.now()}`,
-                exercises: functionArgs.exercises || [],
+                exercises: exercises,
                 date: new Date().toISOString().split('T')[0],
-                completed: false
+                completed: true
               });
             
             if (workoutError) {
