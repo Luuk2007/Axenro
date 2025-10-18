@@ -232,16 +232,10 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
                         <div>
                           <label className="text-xs font-medium block mb-1">{t("Distance")} ({getDistanceUnit(measurementSystem)})</label>
                           <Input
-                            type="text"
-                            inputMode="decimal"
+                            type="number"
+                            step="0.1"
                             value={exercise.distance?.toString() || ''}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(',', '.');
-                              const numValue = parseFloat(value);
-                              if (!isNaN(numValue) || value === '' || value === '0' || value.endsWith('.')) {
-                                handleUpdateExercise(index, 'distance', value === '' ? 0 : parseFloat(value) || 0);
-                              }
-                            }}
+                            onChange={(e) => handleUpdateExercise(index, 'distance', parseFloat(e.target.value) || 0)}
                             className="h-8"
                             placeholder="5.0"
                           />
