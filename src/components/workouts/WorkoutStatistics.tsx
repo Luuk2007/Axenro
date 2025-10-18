@@ -57,15 +57,26 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
           let bestPaceInSession = Infinity;
           
           exercise.sets.forEach(set => {
-            if (set.reps > maxDuration) {
-              maxDuration = set.reps; // Duration stored in reps
+            const duration = set.reps; // Duration in seconds
+            const distance = set.weight; // Distance in km
+            
+            if (duration > maxDuration) {
+              maxDuration = duration;
             }
-            if (set.weight > maxDistance) {
-              maxDistance = set.weight; // Distance stored in weight
+            if (distance > maxDistance) {
+              maxDistance = distance;
             }
-            // Track best pace (lowest minutes per km)
-            if (set.pace && set.pace > 0 && set.pace < bestPaceInSession) {
-              bestPaceInSession = set.pace;
+            
+            // Calculate pace (minutes per km) if we have both duration and distance
+            let pace = set.pace;
+            if (!pace && duration > 0 && distance > 0) {
+              // pace = (duration in seconds / 60) / distance in km = minutes per km
+              pace = (duration / 60) / distance;
+            }
+            
+            // Track best pace (lowest minutes per km is best)
+            if (pace && pace > 0 && pace < bestPaceInSession) {
+              bestPaceInSession = pace;
             }
           });
 
