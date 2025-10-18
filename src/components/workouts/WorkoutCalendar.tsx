@@ -189,19 +189,19 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
 
         <Card className="bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/20 border-purple-200/50 dark:border-purple-800/50">
           <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">Total Exercises</div>
+            <div className="text-xs text-muted-foreground">{t("Total Exercises")}</div>
             <div className="text-2xl font-bold mt-1">
               {workouts.reduce((sum, w) => sum + (w.exercises?.length || 0), 0)}
             </div>
-            <div className="text-xs text-muted-foreground mt-0.5">All time</div>
+            <div className="text-xs text-muted-foreground mt-0.5">{t("All time")}</div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/20 border-orange-200/50 dark:border-orange-800/50">
           <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">Total Workouts</div>
+            <div className="text-xs text-muted-foreground">{t("Total Workouts")}</div>
             <div className="text-2xl font-bold mt-1">{workouts.filter(w => w.completed).length}</div>
-            <div className="text-xs text-muted-foreground mt-0.5">All time</div>
+            <div className="text-xs text-muted-foreground mt-0.5">{t("All time")}</div>
           </CardContent>
         </Card>
       </div>
@@ -220,11 +220,11 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                 <div className="flex gap-3 text-xs">
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-green-600"></div>
-                    <span>Strength</span>
+                    <span>{t("Strength")}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-blue-500"></div>
-                    <span>Cardio</span>
+                    <span>{t("Cardio")}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -377,7 +377,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                   <div>
                     <div className="text-xs font-medium text-green-600 dark:text-green-400 mb-2 flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      Strength Workouts
+                      {t("Strength Workouts")}
                     </div>
                     <div className="space-y-2">
                       {selectedDateStrength.map((workout) => (
@@ -388,7 +388,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                         >
                           <div className="font-medium text-sm">{workout.name}</div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            {workout.exercises.length} exercises
+                            {workout.exercises.length} {t("exercises")}
                           </div>
                         </Card>
                       ))}
@@ -400,7 +400,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                   <div>
                     <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      Cardio Workouts
+                      {t("Cardio Workouts")}
                     </div>
                     <div className="space-y-2">
                       {selectedDateCardio.map((workout) => (
@@ -411,7 +411,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                         >
                           <div className="font-medium text-sm">{workout.name}</div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            {workout.exercises.length} exercises
+                            {workout.exercises.length} {t("exercises")}
                           </div>
                         </Card>
                       ))}

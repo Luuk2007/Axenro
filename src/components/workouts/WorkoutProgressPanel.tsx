@@ -4,12 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Target } from 'lucide-react';
 import { Workout } from '@/types/workout';
 import { getExerciseProgress, getWeeklyStats } from '@/utils/workoutCalculations';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface WorkoutProgressPanelProps {
   workouts: Workout[];
 }
 
 const WorkoutProgressPanel = ({ workouts }: WorkoutProgressPanelProps) => {
+  const { t } = useLanguage();
   const exerciseProgress = getExerciseProgress(workouts);
   const weeklyStats = getWeeklyStats(workouts);
 
@@ -20,7 +22,7 @@ const WorkoutProgressPanel = ({ workouts }: WorkoutProgressPanelProps) => {
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
-            Voortgangsoverzicht
+            {t("Progress Overview")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -47,7 +49,7 @@ const WorkoutProgressPanel = ({ workouts }: WorkoutProgressPanelProps) => {
             ))
           ) : (
             <div className="text-xs text-muted-foreground">
-              Nog geen data beschikbaar
+              {t("No data available yet")}
             </div>
           )}
         </CardContent>
@@ -58,13 +60,13 @@ const WorkoutProgressPanel = ({ workouts }: WorkoutProgressPanelProps) => {
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <Target className="h-4 w-4" />
-            Weekoverzicht
+            {t("Weekly Summary")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="text-xs">
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Trainingen:</span>
+              <span className="text-muted-foreground">{t("Workouts:")}</span>
               <div className="text-right">
                 <span className="font-semibold">{weeklyStats.totalWorkouts}</span>
                 <div className="text-muted-foreground">{weeklyStats.weekComparison}</div>
@@ -73,13 +75,13 @@ const WorkoutProgressPanel = ({ workouts }: WorkoutProgressPanelProps) => {
           </div>
           <div className="text-xs">
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Meest getrainde:</span>
+              <span className="text-muted-foreground">{t("Most trained:")}</span>
               <span className="font-semibold">{weeklyStats.mostTrainedMuscleGroup}</span>
             </div>
           </div>
           <div className="text-xs">
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Meest verbeterd:</span>
+              <span className="text-muted-foreground">{t("Most improved:")}</span>
               <span className="font-semibold">{weeklyStats.mostImprovedExercise}</span>
             </div>
           </div>
