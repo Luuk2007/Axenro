@@ -248,7 +248,8 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
         </div>
 
         {/* History List */}
-        <ScrollArea className="flex-1 pr-2 sm:pr-4">
+        <ScrollArea className="flex-1 pr-2 sm:pr-4 min-h-0">
+          <div className="h-full">
           {exerciseHistory.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               {t("No history available")}
@@ -374,6 +375,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
               ))}
             </div>
           )}
+          </div>
         </ScrollArea>
       </DialogContent>
     </Dialog>
