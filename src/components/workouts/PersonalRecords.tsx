@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -30,29 +32,51 @@ type PersonalRecord = {
 
 const PersonalRecords = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const { measurementSystem } = useMeasurementSystem();
   const [records, setRecords] = useState<PersonalRecord[]>([]);
   const [calculatedWeight, setCalculatedWeight] = useState<number | null>(null);
   const [exerciseName, setExerciseName] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('calculator');
+  const [loading, setLoading] = useState(true);
 
-  // Load personal records from localStorage
+  // Load personal records from Supabase
   useEffect(() => {
-    const savedRecords = localStorage.getItem('personalRecords');
-    if (savedRecords) {
+    const fetchRecords = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        setRecords(JSON.parse(savedRecords));
+        const { data, error } = await supabase
+          .from('personal_records')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('date', { ascending: false });
+
+        if (error) throw error;
+
+        if (data) {
+          const formattedRecords: PersonalRecord[] = data.map(record => ({
+            id: record.id,
+            exerciseName: record.exercise_name,
+            weight: Number(record.weight),
+            date: record.date
+          }));
+          setRecords(formattedRecords);
+        }
       } catch (error) {
         console.error('Error loading personal records:', error);
+        toast.error(t('Failed to load personal records'));
+      } finally {
+        setLoading(false);
       }
-    }
-  }, []);
+    };
 
-  // Save records to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('personalRecords', JSON.stringify(records));
-  }, [records]);
+    fetchRecords();
+  }, [user, t]);
 
   // Handler for weight calculation from OneRepMaxCalculator (receives metric weight)
   const handleWeightCalculated = (metricWeight: number) => {
@@ -60,31 +84,66 @@ const PersonalRecords = () => {
   };
 
   // Save record handler
-  const saveRecord = () => {
-    if (!calculatedWeight || !exerciseName.trim()) {
+  const saveRecord = async () => {
+    if (!calculatedWeight || !exerciseName.trim() || !user) {
       return;
     }
     
-    const newRecord: PersonalRecord = {
-      id: Date.now().toString(),
-      exerciseName: exerciseName.trim(),
-      weight: calculatedWeight, // Store in metric
-      date: new Date().toISOString().split('T')[0]
-    };
-    
-    setRecords(prev => [...prev, newRecord]);
-    setExerciseName('');
-    setDialogOpen(false);
-    toast.success(t('Record saved'));
-    
-    // Switch to the records tab after saving
-    setActiveTab('records');
+    try {
+      const { data, error } = await supabase
+        .from('personal_records')
+        .insert({
+          user_id: user.id,
+          exercise_name: exerciseName.trim(),
+          weight: calculatedWeight,
+          date: new Date().toISOString().split('T')[0]
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const newRecord: PersonalRecord = {
+          id: data.id,
+          exerciseName: data.exercise_name,
+          weight: Number(data.weight),
+          date: data.date
+        };
+        
+        setRecords(prev => [newRecord, ...prev]);
+        setExerciseName('');
+        setDialogOpen(false);
+        toast.success(t('Record saved'));
+        
+        // Switch to the records tab after saving
+        setActiveTab('records');
+      }
+    } catch (error) {
+      console.error('Error saving personal record:', error);
+      toast.error(t('Failed to save record'));
+    }
   };
 
   // Delete record handler
-  const deleteRecord = (id: string) => {
-    setRecords(prev => prev.filter(record => record.id !== id));
-    toast.success(t('Record deleted'));
+  const deleteRecord = async (id: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('personal_records')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setRecords(prev => prev.filter(record => record.id !== id));
+      toast.success(t('Record deleted'));
+    } catch (error) {
+      console.error('Error deleting personal record:', error);
+      toast.error(t('Failed to delete record'));
+    }
   };
 
   const getDisplayWeight = (metricWeight: number) => {
@@ -155,7 +214,11 @@ const PersonalRecords = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {records.length === 0 ? (
+              {loading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>{t('Loading')}...</p>
+                </div>
+              ) : records.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>{t('No personal records')}</p>
                   <Button 
