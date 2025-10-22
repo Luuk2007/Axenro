@@ -1,8 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
 import { convertWeight, getWeightUnit, formatWeight } from '@/utils/unitConversions';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 type PersonalRecord = {
   id: string;
@@ -32,8 +31,8 @@ type PersonalRecord = {
 
 const PersonalRecords = () => {
   const { t } = useLanguage();
-  const { user } = useAuth();
   const { measurementSystem } = useMeasurementSystem();
+  const { user } = useAuth();
   const [records, setRecords] = useState<PersonalRecord[]>([]);
   const [calculatedWeight, setCalculatedWeight] = useState<number | null>(null);
   const [exerciseName, setExerciseName] = useState('');
@@ -43,7 +42,7 @@ const PersonalRecords = () => {
 
   // Load personal records from Supabase
   useEffect(() => {
-    const fetchRecords = async () => {
+    const loadRecords = async () => {
       if (!user) {
         setLoading(false);
         return;
@@ -54,7 +53,7 @@ const PersonalRecords = () => {
           .from('personal_records')
           .select('*')
           .eq('user_id', user.id)
-          .order('date', { ascending: false });
+          .order('created_at', { ascending: false });
 
         if (error) throw error;
 
@@ -69,13 +68,13 @@ const PersonalRecords = () => {
         }
       } catch (error) {
         console.error('Error loading personal records:', error);
-        toast.error(t('Failed to load personal records'));
+        toast.error(t('Failed to load records'));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRecords();
+    loadRecords();
   }, [user, t]);
 
   // Handler for weight calculation from OneRepMaxCalculator (receives metric weight)
@@ -88,7 +87,7 @@ const PersonalRecords = () => {
     if (!calculatedWeight || !exerciseName.trim() || !user) {
       return;
     }
-    
+
     try {
       const { data, error } = await supabase
         .from('personal_records')
@@ -110,38 +109,35 @@ const PersonalRecords = () => {
           weight: Number(data.weight),
           date: data.date
         };
-        
         setRecords(prev => [newRecord, ...prev]);
-        setExerciseName('');
-        setDialogOpen(false);
-        toast.success(t('Record saved'));
-        
-        // Switch to the records tab after saving
-        setActiveTab('records');
       }
+
+      setExerciseName('');
+      setDialogOpen(false);
+      toast.success(t('Record saved'));
+      
+      // Switch to the records tab after saving
+      setActiveTab('records');
     } catch (error) {
-      console.error('Error saving personal record:', error);
+      console.error('Error saving record:', error);
       toast.error(t('Failed to save record'));
     }
   };
 
   // Delete record handler
   const deleteRecord = async (id: string) => {
-    if (!user) return;
-
     try {
       const { error } = await supabase
         .from('personal_records')
         .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', id);
 
       if (error) throw error;
 
       setRecords(prev => prev.filter(record => record.id !== id));
       toast.success(t('Record deleted'));
     } catch (error) {
-      console.error('Error deleting personal record:', error);
+      console.error('Error deleting record:', error);
       toast.error(t('Failed to delete record'));
     }
   };

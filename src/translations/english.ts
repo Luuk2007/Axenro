@@ -117,6 +117,12 @@ export const english = {
     "addExercise": "Add Exercise",
     "noWorkoutsLogged": "No workouts logged yet.",
     "beginYourJourney": "Begin your fitness journey today!",
+    "recordSaved": "Record saved",
+    "recordDeleted": "Record deleted",
+    "failedToLoadRecords": "Failed to load records",
+    "failedToSaveRecord": "Failed to save record",
+    "failedToDeleteRecord": "Failed to delete record",
+    "loading": "Loading",
   },
   "progressSection": {
     "title": "Progress Tracker",
@@ -375,5 +381,11 @@ export const english = {
   "months in": "months in",
   "Milestones This Month": "Milestones This Month",
   "Milestone achieved!": "Milestone achieved!",
-  "measurement": "measurement"
+  "measurement": "measurement",
+  "Record saved": "Record saved",
+  "Record deleted": "Record deleted",
+  "Failed to load records": "Failed to load records",
+  "Failed to save record": "Failed to save record",
+  "Failed to delete record": "Failed to delete record",
+  "Loading": "Loading"
 };
