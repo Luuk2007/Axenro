@@ -1,14 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
-import { Plus, Utensils } from 'lucide-react';
+import { Utensils } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getAvailableMeals, MealData, FoodItem } from '@/types/nutrition';
-import { getFoodLogs } from '@/services/openFoodFactsService';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
 
 interface MealItemData {
   id: string;
@@ -19,143 +15,62 @@ interface MealItemData {
 }
 
 interface MealsListProps {
-  meals: MealItemData[];
   title: string;
   className?: string;
   onViewAll?: () => void;
   selectedDate?: Date;
+  foodLogs?: any[];
 }
 
-export default function MealsList({ title, className, onViewAll, selectedDate = new Date() }: MealsListProps) {
+export default function MealsList({ 
+  title, 
+  className, 
+  onViewAll, 
+  selectedDate = new Date(),
+  foodLogs = []
+}: MealsListProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [meals, setMeals] = useState<MealItemData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Check auth status
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-    };
-    checkAuth();
-  }, []);
+    // Convert foodLogs to meal items
+    const availableMeals = getAvailableMeals();
+    const mealData: MealData[] = availableMeals.map(meal => ({
+      ...meal,
+      items: []
+    }));
 
-  useEffect(() => {
-    const loadSelectedDateMeals = async () => {
-      setIsLoading(true);
-      try {
-        const dateString = format(selectedDate, 'yyyy-MM-dd');
-        let mealData: MealData[] = [];
-
-        if (isAuthenticated) {
-          // Load from Supabase
-          const logs = await getFoodLogs(dateString);
-          const availableMeals = getAvailableMeals();
-          
-          mealData = availableMeals.map(meal => ({
-            ...meal,
-            items: []
-          }));
-
-          // Add food items to appropriate meals
-          logs.forEach((log: any) => {
-            const mealIndex = mealData.findIndex(meal => meal.id === log.meal_id);
-            if (mealIndex >= 0) {
-              mealData[mealIndex].items.push(log.food_item);
-            }
-          });
-        } else {
-          // Load from localStorage
-          const availableMeals = getAvailableMeals();
-          mealData = availableMeals.map(meal => ({
-            ...meal,
-            items: []
-          }));
-
-          const savedData = localStorage.getItem(`foodLog_${dateString}`);
-          if (savedData) {
-            try {
-              const parsedData = JSON.parse(savedData);
-              parsedData.forEach((item: any) => {
-                if (item.mealId) {
-                  const mealIndex = mealData.findIndex(meal => meal.id === item.mealId);
-                  if (mealIndex >= 0) {
-                    mealData[mealIndex].items.push(item);
-                  }
-                }
-              });
-            } catch (error) {
-              console.error('Error parsing local food data:', error);
-            }
-          }
-        }
-
-        // Convert to individual food items
-        const mealItems: MealItemData[] = [];
-        
-        mealData
-          .filter(meal => meal.items.length > 0)
-          .forEach(meal => {
-            meal.items.forEach((item: FoodItem, index: number) => {
-              mealItems.push({
-                id: `${meal.id}-${index}`,
-                name: item.name,
-                time: '', // Remove time display
-                calories: Math.round(item.calories),
-                protein: Math.round(item.protein * 10) / 10
-              });
-            });
-          });
-          
-        // Show only first 5 individual items
-        const displayItems = mealItems.slice(0, 5);
-
-        setMeals(displayItems);
-      } catch (error) {
-        console.error('Error loading today\'s meals:', error);
-      } finally {
-        setIsLoading(false);
+    // Add food items to appropriate meals
+    foodLogs.forEach((log: any) => {
+      const mealIndex = mealData.findIndex(meal => meal.id === log.meal_id);
+      if (mealIndex >= 0) {
+        mealData[mealIndex].items.push(log.food_item);
       }
-    };
+    });
 
-    loadSelectedDateMeals();
-
-    // Listen for meal changes
-    const handleMealsChanged = () => {
-      loadSelectedDateMeals();
-    };
-
-    window.addEventListener('mealsChanged', handleMealsChanged);
+    // Convert to individual food items
+    const mealItems: MealItemData[] = [];
     
-    return () => {
-      window.removeEventListener('mealsChanged', handleMealsChanged);
-    };
-  }, [isAuthenticated, selectedDate]);
+    mealData
+      .filter(meal => meal.items.length > 0)
+      .forEach(meal => {
+        meal.items.forEach((item: FoodItem, index: number) => {
+          mealItems.push({
+            id: `${meal.id}-${index}`,
+            name: item.name,
+            time: '',
+            calories: Math.round(item.calories),
+            protein: Math.round(item.protein * 10) / 10
+          });
+        });
+      });
+      
+    // Show only first 5 individual items
+    const displayItems = mealItems.slice(0, 5);
+    setMeals(displayItems);
+  }, [foodLogs]);
 
-  const getTimeForMeal = (mealId: string): string => {
-    const timeMap: { [key: string]: string } = {
-      'breakfast': '08:00',
-      'lunch': '12:30',
-      'dinner': '18:30',
-      'snack': '15:00'
-    };
-    return timeMap[mealId] || '12:00';
-  };
-  
-  if (isLoading) {
-    return (
-      <div className={cn("glassy-card rounded-xl card-shadow hover-scale h-full flex flex-col", className)}>
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-          <h3 className="font-medium tracking-tight">{title}</h3>
-        </div>
-        <div className="flex items-center justify-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
   
   return (
     <div className={cn("glassy-card rounded-xl card-shadow hover-scale h-full flex flex-col", className)}>

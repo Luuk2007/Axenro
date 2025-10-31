@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Calendar, Dumbbell, Flame, Footprints, Plus, Weight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,15 +11,11 @@ import WorkoutsSummary from '@/components/dashboard/WorkoutsSummary';
 import StepsConnectionModal from '@/components/dashboard/StepsConnectionModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LoginPrompt } from '@/components/auth/LoginPrompt';
-import { format, parse, isValid, startOfWeek, endOfWeek } from 'date-fns';
+import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { Workout } from '@/types/workout';
-import { useWeightData } from '@/hooks/useWeightData';
-import { useUserProfile } from '@/hooks/useUserProfile';
-import { calculateDailyCalories, type ProfileData } from '@/utils/macroCalculations';
-import { supabase } from '@/integrations/supabase/client';
-import { useWorkouts } from '@/hooks/useWorkouts';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const meals = [
   {
@@ -57,155 +53,11 @@ const getActivityOptions = (t: (key: string) => string) => [
 const Dashboard = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { weightData } = useWeightData();
-  const { profile } = useUserProfile();
-  const { workouts: allWorkouts } = useWorkouts();
   const [date, setDate] = useState<Date>(new Date());
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showStepsConnection, setShowStepsConnection] = useState(false);
-  const [userCalories, setUserCalories] = useState<number>(2200);
-  const [consumedCalories, setConsumedCalories] = useState<number>(0);
-  const [dailySteps, setDailySteps] = useState<number>(0);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
-
-  // Calculate workouts this week
-  const weeklyGoal = profile?.weekly_workout_goal;
-  const workoutsThisWeek = React.useMemo(() => {
-    if (!isAuthenticated || !weeklyGoal) return 0;
-    
-    const currentDate = new Date();
-    const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-    const currentWeekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
-    
-    return allWorkouts.filter((workout) => {
-      if (!workout.completed) return false;
-      const workoutDate = new Date(workout.date);
-      return workoutDate >= currentWeekStart && workoutDate <= currentWeekEnd;
-    }).length;
-  }, [allWorkouts, isAuthenticated, weeklyGoal]);
-
-  // Get current weight from weightData hook
-  const currentWeight = weightData.length > 0 
-    ? weightData[weightData.length - 1].value 
-    : null;
-
-  // Check authentication status
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-      setUserId(user?.id || null);
-    };
-    
-    checkAuth();
-    
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session?.user);
-      setUserId(session?.user?.id || null);
-    });
-    
-    return () => subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    // Get user profile from profile hook for calories calculation
-    if (profile) {
-      // Convert profile to ProfileData format (same as MacroProgressTracker)
-      const profileData: ProfileData = {
-        weight: profile.weight,
-        height: profile.height,
-        age: profile.age,
-        gender: profile.gender,
-        activityLevel: profile.activity_level,
-        exerciseFrequency: profile.exercise_frequency,
-        fitnessGoal: profile.fitness_goal,
-      };
-      
-      console.log('Dashboard: Profile data for calculation:', profileData);
-      
-      // Calculate calories using centralized function
-      const calories = calculateDailyCalories(profileData);
-      console.log('Dashboard: Calculated calories:', calories);
-      setUserCalories(calories);
-    }
-
-    // Load consumed calories from selected date's food log
-    const loadConsumedCalories = async () => {
-      try {
-        const selectedDate = format(date, 'yyyy-MM-dd');
-        
-        if (isAuthenticated && userId) {
-          // Load from database if authenticated
-          const { data: logs, error } = await supabase
-            .from('food_logs')
-            .select('food_item')
-            .eq('user_id', userId)
-            .eq('date', selectedDate)
-            .in('meal_id', ['breakfast', 'lunch', 'dinner', 'snack']); // Only valid meal_ids
-
-          if (error) {
-            console.error('Error loading food logs from database:', error);
-            // Fallback to localStorage
-            const savedData = localStorage.getItem(`foodLog_${selectedDate}`);
-            if (savedData) {
-              const allFoodItems = JSON.parse(savedData);
-              const consumed = allFoodItems.reduce((total: number, item: any) => {
-                return total + (Number(item.calories) || 0);
-              }, 0);
-              setConsumedCalories(Math.round(consumed));
-            } else {
-              setConsumedCalories(0);
-            }
-          } else {
-            // Calculate consumed calories from database logs
-            const consumed = logs.reduce((total: number, log: any) => {
-              return total + (Number(log.food_item?.calories) || 0);
-            }, 0);
-            setConsumedCalories(Math.round(consumed));
-          }
-        } else {
-          // Load from localStorage if not authenticated
-          const savedData = localStorage.getItem(`foodLog_${selectedDate}`);
-          if (savedData) {
-            const allFoodItems = JSON.parse(savedData);
-            const consumed = allFoodItems.reduce((total: number, item: any) => {
-              return total + (Number(item.calories) || 0);
-            }, 0);
-            setConsumedCalories(Math.round(consumed));
-          } else {
-            setConsumedCalories(0);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading consumed calories:', error);
-        setConsumedCalories(0);
-      }
-    };
-
-    loadConsumedCalories();
-
-    // Listen for food log updates (custom event)
-    const handleFoodLogUpdate = () => {
-      loadConsumedCalories();
-    };
-
-    // Listen for storage changes (other tabs)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key && e.key.startsWith('foodLog_')) {
-        loadConsumedCalories();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('foodLogUpdated', handleFoodLogUpdate);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('foodLogUpdated', handleFoodLogUpdate);
-    };
-  }, [profile, isAuthenticated, userId, date]);
+  
+  const { data: dashboardData, isLoading } = useDashboardData(date);
 
 
 
@@ -234,9 +86,34 @@ const Dashboard = () => {
     setShowAddActivity(false);
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-9 w-36" />
+        </div>
+        
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+        </div>
+        
+        <Skeleton className="h-[400px] w-full rounded-xl" />
+        
+        <div className="grid gap-6 md:grid-cols-2">
+          <Skeleton className="h-[400px] w-full rounded-xl" />
+          <Skeleton className="h-[400px] w-full rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
-      {!isAuthenticated && <LoginPrompt />}
+      {!dashboardData.isAuthenticated && <LoginPrompt />}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard")}</h1>
@@ -287,50 +164,57 @@ const Dashboard = () => {
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title={t("Daily calories")}
-          value={consumedCalories.toString()}
+          value={dashboardData.consumedCalories.toString()}
           icon={Flame}
-          description={`${t("target")}: ${userCalories || 2200}`}
+          description={`${t("target")}: ${dashboardData.userCalories}`}
           onClick={navigateToNutrition}
         />
         <StatsCard
           title={`${t("Daily steps")}`}
-          value={dailySteps.toLocaleString()}
+          value={dashboardData.dailySteps.toLocaleString()}
           icon={Footprints}
           description={`${t("target")}: 10,000`}
           onClick={handleOpenStepsConnection}
         />
         <StatsCard
           title={`${t("workouts")}`}
-          value={weeklyGoal ? `${workoutsThisWeek}/${weeklyGoal}` : "—"}
+          value={dashboardData.weeklyGoal ? `${dashboardData.workoutsThisWeek}/${dashboardData.weeklyGoal}` : "—"}
           icon={Dumbbell}
-          description={weeklyGoal ? `${Math.round((workoutsThisWeek / weeklyGoal) * 100)}% ${t("completed")}` : t("Set weekly goal")}
+          description={dashboardData.weeklyGoal ? `${Math.round((dashboardData.workoutsThisWeek / dashboardData.weeklyGoal) * 100)}% ${t("completed")}` : t("Set weekly goal")}
           onClick={navigateToWorkouts}
         />
         <StatsCard
           title={t("weight")}
-          value={currentWeight ? `${currentWeight} kg` : "No data"}
+          value={dashboardData.currentWeight ? `${dashboardData.currentWeight} kg` : "No data"}
           icon={Weight}
-          description={profile?.target_weight ? `${t("target")}: ${profile.target_weight} kg` : "Set target weight"}
+          description={dashboardData.profile?.target_weight ? `${t("target")}: ${dashboardData.profile.target_weight} kg` : "Set target weight"}
           onClick={navigateToWeightProgress}
         />
       </div>
 
-      <MacroProgressTracker selectedDate={date} />
+      <MacroProgressTracker 
+        selectedDate={date}
+        consumedMacros={dashboardData.consumedMacros}
+        consumedCalories={dashboardData.consumedCalories}
+        macroGoals={dashboardData.macroGoals}
+        profile={dashboardData.profile}
+      />
 
       <div className="grid gap-6 md:grid-cols-2 items-start">
         <div className="h-[400px]">
           <WorkoutsSummary
             title={t("Recent workouts")}
             onViewAll={navigateToWorkouts}
+            workouts={dashboardData.allWorkouts}
           />
         </div>
         
         <div className="h-[400px]">
           <MealsList
             title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} ${t("meals")}`}
-            meals={meals}
             onViewAll={navigateToNutrition}
             selectedDate={date}
+            foodLogs={dashboardData.foodLogs}
           />
         </div>
       </div>

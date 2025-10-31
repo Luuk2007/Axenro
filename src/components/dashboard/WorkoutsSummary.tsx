@@ -5,24 +5,28 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { Workout } from '@/types/workout';
-import { format, parseISO, isValid } from 'date-fns';
-import { useWorkouts } from '@/hooks/useWorkouts';
+import { format, isValid } from 'date-fns';
 
 interface WorkoutsSummaryProps {
   title?: string;
   className?: string;
   onViewAll?: () => void;
+  workouts?: Workout[];
 }
 
-export default function WorkoutsSummary({ title, className, onViewAll }: WorkoutsSummaryProps) {
+export default function WorkoutsSummary({ 
+  title, 
+  className, 
+  onViewAll,
+  workouts = []
+}: WorkoutsSummaryProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { workouts: allWorkouts, loading } = useWorkouts();
   const [recentWorkouts, setRecentWorkouts] = useState<Workout[]>([]);
 
   useEffect(() => {
     // Filter completed workouts and sort by date (most recent first)
-    const completedWorkouts = allWorkouts
+    const completedWorkouts = workouts
       .filter(workout => workout.completed)
       .sort((a, b) => {
         const dateA = new Date(a.date);
@@ -32,7 +36,7 @@ export default function WorkoutsSummary({ title, className, onViewAll }: Workout
       .slice(0, 4); // Show only the 4 most recent workouts
     
     setRecentWorkouts(completedWorkouts);
-  }, [allWorkouts]);
+  }, [workouts]);
 
   const formatWorkoutDate = (dateString: string): string => {
     try {
@@ -80,18 +84,6 @@ export default function WorkoutsSummary({ title, className, onViewAll }: Workout
     return [];
   };
 
-  if (loading) {
-    return (
-      <div className={cn("glassy-card rounded-xl card-shadow hover-scale h-[400px] flex flex-col", className)}>
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-          <h3 className="font-medium tracking-tight">{title || t("Recent workouts")}</h3>
-        </div>
-        <div className="flex items-center justify-center flex-1">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
   
   return (
     <div className={cn("glassy-card rounded-xl card-shadow hover-scale h-[400px] flex flex-col", className)}>

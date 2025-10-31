@@ -1,12 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
-import { supabase } from '@/integrations/supabase/client';
-import { getFoodLogs } from '@/services/openFoodFactsService';
-import { FoodLogEntry } from '@/types/nutrition';
-import { calculateMacroGoals, getMacroRatios, type ProfileData } from '@/utils/macroCalculations';
-import { useUserProfile } from '@/hooks/useUserProfile';
-import { format } from 'date-fns';
+import { getMacroRatios } from '@/utils/macroCalculations';
 
 type MacroData = {
   calories: { consumed: number; goal: number; unit: string };
@@ -24,155 +19,28 @@ const defaultMacroTargets: MacroData = {
 
 interface MacroProgressTrackerProps {
   selectedDate?: Date;
+  consumedMacros?: { protein: number; carbs: number; fat: number };
+  consumedCalories?: number;
+  macroGoals?: { calories: number; protein: number; carbs: number; fat: number };
+  profile?: any;
 }
 
-export default function MacroProgressTracker({ selectedDate = new Date() }: MacroProgressTrackerProps) {
+export default function MacroProgressTracker({ 
+  selectedDate = new Date(),
+  consumedMacros,
+  consumedCalories,
+  macroGoals,
+  profile: propProfile
+}: MacroProgressTrackerProps) {
   const { t } = useLanguage();
-  const { profile: dbProfile, loading: profileLoading } = useUserProfile();
-  const [macroTargets, setMacroTargets] = useState<MacroData>(defaultMacroTargets);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
   
-  // Check if user is authenticated
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-      setUserId(user?.id || null);
-    };
-    
-    checkAuth();
-    
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session?.user);
-      setUserId(session?.user?.id || null);
-    });
-    
-    return () => subscription.unsubscribe();
-  }, []);
-  
-  useEffect(() => {
-    // Get profile data from database
-    if (!profileLoading && dbProfile) {
-      // Convert database profile to ProfileData format
-        const profileData: ProfileData = {
-          weight: dbProfile.weight,
-          height: dbProfile.height,
-          age: dbProfile.age,
-          gender: dbProfile.gender,
-          activityLevel: dbProfile.activity_level,
-          exerciseFrequency: dbProfile.exercise_frequency,
-          fitnessGoal: dbProfile.fitness_goal,
-        };
-      
-      // Calculate macros using centralized function
-      const macroGoals = calculateMacroGoals(profileData);
-      
-      // Update the macro targets
-      setMacroTargets({
-        calories: { consumed: 0, goal: macroGoals.calories, unit: '' },
-        protein: { consumed: 0, goal: macroGoals.protein, unit: 'g' },
-        carbs: { consumed: 0, goal: macroGoals.carbs, unit: 'g' },
-        fat: { consumed: 0, goal: macroGoals.fat, unit: 'g' },
-      });
-    }
-    
-    // Listen for custom macro ratio changes
-    const handleMacroRatiosChange = () => {
-      if (!profileLoading && dbProfile) {
-        const profileData: ProfileData = {
-          weight: dbProfile.weight,
-          height: dbProfile.height,
-          age: dbProfile.age,
-          gender: dbProfile.gender,
-          exerciseFrequency: dbProfile.exercise_frequency,
-          fitnessGoal: dbProfile.fitness_goal,
-        };
-        const macroGoals = calculateMacroGoals(profileData);
-        
-        setMacroTargets(prevState => ({
-          calories: { ...prevState.calories, goal: macroGoals.calories },
-          protein: { ...prevState.protein, goal: macroGoals.protein },
-          carbs: { ...prevState.carbs, goal: macroGoals.carbs },
-          fat: { ...prevState.fat, goal: macroGoals.fat },
-        }));
-      }
-    };
-    
-    // Listen for custom macro ratio changes
-    window.addEventListener('macroRatiosChanged', handleMacroRatiosChange);
-    
-    return () => {
-      window.removeEventListener('macroRatiosChanged', handleMacroRatiosChange);
-    };
-  }, [dbProfile, profileLoading]);
-  
-  // Load and calculate consumed nutrition data
-  useEffect(() => {
-    const loadConsumedNutrition = async () => {
-      const dateString = format(selectedDate, 'yyyy-MM-dd');
-      
-      try {
-        let allFoodItems: any[] = [];
-        
-        if (isAuthenticated && userId) {
-          // Load from database
-          const logs = await getFoodLogs(dateString);
-          allFoodItems = logs.map((log: FoodLogEntry) => log.food_item);
-        } else {
-          // Load from localStorage (but only if not authenticated)
-          const savedData = localStorage.getItem(`foodLog_${dateString}`);
-          if (savedData) {
-            try {
-              allFoodItems = JSON.parse(savedData);
-            } catch (parseError) {
-              console.error('Error parsing food log data:', parseError);
-              allFoodItems = [];
-            }
-          }
-        }
-        
-        // Calculate consumed macros - ensure we handle empty arrays correctly
-        const consumed = allFoodItems.reduce((total: any, item: any) => {
-          // Make sure item exists and has valid data
-          if (!item) return total;
-          
-          return {
-            calories: total.calories + (Number(item.calories) || 0),
-            protein: total.protein + (Number(item.protein) || 0),
-            carbs: total.carbs + (Number(item.carbs) || 0),
-            fat: total.fat + (Number(item.fat) || 0),
-          };
-        }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
-        
-        // Update consumed values
-        setMacroTargets(prevState => ({
-          calories: { ...prevState.calories, consumed: Math.round(consumed.calories) },
-          protein: { ...prevState.protein, consumed: Math.round(consumed.protein * 10) / 10 },
-          carbs: { ...prevState.carbs, consumed: Math.round(consumed.carbs * 10) / 10 },
-          fat: { ...prevState.fat, consumed: Math.round(consumed.fat * 10) / 10 },
-        }));
-      } catch (error) {
-        console.error('Error loading consumed nutrition:', error);
-        // Reset to 0 on error
-        setMacroTargets(prevState => ({
-          calories: { ...prevState.calories, consumed: 0 },
-          protein: { ...prevState.protein, consumed: 0 },
-          carbs: { ...prevState.carbs, consumed: 0 },
-          fat: { ...prevState.fat, consumed: 0 },
-        }));
-      }
-    };
-
-    loadConsumedNutrition();
-    
-    // Don't set up interval for non-current dates to avoid constant refreshing
-    if (selectedDate.toDateString() === new Date().toDateString()) {
-      const interval = setInterval(loadConsumedNutrition, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [isAuthenticated, userId, selectedDate]);
+  // Use provided data from parent if available, otherwise use defaults
+  const macroTargets: MacroData = {
+    calories: { consumed: consumedCalories ?? 0, goal: macroGoals?.calories ?? 2200, unit: '' },
+    protein: { consumed: consumedMacros?.protein ?? 0, goal: macroGoals?.protein ?? 165, unit: 'g' },
+    carbs: { consumed: consumedMacros?.carbs ?? 0, goal: macroGoals?.carbs ?? 220, unit: 'g' },
+    fat: { consumed: consumedMacros?.fat ?? 0, goal: macroGoals?.fat ?? 73, unit: 'g' },
+  };
 
   
   const calculatePercentage = (consumed: number, goal: number) => {
@@ -236,9 +104,9 @@ export default function MacroProgressTracker({ selectedDate = new Date() }: Macr
               // Get current macro ratios to display accurate percentages
               let ratios = { protein: 35, carbs: 35, fat: 30 }; // default
               
-              if (dbProfile?.fitness_goal) {
+              if (propProfile?.fitness_goal) {
                 try {
-                  ratios = getMacroRatios(dbProfile.fitness_goal);
+                  ratios = getMacroRatios(propProfile.fitness_goal);
                 } catch (error) {
                   console.error("Error getting ratios:", error);
                 }
