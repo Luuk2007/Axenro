@@ -94,10 +94,9 @@ export const useDashboardData = (selectedDate: Date) => {
     const loadAllData = async () => {
       // Wait for all hooks to finish loading
       if (profileLoading || weightLoading || workoutsLoading) {
+        setIsLoading(true);
         return;
       }
-
-      setIsLoading(true);
       
       try {
         // Calculate user calories and macros from profile
