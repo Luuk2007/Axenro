@@ -8,7 +8,7 @@ import { Workout, Exercise } from '@/types/workout';
 export const useWorkouts = () => {
   const { user } = useAuth();
   const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const loadWorkouts = async () => {
     if (!user) {

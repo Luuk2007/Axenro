@@ -465,6 +465,18 @@ const Nutrition = () => {
 
   const addFoodOptions = getAddFoodOptions();
 
+  if (isLoading) {
+    return (
+      <div className="space-y-8 animate-fade-in">
+        <div className="flex items-center justify-between">
+          <div className="h-8 w-32 bg-muted animate-pulse rounded" />
+          <div className="h-10 w-28 bg-muted animate-pulse rounded" />
+        </div>
+        <div className="h-[600px] bg-muted animate-pulse rounded-xl" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 animate-fade-in">
       {!user && <LoginPrompt />}

@@ -55,21 +55,7 @@ export const useDashboardData = (selectedDate: Date) => {
   const { weightData, loading: weightLoading } = useWeightData();
   const { workouts: allWorkouts, loading: workoutsLoading } = useWorkouts();
   
-  const [data, setData] = useState<DashboardData>({
-    isAuthenticated: false,
-    userId: null,
-    profile: null,
-    userCalories: 2200,
-    macroGoals: { calories: 2200, protein: 165, carbs: 220, fat: 73 },
-    consumedCalories: 0,
-    consumedMacros: { protein: 0, carbs: 0, fat: 0 },
-    currentWeight: null,
-    allWorkouts: [],
-    workoutsThisWeek: 0,
-    weeklyGoal: undefined,
-    dailySteps: 0,
-    foodLogs: [],
-  });
+  const [data, setData] = useState<DashboardData | null>(null);
 
   // Check authentication status
   useEffect(() => {
@@ -220,5 +206,5 @@ export const useDashboardData = (selectedDate: Date) => {
     };
   }, [profile, profileLoading, weightData, weightLoading, allWorkouts, workoutsLoading, isAuthenticated, userId, selectedDate]);
 
-  return { data, isLoading };
+  return { data, isLoading: isLoading || data === null };
 };

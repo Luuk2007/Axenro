@@ -133,6 +133,21 @@ const Workouts = () => {
     setEditingWorkout(null);
   };
 
+  if (workoutsLoading || !initialized) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center justify-between">
+          <div className="h-8 w-32 bg-muted animate-pulse rounded" />
+          <div className="flex gap-2">
+            <div className="h-10 w-24 bg-muted animate-pulse rounded" />
+            <div className="h-10 w-32 bg-muted animate-pulse rounded" />
+          </div>
+        </div>
+        <div className="h-[600px] bg-muted animate-pulse rounded-xl" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       {!user && <LoginPrompt />}

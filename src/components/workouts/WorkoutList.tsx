@@ -24,7 +24,7 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
   if (workouts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed rounded-xl border-muted-foreground/20 text-center px-4">
-        <p className="text-muted-foreground mb-4">{t("noWorkoutsFound")}</p>
+        <p className="text-muted-foreground">{t("noWorkoutsFound")}</p>
       </div>
     );
   }

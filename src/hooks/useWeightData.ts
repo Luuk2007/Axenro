@@ -11,7 +11,7 @@ export interface WeightEntry {
 export const useWeightData = () => {
   const { user } = useAuth();
   const [weightData, setWeightData] = useState<WeightEntry[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const loadWeightData = async () => {
     if (!user) {

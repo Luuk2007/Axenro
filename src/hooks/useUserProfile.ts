@@ -19,7 +19,7 @@ export interface UserProfileData {
 export const useUserProfile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfileData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const loadProfile = async () => {
     if (!user) {
