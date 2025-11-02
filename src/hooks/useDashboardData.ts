@@ -47,7 +47,6 @@ export interface DashboardData {
 }
 
 export const useDashboardData = (selectedDate: Date) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   
@@ -56,6 +55,9 @@ export const useDashboardData = (selectedDate: Date) => {
   const { workouts: allWorkouts, loading: workoutsLoading } = useWorkouts();
   
   const [data, setData] = useState<DashboardData | null>(null);
+  
+  // Compute loading state - true if any dependency is loading OR data is not set yet
+  const isLoading = profileLoading || weightLoading || workoutsLoading || data === null;
 
   // Check authentication status
   useEffect(() => {
@@ -80,7 +82,6 @@ export const useDashboardData = (selectedDate: Date) => {
     const loadAllData = async () => {
       // Wait for all hooks to finish loading
       if (profileLoading || weightLoading || workoutsLoading) {
-        setIsLoading(true);
         return;
       }
       
@@ -177,8 +178,6 @@ export const useDashboardData = (selectedDate: Date) => {
         });
       } catch (error) {
         console.error('Error loading dashboard data:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -206,5 +205,5 @@ export const useDashboardData = (selectedDate: Date) => {
     };
   }, [profile, profileLoading, weightData, weightLoading, allWorkouts, workoutsLoading, isAuthenticated, userId, selectedDate]);
 
-  return { data, isLoading: isLoading || data === null };
+  return { data, isLoading };
 };

@@ -42,12 +42,15 @@ const Nutrition = () => {
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'meals' | 'water'>('meals');
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [isLoading, setIsLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [meals, setMeals] = useState<Meal[]>([]);
   const [editingItem, setEditingItem] = useState<FoodItem | null>(null);
+  
+  // Compute loading state - not initialized OR meals are empty
+  const isLoading = !initialized || meals.length === 0;
 
   // Initialize meals when component mounts or language changes
   useEffect(() => {
@@ -141,8 +144,6 @@ const Nutrition = () => {
         console.log('Meals not initialized yet, waiting...');
         return;
       }
-
-      setIsLoading(true);
       
       try {
         if (!isAuthenticated || !userId) {
@@ -185,7 +186,7 @@ const Nutrition = () => {
         console.error('Error loading food logs:', error);
         toast.error(t('errorLoadingData') || 'Error loading food data');
       } finally {
-        setIsLoading(false);
+        setInitialized(true);
       }
     };
 
