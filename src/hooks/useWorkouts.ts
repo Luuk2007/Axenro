@@ -97,9 +97,11 @@ export const useWorkouts = () => {
         return;
       }
 
-      // Update local state
+      // Update local state - add workout and sort by date (newest first)
       const existingWorkouts = workouts.filter(w => w.id !== workout.id);
-      const updatedWorkouts = [...existingWorkouts, workout];
+      const updatedWorkouts = [...existingWorkouts, workout].sort((a, b) => {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
       setWorkouts(updatedWorkouts);
       
       // Also save to localStorage as backup
