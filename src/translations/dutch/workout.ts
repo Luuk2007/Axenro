@@ -122,5 +122,9 @@ export const workoutTranslations = {
   "Most trained:": "Meest getrainde:",
   "Most improved:": "Meest verbeterd:",
   "cardio": "cardio",
-  "Save": "Opslaan"
+  "Save": "Opslaan",
+  "duplicateWorkout": "Training Kopiëren",
+  "selectNewDateForWorkout": "Selecteer nieuwe datum voor training",
+  "duplicate": "Kopiëren",
+  "workoutDuplicated": "Training gekopieerd"
 };

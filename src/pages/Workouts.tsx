@@ -19,6 +19,7 @@ import DeleteWorkoutDialog from "@/components/workouts/DeleteWorkoutDialog";
 import TrackWorkout from "@/components/workouts/TrackWorkout";
 import WorkoutList from "@/components/workouts/WorkoutList";
 import WorkoutCalendar from "@/components/workouts/WorkoutCalendar";
+import DuplicateWorkoutDialog from "@/components/workouts/DuplicateWorkoutDialog";
 import { Workout } from "@/types/workout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import WeeklyGoalSetting from "@/components/workouts/WeeklyGoalSetting";
@@ -48,6 +49,7 @@ const Workouts = () => {
   const [workoutToDelete, setWorkoutToDelete] = useState<string | null>(null);
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
   const [showWeeklyGoal, setShowWeeklyGoal] = useState(false);
+  const [workoutToDuplicate, setWorkoutToDuplicate] = useState<Workout | null>(null);
 
 
   const handleCreateWorkout = async (name: string, exercises: any[], date: string) => {
@@ -101,6 +103,24 @@ const Workouts = () => {
     } else {
       setShowWorkoutForm(true);
     }
+  };
+
+  const handleDuplicateWorkout = (workout: Workout) => {
+    setWorkoutToDuplicate(workout);
+  };
+
+  const confirmDuplicateWorkout = async (newDate: string) => {
+    if (!workoutToDuplicate) return;
+    
+    const duplicatedWorkout: Workout = {
+      ...workoutToDuplicate,
+      id: Date.now().toString(),
+      date: newDate,
+    };
+    
+    await saveWorkout(duplicatedWorkout);
+    toast.success(t("workoutDuplicated"));
+    setWorkoutToDuplicate(null);
   };
 
   const handleDeleteWorkout = (workoutId: string) => {
@@ -194,6 +214,7 @@ const Workouts = () => {
               workouts={workouts}
               onViewWorkout={handleViewWorkout}
               onEditWorkout={handleEditWorkout}
+              onDuplicateWorkout={handleDuplicateWorkout}
               onDeleteWorkout={handleDeleteWorkout}
             />
           </TabsContent>
@@ -256,6 +277,15 @@ const Workouts = () => {
       <WeeklyGoalSetting
         open={showWeeklyGoal}
         onOpenChange={setShowWeeklyGoal}
+      />
+
+      <DuplicateWorkoutDialog
+        open={!!workoutToDuplicate}
+        onOpenChange={(open) => {
+          if (!open) setWorkoutToDuplicate(null);
+        }}
+        onConfirmDuplicate={confirmDuplicateWorkout}
+        workoutName={workoutToDuplicate?.name || ""}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2, Calendar, Edit } from "lucide-react";
+import { Trash2, Calendar, Edit, Copy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
 import { getWorkoutSummary, formatDuration } from "@/utils/workoutUtils";
@@ -10,6 +10,7 @@ interface WorkoutListProps {
   workouts: Workout[];
   onViewWorkout: (workout: Workout) => void;
   onEditWorkout: (workout: Workout) => void;
+  onDuplicateWorkout: (workout: Workout) => void;
   onDeleteWorkout: (workoutId: string) => void;
 }
 
@@ -17,6 +18,7 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
   workouts, 
   onViewWorkout, 
   onEditWorkout,
+  onDuplicateWorkout,
   onDeleteWorkout 
 }) => {
   const { t } = useLanguage();
@@ -74,6 +76,13 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
               size="icon"
             >
               <Edit className="h-4 w-4" />
+            </Button>
+            <Button 
+              onClick={() => onDuplicateWorkout(workout)} 
+              variant="outline"
+              size="icon"
+            >
+              <Copy className="h-4 w-4" />
             </Button>
             <Button 
               variant="destructive" 
