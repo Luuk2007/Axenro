@@ -29,6 +29,7 @@ interface ExerciseProgressModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isCardio: boolean;
+  isCalisthenics?: boolean;
 }
 
 interface ExerciseHistoryEntry {
@@ -49,6 +50,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
   open,
   onOpenChange,
   isCardio,
+  isCalisthenics = false,
 }) => {
   const { t } = useLanguage();
   const { measurementSystem } = useMeasurementSystem();
@@ -142,6 +144,8 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
     : 0;
   const bestPerformance = isCardio
     ? bestPace !== Infinity ? bestPace : 0
+    : isCalisthenics
+    ? Math.max(...exerciseHistory.map((e) => e.maxReps || 0))
     : Math.max(...exerciseHistory.map((e) => e.maxWeight || 0));
   const averagePace = isCardio && exerciseHistory.some(e => e.pace)
     ? exerciseHistory.filter(e => e.pace).reduce((sum, e) => sum + (e.pace || 0), 0) /
@@ -149,8 +153,9 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
     : 0;
   const averagePerformance = isCardio
     ? averagePace
-    : exerciseHistory.reduce((sum, e) => sum + (e.maxWeight || 0), 0) /
-      totalSessions;
+    : isCalisthenics
+    ? exerciseHistory.reduce((sum, e) => sum + (e.maxReps || 0), 0) / totalSessions
+    : exerciseHistory.reduce((sum, e) => sum + (e.maxWeight || 0), 0) / totalSessions;
 
   const firstSession = exerciseHistory[exerciseHistory.length - 1];
   const lastSession = exerciseHistory[0];
@@ -159,6 +164,10 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
       ? isCardio
         ? (((lastSession.maxDuration || 0) - (firstSession.maxDuration || 0)) /
             (firstSession.maxDuration || 1)) *
+          100
+        : isCalisthenics
+        ? (((lastSession.maxReps || 0) - (firstSession.maxReps || 0)) /
+            (firstSession.maxReps || 1)) *
           100
         : (((lastSession.maxWeight || 0) - (firstSession.maxWeight || 0)) /
             (firstSession.maxWeight || 1)) *
@@ -196,10 +205,12 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
               <div className="text-xl sm:text-2xl font-bold text-primary break-all">
                 {isCardio
                   ? bestPerformance > 0 ? `${Math.floor(bestPerformance)}:${String(Math.round((bestPerformance % 1) * 60)).padStart(2, '0')} /km` : 'N/A'
+                  : isCalisthenics
+                  ? `${bestPerformance} reps`
                   : `${formatWeight(convertWeight(bestPerformance, "metric", measurementSystem), measurementSystem)} ${getWeightUnit(measurementSystem)}`}
               </div>
               <div className="text-xs text-muted-foreground">
-                {isCardio ? t("Best Pace") : t("Best Performance")}
+                {isCardio ? t("Best Pace") : isCalisthenics ? t("Max Reps") : t("Best Performance")}
               </div>
             </CardContent>
           </Card>
@@ -208,10 +219,12 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
               <div className="text-xl sm:text-2xl font-bold text-primary break-all">
                 {isCardio
                   ? averagePerformance > 0 ? `${Math.floor(averagePerformance)}:${String(Math.round((averagePerformance % 1) * 60)).padStart(2, '0')} /km` : 'N/A'
+                  : isCalisthenics
+                  ? `${Math.round(averagePerformance)} reps`
                   : `${formatWeight(convertWeight(averagePerformance, "metric", measurementSystem), measurementSystem)} ${getWeightUnit(measurementSystem)}`}
               </div>
               <div className="text-xs text-muted-foreground">
-                {isCardio ? t("Average Pace") : t("Average Performance")}
+                {isCardio ? t("Average Pace") : isCalisthenics ? t("Avg Reps") : t("Average Performance")}
               </div>
             </CardContent>
           </Card>
@@ -328,6 +341,28 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
                             </span>
                           </div>
                         )}
+                      </div>
+                    ) : isCalisthenics ? (
+                      <div className="space-y-1">
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">
+                            {t("Best Set")}:{" "}
+                          </span>
+                          <span className="font-medium">
+                            {entry.maxReps} reps
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2">
+                          {entry.sets.map((set, setIndex) => (
+                            <Badge
+                              key={setIndex}
+                              variant="secondary"
+                              className="text-xs break-all"
+                            >
+                              {set.reps} reps
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-1">
