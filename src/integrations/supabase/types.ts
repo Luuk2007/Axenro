@@ -176,7 +176,7 @@ export type Database = {
       audit_logs: {
         Row: {
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           operation: string
           table_name: string
           timestamp: string
@@ -185,7 +185,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           operation: string
           table_name: string
           timestamp?: string
@@ -194,7 +194,7 @@ export type Database = {
         }
         Update: {
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           operation?: string
           table_name?: string
           timestamp?: string
@@ -1188,10 +1188,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_latest_daily_steps: {
-        Args: { user_uuid: string }
-        Returns: number
-      }
+      get_latest_daily_steps: { Args: { user_uuid: string }; Returns: number }
     }
     Enums: {
       badge_type: "bronze" | "silver" | "gold"

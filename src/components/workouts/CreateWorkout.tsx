@@ -82,6 +82,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     const newExercise: Exercise = {
       id: Date.now().toString(),
       name: exerciseData.name,
+      muscleGroup: exerciseData.muscleGroup,
       sets: exerciseData.sets || [
         { id: 1, reps: 12, weight: 0, completed: false },
         { id: 2, reps: 12, weight: 0, completed: false },
@@ -234,16 +235,18 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                 />
                                 <span className="text-xs text-muted-foreground">reps</span>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Input
-                                  type="number"
-                                  value={set.weight?.toString() || ''}
-                                  onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
-                                  className="w-16 h-8"
-                                  placeholder="Weight"
-                                />
-                                <span className="text-xs text-muted-foreground">{getWeightUnit(measurementSystem)}</span>
-                              </div>
+                              {exercise.muscleGroup !== 'calisthenics' && (
+                                <div className="flex items-center gap-1">
+                                  <Input
+                                    type="number"
+                                    value={set.weight?.toString() || ''}
+                                    onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
+                                    className="w-16 h-8"
+                                    placeholder="Weight"
+                                  />
+                                  <span className="text-xs text-muted-foreground">{getWeightUnit(measurementSystem)}</span>
+                                </div>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"

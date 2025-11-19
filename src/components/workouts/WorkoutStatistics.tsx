@@ -109,46 +109,85 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
             });
           }
         } else {
-          // Handle strength exercises
-          let maxWeightSet = null;
-          let maxWeightInWorkout = -Infinity;
+          // Handle strength and calisthenics exercises
+          const isCalisthenics = exercise.muscleGroup === 'calisthenics';
           
-          exercise.sets
-            .filter(set => set.weight > 0)
-            .forEach(set => {
-              if (set.weight > maxWeightInWorkout) {
-                maxWeightInWorkout = set.weight;
-                maxWeightSet = set;
+          if (isCalisthenics) {
+            // For calisthenics, track only max reps (no weight)
+            let maxRepsInWorkout = 0;
+            
+            exercise.sets.forEach(set => {
+              if (set.reps > maxRepsInWorkout) {
+                maxRepsInWorkout = set.reps;
               }
             });
-
-          if (maxWeightInWorkout === -Infinity || !maxWeightSet) return; // Skip if no weights recorded
-
-          const existing = exerciseMap.get(key);
-          
-          if (!existing) {
-            exerciseMap.set(key, {
-              name: exercise.name,
-              maxWeight: maxWeightInWorkout,
-              maxReps: maxWeightSet.reps,
-              totalSets: exercise.sets.length,
-              lastPerformed: workout.date,
-              maxWeightDate: workout.date,
-              muscleGroup: exercise.muscleGroup,
-              isCardio: false
-            });
+            
+            const existing = exerciseMap.get(key);
+            
+            if (!existing) {
+              exerciseMap.set(key, {
+                name: exercise.name,
+                maxReps: maxRepsInWorkout,
+                totalSets: exercise.sets.length,
+                lastPerformed: workout.date,
+                maxWeightDate: workout.date,
+                muscleGroup: exercise.muscleGroup,
+                isCardio: false
+              });
+            } else {
+              const shouldUpdate = maxRepsInWorkout > (existing.maxReps || 0);
+              exerciseMap.set(key, {
+                ...existing,
+                maxReps: shouldUpdate ? maxRepsInWorkout : existing.maxReps,
+                maxWeightDate: shouldUpdate ? workout.date : existing.maxWeightDate,
+                totalSets: existing.totalSets + exercise.sets.length,
+                lastPerformed: new Date(workout.date) > new Date(existing.lastPerformed) 
+                  ? workout.date 
+                  : existing.lastPerformed
+              });
+            }
           } else {
-            const shouldUpdate = maxWeightInWorkout > (existing.maxWeight || 0);
-            exerciseMap.set(key, {
-              ...existing,
-              maxWeight: shouldUpdate ? maxWeightInWorkout : existing.maxWeight,
-              maxReps: shouldUpdate ? maxWeightSet.reps : existing.maxReps,
-              maxWeightDate: shouldUpdate ? workout.date : existing.maxWeightDate,
-              totalSets: existing.totalSets + exercise.sets.length,
-              lastPerformed: new Date(workout.date) > new Date(existing.lastPerformed) 
-                ? workout.date 
-                : existing.lastPerformed
-            });
+            // Handle regular strength exercises
+            let maxWeightSet = null;
+            let maxWeightInWorkout = -Infinity;
+            
+            exercise.sets
+              .filter(set => set.weight > 0)
+              .forEach(set => {
+                if (set.weight > maxWeightInWorkout) {
+                  maxWeightInWorkout = set.weight;
+                  maxWeightSet = set;
+                }
+              });
+
+            if (maxWeightInWorkout === -Infinity || !maxWeightSet) return; // Skip if no weights recorded
+
+            const existing = exerciseMap.get(key);
+            
+            if (!existing) {
+              exerciseMap.set(key, {
+                name: exercise.name,
+                maxWeight: maxWeightInWorkout,
+                maxReps: maxWeightSet.reps,
+                totalSets: exercise.sets.length,
+                lastPerformed: workout.date,
+                maxWeightDate: workout.date,
+                muscleGroup: exercise.muscleGroup,
+                isCardio: false
+              });
+            } else {
+              const shouldUpdate = maxWeightInWorkout > (existing.maxWeight || 0);
+              exerciseMap.set(key, {
+                ...existing,
+                maxWeight: shouldUpdate ? maxWeightInWorkout : existing.maxWeight,
+                maxReps: shouldUpdate ? maxWeightSet.reps : existing.maxReps,
+                maxWeightDate: shouldUpdate ? workout.date : existing.maxWeightDate,
+                totalSets: existing.totalSets + exercise.sets.length,
+                lastPerformed: new Date(workout.date) > new Date(existing.lastPerformed) 
+                  ? workout.date 
+                  : existing.lastPerformed
+              });
+            }
           }
         }
       });
@@ -186,6 +225,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
       legs: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
       core: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
       cardio: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200",
+      calisthenics: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200",
     };
     return colors[muscleGroup || ""] || "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
   };
@@ -263,6 +303,21 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
                           <span className="font-medium text-foreground">{stat.totalSets}</span>
                           <br />
                           <span>{t("Total Sessions")}</span>
+                        </div>
+                      </>
+                    ) : stat.muscleGroup === 'calisthenics' ? (
+                      <>
+                        <div>
+                          <span className="font-medium text-foreground">
+                            {stat.maxReps} reps
+                          </span>
+                          <br />
+                          <span>{t("Max Reps")}{stat.maxWeightDate && ` (${formatDate(stat.maxWeightDate)})`}</span>
+                        </div>
+                        <div>
+                          <span className="font-medium text-foreground">{stat.totalSets}</span>
+                          <br />
+                          <span>{t("Total Sets")}</span>
                         </div>
                       </>
                     ) : (
