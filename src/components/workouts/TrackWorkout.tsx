@@ -75,9 +75,11 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
                           <>
                             <div className="font-medium">Set {setIndex + 1}</div>
                             <div>{set.reps} {t("reps")}</div>
-                            <div>
-                              {formatWeight(displayWeight, measurementSystem)} {getWeightUnit(measurementSystem)}
-                            </div>
+                            {exercise.muscleGroup !== 'calisthenics' && (
+                              <div>
+                                {formatWeight(displayWeight, measurementSystem)} {getWeightUnit(measurementSystem)}
+                              </div>
+                            )}
                           </>
                         )}
                       </div>

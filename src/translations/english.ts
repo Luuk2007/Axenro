@@ -353,6 +353,9 @@ export const english = {
   "selectNewDateForWorkout": "Select new date for workout",
   "duplicate": "Duplicate",
   "workoutDuplicated": "Workout duplicated",
+  "Max Reps": "Max Reps",
+  "Avg Reps": "Avg Reps",
+  "Best Performance": "Best Performance",
   
   // Progress page translations
   "Track your body measurements": "Track your body measurements",

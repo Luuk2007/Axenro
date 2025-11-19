@@ -126,5 +126,8 @@ export const workoutTranslations = {
   "duplicateWorkout": "Training Kopiëren",
   "selectNewDateForWorkout": "Selecteer nieuwe datum voor training",
   "duplicate": "Kopiëren",
-  "workoutDuplicated": "Training gekopieerd"
+  "workoutDuplicated": "Training gekopieerd",
+  "Max Reps": "Max Herhalingen",
+  "Avg Reps": "Gem Herhalingen",
+  "Best Performance": "Beste Prestatie"
 };

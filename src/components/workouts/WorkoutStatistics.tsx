@@ -34,10 +34,12 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [selectedExerciseIsCardio, setSelectedExerciseIsCardio] = useState(false);
+  const [selectedExerciseIsCalisthenics, setSelectedExerciseIsCalisthenics] = useState(false);
 
-  const handleExerciseClick = (exerciseName: string, isCardio: boolean) => {
+  const handleExerciseClick = (exerciseName: string, isCardio: boolean, isCalisthenics: boolean = false) => {
     setSelectedExercise(exerciseName);
     setSelectedExerciseIsCardio(isCardio);
+    setSelectedExerciseIsCalisthenics(isCalisthenics);
     setShowProgressModal(true);
   };
 
@@ -272,7 +274,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
           <Card 
             key={stat.name} 
             className="transition-colors hover:bg-muted/50 cursor-pointer"
-            onClick={() => handleExerciseClick(stat.name, stat.isCardio)}
+            onClick={() => handleExerciseClick(stat.name, stat.isCardio, stat.muscleGroup === 'calisthenics')}
           >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -358,6 +360,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
           open={showProgressModal}
           onOpenChange={setShowProgressModal}
           isCardio={selectedExerciseIsCardio}
+          isCalisthenics={selectedExerciseIsCalisthenics}
         />
       )}
     </div>
