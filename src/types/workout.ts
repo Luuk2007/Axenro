@@ -94,6 +94,20 @@ export const exerciseDatabase = {
     { id: "jump-rope", name: "Jump Rope" },
     { id: "swimming", name: "Swimming" },
     { id: "battle-ropes", name: "Battle Ropes" }
+  ],
+  calisthenics: [
+    { id: "push-ups", name: "Push-Ups" },
+    { id: "pull-ups-calisthenics", name: "Pull-Ups" },
+    { id: "chin-ups-calisthenics", name: "Chin-Ups" },
+    { id: "dips-calisthenics", name: "Dips" },
+    { id: "muscle-ups", name: "Muscle-Ups" },
+    { id: "handstand-push-ups", name: "Handstand Push-Ups" },
+    { id: "pistol-squats", name: "Pistol Squats" },
+    { id: "l-sit", name: "L-Sit" },
+    { id: "front-lever", name: "Front Lever" },
+    { id: "back-lever", name: "Back Lever" },
+    { id: "planche", name: "Planche" },
+    { id: "dragon-flag", name: "Dragon Flag" }
   ]
 };
 
@@ -133,5 +147,6 @@ export const muscleGroups = [
   { value: "shoulders", label: "Shoulders" },
   { value: "arms", label: "Arms" },
   { value: "legs", label: "Legs" },
-  { value: "core", label: "Core" }
+  { value: "core", label: "Core" },
+  { value: "calisthenics", label: "Calisthenics" }
 ];
