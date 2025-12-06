@@ -129,5 +129,19 @@ export const workoutTranslations = {
   "workoutDuplicated": "Training gekopieerd",
   "Max Reps": "Max Herhalingen",
   "Avg Reps": "Gem Herhalingen",
-  "Best Performance": "Beste Prestatie"
+  "Best Performance": "Beste Prestatie",
+  "Update Record": "Record Bijwerken",
+  "Current": "Huidig",
+  "New Estimated One Rep Max": "Nieuwe Geschatte 1RM",
+  "improvement": "verbetering",
+  "Record updated": "Record bijgewerkt",
+  "Failed to update record": "Kan record niet bijwerken",
+  "Chest": "Borst",
+  "Back": "Rug",
+  "Shoulders": "Schouders",
+  "Arms": "Armen",
+  "Legs": "Benen",
+  "Core": "Core",
+  "Calisthenics": "Calisthenics",
+  "Other": "Overig"
 };
