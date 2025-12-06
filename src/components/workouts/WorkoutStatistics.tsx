@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Workout } from "@/types/workout";
+import { Workout, exerciseDatabase } from "@/types/workout";
 import { TrendingUp, Dumbbell, ChevronRight, ChevronDown } from "lucide-react";
 import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
 import { convertWeight, getWeightUnit, formatWeight } from "@/utils/unitConversions";
@@ -13,6 +13,40 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+
+// Helper function to find muscle group for an exercise
+const findMuscleGroupForExercise = (exerciseName: string): string => {
+  const lowerName = exerciseName.toLowerCase();
+  
+  for (const [muscleGroup, exercises] of Object.entries(exerciseDatabase)) {
+    for (const exercise of exercises) {
+      if (exercise.name.toLowerCase() === lowerName) {
+        return muscleGroup;
+      }
+    }
+  }
+  
+  // Check for partial matches if exact match not found
+  for (const [muscleGroup, exercises] of Object.entries(exerciseDatabase)) {
+    for (const exercise of exercises) {
+      if (lowerName.includes(exercise.name.toLowerCase()) || 
+          exercise.name.toLowerCase().includes(lowerName)) {
+        return muscleGroup;
+      }
+    }
+  }
+  
+  // Fallback to common keywords
+  if (lowerName.includes('bench') || lowerName.includes('chest') || lowerName.includes('fly')) return 'chest';
+  if (lowerName.includes('row') || lowerName.includes('pull') || lowerName.includes('lat') || lowerName.includes('deadlift')) return 'back';
+  if (lowerName.includes('shoulder') || lowerName.includes('press') || lowerName.includes('lateral') || lowerName.includes('shrug')) return 'shoulders';
+  if (lowerName.includes('curl') || lowerName.includes('tricep') || lowerName.includes('bicep')) return 'arms';
+  if (lowerName.includes('squat') || lowerName.includes('leg') || lowerName.includes('lunge') || lowerName.includes('calf') || lowerName.includes('romanian')) return 'legs';
+  if (lowerName.includes('crunch') || lowerName.includes('plank') || lowerName.includes('ab')) return 'core';
+  if (lowerName.includes('run') || lowerName.includes('cycling') || lowerName.includes('swim')) return 'cardio';
+  
+  return 'chest'; // Default fallback
+};
 
 interface WorkoutStatisticsProps {
   workouts: Workout[];
@@ -68,6 +102,8 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
       workout.exercises.forEach((exercise) => {
         const key = exercise.name.toLowerCase();
         const isCardio = isCardioExercise(exercise);
+        // Use stored muscleGroup or look it up from the database
+        const muscleGroup = exercise.muscleGroup || findMuscleGroupForExercise(exercise.name);
         
         if (isCardio) {
           let maxDuration = 0;
@@ -102,7 +138,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
               bestPaceDate: bestPaceInSession !== Infinity ? workout.date : undefined,
               totalSets: exercise.sets.length,
               lastPerformed: workout.date,
-              muscleGroup: exercise.muscleGroup,
+              muscleGroup: muscleGroup,
               isCardio: true
             });
           } else {
@@ -120,7 +156,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
             });
           }
         } else {
-          const isCalisthenics = exercise.muscleGroup === 'calisthenics';
+          const isCalisthenics = muscleGroup === 'calisthenics';
           
           if (isCalisthenics) {
             let maxRepsInWorkout = 0;
@@ -138,7 +174,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
                 totalSets: exercise.sets.length,
                 lastPerformed: workout.date,
                 maxWeightDate: workout.date,
-                muscleGroup: exercise.muscleGroup,
+                muscleGroup: muscleGroup,
                 isCardio: false
               });
             } else {
@@ -178,7 +214,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
                 totalSets: exercise.sets.length,
                 lastPerformed: workout.date,
                 maxWeightDate: workout.date,
-                muscleGroup: exercise.muscleGroup,
+                muscleGroup: muscleGroup,
                 isCardio: false
               });
             } else {
@@ -231,7 +267,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
     return groups;
   }, [exerciseStats]);
 
-  const muscleGroupOrder = ['chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'calisthenics', 'cardio', 'other'];
+  const muscleGroupOrder = ['chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'calisthenics', 'cardio'];
   const sortedGroups = muscleGroupOrder.filter(g => groupedExercises[g]?.length > 0);
 
   const formatDate = (dateString: string) => {
