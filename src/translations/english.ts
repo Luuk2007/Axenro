@@ -394,5 +394,19 @@ export const english = {
   "Failed to load records": "Failed to load records",
   "Failed to save record": "Failed to save record",
   "Failed to delete record": "Failed to delete record",
-  "Loading": "Loading"
+  "Loading": "Loading",
+  "Update Record": "Update Record",
+  "Current": "Current",
+  "New Estimated One Rep Max": "New Estimated One Rep Max",
+  "improvement": "improvement",
+  "Record updated": "Record updated",
+  "Failed to update record": "Failed to update record",
+  "Chest": "Chest",
+  "Back": "Back",
+  "Shoulders": "Shoulders",
+  "Arms": "Arms",
+  "Legs": "Legs",
+  "Core": "Core",
+  "Calisthenics": "Calisthenics",
+  "Other": "Other"
 };

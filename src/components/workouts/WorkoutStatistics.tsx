@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
-import { TrendingUp, Dumbbell, ChevronRight } from "lucide-react";
+import { TrendingUp, Dumbbell, ChevronRight, ChevronDown } from "lucide-react";
 import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
-import { convertWeight, getWeightUnit, formatWeight, convertDistance, getDistanceUnit, formatDistance } from "@/utils/unitConversions";
-import { isCardioExercise, formatDuration } from "@/utils/workoutUtils";
+import { convertWeight, getWeightUnit, formatWeight } from "@/utils/unitConversions";
+import { isCardioExercise } from "@/utils/workoutUtils";
 import ExerciseProgressModal from "./ExerciseProgressModal";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface WorkoutStatisticsProps {
   workouts: Workout[];
@@ -19,7 +24,7 @@ interface ExerciseStats {
   maxReps?: number;
   maxDistance?: number;
   maxDuration?: number;
-  bestPace?: number; // minutes per km
+  bestPace?: number;
   totalSets: number;
   lastPerformed: string;
   maxWeightDate?: string;
@@ -35,6 +40,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [selectedExerciseIsCardio, setSelectedExerciseIsCardio] = useState(false);
   const [selectedExerciseIsCalisthenics, setSelectedExerciseIsCalisthenics] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'cardio', 'calisthenics']));
 
   const handleExerciseClick = (exerciseName: string, isCardio: boolean, isCalisthenics: boolean = false) => {
     setSelectedExercise(exerciseName);
@@ -43,7 +49,18 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
     setShowProgressModal(true);
   };
 
-  // Analyze workouts to get exercise statistics
+  const toggleGroup = (group: string) => {
+    setOpenGroups(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(group)) {
+        newSet.delete(group);
+      } else {
+        newSet.add(group);
+      }
+      return newSet;
+    });
+  };
+
   const getExerciseStatistics = (): ExerciseStats[] => {
     const exerciseMap = new Map<string, ExerciseStats>();
 
@@ -53,30 +70,22 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
         const isCardio = isCardioExercise(exercise);
         
         if (isCardio) {
-          // Handle cardio exercises
           let maxDuration = 0;
           let maxDistance = 0;
           let bestPaceInSession = Infinity;
           
           exercise.sets.forEach(set => {
-            const duration = set.reps; // Duration in seconds
-            const distance = set.weight; // Distance in km
+            const duration = set.reps;
+            const distance = set.weight;
             
-            if (duration > maxDuration) {
-              maxDuration = duration;
-            }
-            if (distance > maxDistance) {
-              maxDistance = distance;
-            }
+            if (duration > maxDuration) maxDuration = duration;
+            if (distance > maxDistance) maxDistance = distance;
             
-            // Calculate pace (minutes per km) if we have both duration and distance
             let pace = set.pace;
             if (!pace && duration > 0 && distance > 0) {
-              // pace = (duration in seconds / 60) / distance in km = minutes per km
               pace = (duration / 60) / distance;
             }
             
-            // Track best pace (lowest minutes per km is best)
             if (pace && pace > 0 && pace < bestPaceInSession) {
               bestPaceInSession = pace;
             }
@@ -111,17 +120,13 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
             });
           }
         } else {
-          // Handle strength and calisthenics exercises
           const isCalisthenics = exercise.muscleGroup === 'calisthenics';
           
           if (isCalisthenics) {
-            // For calisthenics, track only max reps (no weight)
             let maxRepsInWorkout = 0;
             
             exercise.sets.forEach(set => {
-              if (set.reps > maxRepsInWorkout) {
-                maxRepsInWorkout = set.reps;
-              }
+              if (set.reps > maxRepsInWorkout) maxRepsInWorkout = set.reps;
             });
             
             const existing = exerciseMap.get(key);
@@ -149,7 +154,6 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
               });
             }
           } else {
-            // Handle regular strength exercises
             let maxWeightSet = null;
             let maxWeightInWorkout = -Infinity;
             
@@ -162,7 +166,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
                 }
               });
 
-            if (maxWeightInWorkout === -Infinity || !maxWeightSet) return; // Skip if no weights recorded
+            if (maxWeightInWorkout === -Infinity || !maxWeightSet) return;
 
             const existing = exerciseMap.get(key);
             
@@ -195,24 +199,40 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
       });
     });
 
-    return Array.from(exerciseMap.values())
-      .sort((a, b) => {
-        // Sort cardio by best pace (lower is better), strength by max weight
-        if (a.isCardio && b.isCardio) {
-          // For pace, lower is better, so sort ascending
-          const aPace = a.bestPace || Infinity;
-          const bPace = b.bestPace || Infinity;
-          return aPace - bPace;
-        } else if (!a.isCardio && !b.isCardio) {
-          return (b.maxWeight || 0) - (a.maxWeight || 0);
-        } else {
-          // Mixed: strength exercises first
-          return a.isCardio ? 1 : -1;
-        }
-      });
+    return Array.from(exerciseMap.values());
   };
 
   const exerciseStats = getExerciseStatistics();
+
+  // Group exercises by muscle group
+  const groupedExercises = useMemo(() => {
+    const groups: Record<string, ExerciseStats[]> = {};
+    
+    exerciseStats.forEach(stat => {
+      const group = stat.muscleGroup || 'other';
+      if (!groups[group]) {
+        groups[group] = [];
+      }
+      groups[group].push(stat);
+    });
+    
+    // Sort exercises within each group
+    Object.keys(groups).forEach(group => {
+      groups[group].sort((a, b) => {
+        if (a.isCardio && b.isCardio) {
+          return (a.bestPace || Infinity) - (b.bestPace || Infinity);
+        } else if (!a.isCardio && !b.isCardio) {
+          return (b.maxWeight || b.maxReps || 0) - (a.maxWeight || a.maxReps || 0);
+        }
+        return a.isCardio ? 1 : -1;
+      });
+    });
+    
+    return groups;
+  }, [exerciseStats]);
+
+  const muscleGroupOrder = ['chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'calisthenics', 'cardio', 'other'];
+  const sortedGroups = muscleGroupOrder.filter(g => groupedExercises[g]?.length > 0);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -230,6 +250,21 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
       calisthenics: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200",
     };
     return colors[muscleGroup || ""] || "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+  };
+
+  const getMuscleGroupLabel = (group: string) => {
+    const labels: Record<string, string> = {
+      chest: t('Chest'),
+      back: t('Back'),
+      shoulders: t('Shoulders'),
+      arms: t('Arms'),
+      legs: t('Legs'),
+      core: t('Core'),
+      cardio: t('Cardio'),
+      calisthenics: t('Calisthenics'),
+      other: t('Other'),
+    };
+    return labels[group] || group;
   };
 
   if (workouts.length === 0) {
@@ -258,6 +293,80 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
     );
   }
 
+  const renderExerciseCard = (stat: ExerciseStats) => (
+    <Card 
+      key={stat.name} 
+      className="transition-colors hover:bg-muted/50 cursor-pointer"
+      onClick={() => handleExerciseClick(stat.name, stat.isCardio, stat.muscleGroup === 'calisthenics')}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <h3 className="font-medium text-lg mb-2">{stat.name}</h3>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
+              {stat.isCardio ? (
+                <>
+                  <div>
+                    <span className="font-medium text-foreground">
+                      {stat.bestPace 
+                        ? `${Math.floor(stat.bestPace)}:${String(Math.round((stat.bestPace % 1) * 60)).padStart(2, '0')} /km`
+                        : 'N/A'
+                      }
+                    </span>
+                    <br />
+                    <span>{t("Best Pace")}{stat.bestPaceDate && ` (${formatDate(stat.bestPaceDate)})`}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">{stat.totalSets}</span>
+                    <br />
+                    <span>{t("Total Sessions")}</span>
+                  </div>
+                </>
+              ) : stat.muscleGroup === 'calisthenics' ? (
+                <>
+                  <div>
+                    <span className="font-medium text-foreground">
+                      {stat.maxReps} reps
+                    </span>
+                    <br />
+                    <span>{t("Max Reps")}{stat.maxWeightDate && ` (${formatDate(stat.maxWeightDate)})`}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">{stat.totalSets}</span>
+                    <br />
+                    <span>{t("Total Sets")}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <span className="font-medium text-foreground">
+                      {formatWeight(convertWeight(stat.maxWeight || 0, 'metric', measurementSystem), measurementSystem)} {getWeightUnit(measurementSystem)} x {stat.maxReps} reps
+                    </span>
+                    <br />
+                    <span>{t("Max Weight")}{stat.maxWeightDate && ` (${formatDate(stat.maxWeightDate)})`}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">{stat.totalSets}</span>
+                    <br />
+                    <span>{t("Total Sets")}</span>
+                  </div>
+                </>
+              )}
+              <div className="col-span-2 md:col-span-1">
+                <span className="font-medium text-foreground">{formatDate(stat.lastPerformed)}</span>
+                <br />
+                <span>{t("Last Performed")}</span>
+              </div>
+            </div>
+          </div>
+          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="space-y-6">
       <Card>
@@ -269,90 +378,39 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
         </CardHeader>
       </Card>
       
-      <div className="grid gap-4">
-        {exerciseStats.map((stat) => (
-          <Card 
-            key={stat.name} 
-            className="transition-colors hover:bg-muted/50 cursor-pointer"
-            onClick={() => handleExerciseClick(stat.name, stat.isCardio, stat.muscleGroup === 'calisthenics')}
+      <div className="space-y-4">
+        {sortedGroups.map((group) => (
+          <Collapsible 
+            key={group} 
+            open={openGroups.has(group)}
+            onOpenChange={() => toggleGroup(group)}
           >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-medium text-lg">{stat.name}</h3>
-                    {stat.muscleGroup && (
-                      <Badge variant="secondary" className={getMuscleGroupColor(stat.muscleGroup)}>
-                        {stat.muscleGroup}
+            <Card>
+              <CollapsibleTrigger className="w-full">
+                <CardHeader className="py-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary" className={getMuscleGroupColor(group)}>
+                        {getMuscleGroupLabel(group)}
                       </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
-                    {stat.isCardio ? (
-                      <>
-                        <div>
-                          <span className="font-medium text-foreground">
-                            {stat.bestPace 
-                              ? `${Math.floor(stat.bestPace)}:${String(Math.round((stat.bestPace % 1) * 60)).padStart(2, '0')} /km`
-                              : 'N/A'
-                            }
-                          </span>
-                          <br />
-                          <span>{t("Best Pace")}{stat.bestPaceDate && ` (${formatDate(stat.bestPaceDate)})`}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-foreground">{stat.totalSets}</span>
-                          <br />
-                          <span>{t("Total Sessions")}</span>
-                        </div>
-                      </>
-                    ) : stat.muscleGroup === 'calisthenics' ? (
-                      <>
-                        <div>
-                          <span className="font-medium text-foreground">
-                            {stat.maxReps} reps
-                          </span>
-                          <br />
-                          <span>{t("Max Reps")}{stat.maxWeightDate && ` (${formatDate(stat.maxWeightDate)})`}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-foreground">{stat.totalSets}</span>
-                          <br />
-                          <span>{t("Total Sets")}</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div>
-                          <span className="font-medium text-foreground">
-                            {formatWeight(convertWeight(stat.maxWeight || 0, 'metric', measurementSystem), measurementSystem)} {getWeightUnit(measurementSystem)} x {stat.maxReps} reps
-                          </span>
-                          <br />
-                          <span>{t("Max Weight")}{stat.maxWeightDate && ` (${formatDate(stat.maxWeightDate)})`}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-foreground">{stat.totalSets}</span>
-                          <br />
-                          <span>{t("Total Sets")}</span>
-                        </div>
-                      </>
-                    )}
-                    <div className="col-span-2 md:col-span-1">
-                      <span className="font-medium text-foreground">{formatDate(stat.lastPerformed)}</span>
-                      <br />
-                      <span>{t("Last Performed")}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {groupedExercises[group].length} {groupedExercises[group].length === 1 ? t('exercise') : t('exercises')}
+                      </span>
                     </div>
+                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${openGroups.has(group) ? 'rotate-180' : ''}`} />
                   </div>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </div>
-            </CardContent>
-          </Card>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="pt-0 space-y-3">
+                  {groupedExercises[group].map(renderExerciseCard)}
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
         ))}
       </div>
 
-      {/* Exercise Progress Modal */}
       {selectedExercise && (
         <ExerciseProgressModal
           exerciseName={selectedExercise}
