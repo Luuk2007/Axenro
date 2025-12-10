@@ -143,5 +143,6 @@ export const workoutTranslations = {
   "Legs": "Benen",
   "Core": "Core",
   "Calisthenics": "Calisthenics",
-  "Other": "Overig"
+  "Other": "Overig",
+  "All": "Alle"
 };
