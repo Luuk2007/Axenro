@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout, ExerciseSet } from "@/types/workout";
-import { TrendingUp, Calendar, Award, ArrowUpDown } from "lucide-react";
+import { TrendingUp, Calendar, Award, ArrowUpDown, Trophy } from "lucide-react";
 import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
 import {
   convertWeight,
@@ -22,6 +22,8 @@ import {
   formatDistance,
 } from "@/utils/unitConversions";
 import { formatDuration } from "@/utils/workoutUtils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ExerciseProgressModalProps {
   exerciseName: string;
@@ -54,12 +56,39 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
 }) => {
   const { t } = useLanguage();
   const { measurementSystem } = useMeasurementSystem();
+  const { user } = useAuth();
   const [sortNewestFirst, setSortNewestFirst] = useState(true);
+  const [personalRecord, setPersonalRecord] = useState<{ weight: number; date: string } | null>(null);
+
+  // Fetch personal record for this exercise
+  useEffect(() => {
+    const fetchPersonalRecord = async () => {
+      if (!user || isCardio) return;
+      
+      const { data } = await supabase
+        .from('personal_records')
+        .select('weight, date')
+        .eq('user_id', user.id)
+        .eq('exercise_name', exerciseName)
+        .single();
+      
+      if (data) {
+        setPersonalRecord(data);
+      } else {
+        setPersonalRecord(null);
+      }
+    };
+    
+    if (open) {
+      fetchPersonalRecord();
+    }
+  }, [user, exerciseName, open, isCardio]);
 
   // Extract exercise history from all workouts
   const getExerciseHistory = (): ExerciseHistoryEntry[] => {
     const history: ExerciseHistoryEntry[] = [];
     let globalMaxWeight = 0;
+    let globalMaxReps = 0; // Track global max reps for calisthenics
     let globalBestPace = Infinity; // Best pace is lowest value
 
     // First pass: collect all entries
@@ -93,6 +122,20 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             pace,
             isPersonalRecord: false,
           });
+        } else if (isCalisthenics) {
+          // For calisthenics, track max reps per session
+          const maxRepsInSession = Math.max(
+            ...exercise.sets.map((set) => set.reps || 0)
+          );
+          globalMaxReps = Math.max(globalMaxReps, maxRepsInSession);
+
+          history.push({
+            date: workout.date,
+            workoutName: workout.name,
+            sets: exercise.sets,
+            maxReps: maxRepsInSession,
+            isPersonalRecord: false,
+          });
         } else {
           const maxWeightInSession = Math.max(
             ...exercise.sets
@@ -122,6 +165,9 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
       if (isCardio) {
         // For cardio, mark as PR if it has the best (lowest) pace
         entry.isPersonalRecord = entry.pace !== undefined && entry.pace === globalBestPace;
+      } else if (isCalisthenics) {
+        // For calisthenics, mark as PR if it has the highest reps
+        entry.isPersonalRecord = entry.maxReps === globalMaxReps;
       } else {
         entry.isPersonalRecord = entry.maxWeight === globalMaxWeight;
       }
@@ -245,7 +291,29 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
           </Card>
         </div>
 
-        {/* Sort Toggle */}
+        {/* Personal Record Card */}
+        {personalRecord && !isCardio && (
+          <Card className="border-yellow-500 dark:border-yellow-600 bg-yellow-50/50 dark:bg-yellow-950/20">
+            <CardContent className="p-3 sm:p-4 flex items-center gap-3">
+              <Trophy className="h-6 w-6 text-yellow-600 dark:text-yellow-500 flex-shrink-0" />
+              <div className="flex-1">
+                <div className="font-semibold text-sm">
+                  {t("Personal Record")} (1RM)
+                </div>
+                <div className="text-lg font-bold text-yellow-700 dark:text-yellow-400">
+                  {isCalisthenics 
+                    ? `${personalRecord.weight} reps`
+                    : `${formatWeight(convertWeight(personalRecord.weight, "metric", measurementSystem), measurementSystem)} ${getWeightUnit(measurementSystem)}`
+                  }
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {formatDate(personalRecord.date)}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="flex items-center justify-between pb-2">
           <h3 className="text-sm font-medium">{t("Session History")}</h3>
           <Button
