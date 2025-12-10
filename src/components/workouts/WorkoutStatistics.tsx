@@ -74,7 +74,7 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [selectedExerciseIsCardio, setSelectedExerciseIsCardio] = useState(false);
   const [selectedExerciseIsCalisthenics, setSelectedExerciseIsCalisthenics] = useState(false);
-  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'cardio', 'calisthenics']));
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
 
   const handleExerciseClick = (exerciseName: string, isCardio: boolean, isCalisthenics: boolean = false) => {
     setSelectedExercise(exerciseName);
