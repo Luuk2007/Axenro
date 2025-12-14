@@ -408,6 +408,5 @@ export const english = {
   "Legs": "Legs",
   "Core": "Core",
   "Calisthenics": "Calisthenics",
-  "Other": "Other",
-  "All": "All"
+  "Other": "Other"
 };

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -9,7 +9,7 @@ import { useWorkouts } from "@/hooks/useWorkouts";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import PersonalRecords from "@/components/workouts/PersonalRecords";
 import WorkoutStatistics from "@/components/workouts/WorkoutStatistics";
-import { Dumbbell, Trophy, Plus, BarChart, Filter, X } from "lucide-react";
+import { Dumbbell, Trophy, Plus, BarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import CreateWorkout from "@/components/workouts/CreateWorkout";
@@ -24,8 +24,6 @@ import { Workout } from "@/types/workout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import WeeklyGoalSetting from "@/components/workouts/WeeklyGoalSetting";
 import { Target } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const Workouts = () => {
   const { t } = useLanguage();
@@ -52,24 +50,7 @@ const Workouts = () => {
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
   const [showWeeklyGoal, setShowWeeklyGoal] = useState(false);
   const [workoutToDuplicate, setWorkoutToDuplicate] = useState<Workout | null>(null);
-  const [selectedWorkoutName, setSelectedWorkoutName] = useState<string | null>(null);
 
-  // Get unique workout names with counts
-  const workoutNameCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    workouts.forEach(w => {
-      counts[w.name] = (counts[w.name] || 0) + 1;
-    });
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => ({ name, count }));
-  }, [workouts]);
-
-  // Filter workouts based on selected name
-  const filteredWorkouts = useMemo(() => {
-    if (!selectedWorkoutName) return workouts;
-    return workouts.filter(w => w.name === selectedWorkoutName);
-  }, [workouts, selectedWorkoutName]);
 
   const handleCreateWorkout = async (name: string, exercises: any[], date: string) => {
     // Mark all sets as completed automatically
@@ -227,38 +208,10 @@ const Workouts = () => {
               </TabsTrigger>
             )}
           </TabsList>
-
-          {/* Workout Name Filter */}
-          {workoutNameCounts.length > 0 && (
-            <div className="mt-4">
-              <ScrollArea className="w-full whitespace-nowrap">
-                <div className="flex gap-2 pb-2">
-                  <Badge
-                    variant={selectedWorkoutName === null ? "default" : "outline"}
-                    className="cursor-pointer shrink-0"
-                    onClick={() => setSelectedWorkoutName(null)}
-                  >
-                    {t("All")} ({workouts.length})
-                  </Badge>
-                  {workoutNameCounts.map(({ name, count }) => (
-                    <Badge
-                      key={name}
-                      variant={selectedWorkoutName === name ? "default" : "outline"}
-                      className="cursor-pointer shrink-0"
-                      onClick={() => setSelectedWorkoutName(selectedWorkoutName === name ? null : name)}
-                    >
-                      {name} ({count})
-                    </Badge>
-                  ))}
-                </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
-            </div>
-          )}
           
           <TabsContent value="workouts" className="mt-6">
             <WorkoutList 
-              workouts={filteredWorkouts}
+              workouts={workouts}
               onViewWorkout={handleViewWorkout}
               onEditWorkout={handleEditWorkout}
               onDuplicateWorkout={handleDuplicateWorkout}
