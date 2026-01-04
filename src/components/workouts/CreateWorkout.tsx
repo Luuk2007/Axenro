@@ -178,6 +178,16 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
               />
             </div>
             
+            <div className="w-full overflow-hidden">
+              <label className="text-sm font-medium block mb-2">{t("Date")}</label>
+              <Input
+                type="date"
+                value={workoutDate}
+                onChange={(e) => setWorkoutDate(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            
             {/* Auto-filled muscle groups box - only visible when exercises are added */}
             {exercises.length > 0 && (
               <div className="p-3 bg-muted/50 rounded-lg border">
@@ -194,16 +204,6 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                 </div>
               </div>
             )}
-            
-            <div className="w-full overflow-hidden">
-              <label className="text-sm font-medium block mb-2">{t("Date")}</label>
-              <Input
-                type="date"
-                value={workoutDate}
-                onChange={(e) => setWorkoutDate(e.target.value)}
-                className="w-full"
-              />
-            </div>
             
             <div>
               <div className="flex items-center justify-between mb-3">
