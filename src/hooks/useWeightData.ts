@@ -17,6 +17,7 @@ export const useWeightData = () => {
     if (!user) {
       // Clear weight data when not authenticated
       setWeightData([]);
+      setLoading(false);
       return;
     }
 

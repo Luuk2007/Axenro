@@ -14,6 +14,7 @@ export const useWorkouts = () => {
     if (!user) {
       // Clear workouts when not authenticated
       setWorkouts([]);
+      setLoading(false);
       return;
     }
 
