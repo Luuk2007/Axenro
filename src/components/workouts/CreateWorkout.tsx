@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, X, Calendar, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Plus, X, Calendar, Trash2, Eye, EyeOff, Dumbbell } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AddExerciseDialog from './AddExerciseDialog';
 import { Workout, Exercise, ExerciseSet } from '@/types/workout';
@@ -176,6 +177,23 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                 placeholder={t("My Workout")}
               />
             </div>
+            
+            {/* Auto-filled muscle groups box - only visible when exercises are added */}
+            {exercises.length > 0 && (
+              <div className="p-3 bg-muted/50 rounded-lg border">
+                <div className="flex items-center gap-2 mb-2">
+                  <Dumbbell className="h-4 w-4 text-muted-foreground" />
+                  <label className="text-sm font-medium">{t("Muscle groups")}</label>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {[...new Set(exercises.map(ex => ex.muscleGroup).filter(Boolean))].map((group) => (
+                    <Badge key={group} variant="secondary" className="capitalize text-xs">
+                      {t(group as string)}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
             
             <div className="w-full overflow-hidden">
               <label className="text-sm font-medium block mb-2">{t("Date")}</label>
