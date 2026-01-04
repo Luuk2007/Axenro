@@ -50,6 +50,28 @@ const Workouts = () => {
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
   const [showWeeklyGoal, setShowWeeklyGoal] = useState(false);
   const [workoutToDuplicate, setWorkoutToDuplicate] = useState<Workout | null>(null);
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string | null>(null);
+
+  // Get all unique muscle groups from workouts
+  const allMuscleGroups = React.useMemo(() => {
+    const groups = new Set<string>();
+    workouts.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        if (exercise.muscleGroup) {
+          groups.add(exercise.muscleGroup);
+        }
+      });
+    });
+    return Array.from(groups).sort();
+  }, [workouts]);
+
+  // Filter workouts by selected muscle group
+  const filteredWorkouts = React.useMemo(() => {
+    if (!selectedMuscleGroup) return workouts;
+    return workouts.filter(workout => 
+      workout.exercises.some(exercise => exercise.muscleGroup === selectedMuscleGroup)
+    );
+  }, [workouts, selectedMuscleGroup]);
 
 
   const handleCreateWorkout = async (name: string, exercises: any[], date: string) => {
@@ -209,9 +231,33 @@ const Workouts = () => {
             )}
           </TabsList>
           
+          {/* Muscle group filter */}
+          {allMuscleGroups.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              <Button
+                variant={selectedMuscleGroup === null ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedMuscleGroup(null)}
+              >
+                {t("all")}
+              </Button>
+              {allMuscleGroups.map(group => (
+                <Button
+                  key={group}
+                  variant={selectedMuscleGroup === group ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedMuscleGroup(group)}
+                  className="capitalize"
+                >
+                  {t(group)}
+                </Button>
+              ))}
+            </div>
+          )}
+          
           <TabsContent value="workouts" className="mt-6">
             <WorkoutList 
-              workouts={workouts}
+              workouts={filteredWorkouts}
               onViewWorkout={handleViewWorkout}
               onEditWorkout={handleEditWorkout}
               onDuplicateWorkout={handleDuplicateWorkout}
