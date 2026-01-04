@@ -25,6 +25,7 @@ export const useUserProfile = () => {
     if (!user) {
       // Clear profile when not authenticated
       setProfile(null);
+      setLoading(false);
       return;
     }
 
