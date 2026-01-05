@@ -20,10 +20,49 @@ import TrackWorkout from "@/components/workouts/TrackWorkout";
 import WorkoutList from "@/components/workouts/WorkoutList";
 import WorkoutCalendar from "@/components/workouts/WorkoutCalendar";
 import DuplicateWorkoutDialog from "@/components/workouts/DuplicateWorkoutDialog";
-import { Workout } from "@/types/workout";
+import { Workout, exerciseDatabase, getAllExercises } from "@/types/workout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import WeeklyGoalSetting from "@/components/workouts/WeeklyGoalSetting";
 import { Target } from "lucide-react";
+
+// Helper function to find muscle group by exercise name (same logic as WorkoutList)
+const findMuscleGroupByExerciseName = (exerciseName: string): string | null => {
+  const normalizedName = exerciseName.toLowerCase().trim();
+  
+  // First check exerciseDatabase
+  for (const [muscleGroup, exercises] of Object.entries(exerciseDatabase)) {
+    for (const exercise of exercises) {
+      if (exercise.name.toLowerCase() === normalizedName) {
+        return muscleGroup;
+      }
+    }
+  }
+  
+  // Then check custom exercises
+  const allExercises = getAllExercises();
+  for (const exercise of allExercises) {
+    if (exercise.name.toLowerCase() === normalizedName && exercise.muscleGroup) {
+      return exercise.muscleGroup;
+    }
+  }
+  
+  return null;
+};
+
+// Helper function to get muscle groups for a workout
+const getWorkoutMuscleGroups = (workout: Workout): string[] => {
+  const groups: string[] = [];
+  for (const exercise of workout.exercises) {
+    let group = exercise.muscleGroup;
+    if (!group) {
+      group = findMuscleGroupByExerciseName(exercise.name) || undefined;
+    }
+    if (group && !groups.includes(group)) {
+      groups.push(group);
+    }
+  }
+  return groups;
+};
 
 const Workouts = () => {
   const { t } = useLanguage();
@@ -52,25 +91,25 @@ const Workouts = () => {
   const [workoutToDuplicate, setWorkoutToDuplicate] = useState<Workout | null>(null);
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string | null>(null);
 
-  // Get all unique muscle groups from workouts
+  const [activeTab, setActiveTab] = useState("workouts");
+
+  // Get all unique muscle groups from workouts (using lookup for old workouts)
   const allMuscleGroups = React.useMemo(() => {
     const groups = new Set<string>();
     workouts.forEach(workout => {
-      workout.exercises.forEach(exercise => {
-        if (exercise.muscleGroup) {
-          groups.add(exercise.muscleGroup);
-        }
-      });
+      const workoutGroups = getWorkoutMuscleGroups(workout);
+      workoutGroups.forEach(group => groups.add(group));
     });
     return Array.from(groups).sort();
   }, [workouts]);
 
-  // Filter workouts by selected muscle group
+  // Filter workouts by selected muscle group (using lookup for old workouts)
   const filteredWorkouts = React.useMemo(() => {
     if (!selectedMuscleGroup) return workouts;
-    return workouts.filter(workout => 
-      workout.exercises.some(exercise => exercise.muscleGroup === selectedMuscleGroup)
-    );
+    return workouts.filter(workout => {
+      const workoutGroups = getWorkoutMuscleGroups(workout);
+      return workoutGroups.includes(selectedMuscleGroup);
+    });
   }, [workouts, selectedMuscleGroup]);
 
 
@@ -207,7 +246,7 @@ const Workouts = () => {
       </div>
 
       {initialized && (
-        <Tabs defaultValue="workouts">
+        <Tabs defaultValue="workouts" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className={`grid w-full ${canAccessPersonalRecords ? 'grid-cols-4' : (canAccessStatistics ? 'grid-cols-3' : 'grid-cols-2')}`}>
             <TabsTrigger value="workouts">
               <Dumbbell className="h-4 w-4 mr-2" />
@@ -231,15 +270,15 @@ const Workouts = () => {
             )}
           </TabsList>
           
-          {/* Muscle group filter */}
-          {allMuscleGroups.length > 0 && (
+          {/* Muscle group filter - only shown on workouts tab */}
+          {activeTab === "workouts" && allMuscleGroups.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               <Button
                 variant={selectedMuscleGroup === null ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedMuscleGroup(null)}
               >
-                {t("all")}
+                {t("All")}
               </Button>
               {allMuscleGroups.map(group => (
                 <Button

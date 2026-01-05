@@ -3,13 +3,14 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, Calendar, Edit, Copy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Workout, exerciseDatabase } from "@/types/workout";
+import { Workout, exerciseDatabase, getAllExercises } from "@/types/workout";
 import { getWorkoutSummary, formatDuration } from "@/utils/workoutUtils";
 
 // Helper function to find muscle group by exercise name
 const findMuscleGroupByExerciseName = (exerciseName: string): string | null => {
   const normalizedName = exerciseName.toLowerCase().trim();
   
+  // First check exerciseDatabase
   for (const [muscleGroup, exercises] of Object.entries(exerciseDatabase)) {
     for (const exercise of exercises) {
       if (exercise.name.toLowerCase() === normalizedName) {
@@ -17,6 +18,15 @@ const findMuscleGroupByExerciseName = (exerciseName: string): string | null => {
       }
     }
   }
+  
+  // Then check custom exercises
+  const allExercises = getAllExercises();
+  for (const exercise of allExercises) {
+    if (exercise.name.toLowerCase() === normalizedName && exercise.muscleGroup) {
+      return exercise.muscleGroup;
+    }
+  }
+  
   return null;
 };
 
