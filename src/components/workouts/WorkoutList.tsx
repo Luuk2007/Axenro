@@ -1,10 +1,26 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, Calendar, Edit, Copy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
 import { getWorkoutSummary, formatDuration } from "@/utils/workoutUtils";
+
+const generateWorkoutName = (workout: Workout): string => {
+  const uniqueGroups = [...new Set(
+    workout.exercises
+      .map(ex => ex.muscleGroup)
+      .filter(Boolean)
+  )];
+  
+  if (uniqueGroups.length === 0) {
+    return workout.name || "Workout";
+  }
+  
+  return uniqueGroups
+    .map(group => group.charAt(0).toUpperCase() + group.slice(1))
+    .join('/');
+};
 
 interface WorkoutListProps {
   workouts: Workout[];
@@ -51,7 +67,7 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
       {workouts.map(workout => (
         <div key={workout.id} className="border rounded-lg p-4 shadow-sm">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-medium">{workout.name}</h3>
+            <h3 className="text-lg font-medium">{generateWorkoutName(workout)}</h3>
             <div className="flex items-center text-sm text-muted-foreground">
               <Calendar className="h-4 w-4 mr-1" />
               <span>{workout.date}</span>
