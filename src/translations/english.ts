@@ -19,6 +19,7 @@ export const english = {
   "weeklySummaryTitle": "Weekly Summary",
   "weight": "Weight",
   "viewAll": "View All",
+  "All": "All",
   "noWorkoutsFound": "No workouts found",
   "startTracking": "Start tracking your workouts to see them here.",
   "createWorkout": "Create Workout",

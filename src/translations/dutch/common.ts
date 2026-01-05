@@ -78,4 +78,7 @@ export const commonTranslations: Translations = {
   // Measurements
   "No measurements enabled": "Geen metingen ingeschakeld",
   "Enable measurements in Settings": "Schakel metingen in via Instellingen",
+  
+  // Filter
+  "All": "Alle",
 };
