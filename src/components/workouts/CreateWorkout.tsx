@@ -1,11 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, X, Calendar, Trash2, Eye, EyeOff, Dumbbell } from 'lucide-react';
+import { Plus, X, Trash2, Dumbbell } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AddExerciseDialog from './AddExerciseDialog';
 import { Workout, Exercise, ExerciseSet } from '@/types/workout';
@@ -22,10 +21,18 @@ interface CreateWorkoutProps {
 const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: CreateWorkoutProps) => {
   const { t } = useLanguage();
   const { measurementSystem } = useMeasurementSystem();
-  const [workoutName, setWorkoutName] = useState('');
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
+
+  // Auto-generate workout name based on muscle groups
+  const generatedWorkoutName = useMemo(() => {
+    const uniqueGroups = [...new Set(exercises.map(ex => ex.muscleGroup).filter(Boolean))];
+    return uniqueGroups.map(group => {
+      const groupStr = group as string;
+      return groupStr.charAt(0).toUpperCase() + groupStr.slice(1);
+    }).join('/');
+  }, [exercises]);
 
   // Convert stored metric weights to display weights for editing
   const convertExercisesForDisplay = (exerciseList: Exercise[]) => {
@@ -52,28 +59,25 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   // Load editing workout data when editingWorkout changes
   useEffect(() => {
     if (editingWorkout) {
-      setWorkoutName(editingWorkout.name);
       setWorkoutDate(editingWorkout.date);
       // Convert weights for display
       setExercises(convertExercisesForDisplay(editingWorkout.exercises));
     } else {
       // Reset form when not editing
-      setWorkoutName('');
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
     }
   }, [editingWorkout, measurementSystem]);
 
   const handleSaveWorkout = () => {
-    if (!workoutName.trim()) return;
+    if (exercises.length === 0) return;
     
     // Convert weights back to metric for storage
     const exercisesForStorage = convertExercisesForStorage(exercises);
-    onSaveWorkout(workoutName, exercisesForStorage, workoutDate);
+    onSaveWorkout(generatedWorkoutName, exercisesForStorage, workoutDate);
     
     // Reset form only if not editing (will be handled by parent component)
     if (!editingWorkout) {
-      setWorkoutName('');
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
     }
@@ -169,13 +173,14 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
           </DialogHeader>
           
           <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium block mb-2">{t("Workout name")}</label>
-              <Input
-                value={workoutName}
-                onChange={(e) => setWorkoutName(e.target.value)}
-                placeholder={t("My Workout")}
-              />
+            {/* Auto-generated workout name display */}
+            <div className="p-3 bg-muted/50 rounded-lg border">
+              <div className="flex items-center gap-2">
+                <Dumbbell className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">
+                  {generatedWorkoutName || t("Add exercises to generate workout name")}
+                </span>
+              </div>
             </div>
             
             <div className="w-full overflow-hidden">
@@ -187,23 +192,6 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                 className="w-full"
               />
             </div>
-            
-            {/* Auto-filled muscle groups box - only visible when exercises are added */}
-            {exercises.length > 0 && (
-              <div className="p-3 bg-muted/50 rounded-lg border">
-                <div className="flex items-center gap-2 mb-2">
-                  <Dumbbell className="h-4 w-4 text-muted-foreground" />
-                  <label className="text-sm font-medium">{t("Muscle groups")}</label>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {[...new Set(exercises.map(ex => ex.muscleGroup).filter(Boolean))].map((group) => (
-                    <Badge key={group} variant="secondary" className="capitalize text-xs">
-                      {t(group as string)}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
             
             <div>
               <div className="flex items-center justify-between mb-3">
@@ -304,7 +292,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
               </Button>
               <Button
                 onClick={handleSaveWorkout}
-                disabled={!workoutName.trim()}
+                disabled={exercises.length === 0}
                 className="flex-1"
               >
                 {editingWorkout ? t("Update workout") : t("Save workout")}
