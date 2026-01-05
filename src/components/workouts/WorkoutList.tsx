@@ -1,23 +1,47 @@
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, Calendar, Edit, Copy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Workout } from "@/types/workout";
+import { Workout, exerciseDatabase } from "@/types/workout";
 import { getWorkoutSummary, formatDuration } from "@/utils/workoutUtils";
 
-const generateWorkoutName = (workout: Workout): string => {
-  const uniqueGroups = [...new Set(
-    workout.exercises
-      .map(ex => ex.muscleGroup)
-      .filter(Boolean)
-  )];
+// Helper function to find muscle group by exercise name
+const findMuscleGroupByExerciseName = (exerciseName: string): string | null => {
+  const normalizedName = exerciseName.toLowerCase().trim();
   
-  if (uniqueGroups.length === 0) {
+  for (const [muscleGroup, exercises] of Object.entries(exerciseDatabase)) {
+    for (const exercise of exercises) {
+      if (exercise.name.toLowerCase() === normalizedName) {
+        return muscleGroup;
+      }
+    }
+  }
+  return null;
+};
+
+const generateWorkoutName = (workout: Workout): string => {
+  const muscleGroups: string[] = [];
+  
+  for (const exercise of workout.exercises) {
+    // First try to use the stored muscleGroup
+    let group = exercise.muscleGroup;
+    
+    // If no muscleGroup stored, try to find it by exercise name
+    if (!group) {
+      group = findMuscleGroupByExerciseName(exercise.name) || undefined;
+    }
+    
+    if (group && !muscleGroups.includes(group)) {
+      muscleGroups.push(group);
+    }
+  }
+  
+  if (muscleGroups.length === 0) {
     return workout.name || "Workout";
   }
   
-  return uniqueGroups
+  return muscleGroups
     .map(group => group.charAt(0).toUpperCase() + group.slice(1))
     .join('/');
 };
