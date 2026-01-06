@@ -109,4 +109,13 @@ export const aiTranslations: Translations = {
   "Progress analysis completed!": "Voortgangsanalyse voltooid!",
   "Failed to analyze progress": "Voortgangsanalyse mislukt",
   "Failed to send message": "Verzenden bericht mislukt",
+  
+  // AI Chat - NEW
+  "Chat": "Chat",
+  "Workout": "Training",
+  "Loading...": "Laden...",
+  "high": "hoog",
+  "medium": "gemiddeld",
+  "low": "laag",
+  "Confidence": "Betrouwbaarheid",
 };

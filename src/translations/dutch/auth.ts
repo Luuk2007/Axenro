@@ -47,4 +47,15 @@ export const authTranslations: Translations = {
   loggedOut: "Uitgelogd",
   resetEmailSent: "Wachtwoord reset e-mail verzonden!",
   checkEmailConfirmation: "Controleer je e-mail om je account te bevestigen.",
+  
+  // Auth - NEW
+  "Privacy Policy": "Privacybeleid",
+  "Terms & Conditions": "Algemene Voorwaarden",
+  "Don't have an account?": "Heb je nog geen account?",
+  "Already have an account?": "Heb je al een account?",
+  "Create account": "Account aanmaken",
+  "Welcome back": "Welkom terug",
+  "Sign in to continue": "Log in om door te gaan",
+  "Create your account": "Maak je account aan",
+  "Get started for free": "Begin gratis",
 };

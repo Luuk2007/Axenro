@@ -64,4 +64,8 @@ export const dashboardTranslations: Translations = {
   "Weekly goal updated": "Wekelijks doel bijgewerkt",
   "per week": "per week",
   "Set weekly goal": "Stel wekelijks doel in",
+  
+  // Dashboard NEW
+  "No data": "Geen gegevens",
+  "Set target weight": "Stel streefgewicht in",
 };

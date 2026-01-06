@@ -3,6 +3,7 @@ import { Translations } from "../types";
 export const settingsTranslations: Translations = {
   // Settings page
   settings: "Instellingen",
+  "Settings": "Instellingen",
   settingsSaved: "Instellingen opgeslagen",
   
   // Appearance
@@ -15,6 +16,7 @@ export const settingsTranslations: Translations = {
   
   // Measurement System
   measurementSystem: "Meetsysteem",
+  "Measurement system": "Meetsysteem",
   chooseMeasurementSystemDesc: "Kies welk meetsysteem je wilt gebruiken voor gewicht, lengte en afstand.",
   selectSystem: "Selecteer systeem",
   metric: "Metrisch",
@@ -57,7 +59,30 @@ export const settingsTranslations: Translations = {
   notSet: "Niet ingesteld",
   cookiePreferencesSaved: "Cookie voorkeuren opgeslagen",
   
-  // Cookie Consent Modal
+  // Cookie Consent Modal - Updated keys
+  "Cookie preferences": "Cookie voorkeuren",
+  "We use cookies to improve your experience, analyze site traffic, and personalize content": "We gebruiken cookies om je ervaring te verbeteren, siteverkeer te analyseren en content te personaliseren",
+  "You can choose which types of cookies you allow. Essential cookies are always active": "Je kunt kiezen welke soorten cookies je toestaat. Essentiële cookies zijn altijd actief",
+  "Essential cookies": "Essentiële cookies",
+  "These cookies are required for the website to function properly and cannot be disabled": "Deze cookies zijn nodig voor de basisfunctionaliteit van de website en kunnen niet worden uitgeschakeld",
+  "Always active": "Altijd actief",
+  "Analytics cookies": "Analytische cookies",
+  "These cookies help us understand how visitors interact with the website, so we can improve performance and user experience": "Deze cookies helpen ons begrijpen hoe bezoekers de website gebruiken, zodat we de prestaties en gebruikerservaring kunnen verbeteren",
+  "Marketing cookies": "Marketing cookies",
+  "These cookies are used to deliver relevant ads and measure the effectiveness of our marketing campaigns": "Deze cookies worden gebruikt om relevante advertenties te tonen en de effectiviteit van onze marketingcampagnes te meten",
+  "Accept all cookies": "Alle cookies accepteren",
+  "Reject all cookies": "Alleen essentiële cookies",
+  "Customize": "Aanpassen",
+  "Enable analytics": "Analytische cookies inschakelen",
+  "Enable marketing": "Marketing cookies inschakelen",
+  "Save preferences": "Voorkeuren opslaan",
+  "Back": "Terug",
+  "For more information, please see our": "Voor meer informatie, bekijk onze",
+  "privacy policy": "privacybeleid",
+  "and": "en",
+  "terms & conditions": "algemene voorwaarden",
+  
+  // Cookie Consent Modal - Old keys for compatibility
   cookieConsentTitle: "Cookie Voorkeuren",
   cookieConsentDescription: "We gebruiken cookies om je ervaring te verbeteren en onze website te analyseren.",
   cookieExplanation: "Cookies zijn kleine tekstbestanden die op je apparaat worden opgeslagen om de functionaliteit van de website te verbeteren. Je kunt kiezen welke cookies je wilt accepteren.",
@@ -80,10 +105,10 @@ export const settingsTranslations: Translations = {
   cookiePolicyText: "Voor meer informatie, lees onze",
   privacyPolicy: "Privacybeleid",
   cookiePolicy: "Cookie Beleid",
-  and: "en",
   
   // Body Measurements
   "Body Measurements": "Lichaamsmetingen",
+  "Body measurements": "Lichaamsmetingen",
   "Choose which body measurements to track in your progress": "Kies welke lichaamsmetingen je wilt bijhouden in je voortgang",
   "Add Custom Measurement": "Aangepaste meting toevoegen",
   "Measurement Name": "Naam meting",
@@ -119,4 +144,25 @@ export const settingsTranslations: Translations = {
   "Exercise name": "Naam oefening",
   "Cancel": "Annuleren",
   "Exercise updated successfully": "Oefening succesvol bijgewerkt",
+  
+  // Settings page - NEW
+  "Theme": "Thema",
+  "Language": "Taal",
+  "Light": "Licht",
+  "Dark": "Donker",
+  "System": "Systeem",
+  "English": "Engels",
+  "Dutch": "Nederlands",
+  "Meals Settings": "Maaltijdinstellingen",
+  "Exercises Settings": "Oefeninginstellingen",
+  "Exercises": "Oefeningen",
+  "Meals": "Maaltijden",
+  "Body Measurements Settings": "Lichaamsmetingen Instellingen",
+  "Measurement System": "Meetsysteem",
+  "Cookie Preferences": "Cookie Voorkeuren",
+  "Select theme": "Selecteer thema",
+  "Select language": "Selecteer taal",
+  
+  // Misc
+  "used": "gebruikt",
 };

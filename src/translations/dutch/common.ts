@@ -81,4 +81,48 @@ export const commonTranslations: Translations = {
   
   // Filter
   "All": "Alle",
+  
+  // Common UI - NEW
+  "Grid": "Raster",
+  "Timeline": "Tijdlijn",
+  "Select for comparison": "Selecteer om te vergelijken",
+  "Cancel comparison": "Vergelijking annuleren",
+  "No data available": "Geen gegevens beschikbaar",
+  "Target": "Doel",
+  "target": "doel",
+  "completed": "voltooid",
+  "Set weekly goal": "Stel wekelijks doel in",
+  "Today meals": "Vandaag maaltijden",
+  
+  // Sidebar
+  "Nutrition": "Voeding",
+  "Workouts": "Trainingen",
+  "Progress": "Voortgang",
+  "Profile": "Profiel",
+  "Settings": "Instellingen",
+  "Login": "Inloggen",
+  "Log in": "Inloggen",
+  "Log out": "Uitloggen",
+  
+  // Footer
+  "Privacy Policy": "Privacybeleid",
+  "Terms & Conditions": "Algemene Voorwaarden",
+  "Free plan": "Gratis abonnement",
+  "Essential tools to begin your fitness journey": "Essentiële tools om je fitnessreis te beginnen",
+  
+  // Subscription plans
+  "Pro plan": "Pro abonnement",
+  "Premium plan": "Premium abonnement",
+  "Advanced features for consistent progress": "Geavanceerde functies voor consistente voortgang",
+  "The complete solution for maximum results": "De complete oplossing voor maximale resultaten",
+  "Current Plan": "Huidig Abonnement",
+  "Select Plan": "Selecteer Abonnement",
+  "Switching...": "Overschakelen...",
+  "Successfully switched to": "Succesvol overgeschakeld naar",
+  "plan!": "abonnement!",
+  "Redirecting to Stripe checkout...": "Doorverwijzen naar Stripe checkout...",
+  "Failed to switch plan": "Plan wisselen mislukt",
+  "Failed to start checkout process": "Checkout starten mislukt",
+  "Opening settings...": "Instellingen openen...",
+  "Failed to open settings": "Instellingen openen mislukt",
 };

@@ -1,4 +1,6 @@
-export const workoutTranslations = {
+import { Translations } from "../types";
+
+export const workoutTranslations: Translations = {
   title: "Trainingen",
   workouts: "Trainingen",
   "Workouts": "Trainingen",
@@ -143,5 +145,18 @@ export const workoutTranslations = {
   "Legs": "Benen",
   "Core": "Core",
   "Calisthenics": "Calisthenics",
-  "Other": "Overig"
+  "Other": "Overig",
+  
+  // Workout page - NEW
+  "Trainings": "Trainingen",
+  "Filter by muscle group": "Filter op spiergroep",
+  "No workouts found": "Geen trainingen gevonden",
+  "Create your first workout": "Maak je eerste training",
+  "Create Workout": "Training Aanmaken",
+  "Edit Workout": "Training Bewerken",
+  "Delete Workout": "Training Verwijderen",
+  "Workout Details": "Training Details",
+  "Planned Workouts": "Geplande Trainingen",
+  "Plan Workout": "Training Plannen",
+  "Add exercises to generate workout name": "Voeg oefeningen toe om trainingsnaam te genereren",
 };
