@@ -10,6 +10,7 @@ import AddExerciseDialog from './AddExerciseDialog';
 import { Workout, Exercise, ExerciseSet } from '@/types/workout';
 import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
 import { convertWeight, getWeightUnit } from '@/utils/unitConversions';
+import { getWorkoutTitleFromExercises } from '@/utils/workoutNaming';
 
 interface CreateWorkoutProps {
   open: boolean;
@@ -25,13 +26,9 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
 
-  // Auto-generate workout name based on muscle groups
+  // Auto-generate workout name based on muscle groups (with fallback lookup for older workouts)
   const generatedWorkoutName = useMemo(() => {
-    const uniqueGroups = [...new Set(exercises.map(ex => ex.muscleGroup).filter(Boolean))];
-    return uniqueGroups.map(group => {
-      const groupStr = group as string;
-      return groupStr.charAt(0).toUpperCase() + groupStr.slice(1);
-    }).join('/');
+    return getWorkoutTitleFromExercises(exercises);
   }, [exercises]);
 
   // Convert stored metric weights to display weights for editing

@@ -20,49 +20,11 @@ import TrackWorkout from "@/components/workouts/TrackWorkout";
 import WorkoutList from "@/components/workouts/WorkoutList";
 import WorkoutCalendar from "@/components/workouts/WorkoutCalendar";
 import DuplicateWorkoutDialog from "@/components/workouts/DuplicateWorkoutDialog";
-import { Workout, exerciseDatabase, getAllExercises } from "@/types/workout";
+import { Workout } from "@/types/workout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import WeeklyGoalSetting from "@/components/workouts/WeeklyGoalSetting";
 import { Target } from "lucide-react";
-
-// Helper function to find muscle group by exercise name (same logic as WorkoutList)
-const findMuscleGroupByExerciseName = (exerciseName: string): string | null => {
-  const normalizedName = exerciseName.toLowerCase().trim();
-  
-  // First check exerciseDatabase
-  for (const [muscleGroup, exercises] of Object.entries(exerciseDatabase)) {
-    for (const exercise of exercises) {
-      if (exercise.name.toLowerCase() === normalizedName) {
-        return muscleGroup;
-      }
-    }
-  }
-  
-  // Then check custom exercises
-  const allExercises = getAllExercises();
-  for (const exercise of allExercises) {
-    if (exercise.name.toLowerCase() === normalizedName && exercise.muscleGroup) {
-      return exercise.muscleGroup;
-    }
-  }
-  
-  return null;
-};
-
-// Helper function to get muscle groups for a workout
-const getWorkoutMuscleGroups = (workout: Workout): string[] => {
-  const groups: string[] = [];
-  for (const exercise of workout.exercises) {
-    let group = exercise.muscleGroup;
-    if (!group) {
-      group = findMuscleGroupByExerciseName(exercise.name) || undefined;
-    }
-    if (group && !groups.includes(group)) {
-      groups.push(group);
-    }
-  }
-  return groups;
-};
+import { getWorkoutMuscleGroupsFromExercises } from "@/utils/workoutNaming";
 
 const Workouts = () => {
   const { t } = useLanguage();
@@ -93,23 +55,21 @@ const Workouts = () => {
 
   const [activeTab, setActiveTab] = useState("workouts");
 
-  // Get all unique muscle groups from workouts (using lookup for old workouts)
+  // Get all unique muscle groups from workouts (canonicalized, incl. older workouts)
   const allMuscleGroups = React.useMemo(() => {
     const groups = new Set<string>();
-    workouts.forEach(workout => {
-      const workoutGroups = getWorkoutMuscleGroups(workout);
-      workoutGroups.forEach(group => groups.add(group));
+    workouts.forEach((workout) => {
+      getWorkoutMuscleGroupsFromExercises(workout.exercises).forEach((group) => groups.add(group));
     });
     return Array.from(groups).sort();
   }, [workouts]);
 
-  // Filter workouts by selected muscle group (using lookup for old workouts)
+  // Filter workouts by selected muscle group (same logic as naming)
   const filteredWorkouts = React.useMemo(() => {
     if (!selectedMuscleGroup) return workouts;
-    return workouts.filter(workout => {
-      const workoutGroups = getWorkoutMuscleGroups(workout);
-      return workoutGroups.includes(selectedMuscleGroup);
-    });
+    return workouts.filter((workout) =>
+      getWorkoutMuscleGroupsFromExercises(workout.exercises).includes(selectedMuscleGroup)
+    );
   }, [workouts, selectedMuscleGroup]);
 
 
@@ -157,7 +117,7 @@ const Workouts = () => {
   };
 
   const handleEditWorkout = (workout: Workout) => {
-    const isCardio = workout.exercises.some(ex => ex.muscleGroup === 'cardio');
+    const isCardio = getWorkoutMuscleGroupsFromExercises(workout.exercises).includes('cardio');
     setEditingWorkout(workout);
     if (isCardio) {
       setShowCardioForm(true);

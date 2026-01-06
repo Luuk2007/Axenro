@@ -15,6 +15,7 @@ import { Workout } from "@/types/workout";
 import { useMeasurementSystem } from "@/hooks/useMeasurementSystem";
 import { convertWeight, getWeightUnit, formatWeight, convertDistance, getDistanceUnit, formatDistance } from "@/utils/unitConversions";
 import { isCardioExercise, formatDuration } from "@/utils/workoutUtils";
+import { getWorkoutTitleFromExercises } from "@/utils/workoutNaming";
 
 interface TrackWorkoutProps {
   open: boolean;
@@ -33,11 +34,11 @@ const TrackWorkout: React.FC<TrackWorkoutProps> = ({
   if (!workout) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm max-h-[75vh] overflow-y-auto sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{workout.name}</DialogTitle>
-          <DialogDescription className="flex items-center gap-2 mt-2">
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-sm max-h-[75vh] overflow-y-auto sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{getWorkoutTitleFromExercises(workout.exercises) || workout.name}</DialogTitle>
+            <DialogDescription className="flex items-center gap-2 mt-2">
             <Calendar className="h-4 w-4" /> {workout.date}
           </DialogDescription>
         </DialogHeader>

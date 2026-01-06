@@ -3,58 +3,9 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, Calendar, Edit, Copy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Workout, exerciseDatabase, getAllExercises } from "@/types/workout";
+import { Workout } from "@/types/workout";
 import { getWorkoutSummary, formatDuration } from "@/utils/workoutUtils";
-
-// Helper function to find muscle group by exercise name
-const findMuscleGroupByExerciseName = (exerciseName: string): string | null => {
-  const normalizedName = exerciseName.toLowerCase().trim();
-  
-  // First check exerciseDatabase
-  for (const [muscleGroup, exercises] of Object.entries(exerciseDatabase)) {
-    for (const exercise of exercises) {
-      if (exercise.name.toLowerCase() === normalizedName) {
-        return muscleGroup;
-      }
-    }
-  }
-  
-  // Then check custom exercises
-  const allExercises = getAllExercises();
-  for (const exercise of allExercises) {
-    if (exercise.name.toLowerCase() === normalizedName && exercise.muscleGroup) {
-      return exercise.muscleGroup;
-    }
-  }
-  
-  return null;
-};
-
-const generateWorkoutName = (workout: Workout): string => {
-  const muscleGroups: string[] = [];
-  
-  for (const exercise of workout.exercises) {
-    // First try to use the stored muscleGroup
-    let group = exercise.muscleGroup;
-    
-    // If no muscleGroup stored, try to find it by exercise name
-    if (!group) {
-      group = findMuscleGroupByExerciseName(exercise.name) || undefined;
-    }
-    
-    if (group && !muscleGroups.includes(group)) {
-      muscleGroups.push(group);
-    }
-  }
-  
-  if (muscleGroups.length === 0) {
-    return workout.name || "Workout";
-  }
-  
-  return muscleGroups
-    .map(group => group.charAt(0).toUpperCase() + group.slice(1))
-    .join('/');
-};
+import { getWorkoutTitleFromExercises } from "@/utils/workoutNaming";
 
 interface WorkoutListProps {
   workouts: Workout[];
@@ -101,7 +52,7 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
       {workouts.map(workout => (
         <div key={workout.id} className="border rounded-lg p-4 shadow-sm">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-medium">{generateWorkoutName(workout)}</h3>
+            <h3 className="text-lg font-medium">{getWorkoutTitleFromExercises(workout.exercises) || "Workout"}</h3>
             <div className="flex items-center text-sm text-muted-foreground">
               <Calendar className="h-4 w-4 mr-1" />
               <span>{workout.date}</span>

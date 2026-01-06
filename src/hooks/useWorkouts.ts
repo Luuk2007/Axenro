@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Workout, Exercise } from '@/types/workout';
+import { getWorkoutTitleFromExercises } from '@/utils/workoutNaming';
 
 export const useWorkouts = () => {
   const { user } = useAuth();
@@ -32,14 +33,55 @@ export const useWorkouts = () => {
       }
 
       if (data) {
-        const formattedWorkouts: Workout[] = data.map(item => ({
-          id: item.workout_id,
-          name: item.name,
-          date: item.date,
-          exercises: Array.isArray(item.exercises) ? item.exercises as Exercise[] : [],
-          completed: item.completed
-        }));
+        const formattedWorkouts: Workout[] = data.map((item: any) => {
+          const rawExercises = (item as any).exercises;
+          const exercises: Exercise[] = Array.isArray(rawExercises)
+            ? (rawExercises as Exercise[])
+            : Array.isArray((rawExercises as any)?.exercises)
+              ? ((rawExercises as any).exercises as Exercise[])
+              : [];
+
+          const autoName = exercises.length > 0 ? getWorkoutTitleFromExercises(exercises) : '';
+
+          return {
+            id: item.workout_id,
+            name: autoName || item.name || 'Workout',
+            date: item.date,
+            exercises,
+            completed: item.completed
+          };
+        });
+
         setWorkouts(formattedWorkouts);
+
+        // Idempotent sync: replace any manually-entered titles in DB with auto-generated titles
+        const nameFixes = data
+          .map((item: any) => {
+            const rawExercises = (item as any).exercises;
+            const exercises: Exercise[] = Array.isArray(rawExercises)
+              ? (rawExercises as Exercise[])
+              : Array.isArray((rawExercises as any)?.exercises)
+                ? ((rawExercises as any).exercises as Exercise[])
+                : [];
+
+            const autoName = exercises.length > 0 ? getWorkoutTitleFromExercises(exercises) : '';
+            if (!autoName || item.name === autoName) return null;
+
+            return { workout_id: item.workout_id as string, name: autoName };
+          })
+          .filter(Boolean) as Array<{ workout_id: string; name: string }>;
+
+        if (nameFixes.length > 0) {
+          void Promise.all(
+            nameFixes.map((fix) =>
+              supabase
+                .from('workouts')
+                .update({ name: fix.name })
+                .eq('user_id', user.id)
+                .eq('workout_id', fix.workout_id)
+            )
+          ).catch((err) => console.error('Error syncing workout names:', err));
+        }
       }
     } catch (error) {
       console.error('Error loading workouts:', error);
@@ -55,12 +97,16 @@ export const useWorkouts = () => {
     }
 
     try {
+      const autoName = workout.exercises.length > 0 ? getWorkoutTitleFromExercises(workout.exercises) : '';
+      const workoutNameToSave = autoName || workout.name || 'Workout';
+      const workoutToSave: Workout = { ...workout, name: workoutNameToSave };
+
       // Check if workout already exists
       const { data: existingWorkout } = await supabase
         .from('workouts')
         .select('id')
         .eq('user_id', user.id)
-        .eq('workout_id', workout.id)
+        .eq('workout_id', workoutToSave.id)
         .single();
 
       let error;
@@ -69,13 +115,13 @@ export const useWorkouts = () => {
         const { error: updateError } = await supabase
           .from('workouts')
           .update({
-            name: workout.name,
-            date: workout.date,
-            exercises: workout.exercises,
-            completed: workout.completed
+            name: workoutToSave.name,
+            date: workoutToSave.date,
+            exercises: workoutToSave.exercises,
+            completed: workoutToSave.completed
           })
           .eq('user_id', user.id)
-          .eq('workout_id', workout.id);
+          .eq('workout_id', workoutToSave.id);
         error = updateError;
       } else {
         // Insert new workout
@@ -83,11 +129,11 @@ export const useWorkouts = () => {
           .from('workouts')
           .insert({
             user_id: user.id,
-            workout_id: workout.id,
-            name: workout.name,
-            date: workout.date,
-            exercises: workout.exercises,
-            completed: workout.completed
+            workout_id: workoutToSave.id,
+            name: workoutToSave.name,
+            date: workoutToSave.date,
+            exercises: workoutToSave.exercises,
+            completed: workoutToSave.completed
           });
         error = insertError;
       }
@@ -99,8 +145,8 @@ export const useWorkouts = () => {
       }
 
       // Update local state - add workout and sort by date (newest first)
-      const existingWorkouts = workouts.filter(w => w.id !== workout.id);
-      const updatedWorkouts = [...existingWorkouts, workout].sort((a, b) => {
+      const existingWorkouts = workouts.filter(w => w.id !== workoutToSave.id);
+      const updatedWorkouts = [...existingWorkouts, workoutToSave].sort((a, b) => {
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       });
       setWorkouts(updatedWorkouts);
