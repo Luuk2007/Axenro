@@ -23,7 +23,7 @@ export const progressTranslations: Translations = {
   cm: "cm",
   
   // Weight tracking
-  progress: "Progress",
+  progress: "Voortgang",
   weightProgress: "Gewichtsvoortgang",
   logWeight: "Gewicht bijhouden",
   trackYourWeightProgress: "Houd je gewichtsvoortgang bij",
@@ -158,5 +158,34 @@ export const progressTranslations: Translations = {
   "months in": "maanden in",
   "Milestones This Month": "Mijlpalen Deze Maand",
   "Milestone achieved!": "Mijlpaal bereikt!",
-  "measurement": "meting"
+  "measurement": "meting",
+  
+  // Weight Tracker - NEW
+  "Weight Progress": "Gewichtsvoortgang",
+  "Current Weight": "Huidig Gewicht",
+  "Starting Weight": "Startgewicht",
+  "Total Change": "Totale Verandering",
+  "Weight": "Gewicht",
+  "Weight History": "Gewichtsgeschiedenis",
+  "Edit Weight Entry": "Gewichtsinvoer Bewerken",
+  "Add Entry": "Invoer Toevoegen",
+  "Please enter a valid weight": "Voer een geldig gewicht in",
+  "Date": "Datum",
+  "Cancel": "Annuleren",
+  "Save": "Opslaan",
+  
+  // Progress page - NEW
+  "Add measurement": "Meting toevoegen",
+  "Measurements": "Metingen",
+  "Photos": "Foto's",
+  "Waist": "Taille",
+  "Hips": "Heupen",
+  "Biceps": "Biceps",
+  "Thighs": "Dijen",
+  "Calves": "Kuiten",
+  "Body Fat": "Lichaamsvet",
+  "biceps": "Biceps",
+  "calves": "Kuiten",
+  "bodyfat": "Lichaamsvet",
+  "Chest": "Borst",
 };

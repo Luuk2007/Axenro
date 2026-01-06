@@ -190,4 +190,13 @@ export const nutritionTranslations: Translations = {
   "Unit": "Eenheid",
   "Nutrition Facts": "Voedingswaarden",
   "Per adjusted serving": "Per aangepaste portie",
+  
+  // Additional translations - NEW
+  "Meals": "Maaltijden",
+  "Water": "Water",
+  "Breakfast": "Ontbijt",
+  "Lunch": "Lunch",
+  "Dinner": "Avondeten",
+  "Snack": "Snack",
+  "Add Meal": "Maaltijd Toevoegen",
 };
