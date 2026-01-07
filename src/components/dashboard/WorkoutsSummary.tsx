@@ -126,25 +126,6 @@ export default function WorkoutsSummary({
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    {muscleGroups.length > 0 && (
-                      <div className="flex flex-wrap gap-1 max-w-[100px]">
-                        {muscleGroups.slice(0, 2).map((muscle, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium"
-                          >
-                            {muscle}
-                          </span>
-                        ))}
-                        {muscleGroups.length > 2 && (
-                          <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
-                            +{muscleGroups.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
                 </div>
               );
             })}

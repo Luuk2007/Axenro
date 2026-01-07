@@ -182,15 +182,19 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
             
             <div className="w-full">
               <label className="text-sm font-medium block mb-2">{t("Date")}</label>
-              <Input
-                type="date"
-                value={workoutDate}
-                onChange={(e) => setWorkoutDate(e.target.value)}
-                onFocus={(e) => e.target.blur()}
-                onClick={(e) => e.currentTarget.showPicker()}
-                className="w-full box-border appearance-none"
-                style={{ WebkitAppearance: 'none' }}
-              />
+              <button
+                type="button"
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'date';
+                  input.value = workoutDate;
+                  input.onchange = (e) => setWorkoutDate((e.target as HTMLInputElement).value);
+                  input.showPicker();
+                }}
+                className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                {new Date(workoutDate).toLocaleDateString()}
+              </button>
             </div>
             
             <div>
