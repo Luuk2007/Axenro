@@ -180,13 +180,16 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
               </div>
             </div>
             
-            <div className="w-full overflow-hidden">
+            <div className="w-full">
               <label className="text-sm font-medium block mb-2">{t("Date")}</label>
               <Input
                 type="date"
                 value={workoutDate}
                 onChange={(e) => setWorkoutDate(e.target.value)}
-                className="w-full"
+                onFocus={(e) => e.target.blur()}
+                onClick={(e) => e.currentTarget.showPicker()}
+                className="w-full box-border appearance-none"
+                style={{ WebkitAppearance: 'none' }}
               />
             </div>
             
