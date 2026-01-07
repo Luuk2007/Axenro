@@ -19,6 +19,7 @@ import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import TermsConditionsPage from "@/pages/TermsConditionsPage";
 import PasswordResetPage from "@/pages/PasswordResetPage";
 import CookiePreferencesPage from "@/pages/CookiePreferencesPage";
+import Beheer from "@/pages/Beheer";
 import CookieConsentModal from "@/components/cookies/CookieConsentModal";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,6 +79,7 @@ function App() {
                     <Route path="termsandconditions" element={<TermsConditionsPage />} />
                     <Route path="resetyourpassword" element={<PasswordResetPage />} />
                     <Route path="cookiepreferences" element={<CookiePreferencesPage />} />
+                    <Route path="beheer" element={<Beheer />} />
                     <Route path="*" element={<NotFound />} />
                   </Route>
                 </Routes>
