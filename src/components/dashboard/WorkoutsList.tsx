@@ -56,26 +56,9 @@ export default function WorkoutsList({ workouts, title, className, onViewAll }: 
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className="flex">
-                  {workout.muscleGroups.slice(0, 2).map((muscle, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-xs font-medium -ml-1 first:ml-0"
-                    >
-                      {muscle}
-                    </span>
-                  ))}
-                  {workout.muscleGroups.length > 2 && (
-                    <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-xs font-medium -ml-1">
-                      +{workout.muscleGroups.length - 2}
-                    </span>
-                  )}
-                </div>
-                <Button variant="ghost" size="sm" className="h-8 text-xs">
-                  {t("viewWorkout")}
-                </Button>
-              </div>
+              <Button variant="ghost" size="sm" className="h-8 text-xs">
+                {t("viewWorkout")}
+              </Button>
             </div>
           ))
         ) : (
