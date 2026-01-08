@@ -7,17 +7,15 @@ import { ProfileFormValues } from './ProfileForm';
 import { 
   getDefaultRatios, 
   calculateMacroGoals, 
-  getMacroRatios, 
   getCalculationBreakdown,
   type ProfileData 
 } from '@/utils/macroCalculations';
 import { cn } from "@/lib/utils";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface NutritionCalculatorProps {
   profile: ProfileFormValues;
@@ -122,8 +120,17 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
     window.dispatchEvent(new CustomEvent('macroRatiosChanged', { detail: null }));
   };
 
+  // Force recalculation when customRatios changes
   const macroGoals = React.useMemo(() => {
-    return calculateMacroGoals(profile as ProfileData);
+    const ratios = customRatios || getDefaultRatios(profile.fitnessGoal);
+    const calories = calculateMacroGoals(profile as ProfileData).calories;
+    
+    // Calculate macros using the current ratios
+    const protein = Math.round((calories * (ratios.protein / 100)) / 4);
+    const carbs = Math.round((calories * (ratios.carbs / 100)) / 4);
+    const fat = Math.round((calories * (ratios.fat / 100)) / 9);
+    
+    return { calories, protein, carbs, fat };
   }, [profile, customRatios]);
 
   const breakdown = React.useMemo(() => {
@@ -132,14 +139,7 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
 
   const calories = macroGoals.calories;
   const macros = { protein: macroGoals.protein, carbs: macroGoals.carbs, fat: macroGoals.fat };
-
-  // Calculate actual percentages from the calculated macros
-  const totalMacroCalories = (macros.protein * 4) + (macros.carbs * 4) + (macros.fat * 9);
-  const actualPercentages = {
-    protein: Math.round((macros.protein * 4 / totalMacroCalories) * 100),
-    carbs: Math.round((macros.carbs * 4 / totalMacroCalories) * 100),
-    fat: Math.round((macros.fat * 9 / totalMacroCalories) * 100),
-  };
+  const currentRatios = customRatios || getDefaultRatios(profile.fitnessGoal);
 
   return (
     <div className="space-y-6">
@@ -160,30 +160,49 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
               <p className="text-lg text-muted-foreground mt-1">{t("calories")}</p>
             </div>
             
-            {/* Calculation breakdown tooltip */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                    <Info className="h-3.5 w-3.5" />
-                    <span>{t("How is this calculated?")}</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-xs p-4">
-                  <div className="space-y-2 text-sm">
-                    <p className="font-medium">Mifflin-St Jeor Formula</p>
-                    <div className="space-y-1 text-muted-foreground">
-                      <p>BMR: {breakdown.bmr} kcal</p>
-                      <p>× Activity ({breakdown.activityMultiplier}x)</p>
-                      <p>= TDEE: {breakdown.tdee} kcal</p>
-                      {breakdown.calorieAdjustment !== 0 && (
-                        <p>{breakdown.calorieAdjustment > 0 ? '+' : ''}{breakdown.calorieAdjustment} kcal ({profile.fitnessGoal})</p>
-                      )}
+            {/* Calculation breakdown - using Popover for better click support */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                  <Info className="h-3.5 w-3.5" />
+                  <span>{t("How is this calculated?")}</span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="bottom" className="w-72 p-4">
+                <div className="space-y-3 text-sm">
+                  <p className="font-semibold text-foreground">Mifflin-St Jeor Formula</p>
+                  <div className="space-y-2 text-muted-foreground">
+                    <div className="flex justify-between">
+                      <span>BMR (base metabolism)</span>
+                      <span className="font-medium text-foreground">{breakdown.bmr} kcal</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>× Activity multiplier</span>
+                      <span className="font-medium text-foreground">{breakdown.activityMultiplier}x</span>
+                    </div>
+                    <div className="border-t pt-2 flex justify-between">
+                      <span>TDEE (maintenance)</span>
+                      <span className="font-medium text-foreground">{breakdown.tdee} kcal</span>
+                    </div>
+                    {breakdown.calorieAdjustment !== 0 && (
+                      <div className="flex justify-between">
+                        <span>Goal adjustment</span>
+                        <span className={cn(
+                          "font-medium",
+                          breakdown.calorieAdjustment > 0 ? "text-green-600" : "text-red-500"
+                        )}>
+                          {breakdown.calorieAdjustment > 0 ? '+' : ''}{breakdown.calorieAdjustment} kcal
+                        </span>
+                      </div>
+                    )}
+                    <div className="border-t pt-2 flex justify-between font-semibold">
+                      <span className="text-foreground">Daily target</span>
+                      <span className="text-primary">{calories} kcal</span>
                     </div>
                   </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardContent>
       </Card>
@@ -201,19 +220,7 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
               </p>
             </div>
             <p className="text-2xl font-bold">{macros.protein}g</p>
-            <p className="text-xs text-muted-foreground mt-1">{actualPercentages.protein}%</p>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <p className="text-[10px] text-muted-foreground/70 mt-2 cursor-help">
-                    {breakdown.proteinPerKg}g/kg
-                  </p>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs">
-                  Based on your bodyweight ({breakdown.weight}kg)
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <p className="text-xs text-muted-foreground mt-1">{currentRatios.protein}%</p>
           </CardContent>
         </Card>
 
@@ -228,7 +235,7 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
               </p>
             </div>
             <p className="text-2xl font-bold">{macros.carbs}g</p>
-            <p className="text-xs text-muted-foreground mt-1">{actualPercentages.carbs}%</p>
+            <p className="text-xs text-muted-foreground mt-1">{currentRatios.carbs}%</p>
           </CardContent>
         </Card>
 
@@ -243,7 +250,7 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
               </p>
             </div>
             <p className="text-2xl font-bold">{macros.fat}g</p>
-            <p className="text-xs text-muted-foreground mt-1">{actualPercentages.fat}%</p>
+            <p className="text-xs text-muted-foreground mt-1">{currentRatios.fat}%</p>
           </CardContent>
         </Card>
       </div>
@@ -310,7 +317,7 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
           </div>
           
           <p className="text-xs text-muted-foreground mt-4 text-center">
-            💡 {t("Protein is calculated based on your bodyweight")} ({breakdown.proteinPerKg}g/kg)
+            💡 Macros worden berekend op basis van de geselecteerde verdeling
           </p>
         </CardContent>
       </Card>
