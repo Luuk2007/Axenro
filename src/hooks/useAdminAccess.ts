@@ -3,12 +3,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const useAdminAccess = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAdminAccess = async () => {
+      // Wait for auth to finish loading before checking admin access
+      if (authLoading) {
+        return;
+      }
+
       if (!user) {
         setIsAdmin(false);
         setIsLoading(false);
@@ -28,6 +33,7 @@ export const useAdminAccess = () => {
           console.error('Error checking admin access:', error);
           setIsAdmin(false);
         } else {
+          console.log('Admin check result:', { userId: user.id, data, isAdmin: !!data });
           setIsAdmin(!!data);
         }
       } catch (error) {
@@ -39,7 +45,7 @@ export const useAdminAccess = () => {
     };
 
     checkAdminAccess();
-  }, [user]);
+  }, [user, authLoading]);
 
   return { isAdmin, isLoading };
 };
