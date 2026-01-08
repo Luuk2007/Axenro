@@ -195,28 +195,16 @@ export const calculateProtein = (data: ProfileData): number => {
   return protein;
 };
 
-// Calculate macro breakdown based on calorie needs, protein from bodyweight, and ratios for carbs/fat
+// Calculate macro breakdown based on calorie needs and selected ratios
 export const calculateMacros = (calories: number, data: ProfileData): Omit<MacroGoals, 'calories'> => {
   const fitnessGoal = data.fitnessGoal || 'maintain';
   const ratios = getMacroRatios(fitnessGoal);
   
-  // Calculate protein based on bodyweight (more accurate than percentage)
-  const protein = calculateProtein(data);
-  const proteinCalories = protein * 4;
-  
-  // Calculate remaining calories for carbs and fat
-  const remainingCalories = Math.max(calories - proteinCalories, 0);
-  
-  // Distribute remaining calories between carbs and fat based on ratio proportion
-  const carbFatRatioTotal = ratios.carbs + ratios.fat;
-  const carbProportion = ratios.carbs / carbFatRatioTotal;
-  const fatProportion = ratios.fat / carbFatRatioTotal;
-  
-  const carbCalories = remainingCalories * carbProportion;
-  const fatCalories = remainingCalories * fatProportion;
-  
-  const carbs = Math.round(carbCalories / 4); // 4 calories per gram
-  const fat = Math.round(fatCalories / 9);    // 9 calories per gram
+  // Calculate all macros based on the selected ratio percentages
+  // This ensures presets work correctly and all macros change together
+  const protein = Math.round((calories * (ratios.protein / 100)) / 4); // 4 cal per gram
+  const carbs = Math.round((calories * (ratios.carbs / 100)) / 4);     // 4 cal per gram
+  const fat = Math.round((calories * (ratios.fat / 100)) / 9);         // 9 cal per gram
   
   return { protein, carbs, fat };
 };
