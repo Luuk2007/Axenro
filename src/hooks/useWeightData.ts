@@ -157,9 +157,15 @@ export const useWeightData = () => {
     loadWeightData();
   }, [user]);
 
+  // Get the latest weight entry
+  const latestWeight = weightData.length > 0 
+    ? weightData[weightData.length - 1].value 
+    : null;
+
   return {
     weightData,
     loading,
+    latestWeight,
     addWeightEntry,
     updateWeightEntry,
     deleteWeightEntry,

@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LoginPrompt } from "@/components/auth/LoginPrompt";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useUserProfile, UserProfileData } from "@/hooks/useUserProfile";
+import { useWeightData } from "@/hooks/useWeightData";
 import { supabase } from "@/integrations/supabase/client";
 import BMICalculator from "@/components/profile/BMICalculator";
 import ProfileForm, { ProfileFormValues, defaultValues, emptyDefaultValues } from "@/components/profile/ProfileForm";
@@ -25,6 +26,7 @@ const Profile = () => {
   const { user } = useAuth();
   const { test_mode, test_subscription_tier, subscription_tier } = useSubscription();
   const { profile: dbProfile, loading: profileLoading, saveProfile } = useUserProfile();
+  const { latestWeight, loading: weightLoading } = useWeightData();
   const [initialValues, setInitialValues] = useState<Partial<ProfileFormValues>>(emptyDefaultValues);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string>('');
   const [hasMigratedLocalStorage, setHasMigratedLocalStorage] = useState(false);
@@ -33,18 +35,21 @@ const Profile = () => {
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
   const canUseBMICalculator = currentTier === 'pro' || currentTier === 'premium';
 
+  // Use latest weight from weight_data if available, otherwise fall back to profile weight
+  const currentWeight = latestWeight ?? dbProfile?.weight ?? 0;
+
   // Derive values from dbProfile instead of separate state
   const isNewUser = !dbProfile || (!dbProfile.weight || !dbProfile.height);
-  const hasValidSavedProfile = dbProfile?.weight > 0 && dbProfile?.height > 0;
+  const hasValidSavedProfile = (dbProfile?.weight > 0 || currentWeight > 0) && dbProfile?.height > 0;
 
-  // Convert database profile to form profile
-  const convertDbToFormProfile = (dbProfile: UserProfileData): ProfileFormValues => {
+  // Convert database profile to form profile, using latest weight from weight_data
+  const convertDbToFormProfile = (dbProfile: UserProfileData, useLatestWeight: boolean = false): ProfileFormValues => {
     return {
       name: dbProfile.name || '',
       gender: (dbProfile.gender as 'male' | 'female' | 'other') || 'male',
       age: dbProfile.age || 0,
       height: dbProfile.height || 0,
-      weight: dbProfile.weight || 0,
+      weight: useLatestWeight && latestWeight ? latestWeight : (dbProfile.weight || 0),
       activityLevel: (dbProfile.activity_level as 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active') || 'moderate',
       fitnessGoal: dbProfile.fitness_goal as 'lose' | 'maintain' | 'gain' | undefined,
       targetWeight: dbProfile.target_weight,
@@ -78,7 +83,7 @@ const Profile = () => {
 
   // Handle profile data loading and localStorage migration
   useEffect(() => {
-    console.log('Profile: useEffect triggered', { user: !!user, dbProfile: !!dbProfile, profileLoading });
+    console.log('Profile: useEffect triggered', { user: !!user, dbProfile: !!dbProfile, profileLoading, weightLoading, latestWeight });
     
     if (!user) {
       console.log('Profile: No user, resetting to empty values');
@@ -86,14 +91,15 @@ const Profile = () => {
       return;
     }
 
-    if (profileLoading) {
-      console.log('Profile: Still loading profile data');
+    if (profileLoading || weightLoading) {
+      console.log('Profile: Still loading data');
       return;
     }
 
     if (dbProfile) {
       console.log('Profile: Database profile found', dbProfile);
-      const formProfile = convertDbToFormProfile(dbProfile);
+      // Use latest weight from weight_data if available
+      const formProfile = convertDbToFormProfile(dbProfile, true);
       setInitialValues(formProfile);
     } else if (!hasMigratedLocalStorage) {
       console.log('Profile: No database profile, checking localStorage');
@@ -122,7 +128,7 @@ const Profile = () => {
       }
       setHasMigratedLocalStorage(true);
     }
-  }, [user, dbProfile, profileLoading, hasMigratedLocalStorage]);
+  }, [user, dbProfile, profileLoading, hasMigratedLocalStorage, latestWeight, weightLoading]);
 
   const loadProfilePicture = async () => {
     if (!user) return;
@@ -270,7 +276,7 @@ const Profile = () => {
                       {t("Weight")}
                     </p>
                   </div>
-                  <p className="text-2xl font-bold">{dbProfile.weight}</p>
+                  <p className="text-2xl font-bold">{currentWeight > 0 ? currentWeight.toFixed(1) : dbProfile.weight}</p>
                   <p className="text-xs text-muted-foreground">kg</p>
                 </CardContent>
               </Card>
@@ -346,7 +352,7 @@ const Profile = () => {
           {/* BMI Calculator - only show for Pro and Premium plans */}
           {hasValidSavedProfile && dbProfile && canUseBMICalculator && (
             <BMICalculator 
-              initialWeight={dbProfile.weight || 0} 
+              initialWeight={currentWeight > 0 ? currentWeight : (dbProfile.weight || 0)} 
               initialHeight={dbProfile.height || 0} 
             />
           )}
@@ -355,8 +361,8 @@ const Profile = () => {
         <TabsContent value="nutrition" className="space-y-6">
           {dbProfile && !profileLoading ? (
             <>
-              <UserStatsDisplay profile={convertDbToFormProfile(dbProfile)} />
-              <NutritionCalculator profile={convertDbToFormProfile(dbProfile)} />
+              <UserStatsDisplay profile={convertDbToFormProfile(dbProfile, true)} />
+              <NutritionCalculator profile={convertDbToFormProfile(dbProfile, true)} />
             </>
           ) : profileLoading ? (
             <Card className="border-0 shadow-md">
