@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, X, Trash2, Dumbbell } from 'lucide-react';
+import { Plus, X, Trash2, Dumbbell, ChevronUp, ChevronDown, GripVertical } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AddExerciseDialog from './AddExerciseDialog';
 import { Workout, Exercise, ExerciseSet } from '@/types/workout';
@@ -98,6 +98,24 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
 
   const handleRemoveExercise = (exerciseId: string) => {
     setExercises(prev => prev.filter(ex => ex.id !== exerciseId));
+  };
+
+  const handleMoveExercise = (exerciseId: string, direction: 'up' | 'down') => {
+    setExercises(prev => {
+      const index = prev.findIndex(ex => ex.id === exerciseId);
+      if (index === -1) return prev;
+      
+      const newIndex = direction === 'up' ? index - 1 : index + 1;
+      
+      // Check bounds
+      if (newIndex < 0 || newIndex >= prev.length) return prev;
+      
+      // Swap exercises
+      const newExercises = [...prev];
+      [newExercises[index], newExercises[newIndex]] = [newExercises[newIndex], newExercises[index]];
+      
+      return newExercises;
+    });
   };
 
   const handleAddSet = (exerciseId: string) => {
@@ -216,11 +234,35 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                 </div>
               ) : (
                 <div className="space-y-4 max-h-64 overflow-y-auto">
-                  {exercises.map((exercise) => (
+                  {exercises.map((exercise, exerciseIndex) => (
                     <Card key={exercise.id} className="relative">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-medium">{exercise.name}</h4>
+                          <div className="flex items-center gap-2">
+                            {/* Reorder buttons */}
+                            <div className="flex flex-col -my-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleMoveExercise(exercise.id, 'up')}
+                                className="h-5 w-5 p-0 hover:bg-muted"
+                                disabled={exerciseIndex === 0}
+                              >
+                                <ChevronUp className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleMoveExercise(exercise.id, 'down')}
+                                className="h-5 w-5 p-0 hover:bg-muted"
+                                disabled={exerciseIndex === exercises.length - 1}
+                              >
+                                <ChevronDown className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <GripVertical className="h-4 w-4 text-muted-foreground/50" />
+                            <h4 className="font-medium">{exercise.name}</h4>
+                          </div>
                           <Button
                             variant="ghost"
                             size="sm"
