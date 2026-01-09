@@ -114,4 +114,13 @@ export const profileTranslations: Translations = {
   "Personal details": "Persoonlijke gegevens",
   "Profile settings": "Profiel instellingen",
   "Nutrition plan": "Voedingsplan",
+  
+  // New profile page translations
+  "Sedentary": "Zittend",
+  "Light activity": "Lichte activiteit", 
+  "Moderate activity": "Matige activiteit",
+  "Active": "Actief",
+  "Very active": "Zeer actief",
+  "Activity": "Activiteit",
+  "days/week": "dagen/week",
 };

@@ -5,10 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProfileFormValues } from './ProfileForm';
 import { 
-  getDefaultRatios, 
-  calculateMacroGoals, 
+  calculateDailyCalories,
+  calculateMacrosWithProteinLimit,
   getCalculationBreakdown,
-  type ProfileData 
+  getActualProteinPercentage,
+  type ProfileData,
+  type MacroRatios
 } from '@/utils/macroCalculations';
 import { cn } from "@/lib/utils";
 import {
@@ -21,48 +23,56 @@ interface NutritionCalculatorProps {
   profile: ProfileFormValues;
 }
 
-// Preset macro ratio options
+// Preset macro ratio options with realistic descriptions
+// Note: Protein will be calculated based on bodyweight, not percentage
+// The ratios mainly affect the carb:fat distribution
 const MACRO_PRESETS = [
   {
     id: 'cutting',
     name: 'Fat Loss',
     emoji: '🥦',
-    description: 'High protein, moderate carbs — for getting lean while keeping muscle.',
-    ratios: { protein: 40, carbs: 30, fat: 30 }
+    description: 'Hoge eiwitinname om spieren te behouden tijdens afvallen.',
+    proteinNote: '~2.0g/kg',
+    ratios: { protein: 35, carbs: 35, fat: 30 } // Protein % is for display only
   },
   {
     id: 'bulking',
-    name: 'Muscle Growth',
+    name: 'Spieropbouw',
     emoji: '🍚',
-    description: 'Fuel muscle gain with high carbs and solid protein intake.',
+    description: 'Voldoende koolhydraten en eiwitten voor spiermassa.',
+    proteinNote: '~1.8g/kg',
     ratios: { protein: 25, carbs: 55, fat: 20 }
   },
   {
     id: 'recomposition',
     name: 'High Protein',
     emoji: '🥩',
-    description: 'Build muscle and burn fat at the same time with a protein-heavy plan.',
-    ratios: { protein: 45, carbs: 25, fat: 30 }
+    description: 'Maximale eiwitinname voor recompositie.',
+    proteinNote: '~2.2g/kg',
+    ratios: { protein: 40, carbs: 30, fat: 30 }
   },
   {
     id: 'keto',
     name: 'Keto / Low Carb',
     emoji: '🥑',
-    description: 'Use fats as your main energy source — ideal for low-carb lifestyles.',
+    description: 'Lage koolhydraten, hoge vetinname voor ketose.',
+    proteinNote: '~1.6g/kg',
     ratios: { protein: 25, carbs: 10, fat: 65 }
   },
   {
     id: 'endurance',
     name: 'Endurance',
     emoji: '🍠',
-    description: 'Max energy and performance for long training sessions.',
+    description: 'Hoge koolhydraten voor lange trainingen.',
+    proteinNote: '~1.4g/kg',
     ratios: { protein: 20, carbs: 60, fat: 20 }
   },
   {
     id: 'balanced',
-    name: 'Balanced',
+    name: 'Gebalanceerd',
     emoji: '🧘',
-    description: 'A well-rounded macro split for everyday health and maintenance.',
+    description: 'Evenwichtige verdeling voor dagelijks gebruik.',
+    proteinNote: '~1.6g/kg',
     ratios: { protein: 30, carbs: 40, fat: 30 }
   }
 ];
@@ -70,76 +80,72 @@ const MACRO_PRESETS = [
 const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) => {
   const { t } = useLanguage();
   
-  const [customRatios, setCustomRatios] = useState<{
-    protein: number;
-    carbs: number;
-    fat: number;
-  } | null>(null);
-
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  const [selectedRatios, setSelectedRatios] = useState<MacroRatios | null>(null);
 
   useEffect(() => {
-    const savedRatios = localStorage.getItem('customMacroRatios');
     const savedPreset = localStorage.getItem('selectedMacroPreset');
-    
-    if (savedRatios) {
-      try {
-        setCustomRatios(JSON.parse(savedRatios));
-      } catch (error) {
-        console.error('Error loading custom macro ratios:', error);
-      }
-    }
+    const savedRatios = localStorage.getItem('customMacroRatios');
     
     if (savedPreset) {
       setSelectedPreset(savedPreset);
     }
+    
+    if (savedRatios) {
+      try {
+        setSelectedRatios(JSON.parse(savedRatios));
+      } catch (error) {
+        console.error('Error loading custom macro ratios:', error);
+      }
+    }
   }, []);
 
-  const saveRatios = (ratios: { protein: number; carbs: number; fat: number }, presetId?: string) => {
+  const savePreset = (presetId: string, ratios: MacroRatios) => {
+    localStorage.setItem('selectedMacroPreset', presetId);
     localStorage.setItem('customMacroRatios', JSON.stringify(ratios));
-    setCustomRatios(ratios);
-    
-    if (presetId) {
-      localStorage.setItem('selectedMacroPreset', presetId);
-      setSelectedPreset(presetId);
-    }
+    setSelectedPreset(presetId);
+    setSelectedRatios(ratios);
     
     window.dispatchEvent(new CustomEvent('macroRatiosChanged', { detail: ratios }));
   };
 
   const handlePresetSelect = (preset: typeof MACRO_PRESETS[0]) => {
-    saveRatios(preset.ratios, preset.id);
+    savePreset(preset.id, preset.ratios);
   };
 
   const resetToDefaults = () => {
     localStorage.removeItem('customMacroRatios');
     localStorage.removeItem('selectedMacroPreset');
-    setCustomRatios(null);
     setSelectedPreset(null);
+    setSelectedRatios(null);
     
     window.dispatchEvent(new CustomEvent('macroRatiosChanged', { detail: null }));
   };
 
-  // Force recalculation when customRatios changes
+  // Calculate macros using the new realistic calculation method
   const macroGoals = React.useMemo(() => {
-    const ratios = customRatios || getDefaultRatios(profile.fitnessGoal);
-    const calories = calculateMacroGoals(profile as ProfileData).calories;
+    const calories = calculateDailyCalories(profile as ProfileData);
+    const weight = profile.weight || 70;
     
-    // Calculate macros using the current ratios
-    const protein = Math.round((calories * (ratios.protein / 100)) / 4);
-    const carbs = Math.round((calories * (ratios.carbs / 100)) / 4);
-    const fat = Math.round((calories * (ratios.fat / 100)) / 9);
+    // Get ratios - use selected or default balanced
+    const ratios = selectedRatios || { protein: 30, carbs: 40, fat: 30 };
     
-    return { calories, protein, carbs, fat };
-  }, [profile, customRatios]);
+    // Calculate with protein limits based on bodyweight
+    const macros = calculateMacrosWithProteinLimit(calories, weight, selectedPreset, ratios);
+    
+    return { 
+      calories, 
+      ...macros,
+      // Calculate actual percentage for display
+      actualProteinPercent: getActualProteinPercentage(macros.protein, calories),
+      actualCarbPercent: Math.round((macros.carbs * 4 / calories) * 100),
+      actualFatPercent: Math.round((macros.fat * 9 / calories) * 100)
+    };
+  }, [profile, selectedPreset, selectedRatios]);
 
   const breakdown = React.useMemo(() => {
     return getCalculationBreakdown(profile as ProfileData);
   }, [profile]);
-
-  const calories = macroGoals.calories;
-  const macros = { protein: macroGoals.protein, carbs: macroGoals.carbs, fat: macroGoals.fat };
-  const currentRatios = customRatios || getDefaultRatios(profile.fitnessGoal);
 
   return (
     <div className="space-y-6">
@@ -155,12 +161,12 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
                 {t("Daily calorie needs")}
               </p>
               <p className="text-5xl font-bold text-foreground">
-                {calories.toLocaleString()}
+                {macroGoals.calories.toLocaleString()}
               </p>
               <p className="text-lg text-muted-foreground mt-1">{t("calories")}</p>
             </div>
             
-            {/* Calculation breakdown - using Popover for better click support */}
+            {/* Calculation breakdown */}
             <Popover>
               <PopoverTrigger asChild>
                 <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
@@ -197,8 +203,13 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
                     )}
                     <div className="border-t pt-2 flex justify-between font-semibold">
                       <span className="text-foreground">Daily target</span>
-                      <span className="text-primary">{calories} kcal</span>
+                      <span className="text-primary">{macroGoals.calories} kcal</span>
                     </div>
+                  </div>
+                  <div className="border-t pt-3 mt-3">
+                    <p className="text-xs text-muted-foreground">
+                      💪 Eiwit: {breakdown.proteinPerKg}g/kg × {breakdown.weight}kg = {macroGoals.protein}g
+                    </p>
                   </div>
                 </div>
               </PopoverContent>
@@ -219,8 +230,8 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
                 {t("Protein")}
               </p>
             </div>
-            <p className="text-2xl font-bold">{macros.protein}g</p>
-            <p className="text-xs text-muted-foreground mt-1">{currentRatios.protein}%</p>
+            <p className="text-2xl font-bold">{macroGoals.protein}g</p>
+            <p className="text-xs text-muted-foreground mt-1">{macroGoals.actualProteinPercent}%</p>
           </CardContent>
         </Card>
 
@@ -234,8 +245,8 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
                 {t("Carbs")}
               </p>
             </div>
-            <p className="text-2xl font-bold">{macros.carbs}g</p>
-            <p className="text-xs text-muted-foreground mt-1">{currentRatios.carbs}%</p>
+            <p className="text-2xl font-bold">{macroGoals.carbs}g</p>
+            <p className="text-xs text-muted-foreground mt-1">{macroGoals.actualCarbPercent}%</p>
           </CardContent>
         </Card>
 
@@ -249,8 +260,8 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
                 {t("Fat")}
               </p>
             </div>
-            <p className="text-2xl font-bold">{macros.fat}g</p>
-            <p className="text-xs text-muted-foreground mt-1">{currentRatios.fat}%</p>
+            <p className="text-2xl font-bold">{macroGoals.fat}g</p>
+            <p className="text-xs text-muted-foreground mt-1">{macroGoals.actualFatPercent}%</p>
           </CardContent>
         </Card>
       </div>
@@ -299,15 +310,9 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
                     <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
                       {preset.description}
                     </p>
-                    <div className="flex gap-1.5 flex-wrap">
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                        P {preset.ratios.protein}%
-                      </span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                        C {preset.ratios.carbs}%
-                      </span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-600 dark:text-rose-400">
-                        F {preset.ratios.fat}%
+                    <div className="flex items-center justify-between">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                        {preset.proteinNote}
                       </span>
                     </div>
                   </div>
@@ -317,7 +322,7 @@ const NutritionCalculator: React.FC<NutritionCalculatorProps> = ({ profile }) =>
           </div>
           
           <p className="text-xs text-muted-foreground mt-4 text-center">
-            💡 Macros worden berekend op basis van de geselecteerde verdeling
+            💡 Eiwit wordt berekend op basis van lichaamsgewicht (max 2.2-2.5g/kg)
           </p>
         </CardContent>
       </Card>

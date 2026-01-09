@@ -1,6 +1,6 @@
 // Centralized macro calculation utilities
 // This ensures consistency across all pages (Profile, Nutrition, Dashboard)
-// Uses evidence-based formulas: Mifflin-St Jeor for BMR, protein based on g/kg bodyweight
+// Uses evidence-based formulas: Mifflin-St Jeor for BMR, protein capped at realistic g/kg limits
 
 export interface MacroRatios {
   protein: number;
@@ -44,12 +44,24 @@ const EXERCISE_FREQ_TO_ACTIVITY: Record<string, string> = {
   '6+': 'very_active',
 };
 
-// Protein recommendations per kg bodyweight (evidence-based)
-const PROTEIN_PER_KG: Record<string, number> = {
-  lose: 2.0,      // Higher protein during fat loss to preserve muscle (1.8-2.2g/kg)
-  maintain: 1.6,  // Standard recommendation for active individuals (1.4-1.8g/kg)
-  gain: 1.8,      // Muscle building requires moderate-high protein (1.6-2.0g/kg)
+// Protein recommendations per kg bodyweight based on preset type
+// Evidence-based ranges:
+// - Sedentary adults: 0.8-1.0 g/kg
+// - Active adults: 1.2-1.6 g/kg  
+// - Athletes/muscle building: 1.6-2.2 g/kg
+// - Maximum beneficial: ~2.2-2.5 g/kg (no additional benefit above this)
+const PROTEIN_PER_KG_BY_PRESET: Record<string, number> = {
+  cutting: 2.0,        // High protein during fat loss to preserve muscle
+  bulking: 1.8,        // Moderate-high for muscle building
+  recomposition: 2.2,  // Maximum for recomp (build muscle + lose fat)
+  keto: 1.6,           // Moderate protein for keto
+  endurance: 1.4,      // Lower protein for endurance athletes
+  balanced: 1.6,       // Standard active person
 };
+
+// Maximum protein per kg (evidence shows no benefit above this)
+const MAX_PROTEIN_PER_KG = 2.5;
+const ABSOLUTE_MAX_PROTEIN = 220; // Absolute cap in grams
 
 // Calorie adjustment for goals
 const CALORIE_ADJUSTMENTS: Record<string, number> = {
@@ -58,7 +70,7 @@ const CALORIE_ADJUSTMENTS: Record<string, number> = {
   gain: 300,      // 300 kcal surplus for lean muscle gain
 };
 
-// Get default macro ratios based on fitness goal
+// Get default macro ratios based on fitness goal (only used when no preset selected)
 export const getDefaultRatios = (fitnessGoal: string = "maintain"): MacroRatios => {
   switch (fitnessGoal) {
     case "gain":
@@ -69,6 +81,15 @@ export const getDefaultRatios = (fitnessGoal: string = "maintain"): MacroRatios 
       return { protein: 30, carbs: 40, fat: 30 };
     default:
       return { protein: 30, carbs: 40, fat: 30 };
+  }
+};
+
+// Get selected preset ID from localStorage
+export const getSelectedPreset = (): string | null => {
+  try {
+    return localStorage.getItem('selectedMacroPreset');
+  } catch (error) {
+    return null;
   }
 };
 
@@ -174,39 +195,73 @@ export const calculateDailyCalories = (data: ProfileData): number => {
   return Math.round(calories);
 };
 
-// Calculate protein based on bodyweight (evidence-based approach)
-export const calculateProtein = (data: ProfileData): number => {
-  const { weight, fitnessGoal } = data;
-  
-  if (!weight) {
+// Calculate protein based on bodyweight with realistic limits
+// This is the KEY function that prevents unrealistic protein values
+export const calculateProteinForPreset = (weight: number, presetId: string | null): number => {
+  if (!weight || weight <= 0) {
     return 100; // Reasonable default
   }
   
-  const goal = fitnessGoal || 'maintain';
-  const proteinPerKg = PROTEIN_PER_KG[goal] || PROTEIN_PER_KG.maintain;
+  // Get protein per kg based on preset, default to balanced
+  const proteinPerKg = presetId && PROTEIN_PER_KG_BY_PRESET[presetId] 
+    ? PROTEIN_PER_KG_BY_PRESET[presetId] 
+    : 1.6;
   
-  // Calculate protein based on bodyweight
+  // Calculate base protein
   let protein = Math.round(weight * proteinPerKg);
   
-  // Cap protein at reasonable maximum (2.5g/kg or 200g for very heavy individuals)
-  const maxProtein = Math.min(Math.round(weight * 2.5), 220);
-  protein = Math.min(protein, maxProtein);
+  // Apply caps to ensure realistic values
+  const maxByWeight = Math.round(weight * MAX_PROTEIN_PER_KG);
+  protein = Math.min(protein, maxByWeight, ABSOLUTE_MAX_PROTEIN);
+  
+  // Minimum protein threshold
+  protein = Math.max(protein, 50);
   
   return protein;
 };
 
-// Calculate macro breakdown based on calorie needs and selected ratios
+// Calculate macro breakdown based on calorie needs with REALISTIC protein limits
+// This is the main calculation function used throughout the app
+export const calculateMacrosWithProteinLimit = (
+  calories: number, 
+  weight: number,
+  presetId: string | null,
+  ratios: MacroRatios
+): Omit<MacroGoals, 'calories'> => {
+  // Step 1: Calculate protein based on bodyweight (NOT percentage of calories)
+  const protein = calculateProteinForPreset(weight, presetId);
+  const proteinCalories = protein * 4;
+  
+  // Step 2: Calculate remaining calories for carbs and fat
+  const remainingCalories = calories - proteinCalories;
+  
+  // Step 3: Distribute remaining calories between carbs and fat based on ratio proportions
+  // We use the carb:fat ratio from the preset, but protein is fixed by bodyweight
+  const carbFatTotal = ratios.carbs + ratios.fat;
+  const carbProportion = carbFatTotal > 0 ? ratios.carbs / carbFatTotal : 0.5;
+  const fatProportion = carbFatTotal > 0 ? ratios.fat / carbFatTotal : 0.5;
+  
+  const carbCalories = Math.round(remainingCalories * carbProportion);
+  const fatCalories = Math.round(remainingCalories * fatProportion);
+  
+  const carbs = Math.round(carbCalories / 4);  // 4 cal per gram
+  const fat = Math.round(fatCalories / 9);     // 9 cal per gram
+  
+  // Ensure minimum values
+  return { 
+    protein, 
+    carbs: Math.max(carbs, 20),  // Minimum 20g carbs
+    fat: Math.max(fat, 20)       // Minimum 20g fat
+  };
+};
+
+// Legacy function for backward compatibility (uses new calculation internally)
 export const calculateMacros = (calories: number, data: ProfileData): Omit<MacroGoals, 'calories'> => {
-  const fitnessGoal = data.fitnessGoal || 'maintain';
-  const ratios = getMacroRatios(fitnessGoal);
+  const presetId = getSelectedPreset();
+  const ratios = getMacroRatios(data.fitnessGoal || 'maintain');
+  const weight = data.weight || 70;
   
-  // Calculate all macros based on the selected ratio percentages
-  // This ensures presets work correctly and all macros change together
-  const protein = Math.round((calories * (ratios.protein / 100)) / 4); // 4 cal per gram
-  const carbs = Math.round((calories * (ratios.carbs / 100)) / 4);     // 4 cal per gram
-  const fat = Math.round((calories * (ratios.fat / 100)) / 9);         // 9 cal per gram
-  
-  return { protein, carbs, fat };
+  return calculateMacrosWithProteinLimit(calories, weight, presetId, ratios);
 };
 
 // Calculate complete macro goals (calories + macros)
@@ -222,6 +277,12 @@ export const calculateMacroGoals = (profileData: ProfileData): MacroGoals => {
   };
 };
 
+// Get the actual protein ratio percentage (for display purposes)
+export const getActualProteinPercentage = (protein: number, calories: number): number => {
+  if (calories <= 0) return 0;
+  return Math.round((protein * 4 / calories) * 100);
+};
+
 // Get detailed calculation breakdown for display
 export const getCalculationBreakdown = (profileData: ProfileData) => {
   const bmr = calculateBMR(profileData);
@@ -230,7 +291,10 @@ export const getCalculationBreakdown = (profileData: ProfileData) => {
   const activityMultiplier = getActivityMultiplier(profileData);
   const fitnessGoal = profileData.fitnessGoal || 'maintain';
   const calorieAdjustment = CALORIE_ADJUSTMENTS[fitnessGoal] || 0;
-  const proteinPerKg = PROTEIN_PER_KG[fitnessGoal] || PROTEIN_PER_KG.maintain;
+  const presetId = getSelectedPreset();
+  const proteinPerKg = presetId && PROTEIN_PER_KG_BY_PRESET[presetId] 
+    ? PROTEIN_PER_KG_BY_PRESET[presetId] 
+    : 1.6;
   
   return {
     bmr,
