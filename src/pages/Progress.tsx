@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2, Filter, Grid, Clock, ArrowLeftRight, Star, Heart } from 'lucide-react';
+import { Calendar, Camera, Plus, Upload, Weight, ArrowUp, ArrowDown, X, Trash2, Filter, Grid, Clock, ArrowLeftRight, Star, Heart, Ruler, TrendingUp, Activity, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -344,85 +344,133 @@ export default function Progress() {
         </TabsContent>
         
         <TabsContent value="measurements" className="space-y-6">
-          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("Body measurements")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {enabledMeasurementTypes.map(type => {
-                  const latestMeasurement = getLatestMeasurement(type.id);
-                  
-                  return (
-                    <div key={type.id} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{getDisplayName(type)}</span>
-                      <span className="text-sm">
-                        {latestMeasurement ? `${latestMeasurement.value} ${type.unit}` : '—'}
-                      </span>
-                    </div>
-                  );
-                })}
+          {/* Quick Stats - Latest Measurements */}
+          {enabledMeasurementTypes.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {enabledMeasurementTypes.slice(0, 4).map((type, index) => {
+                const latestMeasurement = getLatestMeasurement(type.id);
+                const colors = [
+                  'from-blue-500 to-blue-600',
+                  'from-emerald-500 to-emerald-600', 
+                  'from-amber-500 to-amber-600',
+                  'from-purple-500 to-purple-600'
+                ];
+                const iconColors = ['text-blue-500', 'text-emerald-500', 'text-amber-500', 'text-purple-500'];
                 
-                {enabledMeasurementTypes.length === 0 && (
-                  <div className="text-center py-4">
-                    <p className="text-muted-foreground text-sm">
-                      {t("No measurements enabled")}
-                    </p>
-                    <p className="text-muted-foreground text-xs mt-1">
-                      {t("Enable measurements in Settings")}
-                    </p>
-                  </div>
-                )}
+                return (
+                  <Card key={type.id} className="border-0 shadow-md overflow-hidden">
+                    <div className={`h-1 bg-gradient-to-r ${colors[index % colors.length]}`} />
+                    <CardContent className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-1 mb-2">
+                        <Ruler className={`h-4 w-4 ${iconColors[index % iconColors.length]}`} />
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          {getDisplayName(type)}
+                        </p>
+                      </div>
+                      <p className="text-2xl font-bold">
+                        {latestMeasurement ? latestMeasurement.value : '—'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{type.unit}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
+            {/* All Measurements Card */}
+            <Card className="border-0 shadow-md">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Ruler className="h-5 w-5 text-primary" />
+                  {t("Body measurements")}
+                </h3>
+                <div className="space-y-3">
+                  {enabledMeasurementTypes.map(type => {
+                    const latestMeasurement = getLatestMeasurement(type.id);
+                    
+                    return (
+                      <div key={type.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-full bg-primary/10">
+                            <Ruler className="h-4 w-4 text-primary" />
+                          </div>
+                          <span className="font-medium">{getDisplayName(type)}</span>
+                        </div>
+                        <span className="text-lg font-semibold">
+                          {latestMeasurement ? `${latestMeasurement.value} ${type.unit}` : '—'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  
+                  {enabledMeasurementTypes.length === 0 && (
+                    <div className="text-center py-8">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">
+                        <Ruler className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground text-sm">
+                        {t("No measurements enabled")}
+                      </p>
+                      <p className="text-muted-foreground text-xs mt-1">
+                        {t("Enable measurements in Settings")}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("Measurement history")}</CardTitle>
-              </CardHeader>
-              <CardContent>
+            {/* Measurement History Card */}
+            <Card className="border-0 shadow-md">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-primary" />
+                  {t("Measurement history")}
+                </h3>
                 {measurements.length > 0 ? (
-                  <div className="max-h-72 overflow-y-auto">
-                    <Table className="w-full text-sm">
-                      <TableHeader>
-                        <TableRow className="border-b border-border">
-                          <TableHead className="pb-2 font-medium">{t("date")}</TableHead>
-                          <TableHead className="pb-2 font-medium">{t("measurement")}</TableHead>
-                          <TableHead className="pb-2 font-medium text-right">{t("value")}</TableHead>
-                          <TableHead className="pb-2 font-medium w-10"></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {[...measurements]
-                          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                          .map(measurement => {
-                            const measurementTypeInfo = measurementTypes.find(type => type.id === measurement.type);
-                            return (
-                              <TableRow key={measurement.id} className="border-b border-border">
-                                <TableCell className="py-3">{format(parseISO(measurement.date), 'MMM d, yyyy')}</TableCell>
-                                <TableCell className="py-3">
+                  <div className="space-y-2 max-h-72 overflow-y-auto">
+                    {[...measurements]
+                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .map(measurement => {
+                        const measurementTypeInfo = measurementTypes.find(type => type.id === measurement.type);
+                        return (
+                          <div key={measurement.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-full bg-primary/10">
+                                <Ruler className="h-4 w-4 text-primary" />
+                              </div>
+                              <div>
+                                <p className="font-medium">
                                   {measurementTypeInfo ? getDisplayName(measurementTypeInfo) : measurement.type}
-                                </TableCell>
-                                <TableCell className="py-3 text-right">{measurement.value} {measurement.unit}</TableCell>
-                                <TableCell className="py-3">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon"
-                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                    onClick={() => handleDeleteMeasurement(measurement.id)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })
-                        }
-                      </TableBody>
-                    </Table>
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {format(parseISO(measurement.date), 'MMM d, yyyy')}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold">{measurement.value} {measurement.unit}</span>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="h-8 w-8 p-0 hover:text-destructive"
+                                onClick={() => handleDeleteMeasurement(measurement.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    }
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">
+                      <Plus className="h-6 w-6 text-muted-foreground" />
+                    </div>
                     <p className="text-muted-foreground mb-4">
                       {t("No measurements yet")}
                     </p>
@@ -435,24 +483,26 @@ export default function Progress() {
               </CardContent>
             </Card>
             
+            {/* Measurement Trends Chart */}
             {measurements.length > 0 && enabledMeasurementTypes.length > 0 && (
               <div className={isMobile ? 'col-span-1' : 'col-span-2'}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{t("Measurement Trends")}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                     <Tabs defaultValue={enabledMeasurementTypes[0]?.id} className="w-full">
-                       <TabsList className={`mb-4 w-full ${isMobile ? 'grid h-auto p-2' : 'flex flex-wrap'}`} style={isMobile ? { gridTemplateColumns: `repeat(${Math.min(enabledMeasurementTypes.length, 2)}, 1fr)` } : undefined}>
-                         {enabledMeasurementTypes.map(type => {
-                           const hasData = getMeasurementsByType(type.id).length > 0;
-                           return (
-                             <TabsTrigger key={type.id} value={type.id} disabled={!hasData} className={isMobile ? 'text-xs py-2 px-1' : ''}>
-                               {isMobile ? getDisplayName(type) : `${getDisplayName(type)} ${hasData ? `(${getMeasurementsByType(type.id).length})` : ''}`}
-                             </TabsTrigger>
-                           );
-                         })}
-                       </TabsList>
+                <Card className="border-0 shadow-md">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                      {t("Measurement Trends")}
+                    </h3>
+                    <Tabs defaultValue={enabledMeasurementTypes[0]?.id} className="w-full">
+                      <TabsList className={`mb-4 w-full ${isMobile ? 'grid h-auto p-2' : 'flex flex-wrap'}`} style={isMobile ? { gridTemplateColumns: `repeat(${Math.min(enabledMeasurementTypes.length, 2)}, 1fr)` } : undefined}>
+                        {enabledMeasurementTypes.map(type => {
+                          const hasData = getMeasurementsByType(type.id).length > 0;
+                          return (
+                            <TabsTrigger key={type.id} value={type.id} disabled={!hasData} className={isMobile ? 'text-xs py-2 px-1' : ''}>
+                              {isMobile ? getDisplayName(type) : `${getDisplayName(type)} ${hasData ? `(${getMeasurementsByType(type.id).length})` : ''}`}
+                            </TabsTrigger>
+                          );
+                        })}
+                      </TabsList>
                       
                       {enabledMeasurementTypes.map(type => (
                         <TabsContent key={type.id} value={type.id}>
@@ -483,11 +533,65 @@ export default function Progress() {
       {showPhotosTab && (
           <TabsContent value="photos" className="space-y-6">
             <>
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("Photos")}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
+              {/* Photo Stats */}
+              {photos.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Card className="border-0 shadow-md overflow-hidden">
+                    <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600" />
+                    <CardContent className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-1 mb-2">
+                        <Camera className="h-4 w-4 text-blue-500" />
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          {t("Total Photos")}
+                        </p>
+                      </div>
+                      <p className="text-2xl font-bold">{photos.length}</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-0 shadow-md overflow-hidden">
+                    <div className="h-1 bg-gradient-to-r from-amber-500 to-amber-600" />
+                    <CardContent className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-1 mb-2">
+                        <Star className="h-4 w-4 text-amber-500" />
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          {t("Milestones")}
+                        </p>
+                      </div>
+                      <p className="text-2xl font-bold">{milestonesCount}</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-0 shadow-md overflow-hidden">
+                    <div className="h-1 bg-gradient-to-r from-rose-500 to-rose-600" />
+                    <CardContent className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-1 mb-2">
+                        <Heart className="h-4 w-4 text-rose-500" />
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          {t("Favorites")}
+                        </p>
+                      </div>
+                      <p className="text-2xl font-bold">{favoritesCount}</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-0 shadow-md overflow-hidden">
+                    <div className="h-1 bg-gradient-to-r from-emerald-500 to-emerald-600" />
+                    <CardContent className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-1 mb-2">
+                        <Grid className="h-4 w-4 text-emerald-500" />
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          {t("Categories")}
+                        </p>
+                      </div>
+                      <p className="text-2xl font-bold">{new Set(photos.map(p => p.category)).size}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+              
+              <Card className="border-0 shadow-md">
+                <CardContent className="p-6 space-y-6">
                   <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                     <div className="flex flex-wrap gap-2">
                       <Button
