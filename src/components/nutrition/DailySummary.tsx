@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Progress } from '@/components/ui/progress';
+import { Card, CardContent } from '@/components/ui/card';
 import { calculateMacroGoals, type ProfileData } from '@/utils/macroCalculations';
+import { Flame, Zap, Wheat, Droplets } from 'lucide-react';
 
 type MacroData = {
   calories: { consumed: number; goal: number; unit: string };
@@ -110,48 +112,98 @@ export default function DailySummary({ className, meals = [], selectedDate = new
   };
 
   return (
-    <div className={`grid grid-cols-1 gap-3 ${className}`}>
-      <div className="border rounded-lg p-4 shadow-sm">
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-medium">{t("Calories")}</div>
-          <div className="text-sm text-muted-foreground">
-            {macroTargets.calories.consumed} / {macroTargets.calories.goal}
+    <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 ${className}`}>
+      {/* Calories Card */}
+      <Card className="overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-orange-500 to-amber-500" />
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="rounded-full bg-gradient-to-br from-orange-500 to-amber-500 p-2">
+              <Flame className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{t("Calories")}</p>
+              <p className="text-lg font-bold">{macroTargets.calories.consumed}</p>
+            </div>
           </div>
-        </div>
-        <Progress 
-          value={calculatePercentage(macroTargets.calories.consumed, macroTargets.calories.goal)} 
-          className="h-2" 
-        />
-      </div>
+          <Progress 
+            value={calculatePercentage(macroTargets.calories.consumed, macroTargets.calories.goal)} 
+            className="h-1.5" 
+          />
+          <p className="text-xs text-muted-foreground mt-2">
+            / {macroTargets.calories.goal} {t("kcal")}
+          </p>
+        </CardContent>
+      </Card>
       
-      <div className="grid grid-cols-3 gap-3">
-        <div className="border rounded-lg p-3 shadow-sm">
-          <div className="text-xs text-muted-foreground">{t("Protein")}</div>
-          <div className="text-sm font-medium">{Math.round(macroTargets.protein.consumed * 10) / 10}g / {macroTargets.protein.goal}g</div>
+      {/* Protein Card */}
+      <Card className="overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 p-2">
+              <Zap className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{t("Protein")}</p>
+              <p className="text-lg font-bold">{Math.round(macroTargets.protein.consumed * 10) / 10}g</p>
+            </div>
+          </div>
           <Progress 
             value={calculatePercentage(macroTargets.protein.consumed, macroTargets.protein.goal)} 
-            className="h-1.5 mt-1" 
+            className="h-1.5 [&>div]:bg-blue-500" 
           />
-        </div>
-        
-        <div className="border rounded-lg p-3 shadow-sm">
-          <div className="text-xs text-muted-foreground">{t("Carbs")}</div>
-          <div className="text-sm font-medium">{Math.round(macroTargets.carbs.consumed * 10) / 10}g / {macroTargets.carbs.goal}g</div>
+          <p className="text-xs text-muted-foreground mt-2">
+            / {macroTargets.protein.goal}g
+          </p>
+        </CardContent>
+      </Card>
+      
+      {/* Carbs Card */}
+      <Card className="overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-500" />
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="rounded-full bg-gradient-to-br from-green-500 to-emerald-500 p-2">
+              <Wheat className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{t("Carbs")}</p>
+              <p className="text-lg font-bold">{Math.round(macroTargets.carbs.consumed * 10) / 10}g</p>
+            </div>
+          </div>
           <Progress 
             value={calculatePercentage(macroTargets.carbs.consumed, macroTargets.carbs.goal)} 
-            className="h-1.5 mt-1" 
+            className="h-1.5 [&>div]:bg-green-500" 
           />
-        </div>
-        
-        <div className="border rounded-lg p-3 shadow-sm">
-          <div className="text-xs text-muted-foreground">{t("Fat")}</div>
-          <div className="text-sm font-medium">{Math.round(macroTargets.fat.consumed * 10) / 10}g / {macroTargets.fat.goal}g</div>
+          <p className="text-xs text-muted-foreground mt-2">
+            / {macroTargets.carbs.goal}g
+          </p>
+        </CardContent>
+      </Card>
+      
+      {/* Fat Card */}
+      <Card className="overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-yellow-500 to-orange-500" />
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 p-2">
+              <Droplets className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{t("Fat")}</p>
+              <p className="text-lg font-bold">{Math.round(macroTargets.fat.consumed * 10) / 10}g</p>
+            </div>
+          </div>
           <Progress 
             value={calculatePercentage(macroTargets.fat.consumed, macroTargets.fat.goal)} 
-            className="h-1.5 mt-1" 
+            className="h-1.5 [&>div]:bg-yellow-500" 
           />
-        </div>
-      </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            / {macroTargets.fat.goal}g
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
