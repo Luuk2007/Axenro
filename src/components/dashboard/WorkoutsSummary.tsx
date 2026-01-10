@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Dumbbell, Plus, TrendingUp } from 'lucide-react';
+import { Dumbbell, Plus, TrendingUp, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
@@ -86,61 +87,76 @@ export default function WorkoutsSummary({
 
   
   return (
-    <div className={cn("glassy-card rounded-xl card-shadow hover-scale h-[400px] flex flex-col", className)}>
-      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-        <h3 className="font-medium tracking-tight">{title || t("Recent workouts")}</h3>
-        <div className="flex items-center gap-2">
+    <Card className={cn("overflow-hidden h-[400px] flex flex-col", className)}>
+      <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-500" />
+      <CardHeader className="pb-0 pt-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-gradient-to-br from-green-500 to-emerald-500 p-2">
+              <Dumbbell className="h-4 w-4 text-white" />
+            </div>
+            <h3 className="font-semibold">{title || t("Recent workouts")}</h3>
+          </div>
           {onViewAll && (
             <Button variant="ghost" size="sm" onClick={onViewAll}>
               {t("viewAll")}
             </Button>
           )}
         </div>
-      </div>
-      <div className="flex-1 overflow-y-auto">
+      </CardHeader>
+      <CardContent className="flex-1 overflow-y-auto pt-4">
         {recentWorkouts.length > 0 ? (
-          <div className="divide-y divide-border">
+          <div className="space-y-3">
             {recentWorkouts.map((workout) => {
               const exerciseCount = getExerciseCount(workout);
               const muscleGroups = getMuscleGroups(workout);
               
               return (
-                <div
+                <Card 
                   key={workout.id}
-                  className="flex items-center justify-between p-4 hover:bg-secondary/30 transition-colors"
+                  className="overflow-hidden hover:shadow-sm transition-shadow cursor-pointer"
+                  onClick={() => navigate('/workouts')}
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="rounded-lg bg-primary/10 p-2">
-                      <Dumbbell className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm truncate">{workout.name}</p>
-                      <div className="flex items-center text-xs text-muted-foreground mt-1">
-                        <span>{formatWorkoutDate(workout.date)}</span>
-                        {exerciseCount > 0 && (
-                          <>
-                            <span className="mx-1">•</span>
-                            <span>{exerciseCount} {t("exercises")}</span>
-                          </>
-                        )}
+                  <div className="h-0.5 bg-gradient-to-r from-green-500 to-emerald-500" />
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-full bg-green-500/10 p-2">
+                          <Dumbbell className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm truncate">{workout.name}</p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                            <Calendar className="h-3 w-3" />
+                            <span>{formatWorkoutDate(workout.date)}</span>
+                            {exerciseCount > 0 && (
+                              <>
+                                <span>•</span>
+                                <span>{exerciseCount} {t("exercises")}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
                       </div>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                        {t("completed")}
+                      </span>
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-8 px-4 text-center h-full">
-            <div className="rounded-full bg-secondary p-4 mb-4">
-              <Dumbbell className="h-8 w-8 text-secondary-foreground" />
+            <div className="rounded-full bg-gradient-to-br from-green-500 to-emerald-500 p-4 mb-4">
+              <Dumbbell className="h-8 w-8 text-white" />
             </div>
-            <h4 className="text-lg font-medium mb-2">{t("No workouts completed")}</h4>
+            <h4 className="text-lg font-semibold mb-2">{t("No workouts completed")}</h4>
             <p className="text-sm text-muted-foreground mb-6 max-w-[280px]">
               {t("Complete your first workout to see it here")}
             </p>
             <Button 
-              size="sm" 
               onClick={() => navigate('/workouts')}
               className="flex items-center gap-2"
             >
@@ -149,10 +165,10 @@ export default function WorkoutsSummary({
             </Button>
           </div>
         )}
-      </div>
+      </CardContent>
       
       {recentWorkouts.length > 0 && (
-        <div className="px-5 py-3 border-t border-border bg-secondary/20">
+        <div className="px-4 py-3 border-t border-border bg-muted/30">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
               {recentWorkouts.length} {t("recent workouts")}
@@ -169,6 +185,6 @@ export default function WorkoutsSummary({
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

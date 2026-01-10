@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Utensils } from 'lucide-react';
+import { Utensils, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getAvailableMeals, MealData, FoodItem } from '@/types/nutrition';
@@ -73,49 +74,60 @@ export default function MealsList({
 
   
   return (
-    <div className={cn("glassy-card rounded-xl card-shadow hover-scale h-full flex flex-col", className)}>
-      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-        <h3 className="font-medium tracking-tight">{title}</h3>
-        <div className="flex items-center gap-2">
+    <Card className={cn("overflow-hidden h-full flex flex-col", className)}>
+      <div className="h-1 bg-gradient-to-r from-orange-500 to-red-500" />
+      <CardHeader className="pb-0 pt-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-gradient-to-br from-orange-500 to-red-500 p-2">
+              <Utensils className="h-4 w-4 text-white" />
+            </div>
+            <h3 className="font-semibold">{title}</h3>
+          </div>
           {onViewAll && (
             <Button variant="ghost" size="sm" onClick={() => navigate('/nutrition')}>
               {t("viewAll")}
             </Button>
           )}
         </div>
-      </div>
-      <div className="flex-1 overflow-y-auto">
-        <div className="divide-y divide-border">
-          {meals.length > 0 ? (
-            meals.map((meal) => (
-              <div
+      </CardHeader>
+      <CardContent className="flex-1 overflow-y-auto pt-4">
+        {meals.length > 0 ? (
+          <div className="space-y-3">
+            {meals.map((meal) => (
+              <Card 
                 key={meal.id}
-                className="flex items-center justify-between p-4"
+                className="overflow-hidden hover:shadow-sm transition-shadow"
               >
-                 <div className="flex items-center space-x-4">
-                   <div className="rounded-lg bg-primary/10 p-2">
-                     <Utensils className="h-5 w-5 text-primary" />
-                   </div>
-                   <div>
-                     <p className="font-medium">{meal.name}</p>
-                   </div>
-                 </div>
-                <div className="flex flex-col items-end">
-                  <p className="font-medium">{meal.calories} cal</p>
-                  <p className="text-xs text-muted-foreground">{meal.protein}g {t("protein")}</p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-              <div className="rounded-full bg-secondary p-3 mb-3">
-                <Utensils className="h-6 w-6 text-secondary-foreground" />
-              </div>
-              <h4 className="text-sm font-medium mb-1">{t("No meals tracked")}</h4>
-              <p className="text-xs text-muted-foreground mb-4">
-                {t("startTracking")}
-              </p>
-              <Button size="sm" onClick={() => {
+                <div className="h-0.5 bg-gradient-to-r from-orange-500 to-red-500" />
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-full bg-orange-500/10 p-2">
+                        <Utensils className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                      </div>
+                      <p className="font-medium text-sm">{meal.name}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-sm">{meal.calories} cal</p>
+                      <p className="text-xs text-muted-foreground">{meal.protein}g {t("protein")}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-8 px-4 text-center h-full">
+            <div className="rounded-full bg-gradient-to-br from-orange-500 to-red-500 p-4 mb-4">
+              <Utensils className="h-8 w-8 text-white" />
+            </div>
+            <h4 className="text-lg font-semibold mb-2">{t("No meals tracked")}</h4>
+            <p className="text-sm text-muted-foreground mb-6 max-w-[280px]">
+              {t("startTracking")}
+            </p>
+            <Button 
+              onClick={() => {
                 navigate('/nutrition');
                 // Trigger the add food dialog after a short delay
                 setTimeout(() => {
@@ -124,11 +136,15 @@ export default function MealsList({
                     (addFoodBtn as HTMLElement).click();
                   }
                 }, 100);
-              }}>{t("Add meal")}</Button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+              }}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              {t("Add meal")}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
