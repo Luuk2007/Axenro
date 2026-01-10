@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Apple, Camera, Bot } from 'lucide-react';
+import { Plus, Apple, Camera, Bot, Utensils } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -630,9 +631,13 @@ const Nutrition = () => {
       </Dialog>
 
       <div className="mt-4">
-        <div className="glassy-card rounded-xl overflow-hidden card-shadow">
+        <Card className="overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <h3 className="font-medium tracking-tight">{t("Today meals")}</h3>
+            <div className="flex items-center gap-2">
+              <Utensils className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">{t("Today meals")}</h3>
+            </div>
             <NutritionTabs 
               activeTab={activeTab}
               onTabChange={setActiveTab}
@@ -640,7 +645,7 @@ const Nutrition = () => {
           </div>
           
           {activeTab === 'meals' ? (
-            <div className="divide-y divide-border">
+            <div className="p-4 space-y-4">
               {isLoading ? (
                 <div className="p-8 text-center">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -665,7 +670,7 @@ const Nutrition = () => {
               <WaterTracking />
             </div>
           )}
-        </div>
+        </Card>
       </div>
       
       {!isAuthenticated && (
