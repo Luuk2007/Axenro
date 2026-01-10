@@ -305,11 +305,15 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
 
   if (workouts.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <Dumbbell className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground text-center">
-            {t("noWorkoutDataAvailableYet")}
+      <Card className="overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
+        <CardContent className="flex flex-col items-center justify-center py-16">
+          <div className="rounded-full bg-primary/10 p-4 mb-4">
+            <Dumbbell className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">{t("noWorkoutDataAvailableYet")}</h3>
+          <p className="text-muted-foreground text-center max-w-sm">
+            {t("startTracking")}
           </p>
         </CardContent>
       </Card>
@@ -318,11 +322,15 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
 
   if (exerciseStats.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <TrendingUp className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground text-center">
-            {t("noExerciseStatsAvailable")}
+      <Card className="overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
+        <CardContent className="flex flex-col items-center justify-center py-16">
+          <div className="rounded-full bg-primary/10 p-4 mb-4">
+            <TrendingUp className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">{t("noExerciseStatsAvailable")}</h3>
+          <p className="text-muted-foreground text-center max-w-sm">
+            {t("startTracking")}
           </p>
         </CardContent>
       </Card>
@@ -332,13 +340,14 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
   const renderExerciseCard = (stat: ExerciseStats) => (
     <Card 
       key={stat.name} 
-      className="transition-colors hover:bg-muted/50 cursor-pointer"
+      className="overflow-hidden hover:shadow-md transition-all cursor-pointer group"
       onClick={() => handleExerciseClick(stat.name, stat.isCardio, stat.muscleGroup === 'calisthenics')}
     >
+      <div className={`h-1 bg-gradient-to-r ${getMuscleGroupGradient(stat.muscleGroup)}`} />
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex-1">
-            <h3 className="font-medium text-lg mb-2">{stat.name}</h3>
+            <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">{stat.name}</h3>
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
               {stat.isCardio ? (
@@ -397,23 +406,105 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
               </div>
             </div>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
         </div>
       </CardContent>
     </Card>
   );
 
+  const getMuscleGroupGradient = (muscleGroup?: string) => {
+    const gradients: Record<string, string> = {
+      chest: "from-red-500 to-rose-500",
+      back: "from-blue-500 to-indigo-500",
+      shoulders: "from-yellow-500 to-amber-500",
+      arms: "from-green-500 to-emerald-500",
+      legs: "from-purple-500 to-violet-500",
+      core: "from-orange-500 to-amber-500",
+      cardio: "from-pink-500 to-rose-500",
+      calisthenics: "from-cyan-500 to-teal-500",
+    };
+    return gradients[muscleGroup || ""] || "from-primary to-primary/60";
+  };
+
   return (
     <div className="space-y-6">
-      <Card>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-blue-500/10 p-2">
+                <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{exerciseStats.length}</p>
+                <p className="text-xs text-muted-foreground">{t("Tracked Exercises")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-500" />
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-green-500/10 p-2">
+                <Dumbbell className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{sortedGroups.length}</p>
+                <p className="text-xs text-muted-foreground">{t("Muscle Groups")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-purple-500/10 p-2">
+                <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">
+                  {exerciseStats.reduce((sum, s) => sum + s.totalSets, 0)}
+                </p>
+                <p className="text-xs text-muted-foreground">{t("Total Sets")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-orange-500 to-amber-500" />
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-orange-500/10 p-2">
+                <Dumbbell className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{workouts.length}</p>
+                <p className="text-xs text-muted-foreground">{t("Total Workouts")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Exercise Statistics Header */}
+      <Card className="overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
+            <TrendingUp className="h-5 w-5 text-primary" />
             {t("Exercise Statistics")}
           </CardTitle>
         </CardHeader>
       </Card>
       
+      {/* Muscle Group Collapsibles */}
       <div className="space-y-4">
         {sortedGroups.map((group) => (
           <Collapsible 
@@ -421,7 +512,8 @@ const WorkoutStatistics: React.FC<WorkoutStatisticsProps> = ({ workouts }) => {
             open={openGroups.has(group)}
             onOpenChange={() => toggleGroup(group)}
           >
-            <Card>
+            <Card className="overflow-hidden">
+              <div className={`h-1 bg-gradient-to-r ${getMuscleGroupGradient(group)}`} />
               <CollapsibleTrigger className="w-full">
                 <CardHeader className="py-3">
                   <div className="flex items-center justify-between">
