@@ -201,6 +201,64 @@ const PersonalRecords = () => {
 
   return (
     <div className="space-y-6">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-amber-500 to-yellow-500" />
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-amber-500/10 p-2">
+                <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{records.length}</p>
+                <p className="text-xs text-muted-foreground">{t("Personal records")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-500" />
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-green-500/10 p-2">
+                <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">
+                  {records.length > 0 
+                    ? `${formatWeight(getDisplayWeight(Math.max(...records.map(r => r.weight))), measurementSystem)}`
+                    : '0'
+                  }
+                </p>
+                <p className="text-xs text-muted-foreground">{t("Best 1RM")} ({getWeightUnit(measurementSystem)})</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="overflow-hidden col-span-2">
+          <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-purple-500/10 p-2">
+                <Trophy className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-lg font-bold">
+                  {records.length > 0 
+                    ? records.reduce((best, r) => r.weight > best.weight ? r : best, records[0]).exerciseName
+                    : t("No records yet")
+                  }
+                </p>
+                <p className="text-xs text-muted-foreground">{t("Strongest Exercise")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="calculator">{t('One rep max calculator')}</TabsTrigger>
@@ -208,57 +266,63 @@ const PersonalRecords = () => {
         </TabsList>
         
         <TabsContent value="calculator">
-          <OneRepMaxCalculator onCalculate={handleWeightCalculated} />
-          
-          {calculatedWeight && (
-            <div className="mt-4 flex justify-center">
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Trophy className="mr-2 h-4 w-4" />
-                    {t('Save Record')}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>{t('Save Record')}</DialogTitle>
-                    <DialogDescription>
-                      {t('Estimated One Rep Max')}: {formatWeight(getDisplayWeight(calculatedWeight), measurementSystem)} {getWeightUnit(measurementSystem)}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="exerciseName" className="text-right">
-                        {t('exerciseName')}
-                      </Label>
-                      <Input
-                        id="exerciseName"
-                        value={exerciseName}
-                        onChange={(e) => setExerciseName(e.target.value)}
-                        className="col-span-3"
-                        placeholder="e.g., Bench Press"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                      {t('cancel')}
-                    </Button>
-                    <Button onClick={saveRecord} disabled={!exerciseName.trim()}>
-                      {t('Save Record')}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          )}
+          <Card className="overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
+            <CardContent className="pt-6">
+              <OneRepMaxCalculator onCalculate={handleWeightCalculated} />
+              
+              {calculatedWeight && (
+                <div className="mt-6 flex justify-center">
+                  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="lg">
+                        <Trophy className="mr-2 h-4 w-4" />
+                        {t('Save Record')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t('Save Record')}</DialogTitle>
+                        <DialogDescription>
+                          {t('Estimated One Rep Max')}: {formatWeight(getDisplayWeight(calculatedWeight), measurementSystem)} {getWeightUnit(measurementSystem)}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="exerciseName" className="text-right">
+                            {t('exerciseName')}
+                          </Label>
+                          <Input
+                            id="exerciseName"
+                            value={exerciseName}
+                            onChange={(e) => setExerciseName(e.target.value)}
+                            className="col-span-3"
+                            placeholder="e.g., Bench Press"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                          {t('cancel')}
+                        </Button>
+                        <Button onClick={saveRecord} disabled={!exerciseName.trim()}>
+                          {t('Save Record')}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="records">
-          <Card>
+          <Card className="overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-amber-500 to-yellow-500" />
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5" />
+                <Trophy className="h-5 w-5 text-amber-500" />
                 {t('Personal records')}
               </CardTitle>
             </CardHeader>
@@ -268,46 +332,60 @@ const PersonalRecords = () => {
                   <p>{t('Loading')}...</p>
                 </div>
               ) : records.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>{t('No personal records')}</p>
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="rounded-full bg-amber-500/10 p-4 mb-4">
+                    <Trophy className="h-8 w-8 text-amber-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">{t('No personal records')}</h3>
+                  <p className="text-muted-foreground text-center max-w-sm mb-4">
+                    {t("Start tracking your progress")}
+                  </p>
                   <Button 
-                    variant="outline"
                     onClick={() => setActiveTab('calculator')}
-                    className="mt-2"
                   >
                     {t('Add personal record')}
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {records.map((record) => {
                     const displayWeight = getDisplayWeight(record.weight);
                     return (
-                      <div 
+                      <Card 
                         key={record.id} 
-                        className="flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+                        className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
                         onClick={() => handleRecordClick(record)}
                       >
-                        <div className="flex items-center gap-3 flex-1">
-                          <div className="flex-1">
-                            <div className="font-medium">{record.exerciseName}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {formatWeight(displayWeight, measurementSystem)} {getWeightUnit(measurementSystem)} • {record.date}
+                        <div className="h-1 bg-gradient-to-r from-amber-500 to-yellow-500" />
+                        <CardContent className="pt-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3 flex-1">
+                              <div className="rounded-full bg-amber-500/10 p-2">
+                                <Trophy className="h-4 w-4 text-amber-500" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-semibold group-hover:text-primary transition-colors">
+                                  {record.exerciseName}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {formatWeight(displayWeight, measurementSystem)} {getWeightUnit(measurementSystem)} • {record.date}
+                                </div>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                             </div>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteRecord(record.id);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteRecord(record.id);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                        </CardContent>
+                      </Card>
                     );
                   })}
                 </div>
