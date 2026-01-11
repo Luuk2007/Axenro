@@ -137,7 +137,7 @@ const WeightTracker = () => {
               </p>
             </div>
             <p className="text-3xl font-bold">
-              {currentWeight ? currentWeight.toFixed(1) : '—'}
+              {currentWeight ? currentWeight.toFixed(2) : '—'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">{weightUnit}</p>
           </CardContent>
@@ -154,7 +154,7 @@ const WeightTracker = () => {
               </p>
             </div>
             <p className="text-3xl font-bold">
-              {startWeight ? startWeight.toFixed(1) : '—'}
+              {startWeight ? startWeight.toFixed(2) : '—'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">{weightUnit}</p>
           </CardContent>
@@ -175,7 +175,7 @@ const WeightTracker = () => {
               </p>
             </div>
             <p className={`text-3xl font-bold ${weightChange !== null && weightChange < 0 ? 'text-green-600' : weightChange !== null && weightChange > 0 ? 'text-amber-600' : ''}`}>
-              {weightChange !== null ? `${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)}` : '—'}
+              {weightChange !== null ? `${weightChange > 0 ? '+' : ''}${weightChange.toFixed(2)}` : '—'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">{weightUnit}</p>
           </CardContent>
@@ -202,13 +202,13 @@ const WeightTracker = () => {
                   />
                   <YAxis 
                     domain={['dataMin - 2', 'dataMax + 2']}
-                    tickFormatter={(value) => `${value.toFixed(1)}`}
+                    tickFormatter={(value) => `${value.toFixed(2)}`}
                     fontSize={isMobile ? 10 : 12}
                     stroke="hsl(var(--muted-foreground))"
                   />
                   <Tooltip 
                     labelFormatter={formatDate}
-                    formatter={(value: number) => [`${value.toFixed(1)} ${weightUnit}`, t("Weight")]}
+                    formatter={(value: number) => [`${value.toFixed(2)} ${weightUnit}`, t("Weight")]}
                     contentStyle={{
                       backgroundColor: 'hsl(var(--background))',
                       border: '1px solid hsl(var(--border))',
@@ -290,7 +290,7 @@ const WeightTracker = () => {
                       <Scale className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium">{entry.value.toFixed(1)} {weightUnit}</p>
+                      <p className="font-medium">{entry.value.toFixed(2)} {weightUnit}</p>
                       <p className="text-xs text-muted-foreground">{formatDate(entry.date)}</p>
                     </div>
                   </div>
