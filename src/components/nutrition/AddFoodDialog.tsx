@@ -4,7 +4,7 @@ import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/c
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Loader2, Minus, Clock } from 'lucide-react';
+import { Plus, Search, Loader2, Minus, Clock, Package } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { searchProductsByName, ProductDetails } from '@/services/openFoodFactsService';
 import { calculateNutritionForUnit } from '@/services/foodTypeAnalyzer';
@@ -212,9 +212,10 @@ const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }:
   };
 
   return (
-    <DialogContent className="sm:max-w-md mx-auto p-0 gap-0">
-      <DialogHeader className="p-4 pb-3 text-center">
-        <DialogTitle className="text-xl font-semibold">
+    <DialogContent className="sm:max-w-md mx-auto p-0 gap-0 overflow-hidden border-0 bg-gradient-to-b from-background to-muted/30">
+      <DialogHeader className="relative p-5 pb-4 text-center bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent opacity-50" />
+        <DialogTitle className="relative text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
           {editingItem ? t("Edit food") : t("Add food")}
         </DialogTitle>
         <DialogDescription className="sr-only">
@@ -223,82 +224,95 @@ const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }:
       </DialogHeader>
       
       {selectedProduct ? (
-        <div className="px-4 pb-4">
-          {/* Product Image and Info */}
-          <div className="text-center mb-4">
-            {selectedProduct.imageUrl && (
-              <div className="w-20 h-20 mx-auto mb-3 rounded-xl overflow-hidden bg-muted">
-                <img 
-                  src={selectedProduct.imageUrl} 
-                  alt={selectedProduct.name} 
-                  className="w-full h-full object-cover"
-                />
+        <div className="px-5 pb-5 space-y-5">
+          {/* Product Card with Glassmorphism */}
+          <div className="relative p-4 rounded-2xl bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-sm border border-border/50 shadow-lg">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent" />
+            <div className="relative flex items-center gap-4">
+              {selectedProduct.imageUrl ? (
+                <div className="w-20 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-muted to-muted/50 ring-2 ring-primary/20 shadow-md flex-shrink-0">
+                  <img 
+                    src={selectedProduct.imageUrl} 
+                    alt={selectedProduct.name} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-primary/20 flex-shrink-0">
+                  <Package className="h-8 w-8 text-primary/60" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-bold text-foreground truncate">{selectedProduct.name}</h2>
+                {selectedProduct.brand && (
+                  <p className="text-sm text-muted-foreground truncate">{selectedProduct.brand}</p>
+                )}
+                {selectedProduct.foodAnalysis && (
+                  <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                    {selectedProduct.foodAnalysis.category === 'liquid' ? '🥛 Liquid' :
+                     selectedProduct.foodAnalysis.category === 'countable' ? '🍎 Countable' :
+                     selectedProduct.foodAnalysis.category === 'powder' ? '🥄 Powder' : '🥗 Solid'}
+                  </span>
+                )}
               </div>
-            )}
-            <h2 className="text-lg font-bold text-foreground mb-1">{selectedProduct.name}</h2>
-            {selectedProduct.brand && (
-              <p className="text-sm text-muted-foreground">{selectedProduct.brand}</p>
-            )}
-            {selectedProduct.foodAnalysis && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {selectedProduct.foodAnalysis.category === 'liquid' ? '🥛 Liquid' :
-                 selectedProduct.foodAnalysis.category === 'countable' ? '🍎 Countable' :
-                 selectedProduct.foodAnalysis.category === 'powder' ? '🥄 Powder' : '🥗 Solid'}
-              </p>
-            )}
+            </div>
           </div>
 
-          {/* Portion Size */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-foreground mb-2">{t("Portion Size")}</h3>
+          {/* Portion Size with Modern Inputs */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              {t("Portion Size")}
+            </h3>
             
-            <div className="flex gap-2 mb-3">
-              <div className="flex-1">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="relative">
                 <Input 
                   type="number"
                   value={amount}
                   onChange={handleAmountChange}
                   min="0.1"
                   step="0.1"
-                  className="text-center h-10"
+                  className="h-12 text-center text-lg font-semibold bg-muted/50 border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
               
-              <div className="flex-1">
-                <Select value={unit} onValueChange={setUnit}>
-                  <SelectTrigger className="h-10">
-                    <SelectValue>{t(unit) || unit}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getAvailableUnits().map(unitOption => (
-                      <SelectItem key={unitOption} value={unitOption}>
-                        {t(unitOption) || unitOption}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select value={unit} onValueChange={setUnit}>
+                <SelectTrigger className="h-12 bg-muted/50 border-border/50 rounded-xl">
+                  <SelectValue>{t(unit) || unit}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {getAvailableUnits().map(unitOption => (
+                    <SelectItem key={unitOption} value={unitOption}>
+                      {t(unitOption) || unitOption}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          {/* Number of Servings */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-foreground mb-2">{t("Number of servings")}</h3>
-            <div className="flex items-center justify-center gap-3">
+          {/* Number of Servings with Modern Counter */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              {t("Number of servings")}
+            </h3>
+            <div className="flex items-center justify-center gap-4 p-3 rounded-xl bg-muted/30 border border-border/30">
               <Button 
                 variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0"
+                size="icon"
+                className="h-10 w-10 rounded-xl bg-background hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all"
                 disabled={servings <= 0.25}
                 onClick={() => setServings(prev => Math.max(0.25, prev - 0.25))}
               >
                 <Minus className="h-4 w-4" />
               </Button>
-              <span className="text-lg font-semibold min-w-[60px] text-center">{servings}</span>
+              <span className="text-2xl font-bold min-w-[80px] text-center tabular-nums">{servings}</span>
               <Button 
                 variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0"
+                size="icon"
+                className="h-10 w-10 rounded-xl bg-background hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all"
                 onClick={() => setServings(prev => prev + 0.25)}
               >
                 <Plus className="h-4 w-4" />
@@ -306,10 +320,14 @@ const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }:
             </div>
           </div>
 
-          {/* Add to Meal Selection */}
-          <div className="mb-4">
+          {/* Meal Selection */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              {t("Meal")}
+            </h3>
             <Select value={selectedMealId} onValueChange={setSelectedMealId}>
-              <SelectTrigger className="h-10">
+              <SelectTrigger className="h-12 bg-muted/50 border-border/50 rounded-xl">
                 <SelectValue placeholder={t("Select the meal")} />
               </SelectTrigger>
               <SelectContent>
@@ -320,47 +338,50 @@ const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }:
             </Select>
           </div>
 
-          {/* Nutrition Summary */}
-          <div className="mb-4">
-            <h3 className="text-center text-lg font-semibold mb-3">{t("Nutrition summary")}</h3>
+          {/* Nutrition Summary with Gradient Cards */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              {t("Nutrition summary")}
+            </h3>
             
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div>
-                <div className="text-lg font-bold text-green-600">
+            <div className="grid grid-cols-4 gap-2">
+              <div className="relative p-3 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border border-emerald-500/20 text-center group hover:scale-105 transition-transform">
+                <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                   {Math.round(calculateAdjustedNutrition().carbs * 10) / 10}g
                 </div>
-                <div className="text-xs text-muted-foreground">{t("Carbs")}</div>
+                <div className="text-[10px] font-medium text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-wide">{t("Carbs")}</div>
               </div>
               
-              <div>
-                <div className="text-lg font-bold text-orange-500">
+              <div className="relative p-3 rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-500/5 border border-orange-500/20 text-center group hover:scale-105 transition-transform">
+                <div className="text-xl font-bold text-orange-600 dark:text-orange-400">
                   {Math.round(calculateAdjustedNutrition().fat * 10) / 10}g
                 </div>
-                <div className="text-xs text-muted-foreground">{t("Fat")}</div>
+                <div className="text-[10px] font-medium text-orange-600/70 dark:text-orange-400/70 uppercase tracking-wide">{t("Fat")}</div>
               </div>
               
-              <div>
-                <div className="text-lg font-bold text-blue-600">
+              <div className="relative p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/20 text-center group hover:scale-105 transition-transform">
+                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
                   {Math.round(calculateAdjustedNutrition().protein * 10) / 10}g
                 </div>
-                <div className="text-xs text-muted-foreground">{t("Protein")}</div>
+                <div className="text-[10px] font-medium text-blue-600/70 dark:text-blue-400/70 uppercase tracking-wide">{t("Protein")}</div>
               </div>
               
-              <div>
-                <div className="text-lg font-bold text-blue-500">
-                  {Math.round(calculateAdjustedNutrition().calories)} cal
+              <div className="relative p-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/20 text-center group hover:scale-105 transition-transform">
+                <div className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                  {Math.round(calculateAdjustedNutrition().calories)}
                 </div>
-                <div className="text-xs text-muted-foreground">Cal</div>
+                <div className="text-[10px] font-medium text-purple-600/70 dark:text-purple-400/70 uppercase tracking-wide">Cal</div>
               </div>
             </div>
           </div>
 
-          {/* Add Button */}
+          {/* Add Button with Gradient */}
           <Button 
-            className="w-full h-12 text-base font-semibold" 
+            className="w-full h-14 text-base font-semibold rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02]" 
             onClick={handleAddProduct}
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-5 w-5" />
             {editingItem ? t("Update meal") : t("Add to meal plan")}
           </Button>
         </div>
