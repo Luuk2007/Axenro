@@ -140,17 +140,8 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
       </div>
 
       {/* Workouts Grid */}
-      <Card className="overflow-hidden">
-        <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-2">
-            <Dumbbell className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">{t("Your Workouts")}</h3>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {workouts.map(workout => {
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {workouts.map(workout => {
               const summaryData = renderWorkoutSummary(workout);
               return (
                 <Card 
@@ -229,9 +220,7 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
                 </Card>
               );
             })}
-          </div>
-        </CardContent>
-      </Card>
+      </div>
     </div>
   );
 };
