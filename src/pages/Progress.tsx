@@ -533,62 +533,60 @@ export default function Progress() {
       {showPhotosTab && (
           <TabsContent value="photos" className="space-y-6">
             <>
-              {/* Photo Stats */}
-              {photos.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Card className="border-0 shadow-md overflow-hidden">
-                    <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600" />
-                    <CardContent className="p-4 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-2">
-                        <Camera className="h-4 w-4 text-blue-500" />
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          {t("Total Photos")}
-                        </p>
-                      </div>
-                      <p className="text-2xl font-bold">{photos.length}</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="border-0 shadow-md overflow-hidden">
-                    <div className="h-1 bg-gradient-to-r from-amber-500 to-amber-600" />
-                    <CardContent className="p-4 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-2">
-                        <Star className="h-4 w-4 text-amber-500" />
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          {t("Milestones")}
-                        </p>
-                      </div>
-                      <p className="text-2xl font-bold">{milestonesCount}</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="border-0 shadow-md overflow-hidden">
-                    <div className="h-1 bg-gradient-to-r from-rose-500 to-rose-600" />
-                    <CardContent className="p-4 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-2">
-                        <Heart className="h-4 w-4 text-rose-500" />
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          {t("Favorites")}
-                        </p>
-                      </div>
-                      <p className="text-2xl font-bold">{favoritesCount}</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="border-0 shadow-md overflow-hidden">
-                    <div className="h-1 bg-gradient-to-r from-emerald-500 to-emerald-600" />
-                    <CardContent className="p-4 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-2">
-                        <Grid className="h-4 w-4 text-emerald-500" />
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          {t("Categories")}
-                        </p>
-                      </div>
-                      <p className="text-2xl font-bold">{new Set(photos.map(p => p.category)).size}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
+              {/* Photo Stats - Always visible */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Card className="border-0 shadow-md overflow-hidden">
+                  <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600" />
+                  <CardContent className="p-4 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-2">
+                      <Camera className="h-4 w-4 text-blue-500" />
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        {t("Total Photos")}
+                      </p>
+                    </div>
+                    <p className="text-2xl font-bold">{photos.length}</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-0 shadow-md overflow-hidden">
+                  <div className="h-1 bg-gradient-to-r from-amber-500 to-amber-600" />
+                  <CardContent className="p-4 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-2">
+                      <Star className="h-4 w-4 text-amber-500" />
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        {t("Milestones")}
+                      </p>
+                    </div>
+                    <p className="text-2xl font-bold">{milestonesCount}</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-0 shadow-md overflow-hidden">
+                  <div className="h-1 bg-gradient-to-r from-rose-500 to-rose-600" />
+                  <CardContent className="p-4 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-2">
+                      <Heart className="h-4 w-4 text-rose-500" />
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        {t("Favorites")}
+                      </p>
+                    </div>
+                    <p className="text-2xl font-bold">{favoritesCount}</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-0 shadow-md overflow-hidden">
+                  <div className="h-1 bg-gradient-to-r from-emerald-500 to-emerald-600" />
+                  <CardContent className="p-4 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-2">
+                      <Grid className="h-4 w-4 text-emerald-500" />
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        {t("Categories")}
+                      </p>
+                    </div>
+                    <p className="text-2xl font-bold">{new Set(photos.map(p => p.category)).size}</p>
+                  </CardContent>
+                </Card>
+              </div>
               
               <Card className="border-0 shadow-md">
                 <CardContent className="p-6 space-y-6">
