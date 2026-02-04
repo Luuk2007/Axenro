@@ -484,12 +484,17 @@ const Nutrition = () => {
       {!user && <LoginPrompt />}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("nutrition")}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("nutrition")}</h1>
+          <p className="text-muted-foreground mt-1">{t("Track your daily food intake and macros")}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {/* Free plan: Direct button, no modal */}
           {test_subscription_tier === 'free' ? (
-            <Button data-testid="add-food-trigger" onClick={() => setShowAddFood(true)}>
+            <Button 
+              data-testid="add-food-trigger" 
+              onClick={() => setShowAddFood(true)}
+              className="rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg"
+            >
               <Plus className="mr-2 h-4 w-4" />
               {t("Add food")}
             </Button>
@@ -497,12 +502,15 @@ const Nutrition = () => {
             /* Pro and Premium plans: Modal with multiple options */
             <Dialog>
               <DialogTrigger asChild>
-                <Button data-testid="add-food-trigger">
+                <Button 
+                  data-testid="add-food-trigger"
+                  className="rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg"
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   {t("Add food")}
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="rounded-2xl">
                 <DialogHeader>
                   <DialogTitle>{t("Add food")}</DialogTitle>
                   <DialogDescription>
@@ -516,7 +524,7 @@ const Nutrition = () => {
                   {addFoodOptions.map(option => {
                     const IconComponent = option.icon;
                     return (
-                      <Button key={option.key} className="flex-1" onClick={option.action}>
+                      <Button key={option.key} className="flex-1 rounded-xl" onClick={option.action}>
                         <IconComponent className="mr-2 h-4 w-4" />
                         {option.label}
                       </Button>

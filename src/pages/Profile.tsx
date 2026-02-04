@@ -211,19 +211,22 @@ const Profile = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in">
       {!user && <LoginPrompt />}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{t("profile")}</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t("profile")}</h1>
+          <p className="text-muted-foreground mt-1">{t("Manage your personal information and preferences")}</p>
+        </div>
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="mb-4 w-full sm:w-auto">
-          <TabsTrigger value="profile" className="flex items-center gap-2">
+        <TabsList className="mb-6 w-full sm:w-auto rounded-xl bg-muted/50 p-1">
+          <TabsTrigger value="profile" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
             <User className="h-4 w-4" />
             {t("Profile settings")}
           </TabsTrigger>
-          <TabsTrigger value="nutrition" className="flex items-center gap-2">
+          <TabsTrigger value="nutrition" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
             <Apple className="h-4 w-4" />
             {t("Nutrition plan")}
           </TabsTrigger>

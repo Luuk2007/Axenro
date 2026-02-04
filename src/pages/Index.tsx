@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Dumbbell, Flame, Footprints, Plus, Weight } from 'lucide-react';
+import { Calendar, Dumbbell, Flame, Footprints, Weight, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -16,30 +16,6 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const meals = [
-  {
-    id: '1',
-    name: 'Protein Oatmeal',
-    time: 'Today, 8:00 AM',
-    calories: 450,
-    protein: 32,
-  },
-  {
-    id: '2',
-    name: 'Chicken Salad',
-    time: 'Today, 1:00 PM',
-    calories: 550,
-    protein: 45,
-  },
-  {
-    id: '3',
-    name: 'Protein Shake',
-    time: 'Today, 4:30 PM',
-    calories: 220,
-    protein: 25,
-  },
-];
 
 const getActivityOptions = (t: (key: string) => string) => [
   { id: '1', name: t('running'), icon: Flame },
@@ -58,8 +34,6 @@ const Dashboard = () => {
   const [showStepsConnection, setShowStepsConnection] = useState(false);
   
   const { data: dashboardData, isLoading } = useDashboardData(date);
-
-
 
   const navigateToNutrition = () => {
     navigate('/nutrition');
@@ -88,46 +62,49 @@ const Dashboard = () => {
 
   if (isLoading || !dashboardData) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-8 animate-fade-in">
         <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-32" />
-          <Skeleton className="h-9 w-36" />
+          <Skeleton className="h-9 w-40 rounded-xl" />
+          <Skeleton className="h-10 w-40 rounded-xl" />
         </div>
         
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          <Skeleton className="h-32 w-full rounded-xl" />
-          <Skeleton className="h-32 w-full rounded-xl" />
-          <Skeleton className="h-32 w-full rounded-xl" />
-          <Skeleton className="h-32 w-full rounded-xl" />
+        <div className="grid gap-5 grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-36 w-full rounded-2xl" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
         </div>
         
-        <Skeleton className="h-[400px] w-full rounded-xl" />
+        <Skeleton className="h-[420px] w-full rounded-2xl" />
         
         <div className="grid gap-6 md:grid-cols-2">
-          <Skeleton className="h-[400px] w-full rounded-xl" />
-          <Skeleton className="h-[400px] w-full rounded-xl" />
+          <Skeleton className="h-[420px] w-full rounded-2xl" />
+          <Skeleton className="h-[420px] w-full rounded-2xl" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in">
       {!dashboardData.isAuthenticated && <LoginPrompt />}
+      
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard")}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("dashboard")}</h1>
+          <p className="text-muted-foreground mt-1">{t("Welcome back! Here's your daily overview.")}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="flex">
+              <Button variant="outline" size="sm" className="rounded-xl border-border/50 bg-card/50 backdrop-blur-sm">
                 <Calendar className="mr-2 h-4 w-4" />
                 <span className="hidden sm:inline">{format(date, 'PPP')}</span>
                 <span className="sm:hidden">{format(date, 'MMM d')}</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
+            <PopoverContent className="w-auto p-0 rounded-2xl border-border/50" align="end">
               <CalendarComponent
                 mode="single"
                 selected={date}
@@ -139,7 +116,7 @@ const Dashboard = () => {
           </Popover>
           
           <Dialog open={showAddActivity} onOpenChange={setShowAddActivity}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md rounded-2xl">
               <DialogHeader>
                 <DialogTitle>{t("addActivity")}</DialogTitle>
               </DialogHeader>
@@ -148,7 +125,7 @@ const Dashboard = () => {
                   <Button
                     key={activity.id}
                     variant="outline"
-                    className="h-24 flex flex-col items-center justify-center gap-2"
+                    className="h-24 flex flex-col items-center justify-center gap-2 rounded-xl border-border/50 hover:bg-accent/50"
                     onClick={() => handleAddActivity(activity.id)}
                   >
                     <activity.icon className="h-8 w-8" />
@@ -161,27 +138,31 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      {/* Stats Cards */}
+      <div className="grid gap-5 grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title={t("Daily calories")}
           value={dashboardData.consumedCalories.toString()}
           icon={Flame}
           description={`${t("target")}: ${dashboardData.userCalories}`}
           onClick={navigateToNutrition}
+          gradient="from-orange-500 to-amber-500"
         />
         <StatsCard
-          title={`${t("Daily steps")}`}
+          title={t("Daily steps")}
           value={dashboardData.dailySteps.toLocaleString()}
           icon={Footprints}
           description={`${t("target")}: 10,000`}
           onClick={handleOpenStepsConnection}
+          gradient="from-blue-500 to-cyan-500"
         />
         <StatsCard
-          title={`${t("workouts")}`}
+          title={t("workouts")}
           value={dashboardData.weeklyGoal ? `${dashboardData.workoutsThisWeek}/${dashboardData.weeklyGoal}` : "—"}
           icon={Dumbbell}
           description={dashboardData.weeklyGoal ? `${Math.round((dashboardData.workoutsThisWeek / dashboardData.weeklyGoal) * 100)}% ${t("completed")}` : t("Set weekly goal")}
           onClick={navigateToWorkouts}
+          gradient="from-emerald-500 to-teal-500"
         />
         <StatsCard
           title={t("weight")}
@@ -189,9 +170,11 @@ const Dashboard = () => {
           icon={Weight}
           description={dashboardData.profile?.target_weight ? `${t("target")}: ${dashboardData.profile.target_weight} kg` : "Set target weight"}
           onClick={navigateToWeightProgress}
+          gradient="from-violet-500 to-purple-500"
         />
       </div>
 
+      {/* Macro Progress */}
       <MacroProgressTracker 
         selectedDate={date}
         consumedMacros={dashboardData.consumedMacros}
@@ -200,8 +183,9 @@ const Dashboard = () => {
         profile={dashboardData.profile}
       />
 
+      {/* Workouts and Meals */}
       <div className="grid gap-6 md:grid-cols-2 items-start">
-        <div className="h-[400px]">
+        <div className="h-[420px]">
           <WorkoutsSummary
             title={t("Recent workouts")}
             onViewAll={navigateToWorkouts}
@@ -209,7 +193,7 @@ const Dashboard = () => {
           />
         </div>
         
-        <div className="h-[400px]">
+        <div className="h-[420px]">
           <MealsList
             title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} ${t("meals")}`}
             onViewAll={navigateToNutrition}

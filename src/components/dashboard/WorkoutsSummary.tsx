@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Dumbbell, Plus, TrendingUp, Calendar } from 'lucide-react';
+import { Dumbbell, Plus, TrendingUp, Calendar, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
@@ -26,7 +25,6 @@ export default function WorkoutsSummary({
   const [recentWorkouts, setRecentWorkouts] = useState<Workout[]>([]);
 
   useEffect(() => {
-    // Filter completed workouts and sort by date (most recent first)
     const completedWorkouts = workouts
       .filter(workout => workout.completed)
       .sort((a, b) => {
@@ -34,7 +32,7 @@ export default function WorkoutsSummary({
         const dateB = new Date(b.date);
         return dateB.getTime() - dateA.getTime();
       })
-      .slice(0, 4); // Show only the 4 most recent workouts
+      .slice(0, 4);
     
     setRecentWorkouts(completedWorkouts);
   }, [workouts]);
@@ -71,85 +69,74 @@ export default function WorkoutsSummary({
     }
     return 0;
   };
-
-  const getMuscleGroups = (workout: Workout): string[] => {
-    if (workout.exercises && Array.isArray(workout.exercises)) {
-      const groups = new Set<string>();
-      workout.exercises.forEach((exercise: any) => {
-        if (exercise.muscleGroup) {
-          groups.add(exercise.muscleGroup);
-        }
-      });
-      return Array.from(groups);
-    }
-    return [];
-  };
-
   
   return (
-    <Card className={cn("overflow-hidden h-[400px] flex flex-col", className)}>
-      <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-500" />
-      <CardHeader className="pb-0 pt-4">
+    <div className={cn(
+      "rounded-2xl border border-border/50 bg-card h-[420px] flex flex-col overflow-hidden",
+      className
+    )}>
+      {/* Header */}
+      <div className="p-5 pb-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="rounded-full bg-gradient-to-br from-green-500 to-emerald-500 p-2">
-              <Dumbbell className="h-4 w-4 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 p-2.5 shadow-lg">
+              <Dumbbell className="h-5 w-5 text-white" />
             </div>
-            <h3 className="font-semibold">{title || t("Recent workouts")}</h3>
+            <h3 className="font-semibold text-lg">{title || t("Recent workouts")}</h3>
           </div>
           {onViewAll && (
-            <Button variant="ghost" size="sm" onClick={onViewAll}>
+            <Button variant="ghost" size="sm" onClick={onViewAll} className="rounded-lg">
               {t("viewAll")}
+              <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           )}
         </div>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto pt-4">
+      </div>
+      
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-5 pt-4">
         {recentWorkouts.length > 0 ? (
           <div className="space-y-3">
-            {recentWorkouts.map((workout) => {
+            {recentWorkouts.map((workout, index) => {
               const exerciseCount = getExerciseCount(workout);
-              const muscleGroups = getMuscleGroups(workout);
               
               return (
-                <Card 
+                <div 
                   key={workout.id}
-                  className="overflow-hidden hover:shadow-sm transition-shadow cursor-pointer"
+                  className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500/5 to-teal-500/5 p-4 transition-all duration-300 hover:from-emerald-500/10 hover:to-teal-500/10 cursor-pointer border border-border/50"
                   onClick={() => navigate('/workouts')}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="h-0.5 bg-gradient-to-r from-green-500 to-emerald-500" />
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="rounded-full bg-green-500/10 p-2">
-                          <Dumbbell className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm truncate">{workout.name}</p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                            <Calendar className="h-3 w-3" />
-                            <span>{formatWorkoutDate(workout.date)}</span>
-                            {exerciseCount > 0 && (
-                              <>
-                                <span>•</span>
-                                <span>{exerciseCount} {t("exercises")}</span>
-                              </>
-                            )}
-                          </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 p-2">
+                        <Dumbbell className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm truncate">{workout.name}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                          <Calendar className="h-3 w-3" />
+                          <span>{formatWorkoutDate(workout.date)}</span>
+                          {exerciseCount > 0 && (
+                            <>
+                              <span>•</span>
+                              <span>{exerciseCount} {t("exercises")}</span>
+                            </>
+                          )}
                         </div>
                       </div>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                        {t("completed")}
-                      </span>
                     </div>
-                  </CardContent>
-                </Card>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      {t("completed")}
+                    </span>
+                  </div>
+                </div>
               );
             })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-8 px-4 text-center h-full">
-            <div className="rounded-full bg-gradient-to-br from-green-500 to-emerald-500 p-4 mb-4">
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <div className="rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 p-5 mb-4 shadow-lg">
               <Dumbbell className="h-8 w-8 text-white" />
             </div>
             <h4 className="text-lg font-semibold mb-2">{t("No workouts completed")}</h4>
@@ -158,17 +145,18 @@ export default function WorkoutsSummary({
             </p>
             <Button 
               onClick={() => navigate('/workouts')}
-              className="flex items-center gap-2"
+              className="rounded-xl"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 mr-2" />
               {t("Start workout")}
             </Button>
           </div>
         )}
-      </CardContent>
+      </div>
       
+      {/* Footer */}
       {recentWorkouts.length > 0 && (
-        <div className="px-4 py-3 border-t border-border bg-muted/30">
+        <div className="px-5 py-4 border-t border-border/50 bg-muted/20">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
               {recentWorkouts.length} {t("recent workouts")}
@@ -177,7 +165,7 @@ export default function WorkoutsSummary({
               variant="ghost" 
               size="sm" 
               onClick={() => navigate('/workouts')}
-              className="text-xs h-8"
+              className="text-xs h-8 rounded-lg"
             >
               <TrendingUp className="h-3 w-3 mr-1" />
               {t("View progress")}
@@ -185,6 +173,6 @@ export default function WorkoutsSummary({
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }

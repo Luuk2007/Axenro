@@ -270,17 +270,21 @@ export default function Progress() {
       {!user && <LoginPrompt />}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("progress")}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("progress")}</h1>
+          <p className="text-muted-foreground mt-1">{t("Track your fitness journey and body transformation")}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Dialog>
             <DialogTrigger asChild>
-              <Button data-dialog-trigger="true">
+              <Button 
+                data-dialog-trigger="true"
+                className="rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-lg"
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 {t("Add measurement")}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="rounded-2xl">
               <DialogHeader>
                 <DialogTitle>{t("Add measurement")}</DialogTitle>
                 <DialogDescription>{t("Track your body measurements")}</DialogDescription>
@@ -289,7 +293,7 @@ export default function Progress() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">{t("type")}</label>
                   <select 
-                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    className="w-full rounded-xl border border-border/50 bg-background px-3 py-2.5"
                     value={measurementType}
                     onChange={(e) => setMeasurementType(e.target.value)}
                   >
@@ -310,6 +314,7 @@ export default function Progress() {
                     onChange={(e) => setMeasurementValue(e.target.value)}
                     step="0.1"
                     placeholder="0.0"
+                    className="rounded-xl"
                   />
                 </div>
                 <div className="space-y-2">
@@ -317,10 +322,11 @@ export default function Progress() {
                   <Input 
                     type="date" 
                     value={measurementDate}
-                    onChange={(e) => setMeasurementDate(e.target.value)} 
+                    onChange={(e) => setMeasurementDate(e.target.value)}
+                    className="rounded-xl"
                   />
                 </div>
-                <Button onClick={handleAddMeasurement} className="w-full">
+                <Button onClick={handleAddMeasurement} className="w-full rounded-xl">
                   {t("add")}
                 </Button>
               </div>
