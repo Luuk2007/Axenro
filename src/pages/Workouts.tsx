@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginPrompt } from "@/components/auth/LoginPrompt";
@@ -9,7 +8,7 @@ import { useWorkouts } from "@/hooks/useWorkouts";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import PersonalRecords from "@/components/workouts/PersonalRecords";
 import WorkoutStatistics from "@/components/workouts/WorkoutStatistics";
-import { Dumbbell, Trophy, Plus, BarChart } from "lucide-react";
+import { Dumbbell, Trophy, Plus, BarChart, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import CreateWorkout from "@/components/workouts/CreateWorkout";
@@ -23,8 +22,8 @@ import DuplicateWorkoutDialog from "@/components/workouts/DuplicateWorkoutDialog
 import { Workout } from "@/types/workout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import WeeklyGoalSetting from "@/components/workouts/WeeklyGoalSetting";
-import { Target } from "lucide-react";
 import { getWorkoutMuscleGroupsFromExercises } from "@/utils/workoutNaming";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Workouts = () => {
   const { t } = useLanguage();
@@ -34,11 +33,8 @@ const Workouts = () => {
   const { workouts, saveWorkout, deleteWorkout, loading: workoutsLoading } = useWorkouts();
   const { profile } = useUserProfile();
   
-  // Determine current subscription tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
   
-  // Show personal records and statistics tab logic: Only show when we're certain user has access (pro/premium)
-  // Gate rendering until subscription is initialized to avoid flicker
   const canAccessPersonalRecords = initialized && (currentTier === 'pro' || currentTier === 'premium');
   const canAccessStatistics = initialized && (currentTier === 'pro' || currentTier === 'premium');
   
@@ -55,7 +51,6 @@ const Workouts = () => {
 
   const [activeTab, setActiveTab] = useState("workouts");
 
-  // Get all unique muscle groups from workouts (canonicalized, incl. older workouts)
   const allMuscleGroups = React.useMemo(() => {
     const groups = new Set<string>();
     workouts.forEach((workout) => {
@@ -64,7 +59,6 @@ const Workouts = () => {
     return Array.from(groups).sort();
   }, [workouts]);
 
-  // Filter workouts by selected muscle group (same logic as naming)
   const filteredWorkouts = React.useMemo(() => {
     if (!selectedMuscleGroup) return workouts;
     return workouts.filter((workout) =>
@@ -72,16 +66,13 @@ const Workouts = () => {
     );
   }, [workouts, selectedMuscleGroup]);
 
-
   const handleCreateWorkout = async (name: string, exercises: any[], date: string) => {
-    // Mark all sets as completed automatically
     const completedExercises = exercises.map(exercise => ({
       ...exercise,
       sets: exercise.sets.map(set => ({ ...set, completed: true }))
     }));
 
     if (editingWorkout) {
-      // Update existing workout
       const updatedWorkout: Workout = {
         ...editingWorkout,
         name: name,
@@ -94,7 +85,6 @@ const Workouts = () => {
       toast.success(t("workoutUpdated"));
       setEditingWorkout(null);
     } else {
-      // Create new workout
       const newWorkout: Workout = {
         id: Date.now().toString(),
         name: name,
@@ -176,29 +166,42 @@ const Workouts = () => {
 
   if (workoutsLoading || !initialized) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-8 animate-fade-in">
         <div className="flex items-center justify-between">
-          <div className="h-8 w-32 bg-muted animate-pulse rounded" />
-          <div className="flex gap-2">
-            <div className="h-10 w-24 bg-muted animate-pulse rounded" />
-            <div className="h-10 w-32 bg-muted animate-pulse rounded" />
+          <Skeleton className="h-9 w-40 rounded-xl" />
+          <div className="flex gap-3">
+            <Skeleton className="h-10 w-24 rounded-xl" />
+            <Skeleton className="h-10 w-36 rounded-xl" />
           </div>
         </div>
-        <div className="h-[600px] bg-muted animate-pulse rounded-xl" />
+        <Skeleton className="h-12 w-full rounded-xl" />
+        <Skeleton className="h-[500px] w-full rounded-2xl" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in">
       {!user && <LoginPrompt />}
+      
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{t("workouts")}</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowWeeklyGoal(true)}>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t("workouts")}</h1>
+          <p className="text-muted-foreground mt-1">{t("Track and manage your training sessions")}</p>
+        </div>
+        <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowWeeklyGoal(true)}
+            className="rounded-xl border-border/50"
+          >
             {profile?.weekly_workout_goal || 3}x {isMobile ? "" : t("per week")}
           </Button>
-          <Button onClick={() => setShowWorkoutTypeModal(true)}>
+          <Button 
+            onClick={() => setShowWorkoutTypeModal(true)}
+            className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg"
+          >
             <Plus className="h-4 w-4 mr-2" />
             {t("createWorkout")}
           </Button>
@@ -207,36 +210,37 @@ const Workouts = () => {
 
       {initialized && (
         <Tabs defaultValue="workouts" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={`grid w-full ${canAccessPersonalRecords ? 'grid-cols-4' : (canAccessStatistics ? 'grid-cols-3' : 'grid-cols-2')}`}>
-            <TabsTrigger value="workouts">
+          <TabsList className={`grid w-full rounded-xl bg-muted/50 p-1 ${canAccessPersonalRecords ? 'grid-cols-4' : (canAccessStatistics ? 'grid-cols-3' : 'grid-cols-2')}`}>
+            <TabsTrigger value="workouts" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
               <Dumbbell className="h-4 w-4 mr-2" />
               {t("Workouts")}
             </TabsTrigger>
-            <TabsTrigger value="calendar">
-              <Dumbbell className="h-4 w-4 mr-2" />
+            <TabsTrigger value="calendar" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
+              <Calendar className="h-4 w-4 mr-2" />
               {t("Calendar")}
             </TabsTrigger>
             {canAccessStatistics && (
-              <TabsTrigger value="statistics">
+              <TabsTrigger value="statistics" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
                 <BarChart className="h-4 w-4 mr-2" />
                 {isMobile ? t("Stats") : t("Statistics")}
               </TabsTrigger>
             )}
             {canAccessPersonalRecords && (
-              <TabsTrigger value="personal-records">
+              <TabsTrigger value="personal-records" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
                 <Trophy className="h-4 w-4 mr-2" />
                 {isMobile ? "PR's" : t("Personal records")}
               </TabsTrigger>
             )}
           </TabsList>
           
-          {/* Muscle group filter - only shown on workouts tab */}
+          {/* Muscle group filter */}
           {activeTab === "workouts" && allMuscleGroups.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
+            <div className="flex flex-wrap gap-2 mt-6">
               <Button
                 variant={selectedMuscleGroup === null ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedMuscleGroup(null)}
+                className="rounded-lg"
               >
                 {t("All")}
               </Button>
@@ -246,7 +250,7 @@ const Workouts = () => {
                   variant={selectedMuscleGroup === group ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedMuscleGroup(group)}
-                  className="capitalize"
+                  className="rounded-lg capitalize"
                 >
                   {t(group)}
                 </Button>
@@ -282,7 +286,7 @@ const Workouts = () => {
         </Tabs>
       )}
 
-      {/* Component dialogs */}
+      {/* Dialogs */}
       <WorkoutTypeSelectionModal
         open={showWorkoutTypeModal}
         onOpenChange={setShowWorkoutTypeModal}

@@ -193,12 +193,15 @@ const Settings = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{t("settings")}</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t("settings")}</h1>
+          <p className="text-muted-foreground mt-1">{t("Customize your app preferences")}</p>
+        </div>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-5">
         {/* Appearance Settings */}
         <Card>
           <Collapsible open={appearanceOpen} onOpenChange={setAppearanceOpen}>

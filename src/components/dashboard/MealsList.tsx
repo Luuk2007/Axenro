@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Utensils, Plus } from 'lucide-react';
+import { Utensils, Plus, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getAvailableMeals, MealData, FoodItem } from '@/types/nutrition';
@@ -35,14 +34,12 @@ export default function MealsList({
   const [meals, setMeals] = useState<MealItemData[]>([]);
 
   useEffect(() => {
-    // Convert foodLogs to meal items
     const availableMeals = getAvailableMeals();
     const mealData: MealData[] = availableMeals.map(meal => ({
       ...meal,
       items: []
     }));
 
-    // Add food items to appropriate meals
     foodLogs.forEach((log: any) => {
       const mealIndex = mealData.findIndex(meal => meal.id === log.meal_id);
       if (mealIndex >= 0) {
@@ -50,7 +47,6 @@ export default function MealsList({
       }
     });
 
-    // Convert to individual food items
     const mealItems: MealItemData[] = [];
     
     mealData
@@ -67,59 +63,62 @@ export default function MealsList({
         });
       });
       
-    // Show only first 5 individual items
     const displayItems = mealItems.slice(0, 5);
     setMeals(displayItems);
   }, [foodLogs]);
 
-  
   return (
-    <Card className={cn("overflow-hidden h-full flex flex-col", className)}>
-      <div className="h-1 bg-gradient-to-r from-orange-500 to-red-500" />
-      <CardHeader className="pb-0 pt-4">
+    <div className={cn(
+      "rounded-2xl border border-border/50 bg-card h-full flex flex-col overflow-hidden",
+      className
+    )}>
+      {/* Header */}
+      <div className="p-5 pb-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="rounded-full bg-gradient-to-br from-orange-500 to-red-500 p-2">
-              <Utensils className="h-4 w-4 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 p-2.5 shadow-lg">
+              <Utensils className="h-5 w-5 text-white" />
             </div>
-            <h3 className="font-semibold">{title}</h3>
+            <h3 className="font-semibold text-lg">{title}</h3>
           </div>
           {onViewAll && (
-            <Button variant="ghost" size="sm" onClick={() => navigate('/nutrition')}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/nutrition')} className="rounded-lg">
               {t("viewAll")}
+              <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           )}
         </div>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto pt-4">
+      </div>
+      
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-5 pt-4">
         {meals.length > 0 ? (
           <div className="space-y-3">
-            {meals.map((meal) => (
-              <Card 
+            {meals.map((meal, index) => (
+              <div 
                 key={meal.id}
-                className="overflow-hidden hover:shadow-sm transition-shadow"
+                className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-500/5 to-amber-500/5 p-4 transition-all duration-300 hover:from-orange-500/10 hover:to-amber-500/10 cursor-pointer border border-border/50"
+                onClick={() => navigate('/nutrition')}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className="h-0.5 bg-gradient-to-r from-orange-500 to-red-500" />
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-full bg-orange-500/10 p-2">
-                        <Utensils className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                      </div>
-                      <p className="font-medium text-sm">{meal.name}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/20 p-2">
+                      <Utensils className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-sm">{meal.calories} cal</p>
-                      <p className="text-xs text-muted-foreground">{meal.protein}g {t("protein")}</p>
-                    </div>
+                    <p className="font-medium text-sm truncate">{meal.name}</p>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="text-right">
+                    <p className="font-semibold text-sm">{meal.calories} cal</p>
+                    <p className="text-xs text-muted-foreground">{meal.protein}g {t("protein")}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-8 px-4 text-center h-full">
-            <div className="rounded-full bg-gradient-to-br from-orange-500 to-red-500 p-4 mb-4">
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <div className="rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 p-5 mb-4 shadow-lg">
               <Utensils className="h-8 w-8 text-white" />
             </div>
             <h4 className="text-lg font-semibold mb-2">{t("No meals tracked")}</h4>
@@ -129,7 +128,6 @@ export default function MealsList({
             <Button 
               onClick={() => {
                 navigate('/nutrition');
-                // Trigger the add food dialog after a short delay
                 setTimeout(() => {
                   const addFoodBtn = document.querySelector('[data-testid="add-food-trigger"]');
                   if (addFoodBtn) {
@@ -137,14 +135,14 @@ export default function MealsList({
                   }
                 }, 100);
               }}
-              className="flex items-center gap-2"
+              className="rounded-xl"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 mr-2" />
               {t("Add meal")}
             </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
