@@ -4,14 +4,14 @@ import {
   DialogContent,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2, X, Sparkles } from 'lucide-react';
+import { Loader2, X, Sparkles, Check, Crown, Zap } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { PricingSection } from '@/components/ui/pricing';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface SubscriptionModalProps {
   open: boolean;
@@ -23,6 +23,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
   const navigate = useNavigate();
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, switchTestPlan, createCheckout } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
+  const [frequency, setFrequency] = useState<'monthly' | 'yearly'>('monthly');
 
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
 
@@ -38,7 +39,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
         onOpenChange(false);
         window.location.reload();
       } else {
-        const billingInterval = 'monthly';
+        const billingInterval = frequency === 'yearly' ? 'annually' : 'monthly';
         await createCheckout(planId, billingInterval);
         toast.success(t('Redirecting to Stripe checkout...'));
       }
@@ -55,190 +56,254 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
       setLoading('manage');
       onOpenChange(false);
       navigate('/settings?tab=subscription');
-      toast.success(t('Opening settings...'));
     } catch (error) {
       console.error('Navigation error:', error);
-      toast.error(t('Failed to open settings'));
     } finally {
       setLoading(null);
     }
   };
 
-  const getButtonText = (planId: string) => {
-    if (currentTier === planId) {
-      return t('Current Plan');
-    }
-    
-    if (test_mode) {
-      return loading === planId ? t('Switching...') : t('Select Plan');
-    }
-    
-    if (planId === 'free') {
-      return subscribed ? t('Downgrade') : t('Select Plan');
-    }
-    
-    if (subscribed) {
-      return subscription_tier === 'pro' && planId === 'premium' ? t('Upgrade') : t('Switch Plan');
-    }
-    
-    return t('Select Plan');
-  };
-
-  const getButtonVariant = (planId: string): "default" | "outline" => {
-    return currentTier === planId ? 'outline' : 'default';
-  };
-
   const plans = [
     {
-      name: t('Free'),
-      info: t('Basic fitness tracking'),
-      price: {
-        monthly: 0,
-        yearly: 0,
-      },
+      id: 'free',
+      name: 'Free',
+      description: t('Basic fitness tracking'),
+      price: { monthly: 0, yearly: 0 },
+      icon: Zap,
+      gradient: 'from-slate-500 to-slate-600',
       features: [
-        { text: t('Basic fitness tracking') },
-        { text: t('Limited workout history') },
-        { text: t('Basic nutrition logging') }
+        t('Basic fitness tracking'),
+        t('Limited workout history'),
+        t('Basic nutrition logging')
       ],
-      btn: {
-        text: getButtonText('free'),
-        onClick: () => handleSelectPlan('free'),
-        variant: getButtonVariant('free'),
-        disabled: currentTier === 'free' || loading !== null
-      },
-      highlighted: false,
-      isCurrentPlan: currentTier === 'free'
     },
     {
-      name: t('Pro'),
-      info: t('Advanced fitness tracking'),
-      price: {
-        monthly: test_mode ? 0 : 4.99,
-        yearly: test_mode ? 0 : 49.99,
-      },
-      features: [
-        { text: t('Advanced fitness tracking') },
-        { text: t('Unlimited workout history') },
-        { text: t('Detailed nutrition analysis') },
-        { text: t('Progress charts') },
-        { text: t('Export data') }
-      ],
-      btn: {
-        text: getButtonText('pro'),
-        onClick: () => handleSelectPlan('pro'),
-        variant: getButtonVariant('pro'),
-        disabled: currentTier === 'pro' || loading !== null
-      },
+      id: 'pro',
+      name: 'Pro',
+      description: t('Advanced fitness tracking'),
+      price: { monthly: test_mode ? 0 : 4.99, yearly: test_mode ? 0 : 49.99 },
+      icon: Sparkles,
+      gradient: 'from-primary to-primary/70',
       highlighted: true,
-      isCurrentPlan: currentTier === 'pro'
+      features: [
+        t('Advanced fitness tracking'),
+        t('Unlimited workout history'),
+        t('Detailed nutrition analysis'),
+        t('Progress charts'),
+        t('Export data')
+      ],
     },
     {
-      name: t('Premium'),
-      info: t('Complete fitness solution'),
-      price: {
-        monthly: test_mode ? 0 : 7.99,
-        yearly: test_mode ? 0 : 79.99,
-      },
+      id: 'premium',
+      name: 'Premium',
+      description: t('Complete fitness solution'),
+      price: { monthly: test_mode ? 0 : 7.99, yearly: test_mode ? 0 : 79.99 },
+      icon: Crown,
+      gradient: 'from-amber-500 to-orange-500',
       features: [
-        { text: t('Everything in Pro') },
-        { text: t('AI-powered recommendations') },
-        { text: t('Advanced analytics') },
-        { text: t('Personalized meal plans') },
-        { text: t('Priority support') },
-        { text: t('Early access to new features') }
+        t('Everything in Pro'),
+        t('AI-powered recommendations'),
+        t('Advanced analytics'),
+        t('Personalized meal plans'),
+        t('Priority support'),
+        t('Early access to new features')
       ],
-      btn: {
-        text: getButtonText('premium'),
-        onClick: () => handleSelectPlan('premium'),
-        variant: getButtonVariant('premium'),
-        disabled: currentTier === 'premium' || loading !== null
-      },
-      highlighted: false,
-      isCurrentPlan: currentTier === 'premium'
     }
   ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-6xl max-h-[90vh] p-0 flex flex-col overflow-hidden border-0 bg-transparent shadow-none">
-        <div className="relative flex flex-col h-full glass-premium rounded-3xl overflow-hidden">
-          {/* Background gradient effects */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
-            <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-[100px]" />
-            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/10 rounded-full blur-[100px]" />
-          </div>
+      <DialogContent 
+        hideCloseButton 
+        className="sm:max-w-5xl max-h-[90vh] p-0 border-0 bg-card/95 backdrop-blur-xl overflow-hidden"
+      >
+        {/* Header with close button */}
+        <div className="relative px-6 pt-6 pb-4">
+          {/* Close button */}
+          <button 
+            onClick={() => onOpenChange(false)}
+            className="absolute top-4 right-4 z-20 w-9 h-9 rounded-xl bg-muted/50 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
+          >
+            <X className="h-4 w-4" />
+          </button>
 
           {/* Test mode banner */}
           {test_mode && (
             <motion.div 
-              initial={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative z-10 bg-gradient-to-r from-blue-500/20 via-blue-500/10 to-blue-500/20 backdrop-blur-sm border-b border-blue-500/20 px-6 py-4"
+              className="mb-6 flex items-center justify-center gap-2 py-2 px-4 rounded-full bg-primary/10 border border-primary/20 w-fit mx-auto"
             >
-              <div className="flex items-center justify-center gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-                  </span>
-                  <Sparkles className="h-4 w-4 text-blue-400" />
-                </div>
-                <p className="text-sm font-medium text-blue-100">
-                  {t('Test Mode Active')} — {t('You can freely switch between plans without payment')}
-                </p>
-              </div>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              <span className="text-sm font-medium text-primary">
+                {t('Test Mode')} — {t('Switch plans freely')}
+              </span>
             </motion.div>
           )}
-          
-          {/* Close button */}
-          <button 
-            onClick={() => onOpenChange(false)}
-            className="absolute top-4 right-4 z-20 w-10 h-10 rounded-xl glass-premium flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
 
-          {/* Content */}
-          <div className="relative flex-1 overflow-y-auto px-4 sm:px-8 py-8">
-            <PricingSection 
-              plans={plans}
-              heading={test_mode ? t('Choose Your Plan (Test Version)') : t('Choose Your Plan')}
-              description={test_mode 
-                ? t('Experience all features in test mode. Switch between any plan to test functionality.')
-                : t('Unlock the full potential of your fitness journey with our premium features.')
-              }
-              className="p-0"
-            />
+          {/* Title */}
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-bold">
+              {t('Choose Your Plan')}
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              {t('Unlock the full potential of your fitness journey')}
+            </p>
           </div>
 
-          {/* Footer for subscribed users */}
-          {subscribed && !test_mode && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative border-t border-border/50 px-6 py-5 bg-muted/5 backdrop-blur-sm"
-            >
-              <div className="flex justify-center">
-                <Button 
-                  variant="outline" 
-                  onClick={handleManageSubscription}
-                  disabled={loading !== null}
-                  className="rounded-xl h-11 px-6 glass-premium border-border/50 hover:border-primary/50"
-                >
-                  {loading === 'manage' ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t('Opening...')}
-                    </>
-                  ) : (
-                    t('Manage Subscription')
+          {/* Frequency Toggle */}
+          <div className="flex justify-center mt-6">
+            <div className="inline-flex rounded-xl bg-muted/50 p-1">
+              {(['monthly', 'yearly'] as const).map((freq) => (
+                <button
+                  key={freq}
+                  onClick={() => setFrequency(freq)}
+                  className={cn(
+                    "relative px-5 py-2 text-sm font-medium rounded-lg transition-all",
+                    frequency === freq 
+                      ? "bg-background text-foreground shadow-sm" 
+                      : "text-muted-foreground hover:text-foreground"
                   )}
-                </Button>
-              </div>
-            </motion.div>
-          )}
+                >
+                  {freq === 'monthly' ? t('Monthly') : t('Yearly')}
+                  {freq === 'yearly' && (
+                    <span className="ml-1.5 text-xs text-primary font-semibold">-17%</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
+
+        {/* Plans Grid */}
+        <div className="px-6 pb-6 overflow-y-auto max-h-[60vh]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {plans.map((plan, index) => {
+              const isCurrentPlan = currentTier === plan.id;
+              const Icon = plan.icon;
+              
+              return (
+                <motion.div
+                  key={plan.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className={cn(
+                    "relative flex flex-col rounded-2xl p-5 transition-all duration-300",
+                    plan.highlighted 
+                      ? "bg-primary/5 border-2 border-primary/30 shadow-lg" 
+                      : isCurrentPlan
+                        ? "bg-green-500/5 border-2 border-green-500/30"
+                        : "bg-muted/30 border border-border/50 hover:border-border"
+                  )}
+                >
+                  {/* Badge */}
+                  {(isCurrentPlan || plan.highlighted) && (
+                    <div className="absolute -top-2.5 left-4">
+                      <span className={cn(
+                        "text-xs font-semibold px-3 py-1 rounded-full",
+                        isCurrentPlan 
+                          ? "bg-green-500 text-white"
+                          : "bg-primary text-primary-foreground"
+                      )}>
+                        {isCurrentPlan ? t('Current') : t('Popular')}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Header */}
+                  <div className="flex items-start gap-3 mb-4 mt-1">
+                    <div className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br text-white",
+                      plan.gradient
+                    )}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">{plan.name}</h3>
+                      <p className="text-muted-foreground text-xs">{plan.description}</p>
+                    </div>
+                  </div>
+
+                  {/* Price */}
+                  <div className="mb-4">
+                    {plan.id === 'free' ? (
+                      <span className="text-3xl font-bold">{t('Free')}</span>
+                    ) : (
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-bold">€{plan.price[frequency]}</span>
+                        <span className="text-muted-foreground text-sm">
+                          /{frequency === 'monthly' ? t('mo') : t('yr')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Features */}
+                  <div className="flex-1 space-y-2.5 mb-5">
+                    {plan.features.map((feature, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <div className={cn(
+                          "mt-0.5 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0",
+                          plan.highlighted 
+                            ? "bg-primary/20 text-primary" 
+                            : plan.id === 'premium'
+                              ? "bg-amber-500/20 text-amber-500"
+                              : "bg-muted text-muted-foreground"
+                        )}>
+                          <Check className="h-2.5 w-2.5" />
+                        </div>
+                        <span className="text-sm text-foreground/80">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Button */}
+                  <Button
+                    onClick={() => handleSelectPlan(plan.id)}
+                    disabled={isCurrentPlan || loading !== null}
+                    variant={isCurrentPlan ? 'outline' : 'default'}
+                    className={cn(
+                      "w-full h-11 rounded-xl font-medium",
+                      !isCurrentPlan && plan.highlighted && "bg-primary hover:bg-primary/90",
+                      !isCurrentPlan && plan.id === 'premium' && "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0"
+                    )}
+                  >
+                    {loading === plan.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isCurrentPlan ? (
+                      t('Current Plan')
+                    ) : (
+                      t('Select Plan')
+                    )}
+                  </Button>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Footer */}
+        {subscribed && !test_mode && (
+          <div className="border-t border-border/50 px-6 py-4 bg-muted/20">
+            <div className="flex justify-center">
+              <Button 
+                variant="ghost" 
+                onClick={handleManageSubscription}
+                disabled={loading !== null}
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                {loading === 'manage' ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                {t('Manage Subscription')}
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
