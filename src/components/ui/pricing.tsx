@@ -8,7 +8,7 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { CheckCircle, Star } from 'lucide-react';
+import { Check, Crown, Sparkles, Zap } from 'lucide-react';
 import { motion, Transition } from 'framer-motion';
 
 type FREQUENCY = 'monthly' | 'yearly';
@@ -54,28 +54,48 @@ export function PricingSection({
 	return (
 		<div
 			className={cn(
-				'flex w-full flex-col items-center justify-center space-y-5',
+				'flex w-full flex-col items-center justify-center space-y-8',
 				props.className,
 			)}
 			{...props}
 		>
-			<div className="mx-auto max-w-xl space-y-2">
-				<h2 className="text-center text-2xl font-bold tracking-tight md:text-3xl lg:text-4xl">
+			<motion.div 
+				className="mx-auto max-w-2xl space-y-4 text-center"
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.5 }}
+			>
+				<h2 className="text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl bg-gradient-to-r from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
 					{heading}
 				</h2>
 				{description && (
-					<p className="text-muted-foreground text-center text-sm md:text-base">
+					<p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto">
 						{description}
 					</p>
 				)}
-			</div>
-			<PricingFrequencyToggle
-				frequency={frequency}
-				setFrequency={setFrequency}
-			/>
-			<div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-4 md:grid-cols-3">
-				{plans.map((plan) => (
-					<PricingCard plan={plan} key={plan.name} frequency={frequency} />
+			</motion.div>
+			
+			<motion.div
+				initial={{ opacity: 0, scale: 0.95 }}
+				animate={{ opacity: 1, scale: 1 }}
+				transition={{ duration: 0.4, delay: 0.1 }}
+			>
+				<PricingFrequencyToggle
+					frequency={frequency}
+					setFrequency={setFrequency}
+				/>
+			</motion.div>
+			
+			<div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-6 md:grid-cols-3 px-4">
+				{plans.map((plan, index) => (
+					<motion.div
+						key={plan.name}
+						initial={{ opacity: 0, y: 30 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
+					>
+						<PricingCard plan={plan} frequency={frequency} />
+					</motion.div>
 				))}
 			</div>
 		</div>
@@ -95,7 +115,7 @@ export function PricingFrequencyToggle({
 	return (
 		<div
 			className={cn(
-				'bg-muted/30 mx-auto flex w-fit rounded-full border p-1',
+				'mx-auto flex w-fit rounded-2xl p-1.5 glass-premium',
 				props.className,
 			)}
 			{...props}
@@ -104,15 +124,19 @@ export function PricingFrequencyToggle({
 				<button
 					key={freq}
 					onClick={() => setFrequency(freq)}
-					className="relative px-4 py-1 text-sm capitalize"
+					className="relative px-6 py-2.5 text-sm font-medium capitalize transition-all duration-300"
 				>
-					<span className={cn("relative z-20", frequency === freq ? "text-white" : "text-foreground")}>{freq}</span>
+					<span className={cn(
+						"relative z-20 transition-colors duration-300",
+						frequency === freq ? "text-white" : "text-muted-foreground hover:text-foreground"
+					)}>
+						{freq === 'monthly' ? 'Maandelijks' : 'Jaarlijks'}
+					</span>
 					{frequency === freq && (
 						<motion.span
-							layoutId="frequency"
-							transition={{ type: 'spring', duration: 0.4 }}
-							className="absolute inset-0 z-10 rounded-full"
-							style={{ backgroundColor: '#2663f2' }}
+							layoutId="frequency-toggle"
+							transition={{ type: 'spring', duration: 0.5, bounce: 0.2 }}
+							className="absolute inset-0 z-10 rounded-xl bg-gradient-to-r from-primary to-primary/80 shadow-lg"
 						/>
 					)}
 				</button>
@@ -139,112 +163,185 @@ export function PricingCard({
 			100,
 	) : 0;
 
-	const getCardBorderColor = () => {
-		if (plan.isCurrentPlan) {
-			return 'border-white bg-white shadow-lg';
+	const getPlanIcon = () => {
+		switch (plan.name) {
+			case 'Free':
+				return <Zap className="h-5 w-5" />;
+			case 'Pro':
+				return <Sparkles className="h-5 w-5" />;
+			case 'Premium':
+				return <Crown className="h-5 w-5" />;
+			default:
+				return <Zap className="h-5 w-5" />;
 		}
-		return 'border-primary bg-primary/5';
+	};
+
+	const getGradientColors = () => {
+		if (plan.highlighted) {
+			return 'from-primary/20 via-primary/10 to-transparent';
+		}
+		if (plan.name === 'Premium') {
+			return 'from-amber-500/20 via-amber-500/10 to-transparent';
+		}
+		return 'from-muted/50 via-muted/30 to-transparent';
+	};
+
+	const getIconGradient = () => {
+		if (plan.highlighted) {
+			return 'from-primary to-primary/70';
+		}
+		if (plan.name === 'Premium') {
+			return 'from-amber-500 to-amber-600';
+		}
+		return 'from-muted-foreground to-muted-foreground/70';
 	};
 
 	return (
 		<div
 			key={plan.name}
 			className={cn(
-				'relative flex w-full flex-col rounded-lg border-2',
-				getCardBorderColor(),
+				'group relative flex h-full w-full flex-col rounded-3xl transition-all duration-500',
+				plan.highlighted 
+					? 'bg-gradient-to-b from-primary/5 to-background border-2 border-primary/30 shadow-xl shadow-primary/10 scale-[1.02]' 
+					: plan.isCurrentPlan
+						? 'bg-gradient-to-b from-green-500/5 to-background border-2 border-green-500/30'
+						: 'glass-premium border border-border/50 hover:border-primary/30 hover:shadow-lg',
 				className,
 			)}
 			{...props}
 		>
+			{/* Gradient overlay */}
+			<div className={cn(
+				'absolute inset-0 rounded-3xl bg-gradient-to-b opacity-50 pointer-events-none',
+				getGradientColors()
+			)} />
+
+			{/* Animated border for highlighted */}
 			{plan.highlighted && !plan.isCurrentPlan && (
 				<BorderTrail
 					style={{
-						boxShadow:
-							'0px 0px 60px 30px rgb(255 255 255 / 50%), 0 0 100px 60px rgb(0 0 0 / 50%), 0 0 140px 90px rgb(0 0 0 / 50%)',
+						boxShadow: '0px 0px 60px 30px hsl(var(--primary) / 0.3)',
 					}}
-					size={100}
+					size={80}
 				/>
 			)}
-			<div
-				className={cn(
-					'rounded-t-lg border-b p-4',
-					plan.isCurrentPlan ? 'bg-white' : 'bg-primary/10',
-				)}
-			>
-				<div className="absolute top-2 right-2 z-10 flex items-center gap-2">
-					{plan.isCurrentPlan && (
-						<p className="bg-green-100 text-green-800 flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium">
-							Current Plan
-						</p>
-					)}
-					{plan.highlighted && !plan.isCurrentPlan && (
-						<p className="bg-background flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs">
-							<Star className="h-3 w-3 fill-current" />
-							Popular
-						</p>
-					)}
-					{showDiscountBadge && (
-						<p className="bg-primary text-primary-foreground flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs">
-							{discountPercentage}% off
-						</p>
-					)}
-				</div>
 
-				<div className="text-lg font-medium">{plan.name}</div>
-				<p className="text-muted-foreground text-sm font-normal">{plan.info}</p>
-				<h3 className="mt-2 flex items-end gap-1">
+			{/* Badges */}
+			<div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
+				{plan.isCurrentPlan && (
+					<motion.span 
+						initial={{ scale: 0 }}
+						animate={{ scale: 1 }}
+						className="bg-gradient-to-r from-green-500 to-emerald-500 text-white flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold shadow-lg"
+					>
+						<Check className="h-3 w-3" />
+						Huidig Plan
+					</motion.span>
+				)}
+				{plan.highlighted && !plan.isCurrentPlan && (
+					<motion.span 
+						initial={{ scale: 0 }}
+						animate={{ scale: 1 }}
+						className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold shadow-lg animate-shimmer"
+					>
+						<Sparkles className="h-3 w-3" />
+						Populair
+					</motion.span>
+				)}
+				{showDiscountBadge && (
+					<span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg">
+						-{discountPercentage}%
+					</span>
+				)}
+			</div>
+
+			{/* Header */}
+			<div className="relative p-6 pt-8 pb-4">
+				<div className="flex items-center gap-3 mb-3">
+					<div className={cn(
+						'w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br text-white shadow-lg',
+						getIconGradient()
+					)}>
+						{getPlanIcon()}
+					</div>
+					<div>
+						<h3 className="text-xl font-bold">{plan.name}</h3>
+						<p className="text-muted-foreground text-sm">{plan.info}</p>
+					</div>
+				</div>
+				
+				<div className="mt-6 flex items-baseline gap-1">
 					{plan.name === 'Free' ? (
-						<span className="text-3xl font-bold">Free</span>
+						<span className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Gratis</span>
 					) : (
 						<>
-							<span className="text-3xl font-bold">€{plan.price[frequency]}</span>
-							<span className="text-muted-foreground">
-								/{frequency === 'monthly' ? 'month' : 'year'}
+							<span className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+								€{plan.price[frequency]}
+							</span>
+							<span className="text-muted-foreground text-sm">
+								/{frequency === 'monthly' ? 'maand' : 'jaar'}
 							</span>
 						</>
 					)}
-				</h3>
+				</div>
 			</div>
-			<div
-				className={cn(
-					'text-muted-foreground space-y-4 px-4 py-6 text-sm',
-					plan.isCurrentPlan ? 'bg-white' : 'bg-primary/5',
-				)}
-			>
+
+			{/* Divider */}
+			<div className="mx-6 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+			{/* Features */}
+			<div className="relative flex-1 space-y-3 p-6">
 				{plan.features.map((feature, index) => (
-					<div key={index} className="flex items-center gap-2">
-						<CheckCircle className="text-foreground h-4 w-4" />
+					<motion.div 
+						key={index} 
+						className="flex items-start gap-3"
+						initial={{ opacity: 0, x: -10 }}
+						animate={{ opacity: 1, x: 0 }}
+						transition={{ delay: 0.3 + index * 0.05 }}
+					>
+						<div className={cn(
+							'mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0',
+							plan.highlighted 
+								? 'bg-primary/20 text-primary' 
+								: plan.name === 'Premium'
+									? 'bg-amber-500/20 text-amber-500'
+									: 'bg-muted text-muted-foreground'
+						)}>
+							<Check className="h-3 w-3" />
+						</div>
 						<TooltipProvider>
 							<Tooltip delayDuration={0}>
 								<TooltipTrigger asChild>
-									<p
-										className={cn(
-											feature.tooltip &&
-												'cursor-pointer border-b border-dashed',
-										)}
-									>
+									<p className={cn(
+										"text-sm text-foreground/80",
+										feature.tooltip && 'cursor-pointer border-b border-dashed border-muted-foreground/30',
+									)}>
 										{feature.text}
 									</p>
 								</TooltipTrigger>
 								{feature.tooltip && (
-									<TooltipContent>
+									<TooltipContent className="glass-premium">
 										<p>{feature.tooltip}</p>
 									</TooltipContent>
 								)}
 							</Tooltip>
 						</TooltipProvider>
-					</div>
+					</motion.div>
 				))}
 			</div>
-			<div
-				className={cn(
-					'mt-auto w-full border-t p-3',
-					plan.isCurrentPlan ? 'bg-white' : 'bg-primary/10',
-				)}
-			>
+
+			{/* Button */}
+			<div className="relative p-6 pt-2">
 				<Button
-					className="w-full"
-					variant={plan.btn.variant || (plan.name !== 'Free' ? 'default' : 'outline')}
+					className={cn(
+						"w-full h-12 rounded-xl font-semibold text-base transition-all duration-300",
+						plan.highlighted && !plan.isCurrentPlan
+							? "bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
+							: plan.name === 'Premium' && !plan.isCurrentPlan
+								? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
+								: ""
+					)}
+					variant={plan.isCurrentPlan ? 'outline' : (plan.btn.variant || 'default')}
 					onClick={plan.btn.onClick}
 					disabled={plan.btn.disabled}
 				>
@@ -281,7 +378,7 @@ export function BorderTrail({
   return (
     <div className='pointer-events-none absolute inset-0 rounded-[inherit] border border-transparent [mask-clip:padding-box,border-box] [mask-composite:intersect] [mask-image:linear-gradient(transparent,transparent),linear-gradient(#000,#000)]'>
       <motion.div
-        className={cn('absolute aspect-square bg-zinc-500', className)}
+        className={cn('absolute aspect-square bg-primary', className)}
         style={{
           width: size,
           offsetPath: `rect(0 auto auto 0 round ${size}px)`,
