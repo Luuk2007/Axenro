@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Utensils, Dumbbell, BarChart3, User2 } from 'lucide-react';
+import { Home, Utensils, Dumbbell, BarChart3, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
@@ -10,7 +10,7 @@ const navItems = [
   { titleKey: 'nutrition' as const, href: '/nutrition', icon: Utensils },
   { titleKey: 'workouts' as const, href: '/workouts', icon: Dumbbell },
   { titleKey: 'progress' as const, href: '/progress', icon: BarChart3 },
-  { titleKey: 'profile' as const, href: '/profile', icon: User2 },
+  { titleKey: 'settings' as const, href: '/settings', icon: Settings },
 ];
 
 export default function BottomNav() {

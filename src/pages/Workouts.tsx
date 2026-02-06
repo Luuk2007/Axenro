@@ -181,29 +181,31 @@ const Workouts = () => {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in w-full max-w-full overflow-x-hidden">
       {!user && <LoginPrompt />}
       
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("workouts")}</h1>
-          <p className="text-muted-foreground mt-1">{t("Track and manage your training sessions")}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">{t("workouts")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5 truncate">{t("Track and manage your training sessions")}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2 flex-shrink-0">
           <Button 
             variant="outline" 
+            size="sm"
             onClick={() => setShowWeeklyGoal(true)}
-            className="rounded-xl border-border/50"
+            className="rounded-xl border-border/50 text-xs"
           >
             {profile?.weekly_workout_goal || 3}x {isMobile ? "" : t("per week")}
           </Button>
           <Button 
+            size="sm"
             onClick={() => setShowWorkoutTypeModal(true)}
-            className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg"
+            className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg text-xs"
           >
-            <Plus className="h-4 w-4 mr-2" />
-            {t("createWorkout")}
+            <Plus className="h-3.5 w-3.5 mr-1" />
+            {isMobile ? t("New") : t("createWorkout")}
           </Button>
         </div>
       </div>
