@@ -86,22 +86,21 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in w-full max-w-full overflow-x-hidden">
       {!dashboardData.isAuthenticated && <LoginPrompt />}
       
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("dashboard")}</h1>
-          <p className="text-muted-foreground mt-1">{t("Welcome back! Here's your daily overview.")}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">{t("dashboard")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5 truncate">{t("Welcome back! Here's your daily overview.")}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="rounded-xl border-border/50 bg-card/50 backdrop-blur-sm">
-                <Calendar className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">{format(date, 'PPP')}</span>
-                <span className="sm:hidden">{format(date, 'MMM d')}</span>
+              <Button variant="outline" size="sm" className="rounded-xl border-border/50 bg-card/50 backdrop-blur-sm text-xs sm:text-sm">
+                <Calendar className="mr-1.5 h-3.5 w-3.5" />
+                <span>{format(date, 'MMM d')}</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 rounded-2xl border-border/50" align="end">
@@ -116,7 +115,7 @@ const Dashboard = () => {
           </Popover>
           
           <Dialog open={showAddActivity} onOpenChange={setShowAddActivity}>
-            <DialogContent className="sm:max-w-md rounded-2xl">
+            <DialogContent className="sm:max-w-md rounded-2xl max-w-[calc(100vw-2rem)]">
               <DialogHeader>
                 <DialogTitle>{t("addActivity")}</DialogTitle>
               </DialogHeader>
@@ -129,7 +128,7 @@ const Dashboard = () => {
                     onClick={() => handleAddActivity(activity.id)}
                   >
                     <activity.icon className="h-8 w-8" />
-                    <span>{activity.name}</span>
+                    <span className="text-xs">{activity.name}</span>
                   </Button>
                 ))}
               </div>
@@ -139,7 +138,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-5 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title={t("Daily calories")}
           value={dashboardData.consumedCalories.toString()}
@@ -160,15 +159,15 @@ const Dashboard = () => {
           title={t("workouts")}
           value={dashboardData.weeklyGoal ? `${dashboardData.workoutsThisWeek}/${dashboardData.weeklyGoal}` : "—"}
           icon={Dumbbell}
-          description={dashboardData.weeklyGoal ? `${Math.round((dashboardData.workoutsThisWeek / dashboardData.weeklyGoal) * 100)}% ${t("completed")}` : t("Set weekly goal")}
+          description={dashboardData.weeklyGoal ? `${Math.round((dashboardData.workoutsThisWeek / dashboardData.weeklyGoal) * 100)}%` : t("Set weekly goal")}
           onClick={navigateToWorkouts}
           gradient="from-emerald-500 to-teal-500"
         />
         <StatsCard
           title={t("weight")}
-          value={dashboardData.currentWeight ? `${dashboardData.currentWeight} kg` : "No data"}
+          value={dashboardData.currentWeight ? `${dashboardData.currentWeight}kg` : "—"}
           icon={Weight}
-          description={dashboardData.profile?.target_weight ? `${t("target")}: ${dashboardData.profile.target_weight} kg` : "Set target weight"}
+          description={dashboardData.profile?.target_weight ? `${t("target")}: ${dashboardData.profile.target_weight}kg` : ""}
           onClick={navigateToWeightProgress}
           gradient="from-violet-500 to-purple-500"
         />
@@ -184,8 +183,8 @@ const Dashboard = () => {
       />
 
       {/* Workouts and Meals */}
-      <div className="grid gap-6 md:grid-cols-2 items-start">
-        <div className="h-[420px]">
+      <div className="grid gap-4 md:grid-cols-2 items-start">
+        <div className="min-h-0 max-h-[420px]">
           <WorkoutsSummary
             title={t("Recent workouts")}
             onViewAll={navigateToWorkouts}
@@ -193,7 +192,7 @@ const Dashboard = () => {
           />
         </div>
         
-        <div className="h-[420px]">
+        <div className="min-h-0 max-h-[420px]">
           <MealsList
             title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} ${t("meals")}`}
             onViewAll={navigateToNutrition}

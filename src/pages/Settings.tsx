@@ -193,11 +193,11 @@ const Settings = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in w-full max-w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("settings")}</h1>
-          <p className="text-muted-foreground mt-1">{t("Customize your app preferences")}</p>
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">{t("settings")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5 truncate">{t("Customize your app preferences")}</p>
         </div>
       </div>
 
@@ -316,12 +316,12 @@ const Settings = () => {
                   )}
                 </div>
 
-                <div className="flex gap-4 pt-2">
-                  <Button onClick={handleManageSubscription} disabled={loading}>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button size="sm" onClick={handleManageSubscription} disabled={loading}>
                     {subscribed ? t("Manage billing") : t("Upgrade")}
                   </Button>
                   {subscribed && (
-                    <Button variant="outline" onClick={handleManageSubscription}>
+                    <Button size="sm" variant="outline" onClick={handleManageSubscription}>
                       {t("View subscription details")}
                     </Button>
                   )}
@@ -353,11 +353,11 @@ const Settings = () => {
                   />
                 </div>
 
-                <div className="flex gap-4 pt-2">
-                  <Button onClick={exportData} variant="outline">
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button size="sm" onClick={exportData} variant="outline">
                     {t("Export data")}
                   </Button>
-                  <Button onClick={clearAllData} variant="destructive">
+                  <Button size="sm" onClick={clearAllData} variant="destructive">
                     {t("Clear all data")}
                   </Button>
                 </div>

@@ -480,12 +480,12 @@ const Nutrition = () => {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in w-full max-w-full overflow-x-hidden">
       {!user && <LoginPrompt />}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("nutrition")}</h1>
-          <p className="text-muted-foreground mt-1">{t("Track your daily food intake and macros")}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">{t("nutrition")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5 truncate">{t("Track your daily food intake and macros")}</p>
         </div>
         <div className="flex items-center gap-3">
           {/* Free plan: Direct button, no modal */}

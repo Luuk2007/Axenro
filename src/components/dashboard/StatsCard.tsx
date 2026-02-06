@@ -34,7 +34,7 @@ export default function StatsCard({
   return (
     <div 
       className={cn(
-        "group relative overflow-hidden rounded-2xl bg-card p-5 transition-all duration-300",
+        "group relative overflow-hidden rounded-2xl bg-card p-3 sm:p-5 transition-all duration-300",
         "hover:shadow-lg hover:-translate-y-1",
         "border border-border/50",
         onClick && "cursor-pointer",
@@ -55,27 +55,27 @@ export default function StatsCard({
         gradientClass
       )} />
       
-      <div className="relative flex items-start justify-between">
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className="text-sm font-medium text-muted-foreground truncate">
+      <div className="relative flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
             {title}
           </p>
-          <p className="text-2xl sm:text-3xl font-bold tracking-tight">
+          <p className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight truncate">
             {value}
           </p>
           {description && (
-            <p className="text-xs text-muted-foreground/80 truncate mt-1">
+            <p className="text-[10px] sm:text-xs text-muted-foreground/80 truncate mt-0.5">
               {description}
             </p>
           )}
         </div>
         
         <div className={cn(
-          "flex-shrink-0 ml-4 rounded-xl p-3",
+          "flex-shrink-0 rounded-xl p-2 sm:p-3",
           "bg-gradient-to-br shadow-lg",
           gradientClass
         )}>
-          <Icon className="h-5 w-5 text-white" />
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
         </div>
       </div>
     </div>

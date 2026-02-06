@@ -211,12 +211,12 @@ const Profile = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in w-full max-w-full overflow-x-hidden">
       {!user && <LoginPrompt />}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("profile")}</h1>
-          <p className="text-muted-foreground mt-1">{t("Manage your personal information and preferences")}</p>
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">{t("profile")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5 truncate">{t("Manage your personal information and preferences")}</p>
         </div>
       </div>
 

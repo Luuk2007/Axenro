@@ -12,10 +12,10 @@ export default function Layout() {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen w-full bg-background mesh-gradient">
+      <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-background mesh-gradient">
         <MobileTopBar />
-        <div className="w-full pb-20">
-          <div className="px-4 py-4">
+        <div className="w-full max-w-full overflow-x-hidden pb-20">
+          <div className="px-3 py-3">
             <AnimatedOutlet />
           </div>
         </div>
