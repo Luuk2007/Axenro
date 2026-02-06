@@ -354,3 +354,19 @@
     radial-gradient(at 80% 50%, hsl(262 83% 58% / 0.04) 0px, transparent 50%),
     radial-gradient(at 0% 100%, hsl(38 92% 50% / 0.04) 0px, transparent 50%);
 }
+
+/* Safe area for bottom nav (notch devices) */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Remove tap highlight on mobile */
+.tap-highlight-none {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Overscroll behavior for app feel */
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}

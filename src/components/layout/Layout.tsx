@@ -1,26 +1,25 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import MobileTopBar from './MobileTopBar';
+import BottomNav from './BottomNav';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import AnimatedOutlet from './AnimatedOutlet';
 
 export default function Layout() {
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
 
   if (isMobile) {
     return (
       <div className="min-h-screen w-full bg-background mesh-gradient">
-        <div className="flex flex-col w-full">
-          <TopBar />
-          <div className="w-full">
-            <div className="container py-6 px-4">
-              <AnimatedOutlet />
-            </div>
+        <MobileTopBar />
+        <div className="w-full pb-20">
+          <div className="px-4 py-4">
+            <AnimatedOutlet />
           </div>
         </div>
+        <BottomNav />
       </div>
     );
   }
