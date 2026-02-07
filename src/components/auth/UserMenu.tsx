@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogIn } from 'lucide-react';
+import { LogIn, Smartphone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -115,6 +115,10 @@ export default function UserMenu() {
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => handleNavigate('/settings')}>
               {t("settings")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleNavigate('/install-app')} className="gap-2">
+              <Smartphone className="h-4 w-4" />
+              Mobiele App
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={handleSignOut}>
               {t("logOut")}
