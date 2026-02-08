@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => ({
     componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'lovable-uploads/ec1d44df-3c96-417c-a521-760d8a0e4f29.png'],
+      includeAssets: ['favicon.ico', 'app-icon-192.png', 'app-icon-512.png'],
       manifest: {
         name: 'Axenro - Personal Health Tracker',
         short_name: 'Axenro',
@@ -29,17 +29,17 @@ export default defineConfig(({ mode }) => ({
         start_url: '/',
         icons: [
           {
-            src: '/lovable-uploads/ec1d44df-3c96-417c-a521-760d8a0e4f29.png',
+            src: '/app-icon-192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/lovable-uploads/ec1d44df-3c96-417c-a521-760d8a0e4f29.png',
+            src: '/app-icon-512.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: '/lovable-uploads/ec1d44df-3c96-417c-a521-760d8a0e4f29.png',
+            src: '/app-icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
