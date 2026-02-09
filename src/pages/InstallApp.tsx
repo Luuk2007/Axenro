@@ -3,11 +3,13 @@ import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { toast } from 'sonner';
 import { 
   Smartphone, 
   Download, 
   CheckCircle2, 
+  Share, 
+  PlusSquare, 
+  ArrowDown,
   Wifi,
   Bell,
   Zap,
@@ -20,30 +22,7 @@ export default function InstallApp() {
   const { t } = useLanguage();
 
   const handleInstall = async () => {
-    // Try native install prompt first (Chrome/Android)
-    if (canInstall) {
-      await install();
-      return;
-    }
-
-    // Fallback: use Web Share API to open share sheet (iOS Safari)
-    // From there, user can tap "Add to Home Screen"
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Axenro',
-          text: 'Installeer Axenro op je homescherm',
-          url: window.location.origin,
-        });
-        return;
-      } catch (e) {
-        // User cancelled share sheet, that's fine
-        return;
-      }
-    }
-
-    // Last resort fallback
-    toast.info('Gebruik het deelmenu van je browser en kies "Zet op beginscherm".');
+    await install();
   };
 
   const features = [
@@ -71,7 +50,7 @@ export default function InstallApp() {
         </p>
       </div>
 
-      {/* Install action */}
+      {/* Status card */}
       {isStandalone || isInstalled ? (
         <motion.div
           initial={{ y: 20, opacity: 0 }}
@@ -89,11 +68,10 @@ export default function InstallApp() {
             </CardContent>
           </Card>
         </motion.div>
-      ) : (
+      ) : canInstall ? (
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="space-y-4"
         >
           <Card className="border-primary/30 bg-primary/5">
             <CardContent className="p-5 space-y-4">
@@ -102,16 +80,105 @@ export default function InstallApp() {
                   <Download className="w-6 h-6 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-sm">Installeer Axenro</p>
-                  <p className="text-xs text-muted-foreground">
-                    Voeg Axenro toe aan je homescherm met één klik.
-                  </p>
+                  <p className="font-semibold text-sm">Klaar om te installeren</p>
+                  <p className="text-xs text-muted-foreground">Voeg Axenro toe aan je homescherm met één klik.</p>
                 </div>
               </div>
               <Button onClick={handleInstall} className="w-full gap-2" size="lg">
-                <Download className="w-5 h-5" />
-                Installeer op Homescherm
+                <Download className="w-4 h-4" />
+                Installeer App
               </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : isIOS ? (
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="space-y-4"
+        >
+          <Card>
+            <CardContent className="p-5 space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Smartphone className="w-5 h-5 text-primary" />
+                </div>
+                <p className="font-semibold text-sm">Installeren op iPhone / iPad</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-xs font-bold">1</div>
+                  <div className="min-w-0 pt-1">
+                    <p className="text-sm font-medium flex items-center gap-2 flex-wrap">
+                      Tik op het <Share className="w-4 h-4 text-primary inline" /> Deel-icoon
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Onderaan in Safari</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-xs font-bold">2</div>
+                  <div className="min-w-0 pt-1">
+                    <p className="text-sm font-medium flex items-center gap-2 flex-wrap">
+                      Kies <PlusSquare className="w-4 h-4 text-primary inline" /> Zet op beginscherm
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Scroll eventueel naar beneden</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-xs font-bold">3</div>
+                  <div className="min-w-0 pt-1">
+                    <p className="text-sm font-medium">Tik op Voeg toe</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">De app verschijnt op je homescherm</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : (
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+        >
+          <Card>
+            <CardContent className="p-5 space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Smartphone className="w-5 h-5 text-primary" />
+                </div>
+                <p className="font-semibold text-sm">App installeren</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-xs font-bold">1</div>
+                  <div className="min-w-0 pt-1">
+                    <p className="text-sm font-medium">Open deze website in Chrome of Safari</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Op je mobiele telefoon</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-xs font-bold">2</div>
+                  <div className="min-w-0 pt-1">
+                    <p className="text-sm font-medium flex items-center gap-2 flex-wrap">
+                      Tik op <ArrowDown className="w-4 h-4 text-primary inline" /> Installeren
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Of gebruik het browsermenu → "Toevoegen aan startscherm"</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-xs font-bold">3</div>
+                  <div className="min-w-0 pt-1">
+                    <p className="text-sm font-medium">Open Axenro vanaf je homescherm</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">De app opent fullscreen zonder browserbalk</p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
