@@ -20,10 +20,30 @@ export default function InstallApp() {
   const { t } = useLanguage();
 
   const handleInstall = async () => {
-    const result = await install();
-    if (result === false && !canInstall) {
-      toast.info('Open deze pagina in Chrome (Android) of Safari (iOS) om de app te installeren.');
+    // Try native install prompt first (Chrome/Android)
+    if (canInstall) {
+      await install();
+      return;
     }
+
+    // Fallback: use Web Share API to open share sheet (iOS Safari)
+    // From there, user can tap "Add to Home Screen"
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Axenro',
+          text: 'Installeer Axenro op je homescherm',
+          url: window.location.origin,
+        });
+        return;
+      } catch (e) {
+        // User cancelled share sheet, that's fine
+        return;
+      }
+    }
+
+    // Last resort fallback
+    toast.info('Gebruik het deelmenu van je browser en kies "Zet op beginscherm".');
   };
 
   const features = [
