@@ -3,13 +3,11 @@ import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { toast } from 'sonner';
 import { 
   Smartphone, 
   Download, 
   CheckCircle2, 
-  Share, 
-  PlusSquare, 
-  ArrowDown,
   Wifi,
   Bell,
   Zap,
@@ -22,7 +20,10 @@ export default function InstallApp() {
   const { t } = useLanguage();
 
   const handleInstall = async () => {
-    await install();
+    const result = await install();
+    if (result === false && !canInstall) {
+      toast.info('Open deze pagina in Chrome (Android) of Safari (iOS) om de app te installeren.');
+    }
   };
 
   const features = [
@@ -74,7 +75,6 @@ export default function InstallApp() {
           animate={{ y: 0, opacity: 1 }}
           className="space-y-4"
         >
-          {/* Primary install button - always visible */}
           <Card className="border-primary/30 bg-primary/5">
             <CardContent className="p-5 space-y-4">
               <div className="flex items-center gap-4">
@@ -82,38 +82,16 @@ export default function InstallApp() {
                   <Download className="w-6 h-6 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold text-sm">
-                    {canInstall ? 'Klaar om te installeren' : 'Installeer Axenro'}
-                  </p>
+                  <p className="font-semibold text-sm">Installeer Axenro</p>
                   <p className="text-xs text-muted-foreground">
-                    {canInstall
-                      ? 'Voeg Axenro toe aan je homescherm met één klik.'
-                      : 'Zet Axenro op je homescherm voor een echte app-ervaring.'}
+                    Voeg Axenro toe aan je homescherm met één klik.
                   </p>
                 </div>
               </div>
-              {canInstall ? (
-                <Button onClick={handleInstall} className="w-full gap-2" size="lg">
-                  <Download className="w-5 h-5" />
-                  Installeer op Homescherm
-                </Button>
-              ) : isIOS ? (
-                <div className="space-y-3 pt-1">
-                  <p className="text-xs text-muted-foreground font-medium">Gebruik Safari om te installeren:</p>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <Share className="w-5 h-5 text-primary flex-shrink-0" />
-                    <p className="text-sm">Tik op <span className="font-semibold">Deel</span> onderaan → <span className="font-semibold">Zet op beginscherm</span></p>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3 pt-1">
-                  <p className="text-xs text-muted-foreground font-medium">Open in Chrome op je telefoon:</p>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <ArrowDown className="w-5 h-5 text-primary flex-shrink-0" />
-                    <p className="text-sm">Tik op <span className="font-semibold">⋮ menu</span> → <span className="font-semibold">Toevoegen aan startscherm</span></p>
-                  </div>
-                </div>
-              )}
+              <Button onClick={handleInstall} className="w-full gap-2" size="lg">
+                <Download className="w-5 h-5" />
+                Installeer op Homescherm
+              </Button>
             </CardContent>
           </Card>
         </motion.div>
