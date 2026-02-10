@@ -14,7 +14,7 @@ export default function Layout() {
     return (
       <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-background mesh-gradient">
         <MobileTopBar />
-        <div className="w-full max-w-full overflow-x-hidden pb-20">
+        <div className="w-full max-w-full overflow-x-hidden pb-24">
           <div className="px-3 py-3">
             <AnimatedOutlet />
           </div>
