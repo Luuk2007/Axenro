@@ -25,6 +25,8 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
+  // Raw string state for input fields to support intermediate values like "12."
+  const [rawInputs, setRawInputs] = useState<Record<string, string>>({});
 
   // Auto-generate workout name based on muscle groups (with fallback lookup for older workouts)
   const generatedWorkoutName = useMemo(() => {
@@ -77,6 +79,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     if (!editingWorkout) {
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
+      setRawInputs({});
     }
   };
 
@@ -143,35 +146,55 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }));
   };
 
+  const getRawInputKey = (exerciseId: string, setId: number, field: string) => `${exerciseId}-${setId}-${field}`;
+
   const handleUpdateSet = (exerciseId: string, setId: number, field: 'reps' | 'weight' | 'completed', value: number | boolean | string) => {
+    if (field === 'reps' || field === 'weight') {
+      const key = getRawInputKey(exerciseId, setId, field);
+      const strValue = String(value);
+      
+      // Store raw string for display
+      setRawInputs(prev => ({ ...prev, [key]: strValue }));
+      
+      // Only update numeric state when we have a complete number
+      if (strValue === '' || strValue === '.' || strValue === '-' || strValue.endsWith('.')) {
+        // Don't update numeric state yet for incomplete input
+        if (strValue === '') {
+          setExercises(prev => prev.map(exercise => {
+            if (exercise.id === exerciseId) {
+              return { ...exercise, sets: exercise.sets.map(set => set.id === setId ? { ...set, [field]: 0 } : set) };
+            }
+            return exercise;
+          }));
+        }
+        return;
+      }
+      
+      const numValue = parseFloat(strValue);
+      if (!isNaN(numValue)) {
+        setExercises(prev => prev.map(exercise => {
+          if (exercise.id === exerciseId) {
+            return { ...exercise, sets: exercise.sets.map(set => set.id === setId ? { ...set, [field]: numValue } : set) };
+          }
+          return exercise;
+        }));
+      }
+      return;
+    }
+
+    // completed field
     setExercises(prev => prev.map(exercise => {
       if (exercise.id === exerciseId) {
-        return {
-          ...exercise,
-          sets: exercise.sets.map(set => {
-            if (set.id === setId) {
-              if (field === 'completed') {
-                // Ensure completed is always a boolean
-                return { ...set, completed: Boolean(value) };
-              } else if (field === 'reps' || field === 'weight') {
-                if (typeof value === 'string') {
-                  // Allow empty string values
-                  if (value === '') {
-                    return { ...set, [field]: 0 }; // Default to 0 for empty values in sets
-                  }
-                  const numValue = parseFloat(value);
-                  return { ...set, [field]: isNaN(numValue) ? 0 : numValue };
-                }
-                return { ...set, [field]: Number(value) };
-              }
-              return set;
-            }
-            return set;
-          })
-        };
+        return { ...exercise, sets: exercise.sets.map(set => set.id === setId ? { ...set, completed: Boolean(value) } : set) };
       }
       return exercise;
     }));
+  };
+
+  const getInputValue = (exerciseId: string, setId: number, field: string, numericValue: number) => {
+    const key = getRawInputKey(exerciseId, setId, field);
+    if (key in rawInputs) return rawInputs[key];
+    return numericValue?.toString() || '';
   };
 
   return (
@@ -280,7 +303,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                               <div className="flex items-center gap-1">
                                 <Input
                                   type="number"
-                                  value={set.reps?.toString() || ''}
+                                  value={getInputValue(exercise.id, set.id, 'reps', set.reps)}
                                   onChange={(e) => handleUpdateSet(exercise.id, set.id, 'reps', e.target.value)}
                                   className="w-16 h-8"
                                   placeholder="Reps"
@@ -291,7 +314,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                 <div className="flex items-center gap-1">
                                   <Input
                                     type="number"
-                                    value={set.weight?.toString() || ''}
+                                    value={getInputValue(exercise.id, set.id, 'weight', set.weight)}
                                     onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
                                     className="w-16 h-8"
                                     placeholder="Weight"

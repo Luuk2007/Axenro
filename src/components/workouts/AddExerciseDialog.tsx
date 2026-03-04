@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, History } from "lucide-react";
+import { Plus, History, Trophy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { exerciseDatabase, muscleGroups } from "@/types/workout";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
@@ -56,7 +56,7 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
     return allExercises.find(ex => ex.id === selectedExerciseId);
   }, [selectedExerciseId, allExercises]);
   
-  const { lastExercise, loading: historyLoading } = useExerciseHistory(selectedExercise?.name || "");
+  const { lastExercise, personalBest, loading: historyLoading } = useExerciseHistory(selectedExercise?.name || "");
   
   const [filteredExercises, setFilteredExercises] = useState(allExercises);
 
@@ -204,15 +204,28 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
             
             {/* Show last exercise info */}
             {selectedExerciseId && lastExercise && (
-              <div className="flex items-start gap-2 p-3 bg-secondary/30 rounded-md text-sm">
-                <History className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground">{t("Last performed")}: {format(new Date(lastExercise.date), 'MMM d, yyyy')}</p>
-                  <p className="text-muted-foreground text-xs mt-1">
-                    {lastExercise.sets.length} {t("sets")} - {lastExercise.sets.map(s => `${s.reps} reps × ${s.weight}kg`).join(', ')}
-                  </p>
-                  <p className="text-muted-foreground text-xs mt-1 italic">{t("These values will be pre-filled")}</p>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2 p-3 bg-secondary/30 rounded-md text-sm">
+                  <History className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground">{t("Last performed")}: {format(new Date(lastExercise.date), 'MMM d, yyyy')}</p>
+                    <p className="text-muted-foreground text-xs mt-1">
+                      {lastExercise.sets.length} {t("sets")} - {lastExercise.sets.map(s => `${s.reps} reps × ${s.weight}kg`).join(', ')}
+                    </p>
+                    <p className="text-muted-foreground text-xs mt-1 italic">{t("These values will be pre-filled")}</p>
+                  </div>
                 </div>
+                {personalBest && personalBest.weight > 0 && (
+                  <div className="flex items-start gap-2 p-3 bg-amber-500/10 rounded-md text-sm border border-amber-500/20">
+                    <Trophy className="h-4 w-4 mt-0.5 text-amber-500 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground">{t("Personal Best")}</p>
+                      <p className="text-muted-foreground text-xs mt-1">
+                        {personalBest.weight}kg × {personalBest.reps} reps — {format(new Date(personalBest.date), 'MMM d, yyyy')}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             
