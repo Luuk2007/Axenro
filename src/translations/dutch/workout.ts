@@ -159,4 +159,8 @@ export const workoutTranslations: Translations = {
   "Planned Workouts": "Geplande Trainingen",
   "Plan Workout": "Training Plannen",
   "Add exercises to generate workout name": "Voeg oefeningen toe om trainingsnaam te genereren",
+  "Finish workout": "Training Afronden",
+  "Save as in progress": "Opslaan als bezig",
+  "In progress": "Bezig",
+  "Workout saved as in progress": "Training opgeslagen als bezig",
 };

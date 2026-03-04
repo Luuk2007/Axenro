@@ -156,8 +156,13 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
                       <span>{workout.date}</span>
                     </div>
                   </div>
-                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    {t("completed")}
+                  <span className={cn(
+                    "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium border",
+                    workout.completed 
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                  )}>
+                    {workout.completed ? t("completed") : t("In progress")}
                   </span>
                 </div>
                 

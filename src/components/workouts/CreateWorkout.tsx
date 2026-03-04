@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, X, Trash2, Dumbbell, ChevronUp, ChevronDown, GripVertical } from 'lucide-react';
+import { Plus, X, Trash2, Dumbbell, ChevronUp, ChevronDown, GripVertical, CheckCircle2, Circle, Flag } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AddExerciseDialog from './AddExerciseDialog';
 import { Workout, Exercise, ExerciseSet } from '@/types/workout';
@@ -15,7 +15,7 @@ import { getWorkoutTitleFromExercises } from '@/utils/workoutNaming';
 interface CreateWorkoutProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSaveWorkout: (name: string, exercises: any[], date: string) => void;
+  onSaveWorkout: (name: string, exercises: any[], date: string, finished?: boolean) => void;
   editingWorkout?: Workout | null;
 }
 
@@ -68,12 +68,12 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }
   }, [editingWorkout, measurementSystem]);
 
-  const handleSaveWorkout = () => {
+  const handleSaveWorkout = (finished: boolean = false) => {
     if (exercises.length === 0) return;
     
     // Convert weights back to metric for storage
     const exercisesForStorage = convertExercisesForStorage(exercises);
-    onSaveWorkout(generatedWorkoutName, exercisesForStorage, workoutDate);
+    onSaveWorkout(generatedWorkoutName, exercisesForStorage, workoutDate, finished);
     
     // Reset form only if not editing (will be handled by parent component)
     if (!editingWorkout) {
@@ -81,6 +81,12 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
       setExercises([]);
       setRawInputs({});
     }
+  };
+
+  const handleToggleExerciseCompleted = (exerciseId: string) => {
+    setExercises(prev => prev.map(ex => 
+      ex.id === exerciseId ? { ...ex, completed: !ex.completed } : ex
+    ));
   };
 
   const handleAddExercise = (exerciseData: any) => {
@@ -258,7 +264,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
               ) : (
                 <div className="space-y-4 max-h-64 overflow-y-auto">
                   {exercises.map((exercise, exerciseIndex) => (
-                    <Card key={exercise.id} className="relative">
+                    <Card key={exercise.id} className={`relative ${exercise.completed ? 'border-emerald-500/50 bg-emerald-500/5' : ''}`}>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
@@ -286,40 +292,50 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
                             <h4 className="font-medium">{exercise.name}</h4>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveExercise(exercise.id)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleToggleExerciseCompleted(exercise.id)}
+                              className={`h-8 px-2 gap-1 text-xs ${exercise.completed ? 'text-emerald-600' : 'text-muted-foreground'}`}
+                            >
+                              {exercise.completed ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveExercise(exercise.id)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
                         </div>
                         
                         <div className="space-y-2">
                           {exercise.sets.map((set, index) => (
                             <div key={set.id} className="flex items-center gap-2 text-sm">
-                              <span className="w-12 text-muted-foreground">Set {index + 1}</span>
+                              <span className="w-10 text-muted-foreground flex-shrink-0">Set {index + 1}</span>
                               <div className="flex items-center gap-1">
                                 <Input
                                   type="number"
                                   value={getInputValue(exercise.id, set.id, 'reps', set.reps)}
                                   onChange={(e) => handleUpdateSet(exercise.id, set.id, 'reps', e.target.value)}
-                                  className="w-16 h-8"
+                                  className="w-14 h-8 text-center px-1"
                                   placeholder="Reps"
                                 />
                                 <span className="text-xs text-muted-foreground">reps</span>
                               </div>
                               {exercise.muscleGroup !== 'calisthenics' && (
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1 flex-1 min-w-0">
                                   <Input
                                     type="number"
                                     value={getInputValue(exercise.id, set.id, 'weight', set.weight)}
                                     onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
-                                    className="w-16 h-8"
+                                    className="w-full min-w-[60px] h-8 px-2"
                                     placeholder="Weight"
                                   />
-                                  <span className="text-xs text-muted-foreground">{getWeightUnit(measurementSystem)}</span>
+                                  <span className="text-xs text-muted-foreground flex-shrink-0">{getWeightUnit(measurementSystem)}</span>
                                 </div>
                               )}
                               <Button
@@ -351,21 +367,32 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
               )}
             </div>
             
-            <div className="flex gap-2 pt-4">
+            <div className="flex flex-col gap-2 pt-4">
               <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="flex-1"
-              >
-                {t("Cancel")}
-              </Button>
-              <Button
-                onClick={handleSaveWorkout}
+                onClick={() => handleSaveWorkout(true)}
                 disabled={exercises.length === 0}
-                className="flex-1"
+                className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
               >
-                {editingWorkout ? t("Update workout") : t("Save workout")}
+                <Flag className="h-4 w-4 mr-2" />
+                {t("Finish workout")}
               </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="flex-1"
+                >
+                  {t("Cancel")}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleSaveWorkout(false)}
+                  disabled={exercises.length === 0}
+                  className="flex-1"
+                >
+                  {editingWorkout ? t("Update workout") : t("Save as in progress")}
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>

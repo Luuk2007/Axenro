@@ -13,6 +13,7 @@ export type Exercise = {
   name: string;
   sets: ExerciseSet[];
   muscleGroup?: string;
+  completed?: boolean;
 };
 
 export type Workout = {

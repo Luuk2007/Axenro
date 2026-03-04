@@ -66,10 +66,10 @@ const Workouts = () => {
     );
   }, [workouts, selectedMuscleGroup]);
 
-  const handleCreateWorkout = async (name: string, exercises: any[], date: string) => {
-    const completedExercises = exercises.map(exercise => ({
+  const handleCreateWorkout = async (name: string, exercises: any[], date: string, finished: boolean = true) => {
+    const processedExercises = exercises.map(exercise => ({
       ...exercise,
-      sets: exercise.sets.map(set => ({ ...set, completed: true }))
+      sets: exercise.sets.map(set => ({ ...set, completed: finished ? true : set.completed }))
     }));
 
     if (editingWorkout) {
@@ -77,8 +77,8 @@ const Workouts = () => {
         ...editingWorkout,
         name: name,
         date: date,
-        exercises: completedExercises,
-        completed: true
+        exercises: processedExercises,
+        completed: finished
       };
 
       await saveWorkout(updatedWorkout);
@@ -89,12 +89,12 @@ const Workouts = () => {
         id: Date.now().toString(),
         name: name,
         date: date,
-        exercises: completedExercises,
-        completed: true
+        exercises: processedExercises,
+        completed: finished
       };
 
       await saveWorkout(newWorkout);
-      toast.success(t("Workout saved"));
+      toast.success(finished ? t("Workout saved") : t("Workout saved as in progress"));
     }
     
     setShowWorkoutForm(false);
