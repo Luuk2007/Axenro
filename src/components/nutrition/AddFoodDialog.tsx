@@ -4,11 +4,12 @@ import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/c
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Loader2, Minus, Clock, Package } from 'lucide-react';
+import { Plus, Search, Loader2, Minus, Clock, Package, ChefHat } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { searchProductsByName, ProductDetails } from '@/services/openFoodFactsService';
 import { calculateNutritionForUnit } from '@/services/foodTypeAnalyzer';
 import { useRecentFoods } from '@/hooks/useRecentFoods';
+import { useRecipes, Recipe } from '@/hooks/useRecipes';
 
 interface Meal {
   id: string;
@@ -27,6 +28,7 @@ interface AddFoodDialogProps {
 const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }: AddFoodDialogProps) => {
   const { t, language } = useLanguage();
   const { recentFoods, addRecentFood } = useRecentFoods();
+  const { recipes } = useRecipes();
   const [searchValue, setSearchValue] = useState('');
   const [apiResults, setApiResults] = useState<ProductDetails[]>([]);
   const [searching, setSearching] = useState(false);
@@ -202,6 +204,32 @@ const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }:
     setServings(recentFood.servings);
     setAmount(recentFood.amount);
     setUnit(recentFood.unit);
+  };
+  const handleSelectRecipe = (recipe: Recipe) => {
+    // Create a mock product from recipe totals (per serving)
+    const perServing = recipe.servings > 1;
+    const divisor = perServing ? recipe.servings : 1;
+    const mockProduct: ProductDetails = {
+      id: recipe.id,
+      name: recipe.name,
+      description: `${t('Recipe')}: ${recipe.ingredients.length} ${t('ingredients')}`,
+      brand: `🍽️ ${t('Recipe')}`,
+      imageUrl: null,
+      servingSize: `1 ${t('serving')}`,
+      servings: 1,
+      amount: 1,
+      unit: 'piece',
+      nutrition: {
+        calories: Math.round(recipe.totalCalories / divisor),
+        protein: Math.round((recipe.totalProtein / divisor) * 10) / 10,
+        carbs: Math.round((recipe.totalCarbs / divisor) * 10) / 10,
+        fat: Math.round((recipe.totalFat / divisor) * 10) / 10,
+      }
+    };
+    setSelectedProduct(mockProduct);
+    setServings(1);
+    setAmount(1);
+    setUnit('piece');
   };
 
   const getAvailableUnits = () => {
@@ -452,6 +480,40 @@ const AddFoodDialog = ({ meals, selectedMeal, editingItem, onClose, onAddFood }:
                         )}
                         <div className="text-xs text-muted-foreground">
                           {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | F: {food.fat}g
+                        </div>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Recipes Section */}
+          {!searchValue && recipes.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <ChefHat className="h-4 w-4 text-muted-foreground" />
+                <label className="text-sm font-medium text-muted-foreground">{t("My Recipes")}</label>
+              </div>
+              <div className="max-h-48 overflow-y-auto space-y-2">
+                {recipes.map(recipe => (
+                  <div
+                    key={recipe.id}
+                    className="flex items-center justify-between bg-secondary/30 p-2 rounded-md cursor-pointer hover:bg-secondary/50 transition-colors"
+                    onClick={() => handleSelectRecipe(recipe)}
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <ChefHat className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{recipe.name}</p>
+                        <div className="text-xs text-muted-foreground">
+                          {Math.round(recipe.totalCalories / recipe.servings)} cal | P: {Math.round(recipe.totalProtein / recipe.servings * 10) / 10}g | {recipe.ingredients.length} {t('ingredients')}
                         </div>
                       </div>
                     </div>
