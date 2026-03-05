@@ -20,6 +20,7 @@ import ProductModal from '@/components/nutrition/ProductModal';
 import NutritionTabs from '@/components/nutrition/NutritionTabs';
 import WaterTracking from '@/components/nutrition/WaterTracking';
 import AIMealAnalyzer from '@/components/nutrition/AIMealAnalyzer';
+import RecipesManager from '@/components/nutrition/RecipesManager';
 import { saveFoodLog, getFoodLogs, deleteFoodLog, ProductDetails } from '@/services/openFoodFactsService';
 import { FoodItem, FoodLogEntry, getAvailableMeals } from '@/types/nutrition';
 
@@ -41,7 +42,7 @@ const Nutrition = () => {
   const [showMealOptionsModal, setShowMealOptionsModal] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<ProductDetails | null>(null);
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'meals' | 'water'>('meals');
+  const [activeTab, setActiveTab] = useState<'meals' | 'water' | 'recipes'>('meals');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [initialized, setInitialized] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -672,6 +673,10 @@ const Nutrition = () => {
                   />
                 ))
               )}
+            </div>
+          ) : activeTab === 'recipes' ? (
+            <div className="p-4">
+              <RecipesManager />
             </div>
           ) : (
             <div className="p-5">
