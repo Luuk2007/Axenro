@@ -508,10 +508,9 @@ const Nutrition = () => {
         </Dialog>
       )}
 
-      {(test_subscription_tier === 'pro' || test_subscription_tier === 'premium') && (
+      {(test_subscription_tier === 'pro' || test_subscription_tier === 'premium') && showScanBarcode && (
         <Dialog open={showScanBarcode} onOpenChange={setShowScanBarcode}>
           <BarcodeScanner
-            key={showScanBarcode ? 'scanner-open' : 'scanner-closed'}
             onClose={() => setShowScanBarcode(false)}
             onProductScanned={handleProductScanned}
           />
