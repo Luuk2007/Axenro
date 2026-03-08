@@ -194,9 +194,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="male">{t("Male")}</SelectItem>
+                    <SelectItem value="female">{t("Female")}</SelectItem>
+                    <SelectItem value="other">{t("Other")}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
