@@ -339,7 +339,7 @@ const Profile = () => {
                 <div className="py-10 text-center">
                   <div className="inline-flex items-center gap-2">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    <p className="text-muted-foreground">Loading profile...</p>
+                    <p className="text-muted-foreground">{t("Loading...")}</p>
                   </div>
                 </div>
               ) : (
