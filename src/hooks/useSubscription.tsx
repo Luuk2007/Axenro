@@ -153,9 +153,16 @@ export const useSubscription = () => {
         throw error;
       }
 
+      if (data?.error) {
+        if (data.error.includes('No Stripe customer found')) {
+          throw new Error('NO_STRIPE_CUSTOMER');
+        }
+        throw new Error(data.error);
+      }
+
       // Open customer portal in a new tab
       window.open(data.url, '_blank');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error opening customer portal:', error);
       throw error;
     }
