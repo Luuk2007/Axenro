@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Edit, ChefHat, Search, Loader2, Package, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, Edit, ChefHat, Search, Loader2, Package, ChevronDown, ChevronUp, ShoppingCart, Copy, Check, Utensils } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,13 +15,20 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const RecipesManager = () => {
+interface RecipesManagerProps {
+  onAddToMeals?: () => void;
+}
+
+const RecipesManager = ({ onAddToMeals }: RecipesManagerProps) => {
   const { t, language } = useLanguage();
   const { recipes, addRecipe, updateRecipe, deleteRecipe } = useRecipes();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showShoppingList, setShowShoppingList] = useState(false);
+  const [shoppingListRecipes, setShoppingListRecipes] = useState<string[]>([]);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [expandedRecipeId, setExpandedRecipeId] = useState<string | null>(null);
+  const [copiedShopping, setCopiedShopping] = useState(false);
 
   // Create/Edit dialog state
   const [recipeName, setRecipeName] = useState('');
@@ -126,92 +133,209 @@ const RecipesManager = () => {
     fat: Math.round(ingredients.reduce((s, i) => s + i.fat, 0) * 10) / 10,
   };
 
+  // Shopping list logic
+  const toggleShoppingRecipe = (recipeId: string) => {
+    setShoppingListRecipes(prev => 
+      prev.includes(recipeId) ? prev.filter(id => id !== recipeId) : [...prev, recipeId]
+    );
+  };
+
+  const getShoppingList = () => {
+    const ingredientMap = new Map<string, { name: string; amount: number; unit: string }>();
+    
+    const selectedRecipes = recipes.filter(r => shoppingListRecipes.includes(r.id));
+    selectedRecipes.forEach(recipe => {
+      recipe.ingredients.forEach(ing => {
+        const key = `${ing.name}-${ing.unit}`;
+        if (ingredientMap.has(key)) {
+          const existing = ingredientMap.get(key)!;
+          existing.amount += ing.amount;
+        } else {
+          ingredientMap.set(key, { name: ing.name, amount: ing.amount, unit: ing.unit });
+        }
+      });
+    });
+    
+    return Array.from(ingredientMap.values());
+  };
+
+  const copyShoppingList = () => {
+    const list = getShoppingList();
+    const text = list.map(item => `• ${item.name} - ${item.amount} ${t(item.unit)}`).join('\n');
+    navigator.clipboard.writeText(text);
+    setCopiedShopping(true);
+    toast.success(t('Shopping list copied'));
+    setTimeout(() => setCopiedShopping(false), 2000);
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <ChefHat className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">{t('My Recipes')}</h2>
-        </div>
-        <Button onClick={openCreate} size="sm" className="rounded-xl">
-          <Plus className="mr-1 h-4 w-4" />
+    <div className="space-y-6">
+      {/* Action buttons */}
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={openCreate} className="rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg">
+          <Plus className="mr-1.5 h-4 w-4" />
           {t('New Recipe')}
         </Button>
+        {recipes.length > 0 && (
+          <Button variant="outline" onClick={() => setShowShoppingList(true)} className="rounded-xl">
+            <ShoppingCart className="mr-1.5 h-4 w-4" />
+            {t('Shopping list')}
+          </Button>
+        )}
+        {onAddToMeals && recipes.length > 0 && (
+          <Button variant="outline" onClick={onAddToMeals} className="rounded-xl">
+            <Utensils className="mr-1.5 h-4 w-4" />
+            {t('Add to meals')}
+          </Button>
+        )}
       </div>
 
+      {/* Stats summary */}
+      {recipes.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Card className="overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
+            <CardContent className="p-3 text-center">
+              <div className="text-2xl font-bold text-primary">{recipes.length}</div>
+              <div className="text-xs text-muted-foreground">{t('Recipes')}</div>
+            </CardContent>
+          </Card>
+          <Card className="overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-purple-500 to-purple-400" />
+            <CardContent className="p-3 text-center">
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                {Math.round(recipes.reduce((s, r) => s + r.totalCalories / r.servings, 0) / recipes.length)}
+              </div>
+              <div className="text-xs text-muted-foreground">{t('Avg cal/serving')}</div>
+            </CardContent>
+          </Card>
+          <Card className="overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-400" />
+            <CardContent className="p-3 text-center">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {Math.round(recipes.reduce((s, r) => s + r.totalProtein / r.servings, 0) / recipes.length * 10) / 10}g
+              </div>
+              <div className="text-xs text-muted-foreground">{t('Avg protein')}</div>
+            </CardContent>
+          </Card>
+          <Card className="overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-green-500 to-green-400" />
+            <CardContent className="p-3 text-center">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {recipes.reduce((s, r) => s + r.ingredients.length, 0)}
+              </div>
+              <div className="text-xs text-muted-foreground">{t('Total ingredients')}</div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Recipe list */}
       {recipes.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center">
-            <ChefHat className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-            <p className="text-muted-foreground text-sm">{t('No recipes yet')}</p>
-            <Button variant="ghost" size="sm" className="mt-2" onClick={openCreate}>
-              <Plus className="mr-1 h-3 w-3" />
+          <CardContent className="py-16 text-center">
+            <ChefHat className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
+            <h3 className="text-lg font-semibold mb-1">{t('No recipes yet')}</h3>
+            <p className="text-muted-foreground text-sm mb-4">{t('Create your first recipe to get started')}</p>
+            <Button onClick={openCreate} className="rounded-xl">
+              <Plus className="mr-1.5 h-4 w-4" />
               {t('Create your first recipe')}
             </Button>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {recipes.map(recipe => (
-            <Card key={recipe.id} className="overflow-hidden">
-              <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
-              <CardContent className="p-4">
-                <div 
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => setExpandedRecipeId(expandedRecipeId === recipe.id ? null : recipe.id)}
-                >
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold truncate">{recipe.name}</h3>
-                    <div className="flex flex-wrap gap-2 text-xs mt-1">
-                      <span className="px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
-                        {recipe.totalCalories} cal
-                      </span>
-                      <span className="px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                        {recipe.totalProtein}g P
-                      </span>
-                      <span className="px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                        {recipe.totalCarbs}g C
-                      </span>
-                      <span className="px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
-                        {recipe.totalFat}g F
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {recipe.ingredients.length} {t('ingredients')} • {recipe.servings} {t('servings')}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 ml-2">
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); openEdit(recipe); }}>
-                      <Edit className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); setDeleteId(recipe.id); }}>
-                      <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                    </Button>
-                    {expandedRecipeId === recipe.id ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                  </div>
-                </div>
-                {expandedRecipeId === recipe.id && (
-                  <div className="mt-3 pt-3 border-t border-border space-y-2">
-                    {recipe.ingredients.map(ing => (
-                      <div key={ing.id} className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          {ing.imageUrl ? (
-                            <img src={ing.imageUrl} alt={ing.name} className="w-6 h-6 rounded object-cover flex-shrink-0" />
-                          ) : (
-                            <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          )}
-                          <span className="truncate">{ing.name}</span>
-                        </div>
-                        <span className="text-muted-foreground text-xs flex-shrink-0 ml-2">
-                          {ing.amount} {t(ing.unit)} • {ing.calories} cal
+          {recipes.map(recipe => {
+            const perServing = recipe.servings > 1;
+            const calPerServing = perServing ? Math.round(recipe.totalCalories / recipe.servings) : recipe.totalCalories;
+            const protPerServing = perServing ? Math.round(recipe.totalProtein / recipe.servings * 10) / 10 : recipe.totalProtein;
+            const carbsPerServing = perServing ? Math.round(recipe.totalCarbs / recipe.servings * 10) / 10 : recipe.totalCarbs;
+            const fatPerServing = perServing ? Math.round(recipe.totalFat / recipe.servings * 10) / 10 : recipe.totalFat;
+
+            return (
+              <Card key={recipe.id} className="overflow-hidden">
+                <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
+                <CardContent className="p-4">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer"
+                    onClick={() => setExpandedRecipeId(expandedRecipeId === recipe.id ? null : recipe.id)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold truncate">{recipe.name}</h3>
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                          {calPerServing} cal
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                          {protPerServing}g P
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-600 dark:text-green-400">
+                          {carbsPerServing}g C
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-orange-500/10 text-orange-600 dark:text-orange-400">
+                          {fatPerServing}g F
                         </span>
                       </div>
-                    ))}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {recipe.ingredients.length} {t('ingredients')} • {recipe.servings} {recipe.servings === 1 ? t('serving') : t('servings')}
+                        {perServing && ` • ${t('per serving')}`}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 ml-2">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); openEdit(recipe); }}>
+                        <Edit className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); setDeleteId(recipe.id); }}>
+                        <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                      </Button>
+                      {expandedRecipeId === recipe.id ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  {expandedRecipeId === recipe.id && (
+                    <div className="mt-3 pt-3 border-t border-border space-y-2">
+                      {recipe.ingredients.map(ing => (
+                        <div key={ing.id} className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            {ing.imageUrl ? (
+                              <img src={ing.imageUrl} alt={ing.name} className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                            ) : (
+                              <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            )}
+                            <span className="truncate">{ing.name}</span>
+                          </div>
+                          <span className="text-muted-foreground text-xs flex-shrink-0 ml-2">
+                            {ing.amount} {t(ing.unit)} • {ing.calories} cal
+                          </span>
+                        </div>
+                      ))}
+                      
+                      {/* Totals bar */}
+                      <div className="mt-3 pt-2 border-t border-border/50">
+                        <div className="grid grid-cols-4 gap-2">
+                          <div className="p-2 rounded-lg bg-purple-500/10 text-center">
+                            <div className="text-sm font-bold text-purple-600 dark:text-purple-400">{recipe.totalCalories}</div>
+                            <div className="text-[10px] text-muted-foreground">Cal {t('total')}</div>
+                          </div>
+                          <div className="p-2 rounded-lg bg-blue-500/10 text-center">
+                            <div className="text-sm font-bold text-blue-600 dark:text-blue-400">{recipe.totalProtein}g</div>
+                            <div className="text-[10px] text-muted-foreground">P</div>
+                          </div>
+                          <div className="p-2 rounded-lg bg-green-500/10 text-center">
+                            <div className="text-sm font-bold text-green-600 dark:text-green-400">{recipe.totalCarbs}g</div>
+                            <div className="text-[10px] text-muted-foreground">C</div>
+                          </div>
+                          <div className="p-2 rounded-lg bg-orange-500/10 text-center">
+                            <div className="text-sm font-bold text-orange-600 dark:text-orange-400">{recipe.totalFat}g</div>
+                            <div className="text-[10px] text-muted-foreground">F</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
@@ -252,7 +376,6 @@ const RecipesManager = () => {
                   ))}
                 </div>
 
-                {/* Totals */}
                 <div className="grid grid-cols-4 gap-2 mt-3">
                   <div className="p-2 rounded-lg bg-purple-500/10 text-center">
                     <div className="text-sm font-bold text-purple-600 dark:text-purple-400">{totals.calories}</div>
@@ -349,6 +472,70 @@ const RecipesManager = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Shopping List Dialog */}
+      <Dialog open={showShoppingList} onOpenChange={setShowShoppingList}>
+        <DialogContent className="sm:max-w-md mx-auto max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5 text-primary" />
+              {t('Shopping list')}
+            </DialogTitle>
+            <DialogDescription>{t('Select recipes to generate a shopping list')}</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Recipe selection */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t('Select recipes')}</label>
+              {recipes.map(recipe => (
+                <div
+                  key={recipe.id}
+                  className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                    shoppingListRecipes.includes(recipe.id) 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => toggleShoppingRecipe(recipe.id)}
+                >
+                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                    shoppingListRecipes.includes(recipe.id)
+                      ? 'border-primary bg-primary'
+                      : 'border-muted-foreground/30'
+                  }`}>
+                    {shoppingListRecipes.includes(recipe.id) && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{recipe.name}</p>
+                    <p className="text-xs text-muted-foreground">{recipe.ingredients.length} {t('ingredients')}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Generated shopping list */}
+            {shoppingListRecipes.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">{t('Your shopping list')}</label>
+                  <Button variant="ghost" size="sm" onClick={copyShoppingList} className="text-xs">
+                    {copiedShopping ? <Check className="h-3.5 w-3.5 mr-1" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
+                    {copiedShopping ? t('Copied') : t('Copy')}
+                  </Button>
+                </div>
+                <div className="bg-muted/30 rounded-xl p-3 space-y-1.5">
+                  {getShoppingList().map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-sm">
+                      <span>• {item.name}</span>
+                      <span className="text-muted-foreground text-xs">{item.amount} {t(item.unit)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={open => !open && setDeleteId(null)}>
         <AlertDialogContent className="max-w-sm">
@@ -358,7 +545,7 @@ const RecipesManager = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { if (deleteId) { deleteRecipe(deleteId); setDeleteId(null); toast.success(t('Recipe deleted')); } }} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction onClick={() => { if (deleteId) { deleteRecipe(deleteId); toast.success(t('Recipe deleted')); setDeleteId(null); } }}>
               {t('Delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
