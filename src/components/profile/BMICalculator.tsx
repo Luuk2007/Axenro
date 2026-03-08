@@ -80,10 +80,10 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
   };
 
   const getBMICategory = (bmiValue: number) => {
-    if (bmiValue < 18.5) return "Underweight";
-    if (bmiValue >= 18.5 && bmiValue <= 24.9) return "Healthy weight";
-    if (bmiValue > 24.9 && bmiValue <= 29.9) return "Overweight";
-    return "Obesity";
+    if (bmiValue < 18.5) return t("underweight");
+    if (bmiValue >= 18.5 && bmiValue <= 24.9) return t("healthyWeight");
+    if (bmiValue > 24.9 && bmiValue <= 29.9) return t("overweight");
+    return t("obesity");
   };
 
   const getStatusColor = (bmiValue: number) => {
@@ -110,7 +110,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
                 type="number"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
-                placeholder="Enter your weight"
+                placeholder={t("Enter your weight")}
                 className="w-full"
               />
             </div>
@@ -123,7 +123,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
                 type="number"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
-                placeholder="Enter your height"
+                placeholder={t("Enter your height")}
                 className="w-full"
               />
             </div>
@@ -135,7 +135,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
               <p className="text-3xl font-bold mb-2">
                 {t("BMI value")} <span className={getStatusColor(bmi)}>{bmi}</span>
               </p>
-              <p className="mb-4">{t(getBMICategory(bmi))}</p>
+              <p className="mb-4">{getBMICategory(bmi)}</p>
               
               {weightDifference !== null && (
                 <div className="text-sm">

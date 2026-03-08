@@ -315,7 +315,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                         <div className="space-y-2">
                           {exercise.sets.map((set, index) => (
                             <div key={set.id} className="flex items-center gap-2 text-sm">
-                              <span className="w-10 text-muted-foreground flex-shrink-0">Set {index + 1}</span>
+                              <span className="w-10 text-muted-foreground flex-shrink-0">{t("Set")} {index + 1}</span>
                               <div className="flex items-center gap-1">
                                 <Input
                                   type="number"

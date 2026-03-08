@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { PHOTO_CATEGORIES, COMMON_TAGS } from '@/types/progressPhotos';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AddProgressPhotoDialogProps {
   open: boolean;
@@ -27,6 +28,7 @@ export default function AddProgressPhotoDialog({
 }: AddProgressPhotoDialogProps) {
   const { user } = useAuth();
   const { subscription_tier, test_mode, test_subscription_tier } = useSubscription();
+  const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -198,7 +200,7 @@ export default function AddProgressPhotoDialog({
 
           {/* Date */}
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{t("Date")}</Label>
             <Input
               id="date"
               type="date"
@@ -210,10 +212,10 @@ export default function AddProgressPhotoDialog({
           {/* Category - Only for Premium */}
           {isPremium && (
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">{t("Category")}</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder={t("Select category")} />
                 </SelectTrigger>
                 <SelectContent>
                   {PHOTO_CATEGORIES.map(cat => (
@@ -229,10 +231,10 @@ export default function AddProgressPhotoDialog({
           {/* Notes - Only for Premium */}
           {isPremium && (
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Label htmlFor="notes">{t("Notes")} ({t("Optional")})</Label>
               <Textarea
                 id="notes"
-                placeholder="Add notes about this photo..."
+                placeholder={t("Add notes about this photo...")}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
@@ -243,7 +245,7 @@ export default function AddProgressPhotoDialog({
           {/* Tags - Only for Premium */}
           {isPremium && (
             <div className="space-y-2">
-              <Label>Tags (Optional)</Label>
+              <Label>{t("Tags")} ({t("Optional")})</Label>
               <div className="flex flex-wrap gap-2 mb-2">
                 {tags.map(tag => (
                   <Badge key={tag} variant="secondary" className="text-xs">
@@ -259,7 +261,7 @@ export default function AddProgressPhotoDialog({
               </div>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Add a tag..."
+                  placeholder={t("Add a tag...")}
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyPress={(e) => {

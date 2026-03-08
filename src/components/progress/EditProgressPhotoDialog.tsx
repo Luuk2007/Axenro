@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { X, Heart, Star } from 'lucide-react';
 import { ProgressPhoto, PHOTO_CATEGORIES, COMMON_TAGS } from '@/types/progressPhotos';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EditProgressPhotoDialogProps {
   open: boolean;
@@ -25,6 +26,7 @@ export default function EditProgressPhotoDialog({
   onUpdatePhoto,
   subscriptionTier
 }: EditProgressPhotoDialogProps) {
+  const { t } = useLanguage();
   const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
   const [category, setCategory] = useState<ProgressPhoto['category']>('front');
@@ -151,10 +153,10 @@ export default function EditProgressPhotoDialog({
           {/* Category - For Pro and Premium */}
           {(isPro || isPremium) && (
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">{t("Category")}</Label>
               <Select value={category} onValueChange={(value) => setCategory(value as ProgressPhoto['category'])}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder={t("Select category")} />
                 </SelectTrigger>
                 <SelectContent>
                   {PHOTO_CATEGORIES.map(cat => (

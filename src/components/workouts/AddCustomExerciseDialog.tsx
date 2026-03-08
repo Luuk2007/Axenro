@@ -31,6 +31,16 @@ const muscleGroups = [
   'chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'cardio'
 ];
 
+const muscleGroupTranslationKeys: Record<string, string> = {
+  chest: "Chest",
+  back: "Back",
+  shoulders: "Shoulders",
+  arms: "Arms",
+  legs: "Legs",
+  core: "Core",
+  cardio: "Cardio",
+};
+
 const AddCustomExerciseDialog: React.FC<AddCustomExerciseDialogProps> = ({
   open,
   onOpenChange,
@@ -50,31 +60,24 @@ const AddCustomExerciseDialog: React.FC<AddCustomExerciseDialogProps> = ({
 
   const handleSave = async () => {
     if (!exerciseName.trim()) {
-      toast.error("Please enter an exercise name");
+      toast.error(t("Please enter an exercise name"));
       return;
     }
 
     if (!selectedMuscleGroup) {
-      toast.error("Please select a muscle group");
+      toast.error(t("Please select a muscle group first"));
       return;
     }
 
-    // Create new exercise using the hook
     const newExercise = await addCustomExercise({
       name: exerciseName.trim(),
       muscleGroup: selectedMuscleGroup
     });
 
     if (newExercise) {
-      // Dispatch event to notify other components
       window.dispatchEvent(new Event('exercisesChanged'));
-      
-      // Notify parent component
       onCustomExerciseAdded(newExercise);
-      
-      toast.success("Custom exercise added successfully");
-      
-      // Reset form
+      toast.success(t("Custom exercise added successfully"));
       setExerciseName('');
       setSelectedMuscleGroup(preselectedMuscleGroup || '');
       onOpenChange(false);
@@ -91,28 +94,28 @@ const AddCustomExerciseDialog: React.FC<AddCustomExerciseDialogProps> = ({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md mx-auto">
         <DialogHeader>
-          <DialogTitle>Add Custom Exercise</DialogTitle>
+          <DialogTitle>{t("Add Custom Exercise")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Exercise Name</label>
+            <label className="text-sm font-medium">{t("Exercise name")}</label>
             <Input
-              placeholder="Enter exercise name"
+              placeholder={t("Enter exercise name...")}
               value={exerciseName}
               onChange={(e) => setExerciseName(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Muscle Group</label>
+            <label className="text-sm font-medium">{t("Muscle Group")}</label>
             <Select value={selectedMuscleGroup} onValueChange={setSelectedMuscleGroup}>
               <SelectTrigger>
-                <SelectValue placeholder="Select muscle group" />
+                <SelectValue placeholder={t("Select muscle group")} />
               </SelectTrigger>
               <SelectContent>
                 {muscleGroups.map((group) => (
                   <SelectItem key={group} value={group}>
-                    {group.charAt(0).toUpperCase() + group.slice(1)}
+                    {t(muscleGroupTranslationKeys[group] || group)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -121,10 +124,10 @@ const AddCustomExerciseDialog: React.FC<AddCustomExerciseDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button onClick={handleSave} disabled={!exerciseName.trim() || !selectedMuscleGroup}>
-            Add Exercise
+            {t("Add Exercise")}
           </Button>
         </DialogFooter>
       </DialogContent>

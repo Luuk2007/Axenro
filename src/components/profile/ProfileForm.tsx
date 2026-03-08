@@ -170,7 +170,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             <FormItem>
               <FormLabel>{t("Full name")}</FormLabel>
               <FormControl>
-                <Input placeholder="Enter your full name" {...field} />
+                <Input placeholder={t("Enter your full name")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -194,9 +194,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="male">{t("Male")}</SelectItem>
+                    <SelectItem value="female">{t("Female")}</SelectItem>
+                    <SelectItem value="other">{t("Other")}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -213,7 +213,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="Enter your age"
+                    placeholder={t("Enter your age")}
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
@@ -234,7 +234,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="Enter your height"
+                    placeholder={t("Enter your height")}
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
@@ -253,7 +253,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="Enter your weight"
+                    placeholder={t("Enter your weight")}
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"
@@ -289,14 +289,14 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select frequency" />
+                    <SelectValue placeholder={t("Select frequency")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="0-1">0–1 times per week</SelectItem>
-                  <SelectItem value="2-3">2–3 times per week</SelectItem>
-                  <SelectItem value="4-5">4–5 times per week</SelectItem>
-                  <SelectItem value="6+">6+ times per week</SelectItem>
+                  <SelectItem value="0-1">{t("0-1 days/week")}</SelectItem>
+                  <SelectItem value="2-3">{t("2-3 days/week")}</SelectItem>
+                  <SelectItem value="4-5">{t("4-5 days/week")}</SelectItem>
+                  <SelectItem value="6+">{t("6+ days/week")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -316,7 +316,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select goal" />
+                    <SelectValue placeholder={t("Select goal")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -340,7 +340,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="Enter target weight"
+                    placeholder={t("Enter target weight")}
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"
