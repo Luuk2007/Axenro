@@ -52,6 +52,7 @@ const Nutrition = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [meals, setMeals] = useState<Meal[]>([]);
   const [editingItem, setEditingItem] = useState<FoodItem | null>(null);
+  const mealStructureRef = React.useRef<Meal[]>([]);
   
   const isLoading = !initialized || meals.length === 0;
 
