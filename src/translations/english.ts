@@ -567,5 +567,27 @@ export const english = {
   
   "Food item deleted": "Food item deleted",
   "updated successfully": "updated successfully",
-  "added to meal plan": "added to meal plan"
+  "added to meal plan": "added to meal plan",
+  
+  // Challenges
+  "challenges": "Challenges",
+  "challengesDesc": "Push your limits with daily challenges",
+  "Discover": "Discover",
+  "Active": "Active",
+  "Badges": "Badges",
+  "Completed": "Completed",
+  "days": "days",
+  "Joined": "Joined",
+  "Join": "Join",
+  "Day": "Day",
+  "Log Day": "Log Day",
+  "Today completed!": "Today completed!",
+  "No active challenges": "No active challenges",
+  "Join a challenge to get started!": "Join a challenge to get started!",
+  "Discover Challenges": "Discover Challenges",
+  "No badges yet": "No badges yet",
+  "Complete challenges to earn badges!": "Complete challenges to earn badges!",
+  "Challenge joined!": "Challenge joined!",
+  "Error joining challenge": "Error joining challenge",
+  "Challenge abandoned": "Challenge abandoned"
 };

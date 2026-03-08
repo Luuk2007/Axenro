@@ -299,12 +299,20 @@ const MuscleAnalysis: React.FC = () => {
           <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-[260px_1fr]'}`}>
             {/* Body diagram */}
             <div className="flex flex-col items-center">
-              <BodyHeatmapSVG
-                view={view}
-                muscleVolumes={muscleVolumes}
-                onMuscleClick={handleMuscleClick}
-                selectedMuscle={selectedMuscle}
-              />
+              {viewMode === '3d' ? (
+                <Body3DWireframe
+                  muscleVolumes={muscleVolumes}
+                  onMuscleClick={handleMuscleClick}
+                  selectedMuscle={selectedMuscle}
+                />
+              ) : (
+                <BodyHeatmapSVG
+                  view={view}
+                  muscleVolumes={muscleVolumes}
+                  onMuscleClick={handleMuscleClick}
+                  selectedMuscle={selectedMuscle}
+                />
+              )}
               {/* Legend */}
               <div className="flex flex-wrap justify-center gap-3 mt-4 text-[11px] text-muted-foreground">
                 <span className="flex items-center gap-1.5">
