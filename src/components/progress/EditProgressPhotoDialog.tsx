@@ -26,6 +26,7 @@ export default function EditProgressPhotoDialog({
   onUpdatePhoto,
   subscriptionTier
 }: EditProgressPhotoDialogProps) {
+  const { t } = useLanguage();
   const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
   const [category, setCategory] = useState<ProgressPhoto['category']>('front');

@@ -28,6 +28,7 @@ export default function AddProgressPhotoDialog({
 }: AddProgressPhotoDialogProps) {
   const { user } = useAuth();
   const { subscription_tier, test_mode, test_subscription_tier } = useSubscription();
+  const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
