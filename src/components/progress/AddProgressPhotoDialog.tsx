@@ -198,7 +198,7 @@ export default function AddProgressPhotoDialog({
 
           {/* Date */}
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{t("Date")}</Label>
             <Input
               id="date"
               type="date"
