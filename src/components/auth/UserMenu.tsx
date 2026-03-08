@@ -116,8 +116,7 @@ export default function UserMenu() {
             <DropdownMenuItem onSelect={() => handleNavigate('/settings')}>
               {t("settings")}
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleNavigate('/install-app')} className="gap-2">
-              <Smartphone className="h-4 w-4" />
+            <DropdownMenuItem onSelect={() => handleNavigate('/install-app')}>
               Mobiele App
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={handleSignOut}>
