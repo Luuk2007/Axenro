@@ -123,7 +123,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
                 type="number"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
-                placeholder="Enter your height"
+                placeholder={t("Enter your height")}
                 className="w-full"
               />
             </div>
