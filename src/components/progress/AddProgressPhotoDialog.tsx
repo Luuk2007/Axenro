@@ -243,7 +243,7 @@ export default function AddProgressPhotoDialog({
           {/* Tags - Only for Premium */}
           {isPremium && (
             <div className="space-y-2">
-              <Label>Tags (Optional)</Label>
+              <Label>{t("Tags")} ({t("Optional")})</Label>
               <div className="flex flex-wrap gap-2 mb-2">
                 {tags.map(tag => (
                   <Badge key={tag} variant="secondary" className="text-xs">
