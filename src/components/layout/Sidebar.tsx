@@ -76,6 +76,25 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
+  const { user } = useAuth();
+  const { profile } = useUserProfile();
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
+
+  // Load profile picture
+  useEffect(() => {
+    if (!user) return;
+    const fetchProfilePicture = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('profile_picture_url')
+        .eq('id', user.id)
+        .single();
+      if (data?.profile_picture_url) {
+        setProfilePictureUrl(data.profile_picture_url);
+      }
+    };
+    fetchProfilePicture();
+  }, [user]);
   
   // Monitor theme changes
   useEffect(() => {
