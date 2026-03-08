@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Activity, CheckCircle, AlertTriangle, XCircle, ChevronRight, Dumbbell, Target, TrendingUp, Info, Scale } from 'lucide-react';
+import { Activity, CheckCircle, AlertTriangle, XCircle, ChevronRight, Dumbbell, TrendingUp, ArrowRight } from 'lucide-react';
 import BodyHeatmapSVG from './BodyHeatmapSVG';
 import {
   HeatmapMuscle,
@@ -16,10 +16,11 @@ import {
   recommendedExercises,
   getHeatmapMuscle,
   getVolumeLevel,
+  getVolumeColor,
 } from '@/utils/muscleMapping';
-import { Exercise } from '@/types/workout';
 import { subDays, parseISO, isAfter } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type TimePeriod = 7 | 14 | 30;
 
@@ -39,7 +40,6 @@ const MuscleAnalysis: React.FC = () => {
     return t('muscleLast30Days') || 'Laatste 30 dagen';
   }, [timePeriod, t]);
 
-  // Calculate sets per heatmap muscle
   const { muscleVolumes, muscleExercises } = useMemo(() => {
     const volumes: Record<string, number> = {};
     const exercises: Record<string, { name: string; sets: number }[]> = {};
@@ -53,16 +53,11 @@ const MuscleAnalysis: React.FC = () => {
       for (const exercise of workout.exercises) {
         const muscle = getHeatmapMuscle(exercise.id, exercise.name, exercise.muscleGroup);
         if (!muscle || !volumes.hasOwnProperty(muscle)) continue;
-
         const completedSets = exercise.sets.filter(s => s.completed).length || exercise.sets.length;
         volumes[muscle] += completedSets;
-
         const existing = exercises[muscle].find(e => e.name === exercise.name);
-        if (existing) {
-          existing.sets += completedSets;
-        } else {
-          exercises[muscle].push({ name: exercise.name, sets: completedSets });
-        }
+        if (existing) existing.sets += completedSets;
+        else exercises[muscle].push({ name: exercise.name, sets: completedSets });
       }
     }
 
@@ -72,7 +67,6 @@ const MuscleAnalysis: React.FC = () => {
     };
   }, [workouts, periodStart]);
 
-  // Muscle Balance Score
   const balanceScore = useMemo(() => {
     const scores = heatmapMuscleGroups.map(m => {
       const [min, max] = recommendedSets[m];
@@ -87,41 +81,14 @@ const MuscleAnalysis: React.FC = () => {
     return Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 100);
   }, [muscleVolumes, timePeriod]);
 
-  // Balance insights (short list for the score card)
-  const balanceInsights = useMemo(() => {
+  const scoreColor = balanceScore >= 75 ? 'text-emerald-500' : balanceScore >= 40 ? 'text-amber-500' : 'text-red-500';
+  const scoreRingColor = balanceScore >= 75 ? 'stroke-emerald-500' : balanceScore >= 40 ? 'stroke-amber-500' : 'stroke-red-500';
+
+  const insights = useMemo(() => {
     const msgs: { text: string; type: 'good' | 'warn' | 'bad' }[] = [];
     const totalSets = Object.values(muscleVolumes).reduce((a, b) => a + b, 0);
-    if (totalSets === 0) return msgs;
-
-    const upper = muscleVolumes.chest + muscleVolumes.shoulders + muscleVolumes.biceps + muscleVolumes.triceps + muscleVolumes.back;
-    const lower = muscleVolumes.quads + muscleVolumes.hamstrings + muscleVolumes.glutes + muscleVolumes.calves;
-
-    if (upper > 0 && lower > 0 && upper / lower < 2 && lower / upper < 2) {
-      msgs.push({ text: t('muscleGoodUpperBalance') || 'Goede upper body balans', type: 'good' });
-    }
-    
-    if (lower > 0 && upper > 0 && upper / lower > 2) {
-      msgs.push({ text: t('muscleLegsSlight') || 'Benen iets ondertraind', type: 'warn' });
-    }
-
-    // Check for rarely trained muscles
-    heatmapMuscleGroups.forEach(m => {
-      const sets = muscleVolumes[m];
-      if (sets === 0 && totalSets > 0) {
-        msgs.push({ text: `${muscleLabels[m]} ${t('muscleRarelyTrained') || 'nauwelijks getraind'}`, type: 'bad' });
-      }
-    });
-
-    return msgs.slice(0, 3);
-  }, [muscleVolumes, t]);
-
-  // Training insights (detailed)
-  const insights = useMemo(() => {
-    const msgs: { icon: string; text: string; type: 'good' | 'warn' | 'bad' }[] = [];
-    const totalSets = Object.values(muscleVolumes).reduce((a, b) => a + b, 0);
-
     if (totalSets === 0) {
-      msgs.push({ icon: '📊', text: t('muscleNoData') || `Geen trainingsdata van de afgelopen ${timePeriod} dagen.`, type: 'bad' });
+      msgs.push({ text: t('muscleNoData') || `Geen trainingsdata beschikbaar`, type: 'bad' });
       return msgs;
     }
 
@@ -129,199 +96,180 @@ const MuscleAnalysis: React.FC = () => {
     const lower = muscleVolumes.quads + muscleVolumes.hamstrings + muscleVolumes.glutes + muscleVolumes.calves;
 
     if (upper > 0 && lower > 0) {
-      const ratio = upper / lower;
-      if (ratio > 2) {
-        const pct = Math.round((1 - lower / upper) * 100);
-        msgs.push({ icon: '🦵', text: `Benen kregen deze week ${pct}% minder volume dan bovenlichaam`, type: 'warn' });
-      } else if (ratio < 0.5) {
-        msgs.push({ icon: '💪', text: 'Bovenlichaam krijgt minder volume dan benen', type: 'warn' });
+      if (upper / lower < 2 && lower / upper < 2) {
+        msgs.push({ text: t('muscleGoodUpperBalance') || 'Goede upper/lower body balans', type: 'good' });
+      } else if (upper / lower > 2) {
+        msgs.push({ text: t('muscleLegsSlight') || 'Benen krijgen minder volume dan bovenlichaam', type: 'warn' });
       }
     }
 
-    // Check chest vs back balance
     if (muscleVolumes.chest > 0 && muscleVolumes.back > 0) {
-      const cbRatio = muscleVolumes.chest / muscleVolumes.back;
-      if (cbRatio > 0.6 && cbRatio < 1.5) {
-        msgs.push({ icon: '⚖️', text: t('muscleChestBackBalanced') || 'Rug en borsttraining goed in balans', type: 'good' });
+      const r = muscleVolumes.chest / muscleVolumes.back;
+      if (r > 0.6 && r < 1.5) {
+        msgs.push({ text: t('muscleChestBackBalanced') || 'Rug en borst goed in balans', type: 'good' });
       }
     }
 
     heatmapMuscleGroups.forEach(m => {
       if (muscleVolumes[m] === 0 && totalSets > 5) {
-        msgs.push({ icon: '⚠️', text: `${muscleLabels[m]} krijgen nauwelijks aandacht in je training`, type: 'warn' });
+        msgs.push({ text: `${muscleLabels[m]} niet getraind deze periode`, type: 'bad' });
       }
     });
 
     return msgs.sort((a, b) => {
       const order = { bad: 0, warn: 1, good: 2 };
       return order[a.type] - order[b.type];
-    }).slice(0, 4);
-  }, [muscleVolumes, t, timePeriod]);
+    }).slice(0, 5);
+  }, [muscleVolumes, t]);
 
   const handleMuscleClick = (muscle: HeatmapMuscle) => {
     setSelectedMuscle(prev => prev === muscle ? null : muscle);
   };
 
-  // Gauge SVG for the balance score
-  const GaugeChart = ({ score }: { score: number }) => {
-    const radius = 70;
-    const strokeWidth = 14;
-    const cx = 90;
-    const cy = 90;
-    const startAngle = 135;
-    const endAngle = 405;
-    const totalAngle = endAngle - startAngle;
-    const scoreAngle = startAngle + (score / 100) * totalAngle;
-
-    const polarToCartesian = (angle: number) => {
-      const rad = ((angle - 90) * Math.PI) / 180;
-      return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
-    };
-
-    const describeArc = (start: number, end: number) => {
-      const s = polarToCartesian(start);
-      const e = polarToCartesian(end);
-      const largeArc = end - start > 180 ? 1 : 0;
-      return `M ${s.x} ${s.y} A ${radius} ${radius} 0 ${largeArc} 1 ${e.x} ${e.y}`;
-    };
-
-    // Needle position
-    const needleEnd = polarToCartesian(scoreAngle);
-
+  // Score ring component
+  const ScoreRing = ({ score }: { score: number }) => {
+    const r = 52;
+    const circ = 2 * Math.PI * r;
+    const offset = circ - (score / 100) * circ;
     return (
-      <svg viewBox="0 0 180 130" className="w-full max-w-[220px] mx-auto">
-        {/* Background arc segments */}
-        <path d={describeArc(135, 195)} fill="none" stroke="hsl(0, 72%, 55%)" strokeWidth={strokeWidth} strokeLinecap="round" opacity={0.8} />
-        <path d={describeArc(198, 282)} fill="none" stroke="hsl(45, 93%, 50%)" strokeWidth={strokeWidth} strokeLinecap="round" opacity={0.8} />
-        <path d={describeArc(285, 405)} fill="none" stroke="hsl(142, 71%, 45%)" strokeWidth={strokeWidth} strokeLinecap="round" opacity={0.8} />
-
-        {/* Needle */}
-        <line
-          x1={cx}
-          y1={cy}
-          x2={needleEnd.x}
-          y2={needleEnd.y}
-          stroke="hsl(var(--primary))"
-          strokeWidth={3}
-          strokeLinecap="round"
-        />
-        <circle cx={cx} cy={cy} r={5} fill="hsl(var(--primary))" />
-
-        {/* Score text */}
-        <text x={cx} y={cy + 2} textAnchor="middle" className="text-3xl font-extrabold" fill="hsl(var(--foreground))" fontSize="32" fontWeight="800">
-          {score}
-        </text>
-      </svg>
+      <div className="relative w-[140px] h-[140px] mx-auto">
+        <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
+          <circle cx="60" cy="60" r={r} fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
+          <circle
+            cx="60" cy="60" r={r} fill="none"
+            className={scoreRingColor}
+            strokeWidth="8" strokeLinecap="round"
+            strokeDasharray={circ} strokeDashoffset={offset}
+            style={{ transition: 'stroke-dashoffset 0.8s ease' }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className={`text-3xl font-extrabold ${scoreColor}`}>{score}%</span>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Balans</span>
+        </div>
+      </div>
     );
   };
 
+  const visibleMuscles = view === 'front' ? frontMuscles : backMuscles;
+
   return (
-    <div className="space-y-5">
-      {/* Header with time period selector */}
+    <div className="space-y-4">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold flex items-center gap-2">
+          <h2 className="text-lg font-bold flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />
             {t('muscleAnalysisTab') || 'Spieranalyse'}
           </h2>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {t('muscleAnalysisDesc') || 'Analyseer je spierbalans en ontdek welke spiergroepen je traint.'}
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {t('muscleAnalysisDesc') || 'Analyseer je spierbalans op basis van je trainingen.'}
           </p>
         </div>
-        <div className="flex bg-muted/60 rounded-xl p-1 gap-0.5">
+        <div className="flex bg-muted/50 rounded-xl p-1 gap-0.5 border border-border/40">
           {([7, 14, 30] as TimePeriod[]).map(p => (
             <Button
               key={p}
               variant={timePeriod === p ? 'default' : 'ghost'}
               size="sm"
-              className={`h-8 text-xs rounded-lg px-3 ${timePeriod === p ? '' : 'text-muted-foreground'}`}
+              className={`h-7 text-xs rounded-lg px-3 ${timePeriod === p ? 'shadow-sm' : 'text-muted-foreground'}`}
               onClick={() => setTimePeriod(p)}
             >
-              {p}d
+              {p} {t('muscleDays') || 'dagen'}
             </Button>
           ))}
         </div>
       </div>
 
-      {/* Main 2-column layout */}
-      <div className={`grid gap-5 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-[380px_1fr]'}`}>
-        {/* Left Column */}
-        <div className="space-y-5">
-          {/* Muscle Balance Score with Gauge */}
-          <Card className="border-0 shadow-md overflow-hidden">
-            <CardContent className="p-5">
-              <h3 className="text-base font-bold mb-2">
-                {t('muscleBalanceScore') || 'Muscle Balance Score'}
-              </h3>
-
-              <GaugeChart score={balanceScore} />
-
-              {/* Balance insights */}
-              <div className="space-y-2 mt-3">
-                {balanceInsights.map((insight, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm">
-                    {insight.type === 'good' && <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
-                    {insight.type === 'warn' && <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0" />}
-                    {insight.type === 'bad' && <XCircle className="h-4 w-4 text-red-500 flex-shrink-0" />}
-                    <span className="text-muted-foreground">{insight.text}</span>
-                  </div>
-                ))}
-                {balanceInsights.length === 0 && Object.values(muscleVolumes).reduce((a, b) => a + b, 0) === 0 && (
-                  <p className="text-sm text-muted-foreground">{t('muscleNoData') || 'Geen data beschikbaar'}</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Training Insights */}
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-5">
-              <h3 className="text-base font-bold mb-3 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                {t('muscleInsights') || 'Training Insights'}
-              </h3>
-              <div className="space-y-2.5">
-                {insights.map((insight, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-muted/40 border border-border/30"
-                  >
-                    <span className="text-lg flex-shrink-0 mt-0.5">{insight.icon}</span>
-                    <span className="text-sm text-foreground/80">{insight.text}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column - Heatmap */}
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-bold">
-                {t('muscleHeatmap') || 'Lichaam Heatmap'}
-              </h3>
-              <div className="flex bg-muted/60 rounded-xl p-1 gap-0.5">
-                <Button
-                  variant={view === 'front' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="h-7 text-xs rounded-lg px-4"
-                  onClick={() => setView('front')}
-                >
-                  Front
-                </Button>
-                <Button
-                  variant={view === 'back' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="h-7 text-xs rounded-lg px-4"
-                  onClick={() => setView('back')}
-                >
-                  Back
-                </Button>
-              </div>
+      {/* Score + Insights row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Balance Score */}
+        <Card className="border border-border/40 shadow-sm bg-card">
+          <CardContent className="p-5 flex flex-col items-center">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+              Muscle Balance Score
+            </h3>
+            <ScoreRing score={balanceScore} />
+            <div className="mt-4 space-y-1.5 w-full">
+              {insights.filter(i => i.type === 'good').slice(0, 2).map((ins, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <CheckCircle className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                  <span className="text-muted-foreground">{ins.text}</span>
+                </div>
+              ))}
+              {insights.filter(i => i.type === 'warn').slice(0, 2).map((ins, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <AlertTriangle className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+                  <span className="text-muted-foreground">{ins.text}</span>
+                </div>
+              ))}
+              {insights.filter(i => i.type === 'bad').slice(0, 1).map((ins, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <XCircle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />
+                  <span className="text-muted-foreground">{ins.text}</span>
+                </div>
+              ))}
             </div>
+          </CardContent>
+        </Card>
 
+        {/* Training Insights */}
+        <Card className="border border-border/40 shadow-sm bg-card">
+          <CardContent className="p-5">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              Training Insights
+            </h3>
+            <div className="space-y-2">
+              {insights.map((ins, i) => (
+                <div key={i} className={`flex items-start gap-2.5 p-2.5 rounded-xl border transition-colors ${
+                  ins.type === 'good' ? 'bg-emerald-500/5 border-emerald-500/20' :
+                  ins.type === 'warn' ? 'bg-amber-500/5 border-amber-500/20' :
+                  'bg-red-500/5 border-red-500/20'
+                }`}>
+                  {ins.type === 'good' && <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" />}
+                  {ins.type === 'warn' && <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />}
+                  {ins.type === 'bad' && <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />}
+                  <span className="text-sm text-foreground/80">{ins.text}</span>
+                </div>
+              ))}
+              {insights.length === 0 && (
+                <p className="text-sm text-muted-foreground py-4 text-center">Geen data beschikbaar</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Heatmap + Volume Bars */}
+      <Card className="border border-border/40 shadow-sm bg-card">
+        <CardContent className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              {t('muscleHeatmap') || 'Lichaam Heatmap'}
+            </h3>
+            <div className="flex bg-muted/50 rounded-xl p-1 gap-0.5 border border-border/40">
+              <Button
+                variant={view === 'front' ? 'default' : 'ghost'}
+                size="sm"
+                className="h-7 text-xs rounded-lg px-4"
+                onClick={() => setView('front')}
+              >
+                Front
+              </Button>
+              <Button
+                variant={view === 'back' ? 'default' : 'ghost'}
+                size="sm"
+                className="h-7 text-xs rounded-lg px-4"
+                onClick={() => setView('back')}
+              >
+                Back
+              </Button>
+            </div>
+          </div>
+
+          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-[260px_1fr]'}`}>
+            {/* Body diagram */}
             <div className="flex flex-col items-center">
               <BodyHeatmapSVG
                 view={view}
@@ -329,109 +277,134 @@ const MuscleAnalysis: React.FC = () => {
                 onMuscleClick={handleMuscleClick}
                 selectedMuscle={selectedMuscle}
               />
-
               {/* Legend */}
-              <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5 text-emerald-500" /> {t('muscleTrained') || 'Goed getraind'}</span>
-                <span className="flex items-center gap-1.5"><AlertTriangle className="h-3.5 w-3.5 text-amber-500" /> {t('muscleModerate') || 'Gemiddeld'}</span>
-                <span className="flex items-center gap-1.5"><XCircle className="h-3.5 w-3.5 text-red-500" /> {t('muscleUndertrained2') || 'Ondertraind'}</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-muted-foreground/30" /> {t('muscleNotTrained2') || 'Niet getraind'}</span>
+              <div className="flex flex-wrap justify-center gap-3 mt-4 text-[11px] text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--muscle-green)' }} />
+                  Getraind
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--muscle-yellow)' }} />
+                  Gemiddeld
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--muscle-red)' }} />
+                  Ondertraind
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--muscle-grey)' }} />
+                  Niet getraind
+                </span>
               </div>
             </div>
 
-            {/* Volume bars for visible muscles */}
-            <div className="mt-5 space-y-1.5">
-              {(view === 'front' ? frontMuscles : backMuscles).map(m => {
+            {/* Volume bars */}
+            <div className="space-y-1">
+              {visibleMuscles.map(m => {
                 const sets = muscleVolumes[m];
                 const scaledMax = recommendedSets[m][1] * (timePeriod / 7);
                 const pct = Math.min((sets / scaledMax) * 100, 100);
                 const level = getVolumeLevel(sets);
-                const barColor = level === 'trained' ? 'bg-emerald-500' : level === 'moderate' ? 'bg-amber-400' : level === 'undertrained' ? 'bg-red-500' : 'bg-muted-foreground/20';
+                const barBg = level === 'trained' ? 'bg-emerald-500' : level === 'moderate' ? 'bg-amber-400' : level === 'undertrained' ? 'bg-red-500' : 'bg-muted-foreground/20';
 
                 return (
                   <button
                     key={m}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-colors hover:bg-muted/40 ${selectedMuscle === m ? 'bg-muted/50 ring-1 ring-primary/30' : ''}`}
+                    className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all hover:bg-muted/40 ${
+                      selectedMuscle === m ? 'bg-primary/5 ring-1 ring-primary/30' : ''
+                    }`}
                     onClick={() => handleMuscleClick(m)}
                   >
-                    <span className="text-xs font-medium w-24 text-left">{muscleLabels[m]}</span>
-                    <div className="flex-1 h-2.5 rounded-full bg-muted/60 overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-500 ${barColor}`} style={{ width: `${pct}%` }} />
+                    <span className="text-xs font-medium w-[88px] text-left truncate">{muscleLabels[m]}</span>
+                    <div className="flex-1 h-2 rounded-full bg-muted/60 overflow-hidden">
+                      <motion.div
+                        className={`h-full rounded-full ${barBg}`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                      />
                     </div>
-                    <span className="text-xs text-muted-foreground w-16 text-right">{sets} sets</span>
-                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground w-14 text-right tabular-nums">{sets} sets</span>
+                    <ChevronRight className={`h-3.5 w-3.5 transition-colors ${selectedMuscle === m ? 'text-primary' : 'text-muted-foreground/40'}`} />
                   </button>
                 );
               })}
             </div>
+          </div>
+        </CardContent>
+      </Card>
 
-            {/* Inline insights badges under heatmap */}
-            {insights.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border/30">
-                {insights.slice(0, 2).map((insight, i) => (
-                  <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/40 rounded-lg px-3 py-2">
-                    <span>{insight.icon}</span>
-                    <span>{insight.text}</span>
+      {/* Selected Muscle Detail */}
+      <AnimatePresence mode="wait">
+        {selectedMuscle && (
+          <motion.div
+            key={selectedMuscle}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25 }}
+          >
+            <Card className="border border-border/40 shadow-sm bg-card overflow-hidden">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full`} style={{ background: getVolumeColor(muscleVolumes[selectedMuscle]) }} />
+                    <h3 className="text-lg font-bold">{muscleLabels[selectedMuscle]}</h3>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Selected Muscle Detail Panel */}
-      {selectedMuscle && (
-        <Card className="border-0 shadow-md animate-fade-in">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-bold">{muscleLabels[selectedMuscle]}</h3>
-              <Badge variant="outline" className="text-xs">{periodLabel}</Badge>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-3 rounded-xl bg-muted/40">
-                <p className="text-[11px] text-muted-foreground uppercase">{t('muscleVolume') || 'Volume'}</p>
-                <p className="text-xl font-bold">{muscleVolumes[selectedMuscle]} <span className="text-sm font-normal text-muted-foreground">sets</span></p>
-              </div>
-              <div className="p-3 rounded-xl bg-muted/40">
-                <p className="text-[11px] text-muted-foreground uppercase">{t('muscleRecommended') || 'Aanbevolen'}</p>
-                <p className="text-xl font-bold">
-                  {Math.round(recommendedSets[selectedMuscle][0] * (timePeriod / 7))}–{Math.round(recommendedSets[selectedMuscle][1] * (timePeriod / 7))}
-                  <span className="text-sm font-normal text-muted-foreground"> sets</span>
-                </p>
-              </div>
-            </div>
-
-            {muscleExercises[selectedMuscle].length > 0 && (
-              <div className="mb-4">
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
-                  <Dumbbell className="h-3.5 w-3.5" /> {t('muscleExercisesDone') || 'Uitgevoerde oefeningen'}
-                </p>
-                <div className="space-y-1.5">
-                  {muscleExercises[selectedMuscle].map((ex, i) => (
-                    <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30">
-                      <span className="text-sm">{ex.name}</span>
-                      <span className="text-xs text-muted-foreground">{ex.sets} sets</span>
-                    </div>
-                  ))}
+                  <Badge variant="outline" className="text-[11px] font-medium">{periodLabel}</Badge>
                 </div>
-              </div>
-            )}
 
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
-                <TrendingUp className="h-3.5 w-3.5" /> {t('muscleRecommendedExercises') || 'Aanbevolen oefeningen'}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {recommendedExercises[selectedMuscle].map((ex, i) => (
-                  <Badge key={i} variant="secondary" className="text-xs">{ex}</Badge>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                  <div className="p-3.5 rounded-xl bg-muted/30 border border-border/30">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Volume</p>
+                    <p className="text-2xl font-bold mt-1">
+                      {muscleVolumes[selectedMuscle]}
+                      <span className="text-sm font-normal text-muted-foreground ml-1">sets</span>
+                    </p>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-muted/30 border border-border/30">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Aanbevolen</p>
+                    <p className="text-2xl font-bold mt-1">
+                      {Math.round(recommendedSets[selectedMuscle][0] * (timePeriod / 7))}–{Math.round(recommendedSets[selectedMuscle][1] * (timePeriod / 7))}
+                      <span className="text-sm font-normal text-muted-foreground ml-1">sets</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Exercises done */}
+                {muscleExercises[selectedMuscle].length > 0 && (
+                  <div className="mb-5">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Dumbbell className="h-3.5 w-3.5" /> Uitgevoerde oefeningen
+                    </p>
+                    <div className="space-y-1">
+                      {muscleExercises[selectedMuscle].map((ex, i) => (
+                        <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-muted/20 border border-border/20">
+                          <span className="text-sm font-medium">{ex.name}</span>
+                          <span className="text-xs text-muted-foreground tabular-nums">{ex.sets} sets</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recommended exercises */}
+                <div>
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <ArrowRight className="h-3.5 w-3.5" /> Aanbevolen oefeningen
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {recommendedExercises[selectedMuscle].map((ex, i) => (
+                      <Badge key={i} variant="secondary" className="text-xs font-normal">{ex}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
