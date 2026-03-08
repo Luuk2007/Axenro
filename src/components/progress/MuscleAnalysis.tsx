@@ -32,6 +32,7 @@ const MuscleAnalysis: React.FC = () => {
   const [view, setView] = useState<'front' | 'back'>('front');
   const [selectedMuscle, setSelectedMuscle] = useState<HeatmapMuscle | null>(null);
   const [timePeriod, setTimePeriod] = useState<TimePeriod>(7);
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
   const periodStart = useMemo(() => subDays(new Date(), timePeriod), [timePeriod]);
 
