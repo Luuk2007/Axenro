@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils, Sparkles, ChevronRight, Ruler, Weight } from 'lucide-react';
+import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils, Sparkles, ChevronRight, Ruler, Weight, Trophy } from 'lucide-react';
 import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SubscriptionModal from '@/components/subscription/SubscriptionModal';
