@@ -234,7 +234,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="Enter your height"
+                    placeholder={t("Enter your height")}
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                   />
