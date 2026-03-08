@@ -141,7 +141,6 @@ export const profileTranslations: Translations = {
   "Obesity": "Obesitas",
   
   // Profile save
-  "Please login to save your profile": "Log in om je profiel op te slaan",
   "Profile updated successfully": "Profiel succesvol bijgewerkt",
   "Failed to save profile": "Profiel opslaan mislukt",
   "Please log in to save your profile": "Log in om je profiel op te slaan",
