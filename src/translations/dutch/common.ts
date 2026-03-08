@@ -157,4 +157,17 @@ export const commonTranslations: Translations = {
   // Misc
   "Add Exercise": "Oefening toevoegen",
   "Enter exercise name...": "Voer oefeningnaam in...",
+  
+  // Page descriptions
+  "Manage your personal information and preferences": "Beheer je persoonlijke gegevens en voorkeuren",
+  "Track your fitness journey and body transformation": "Volg je fitnessreis en lichaamstransformatie",
+  "Track and manage your training sessions": "Volg en beheer je trainingen",
+  "Customize your app preferences": "Pas je app-voorkeuren aan",
+  "New": "Nieuw",
+  "Activity added": "Activiteit toegevoegd",
+  "Welcome back! Here's your daily overview.": "Welkom terug! Hier is je dagelijks overzicht.",
+  
+  // Misc missing
+  "Loading...": "Laden...",
+  "completeYourProfile": "Vul je profiel in om je voedingsplan te bekijken",
 };

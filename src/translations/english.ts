@@ -644,5 +644,15 @@ export const english = {
   // Error messages
   "errorLoadingData": "Error loading data",
   "Product Found": "Product found",
-  "No results found": "No results found"
+  "No results found": "No results found",
+  
+  // Page descriptions
+  "Manage your personal information and preferences": "Manage your personal information and preferences",
+  "Track your fitness journey and body transformation": "Track your fitness journey and body transformation",
+  "Track and manage your training sessions": "Track and manage your training sessions",
+  "Customize your app preferences": "Customize your app preferences",
+  "New": "New",
+  "Activity added": "Activity added",
+  "Welcome back! Here's your daily overview.": "Welcome back! Here's your daily overview.",
+  "completeYourProfile": "Complete your profile to see your nutrition plan"
 };

@@ -56,7 +56,7 @@ const Dashboard = () => {
   };
 
   const handleAddActivity = (activityId: string) => {
-    toast.success(`Activity added to your plan`);
+    toast.success(t("Activity added"));
     setShowAddActivity(false);
   };
 
