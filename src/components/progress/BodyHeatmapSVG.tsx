@@ -25,11 +25,14 @@ const MusclePath: React.FC<MusclePathProps> = ({ muscle, paths, sets, selected, 
           key={`${muscle}-${i}`}
           d={d}
           fill={color}
-          stroke={selected ? 'hsl(var(--primary))' : 'hsl(var(--foreground) / 0.12)'}
-          strokeWidth={selected ? 2 : 0.7}
-          opacity={0.88}
-          className="cursor-pointer transition-all duration-300 hover:opacity-100 hover:brightness-110"
-          style={{ filter: selected ? 'brightness(1.15)' : undefined }}
+          stroke={selected ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.15)'}
+          strokeWidth={selected ? 2.5 : 0.5}
+          opacity={sets === 0 ? 0.25 : 0.55}
+          className="cursor-pointer transition-all duration-300 hover:opacity-70"
+          style={{ 
+            mixBlendMode: 'multiply',
+            filter: selected ? 'brightness(1.2) saturate(1.3)' : undefined,
+          }}
           onClick={onClick}
           data-muscle={muscle}
         />
@@ -38,147 +41,112 @@ const MusclePath: React.FC<MusclePathProps> = ({ muscle, paths, sets, selected, 
   );
 };
 
-// Much more anatomically detailed body - viewBox 0 0 200 450
+// SVG paths carefully mapped to the generated body images (viewBox matches image aspect 512x1024)
+// These paths are positioned to overlay on the realistic mannequin
+
+// Front body muscle overlay paths (mapped to 512x1024 image)
 const frontPaths: Record<string, string[]> = {
-  // Chest - pectoral muscles with more shape
   chest: [
     // Left pec
-    'M78,108 Q82,100 95,98 Q100,97 100,102 L100,128 Q92,133 82,130 Q75,126 74,118 Z',
+    'M175,260 Q195,240 230,235 Q256,233 256,245 L256,310 Q235,325 210,320 Q185,315 175,300 Z',
     // Right pec
-    'M122,108 Q118,100 105,98 Q100,97 100,102 L100,128 Q108,133 118,130 Q125,126 126,118 Z',
+    'M337,260 Q317,240 282,235 Q256,233 256,245 L256,310 Q277,325 302,320 Q327,315 337,300 Z',
   ],
-  // Shoulders / deltoids
   shoulders: [
-    // Left shoulder
-    'M58,92 Q62,82 72,84 Q78,86 80,92 L78,108 Q74,112 68,112 L62,108 Q54,102 58,92 Z',
-    // Right shoulder
-    'M142,92 Q138,82 128,84 Q122,86 120,92 L122,108 Q126,112 132,112 L138,108 Q146,102 142,92 Z',
+    // Left deltoid
+    'M130,215 Q140,195 165,200 Q180,205 185,215 L180,260 Q170,275 155,275 L140,265 Q125,248 130,215 Z',
+    // Right deltoid
+    'M382,215 Q372,195 347,200 Q332,205 327,215 L332,260 Q342,275 357,275 L372,265 Q387,248 382,215 Z',
   ],
-  // Biceps
   biceps: [
     // Left bicep
-    'M55,114 Q58,110 62,108 L68,112 L66,148 Q60,152 54,148 L52,126 Z',
+    'M118,280 Q128,270 140,268 L155,275 L150,370 Q138,378 125,372 L115,320 Z',
     // Right bicep
-    'M145,114 Q142,110 138,108 L132,112 L134,148 Q140,152 146,148 L148,126 Z',
+    'M394,280 Q384,270 372,268 L357,275 L362,370 Q374,378 387,372 L397,320 Z',
   ],
-  // Abs - segmented
   abs: [
     // Upper abs
-    'M84,132 Q92,130 100,132 Q108,130 116,132 L116,152 Q108,150 100,152 Q92,150 84,152 Z',
+    'M218,320 Q237,315 256,318 Q275,315 294,320 L294,370 Q275,365 256,368 Q237,365 218,370 Z',
     // Mid abs
-    'M84,154 Q92,152 100,154 Q108,152 116,154 L116,176 Q108,174 100,176 Q92,174 84,176 Z',
+    'M218,374 Q237,370 256,372 Q275,370 294,374 L294,425 Q275,420 256,422 Q237,420 218,425 Z',
     // Lower abs
-    'M84,178 Q92,176 100,178 Q108,176 116,178 L116,200 Q108,204 100,206 Q92,204 84,200 Z',
+    'M220,428 Q238,424 256,426 Q274,424 292,428 L290,480 Q274,488 256,490 Q238,488 222,480 Z',
   ],
-  // Quads
   quads: [
     // Left quad
-    'M78,210 Q84,206 92,208 L100,210 L100,300 Q94,304 88,300 L78,250 Z',
+    'M190,500 Q205,492 225,495 L256,500 L252,700 Q235,708 220,700 L190,580 Z',
     // Right quad
-    'M122,210 Q116,206 108,208 L100,210 L100,300 Q106,304 112,300 L122,250 Z',
+    'M322,500 Q307,492 287,495 L256,500 L260,700 Q277,708 292,700 L322,580 Z',
   ],
 };
 
+// Back body muscle overlay paths
 const backPaths: Record<string, string[]> = {
-  // Back - upper and lower
   back: [
-    // Upper back / lats left
-    'M74,92 Q80,88 92,86 L100,86 L100,140 Q88,144 78,138 Q72,130 72,118 Z',
-    // Upper back / lats right
-    'M126,92 Q120,88 108,86 L100,86 L100,140 Q112,144 122,138 Q128,130 128,118 Z',
+    // Left lat/upper back
+    'M175,225 Q195,215 230,210 L256,210 L256,345 Q230,355 205,345 Q180,330 175,300 Z',
+    // Right lat/upper back
+    'M337,225 Q317,215 282,210 L256,210 L256,345 Q282,355 307,345 Q332,330 337,300 Z',
     // Lower back
-    'M82,142 Q92,138 100,140 Q108,138 118,142 L118,175 Q108,180 100,182 Q92,180 82,175 Z',
+    'M215,350 Q236,342 256,345 Q276,342 297,350 L295,410 Q276,420 256,422 Q236,420 217,410 Z',
   ],
-  // Triceps
   triceps: [
     // Left tricep
-    'M54,114 Q58,108 64,110 L68,114 L66,150 Q60,154 52,148 Z',
+    'M115,280 Q125,268 140,270 L155,278 L150,375 Q138,382 122,372 Z',
     // Right tricep
-    'M146,114 Q142,108 136,110 L132,114 L134,150 Q140,154 148,148 Z',
+    'M397,280 Q387,268 372,270 L357,278 L362,375 Q374,382 390,372 Z',
   ],
-  // Glutes
   glutes: [
     // Left glute
-    'M80,195 Q88,190 100,192 L100,225 Q90,230 82,226 L78,210 Z',
+    'M200,440 Q220,430 256,435 L256,500 Q230,510 210,502 L198,470 Z',
     // Right glute
-    'M120,195 Q112,190 100,192 L100,225 Q110,230 118,226 L122,210 Z',
+    'M312,440 Q292,430 256,435 L256,500 Q282,510 302,502 L314,470 Z',
   ],
-  // Hamstrings
   hamstrings: [
     // Left hamstring
-    'M80,228 Q88,224 94,228 L100,230 L100,310 Q94,314 88,310 L80,268 Z',
+    'M195,510 Q215,502 235,508 L252,512 L248,710 Q232,718 218,710 L195,600 Z',
     // Right hamstring
-    'M120,228 Q112,224 106,228 L100,230 L100,310 Q106,314 112,310 L120,268 Z',
+    'M317,510 Q297,502 277,508 L260,512 L264,710 Q280,718 294,710 L317,600 Z',
   ],
-  // Calves
   calves: [
     // Left calf
-    'M84,315 Q90,310 96,314 L96,368 Q92,374 86,370 L82,340 Z',
+    'M210,725 Q225,715 240,720 L242,850 Q230,862 215,855 L205,780 Z',
     // Right calf
-    'M116,315 Q110,310 104,314 L104,368 Q108,374 114,370 L118,340 Z',
+    'M302,725 Q287,715 272,720 L270,850 Q282,862 297,855 L307,780 Z',
   ],
 };
-
-// Body silhouette outline - more detailed and realistic
-const bodyOutline = `
-  M100,18 
-  Q116,18 119,34 L119,50 Q120,62 115,72 Q112,78 108,82
-  L126,86 Q140,90 146,98 Q152,108 152,120 L150,155 Q150,162 145,166 L140,164 L138,155 L134,148
-  L130,140 L128,175 L126,200 L124,215 L124,250 L120,295 L120,315
-  L122,345 L122,370 Q122,388 114,392 L108,394 Q104,394 100,394
-  Q96,394 92,394 L86,392 Q78,388 78,370 L78,345 L80,315 L80,295
-  L76,250 L76,215 L72,200 L70,175 L66,148 L62,155 L60,164 L55,166
-  Q50,162 50,155 L48,120 Q48,108 54,98 Q60,90 74,86 L92,82
-  Q88,78 85,72 Q80,62 81,50 L81,34 Q84,18 100,18 Z`;
 
 const BodyHeatmapSVG: React.FC<BodyHeatmapSVGProps> = ({ view, muscleVolumes, onMuscleClick, selectedMuscle }) => {
   const paths = view === 'front' ? frontPaths : backPaths;
+  const imageSrc = view === 'front' ? '/images/body-front.png' : '/images/body-back.png';
 
   return (
-    <svg
-      viewBox="0 0 200 420"
-      className="w-full max-w-[260px] mx-auto select-none"
-      style={{ filter: 'drop-shadow(0 4px 16px hsl(var(--foreground) / 0.06))' }}
-    >
-      {/* Subtle glow behind body */}
-      <defs>
-        <radialGradient id="bodyGlow" cx="50%" cy="45%" r="40%">
-          <stop offset="0%" stopColor="hsl(var(--primary) / 0.06)" />
-          <stop offset="100%" stopColor="transparent" />
-        </radialGradient>
-        <linearGradient id="skinGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="hsl(var(--muted-foreground) / 0.12)" />
-          <stop offset="100%" stopColor="hsl(var(--muted-foreground) / 0.06)" />
-        </linearGradient>
-      </defs>
-
-      {/* Background glow */}
-      <ellipse cx="100" cy="200" rx="90" ry="180" fill="url(#bodyGlow)" />
-
-      {/* Body silhouette */}
-      <path
-        d={bodyOutline}
-        fill="hsl(var(--muted) / 0.8)"
-        stroke="hsl(var(--border))"
-        strokeWidth={1}
-        opacity={0.6}
+    <div className="relative w-full max-w-[280px] mx-auto select-none">
+      {/* Realistic body image */}
+      <img
+        src={imageSrc}
+        alt={view === 'front' ? 'Body front view' : 'Body back view'}
+        className="w-full h-auto pointer-events-none"
+        draggable={false}
       />
-
-      {/* Head */}
-      <ellipse cx="100" cy="34" rx="17" ry="19" fill="hsl(var(--muted) / 0.8)" stroke="hsl(var(--border))" strokeWidth={1} opacity={0.6} />
-
-      {/* Muscle regions */}
-      {Object.entries(paths).map(([muscle, musclePaths]) => (
-        <MusclePath
-          key={muscle}
-          muscle={muscle as HeatmapMuscle}
-          paths={musclePaths}
-          sets={muscleVolumes[muscle as HeatmapMuscle] || 0}
-          selected={selectedMuscle === muscle}
-          onClick={() => onMuscleClick(muscle as HeatmapMuscle)}
-        />
-      ))}
-    </svg>
+      {/* SVG overlay for colored muscle regions */}
+      <svg
+        viewBox="0 0 512 1024"
+        className="absolute inset-0 w-full h-full"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {Object.entries(paths).map(([muscle, musclePaths]) => (
+          <MusclePath
+            key={muscle}
+            muscle={muscle as HeatmapMuscle}
+            paths={musclePaths}
+            sets={muscleVolumes[muscle as HeatmapMuscle] || 0}
+            selected={selectedMuscle === muscle}
+            onClick={() => onMuscleClick(muscle as HeatmapMuscle)}
+          />
+        ))}
+      </svg>
+    </div>
   );
 };
 
