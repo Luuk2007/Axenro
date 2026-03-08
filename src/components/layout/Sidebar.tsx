@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils, Sparkles, ChevronRight } from 'lucide-react';
+import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils, Sparkles, ChevronRight, Ruler, Weight } from 'lucide-react';
 import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SubscriptionModal from '@/components/subscription/SubscriptionModal';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { supabase } from '@/integrations/supabase/client';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 type NavItem = {
   titleKey: TranslationKeys;
@@ -72,6 +76,25 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
+  const { user } = useAuth();
+  const { profile } = useUserProfile();
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
+
+  // Load profile picture
+  useEffect(() => {
+    if (!user) return;
+    const fetchProfilePicture = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('profile_picture_url')
+        .eq('id', user.id)
+        .single();
+      if (data?.profile_picture_url) {
+        setProfilePictureUrl(data.profile_picture_url);
+      }
+    };
+    fetchProfilePicture();
+  }, [user]);
   
   // Monitor theme changes
   useEffect(() => {
@@ -182,6 +205,42 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         </div>
         
         <div className="flex flex-col flex-1 overflow-hidden">
+          {/* Profile Card */}
+          {user && (
+            <div 
+              className="mx-3 mt-2 mb-1 p-3 rounded-xl bg-muted/50 border border-border/50 cursor-pointer hover:bg-muted transition-colors"
+              onClick={() => { navigate('/profile'); handleNavClick(); }}
+            >
+              <div className="flex items-center gap-3">
+                <Avatar className="h-11 w-11 border-2 border-primary/20">
+                  <AvatarImage src={profilePictureUrl || undefined} alt={profile?.name || 'User'} />
+                  <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary font-semibold text-sm">
+                    {(profile?.name || user.email || 'U').charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    {profile?.name || user.user_metadata?.full_name || 'Gebruiker'}
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {profile?.height && (
+                      <span className="text-[11px] text-muted-foreground flex items-center gap-0.5">
+                        <Ruler className="h-3 w-3" />
+                        {profile.height} cm
+                      </span>
+                    )}
+                    {profile?.weight && (
+                      <span className="text-[11px] text-muted-foreground flex items-center gap-0.5">
+                        <Weight className="h-3 w-3" />
+                        {profile.weight} kg
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Navigation */}
           <nav className="flex-1 overflow-auto py-4 px-3">
             <ul className="space-y-1.5">
