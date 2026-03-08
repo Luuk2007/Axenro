@@ -197,55 +197,50 @@ const Nutrition = () => {
     const mealId = foodItem.mealId || selectedMeal;
     if (!mealId) { toast.error(t('selectMealFirst')); return; }
     
-    const updatedMeals = [...meals];
-    const mealIndex = updatedMeals.findIndex(meal => meal.id === mealId);
-    
-    if (mealIndex >= 0) {
+    try {
       if (editingItem) {
-        try {
-          const itemIndex = updatedMeals[mealIndex].items.findIndex(item => item.id === editingItem.id);
-          if (itemIndex >= 0) {
-            const updatedItem = { ...foodItem, id: editingItem.id, logId: editingItem.logId };
-            updatedMeals[mealIndex].items[itemIndex] = updatedItem;
-            
-            if (isAuthenticated && editingItem.logId) {
-              await deleteFoodLog(editingItem.logId);
-              const dateStr = selectedDate.toISOString().split('T')[0];
-              await saveFoodLog(updatedItem, mealId, dateStr);
-            } else {
-              saveFoodLogsToLocalStorage(updatedMeals);
-            }
-            
-            setMeals(updatedMeals);
-            setRefreshTrigger(prev => prev + 1);
-            toast.success(`${foodItem.name} ${t('updated successfully')}`);
-            window.dispatchEvent(new CustomEvent('foodLogUpdated'));
-          }
-        } catch (error) {
-          console.error('Error updating food log:', error);
-          toast.error(t('errorSavingData'));
-        }
-      } else {
-        const newFoodItem = { ...foodItem, id: `${mealId}-${Date.now()}` };
-        updatedMeals[mealIndex].items.push(newFoodItem);
-        
-        try {
-          if (isAuthenticated) {
-            const dateStr = selectedDate.toISOString().split('T')[0];
-            await saveFoodLog(newFoodItem, mealId, dateStr);
-          } else {
-            saveFoodLogsToLocalStorage(updatedMeals);
-          }
-          
+        // Editing existing item
+        if (isAuthenticated && editingItem.logId) {
+          await deleteFoodLog(editingItem.logId);
+          const dateStr = selectedDate.toISOString().split('T')[0];
+          await saveFoodLog({ ...foodItem, id: editingItem.id }, mealId, dateStr);
+        } else {
+          const updatedMeals = meals.map(meal => {
+            if (meal.id !== mealId) return meal;
+            return {
+              ...meal,
+              items: meal.items.map(item => 
+                item.id === editingItem.id ? { ...foodItem, id: editingItem.id, logId: editingItem.logId } : item
+              )
+            };
+          });
+          saveFoodLogsToLocalStorage(updatedMeals);
           setMeals(updatedMeals);
-          setRefreshTrigger(prev => prev + 1);
-          toast.success(`${foodItem.name} ${t('added to meal plan')}`);
-          window.dispatchEvent(new CustomEvent('foodLogUpdated'));
-        } catch (error) {
-          console.error('Error saving food log:', error);
-          toast.error(t('errorSavingData'));
         }
+        toast.success(`${foodItem.name} ${t('updated successfully')}`);
+      } else {
+        // Adding new item
+        const newFoodItem = { ...foodItem, id: `${mealId}-${Date.now()}` };
+        if (isAuthenticated) {
+          const dateStr = selectedDate.toISOString().split('T')[0];
+          await saveFoodLog(newFoodItem, mealId, dateStr);
+        } else {
+          const updatedMeals = meals.map(meal => {
+            if (meal.id !== mealId) return meal;
+            return { ...meal, items: [...meal.items, newFoodItem] };
+          });
+          saveFoodLogsToLocalStorage(updatedMeals);
+          setMeals(updatedMeals);
+        }
+        toast.success(`${foodItem.name} ${t('added to meal plan')}`);
       }
+      
+      // Reload data from DB to stay in sync
+      setRefreshTrigger(prev => prev + 1);
+      window.dispatchEvent(new CustomEvent('foodLogUpdated'));
+    } catch (error) {
+      console.error('Error saving food log:', error);
+      toast.error(t('errorSavingData'));
     }
     
     setEditingItem(null);
