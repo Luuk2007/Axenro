@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Activity, CheckCircle, AlertTriangle, XCircle, ChevronRight, Dumbbell, TrendingUp, ArrowRight } from 'lucide-react';
+import { Activity, CheckCircle, AlertTriangle, XCircle, ChevronRight, Dumbbell, TrendingUp, ArrowRight, Box, Layers } from 'lucide-react';
 import BodyHeatmapSVG from './BodyHeatmapSVG';
+import Body3DWireframe from './Body3DWireframe';
 import {
   HeatmapMuscle,
   heatmapMuscleGroups,
@@ -31,6 +32,7 @@ const MuscleAnalysis: React.FC = () => {
   const [view, setView] = useState<'front' | 'back'>('front');
   const [selectedMuscle, setSelectedMuscle] = useState<HeatmapMuscle | null>(null);
   const [timePeriod, setTimePeriod] = useState<TimePeriod>(7);
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
   const periodStart = useMemo(() => subDays(new Date(), timePeriod), [timePeriod]);
 
@@ -248,35 +250,69 @@ const MuscleAnalysis: React.FC = () => {
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               {t('muscleHeatmap') || 'Lichaam Heatmap'}
             </h3>
-            <div className="flex bg-muted/50 rounded-xl p-1 gap-0.5 border border-border/40">
-              <Button
-                variant={view === 'front' ? 'default' : 'ghost'}
-                size="sm"
-                className="h-7 text-xs rounded-lg px-4"
-                onClick={() => setView('front')}
-              >
-                Front
-              </Button>
-              <Button
-                variant={view === 'back' ? 'default' : 'ghost'}
-                size="sm"
-                className="h-7 text-xs rounded-lg px-4"
-                onClick={() => setView('back')}
-              >
-                Back
-              </Button>
+            <div className="flex gap-2">
+              {/* 2D / 3D toggle */}
+              <div className="flex bg-muted/50 rounded-xl p-1 gap-0.5 border border-border/40">
+                <Button
+                  variant={viewMode === '2d' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-7 text-xs rounded-lg px-3"
+                  onClick={() => setViewMode('2d')}
+                >
+                  <Layers className="h-3 w-3 mr-1" />
+                  2D
+                </Button>
+                <Button
+                  variant={viewMode === '3d' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-7 text-xs rounded-lg px-3"
+                  onClick={() => setViewMode('3d')}
+                >
+                  <Box className="h-3 w-3 mr-1" />
+                  3D
+                </Button>
+              </div>
+              {/* Front/Back toggle (only for 2D) */}
+              {viewMode === '2d' && (
+                <div className="flex bg-muted/50 rounded-xl p-1 gap-0.5 border border-border/40">
+                  <Button
+                    variant={view === 'front' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-7 text-xs rounded-lg px-4"
+                    onClick={() => setView('front')}
+                  >
+                    Front
+                  </Button>
+                  <Button
+                    variant={view === 'back' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-7 text-xs rounded-lg px-4"
+                    onClick={() => setView('back')}
+                  >
+                    Back
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
           <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-[260px_1fr]'}`}>
             {/* Body diagram */}
             <div className="flex flex-col items-center">
-              <BodyHeatmapSVG
-                view={view}
-                muscleVolumes={muscleVolumes}
-                onMuscleClick={handleMuscleClick}
-                selectedMuscle={selectedMuscle}
-              />
+              {viewMode === '3d' ? (
+                <Body3DWireframe
+                  muscleVolumes={muscleVolumes}
+                  onMuscleClick={handleMuscleClick}
+                  selectedMuscle={selectedMuscle}
+                />
+              ) : (
+                <BodyHeatmapSVG
+                  view={view}
+                  muscleVolumes={muscleVolumes}
+                  onMuscleClick={handleMuscleClick}
+                  selectedMuscle={selectedMuscle}
+                />
+              )}
               {/* Legend */}
               <div className="flex flex-wrap justify-center gap-3 mt-4 text-[11px] text-muted-foreground">
                 <span className="flex items-center gap-1.5">
