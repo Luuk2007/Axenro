@@ -16,6 +16,7 @@ import {
   recommendedExercises,
   getHeatmapMuscle,
   getVolumeLevel,
+  getVolumeColor,
 } from '@/utils/muscleMapping';
 import { subDays, parseISO, isAfter } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
