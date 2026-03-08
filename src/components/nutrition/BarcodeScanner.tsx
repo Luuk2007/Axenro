@@ -29,12 +29,12 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
     try {
       const product = await fetchProductByBarcode(barcode);
       if (product) {
-        toast.success(`Product found: ${product.name}`);
+        toast.success(`${t("Product Found")}: ${product.name}`);
         stopScanner();
         onProductScanned(product);
       } else {
-        toast.error(`No product found for barcode: ${barcode}`);
-        setError(`No product found for barcode: ${barcode}`);
+        toast.error(t("No results found"));
+        setError(t("No results found"));
       }
     } catch (err) {
       console.error('Error fetching product:', err);
