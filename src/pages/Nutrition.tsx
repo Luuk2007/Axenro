@@ -65,6 +65,7 @@ const Nutrition = () => {
         name: meal.name,
         items: []
       }));
+      mealStructureRef.current = initializedMeals;
       setMeals(initializedMeals);
     };
 
