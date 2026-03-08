@@ -232,7 +232,7 @@ const ProductModal = ({
               <p className="font-medium">{t("Add to Meal")}</p>
               <Select value={selectedMealId} onValueChange={setSelectedMealId}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select meal" />
+                  <SelectValue placeholder={t("Select the meal")} />
                 </SelectTrigger>
                 <SelectContent>
                   {meals.map(meal => (

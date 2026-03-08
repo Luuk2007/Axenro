@@ -384,7 +384,7 @@ export default function AxenroAI() {
           <Input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Ask me anything about fitness, workouts, or nutrition…"
+            placeholder={t("Ask a question about fitness or nutrition...")}
             disabled={loading}
             className="flex-1"
           />

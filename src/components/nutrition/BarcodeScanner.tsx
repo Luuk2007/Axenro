@@ -38,8 +38,8 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
       }
     } catch (err) {
       console.error('Error fetching product:', err);
-      toast.error('Error loading product data');
-      setError('Error loading product data');
+      toast.error(t("errorLoadingData"));
+      setError(t("errorLoadingData"));
     } finally {
       setLoading(false);
     }

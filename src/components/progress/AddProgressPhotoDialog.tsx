@@ -259,7 +259,7 @@ export default function AddProgressPhotoDialog({
               </div>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Add a tag..."
+                  placeholder={t("Add a tag...")}
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyPress={(e) => {
