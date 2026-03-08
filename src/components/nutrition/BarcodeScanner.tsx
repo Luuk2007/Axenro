@@ -24,7 +24,7 @@ const BarcodeScanner = ({ onClose, onProductScanned }: BarcodeScannerProps) => {
     
     setLoading(true);
     setError(null);
-    toast.info(`Scanning barcode: ${barcode}`);
+    toast.info(t("Processing barcode..."));
     
     try {
       const product = await fetchProductByBarcode(barcode);
