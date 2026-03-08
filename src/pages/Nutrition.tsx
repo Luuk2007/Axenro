@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Apple, Camera, Bot, Utensils } from 'lucide-react';
+import { Plus, Apple, Camera, Bot, Utensils, GlassWater, ChefHat, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoginPrompt } from '@/components/auth/LoginPrompt';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -17,7 +19,6 @@ import MealSection from '@/components/nutrition/MealSection';
 import AddFoodDialog from '@/components/nutrition/AddFoodDialog';
 import BarcodeScanner from '@/components/nutrition/BarcodeScanner';
 import ProductModal from '@/components/nutrition/ProductModal';
-import NutritionTabs from '@/components/nutrition/NutritionTabs';
 import WaterTracking from '@/components/nutrition/WaterTracking';
 import AIMealAnalyzer from '@/components/nutrition/AIMealAnalyzer';
 import RecipesManager from '@/components/nutrition/RecipesManager';
@@ -34,6 +35,7 @@ interface Meal {
 const Nutrition = () => {
   const { t, language } = useLanguage();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { test_subscription_tier } = useSubscription();
   const [showAddFood, setShowAddFood] = useState(false);
   const [showScanBarcode, setShowScanBarcode] = useState(false);
@@ -42,7 +44,7 @@ const Nutrition = () => {
   const [showMealOptionsModal, setShowMealOptionsModal] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<ProductDetails | null>(null);
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'meals' | 'water' | 'recipes'>('meals');
+  const [activeTab, setActiveTab] = useState<string>('today');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [initialized, setInitialized] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -51,7 +53,6 @@ const Nutrition = () => {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [editingItem, setEditingItem] = useState<FoodItem | null>(null);
   
-  // Compute loading state - not initialized OR meals are empty
   const isLoading = !initialized || meals.length === 0;
 
   // Initialize meals when component mounts or language changes
@@ -63,13 +64,11 @@ const Nutrition = () => {
         name: meal.name,
         items: []
       }));
-      console.log('Initializing meals:', initializedMeals);
       setMeals(initializedMeals);
     };
 
     initializeMeals();
 
-    // Listen for custom meals changes
     const handleMealsChanged = () => {
       initializeMeals();
     };
@@ -79,7 +78,7 @@ const Nutrition = () => {
     return () => {
       window.removeEventListener('mealsChanged', handleMealsChanged);
     };
-  }, [language]); // Only depend on language, not meals
+  }, [language]);
 
   // Check if user is authenticated
   useEffect(() => {
@@ -91,7 +90,6 @@ const Nutrition = () => {
     
     checkAuth();
     
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session?.user);
       setUserId(session?.user?.id || null);
@@ -100,24 +98,15 @@ const Nutrition = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fallback to localStorage for demo or when not logged in
   const loadFoodLogsFromLocalStorage = (mealsToUpdate: Meal[]) => {
     const dateStr = selectedDate.toISOString().split('T')[0];
     const savedData = localStorage.getItem(`foodLog_${dateStr}`);
     
-    console.log('Loading from localStorage for date:', dateStr, 'Data:', savedData);
-    
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
+        const updatedMeals = mealsToUpdate.map(meal => ({ ...meal, items: [] }));
         
-        // Reset meal items
-        const updatedMeals = mealsToUpdate.map(meal => ({
-          ...meal,
-          items: []
-        }));
-        
-        // Add items to appropriate meals
         parsedData.forEach((item: any) => {
           if (item.mealId) {
             const mealIndex = updatedMeals.findIndex(meal => meal.id === item.mealId);
@@ -127,62 +116,42 @@ const Nutrition = () => {
           }
         });
         
-        console.log('Updated meals with localStorage data:', updatedMeals);
         setMeals(updatedMeals);
       } catch (error) {
         console.error('Error parsing local food data:', error);
       }
     } else {
-      console.log('No localStorage data found for date:', dateStr);
       setMeals(mealsToUpdate);
     }
   };
 
-  // Load food logs for the selected date - removed meals dependency to prevent infinite loop
   useEffect(() => {
     const loadFoodLogs = async () => {
-      // Don't load if meals are not yet initialized
-      if (!meals || meals.length === 0) {
-        console.log('Meals not initialized yet, waiting...');
-        return;
-      }
+      if (!meals || meals.length === 0) return;
       
       try {
         if (!isAuthenticated || !userId) {
-          // If not authenticated, load from local storage for demo
-          console.log('Not authenticated, loading from localStorage');
           loadFoodLogsFromLocalStorage(meals);
           return;
         }
         
-        // Format date as YYYY-MM-DD for consistency
         const dateStr = selectedDate.toISOString().split('T')[0];
-        
-        console.log('Loading food logs from database for date:', dateStr);
         const logs = await getFoodLogs(dateStr);
         
-        // Reset meal items
-        const updatedMeals = meals.map(meal => ({
-          ...meal,
-          items: []
-        }));
+        const updatedMeals = meals.map(meal => ({ ...meal, items: [] }));
         
-        // Add food items to appropriate meals
         logs.forEach((log: FoodLogEntry) => {
           const mealIndex = updatedMeals.findIndex(meal => meal.id === log.meal_id);
-          
           if (mealIndex >= 0) {
             const foodItem = {
               ...log.food_item,
-              id: log.id, // Use the database log ID as the item ID
-              logId: log.id // Store the log ID for deletion
+              id: log.id,
+              logId: log.id
             };
-            console.log('[Nutrition] Adding item to', log.meal_id + ':', { name: foodItem.name, logId: log.id, itemId: foodItem.id });
             updatedMeals[mealIndex].items.push(foodItem);
           }
         });
         
-        console.log('[Nutrition] Loaded', logs.length, 'food logs from database');
         setMeals(updatedMeals);
       } catch (error) {
         console.error('Error loading food logs:', error);
@@ -192,98 +161,61 @@ const Nutrition = () => {
       }
     };
 
-    // Only run if we have meals initialized
     if (meals.length > 0) {
       loadFoodLogs();
     }
 
-    // Listen for food log updates from AI or other sources
     const handleFoodLogUpdate = () => {
-      console.log('Food log update event received, refreshing...');
       setRefreshTrigger(prev => prev + 1);
     };
 
     window.addEventListener('foodLogUpdated', handleFoodLogUpdate);
-    
-    return () => {
-      window.removeEventListener('foodLogUpdated', handleFoodLogUpdate);
-    };
-  }, [selectedDate, isAuthenticated, userId, refreshTrigger, t]); // Removed meals dependency
+    return () => window.removeEventListener('foodLogUpdated', handleFoodLogUpdate);
+  }, [selectedDate, isAuthenticated, userId, refreshTrigger, t]);
 
-  // Save food logs to localStorage for demo
   const saveFoodLogsToLocalStorage = (updatedMeals: Meal[]) => {
     const dateStr = selectedDate.toISOString().split('T')[0];
-    
-    // Collect all food items from all meals
     const allItems = updatedMeals.flatMap(meal => 
-      meal.items.map(item => ({
-        ...item,
-        mealId: meal.id
-      }))
+      meal.items.map(item => ({ ...item, mealId: meal.id }))
     );
-    
     localStorage.setItem(`foodLog_${dateStr}`, JSON.stringify(allItems));
-    console.log('Saved to localStorage:', allItems);
   };
 
   const handleAddItem = (mealId: string) => {
     setSelectedMeal(mealId);
-    
-    // For free plan, directly open the AddFoodDialog since there's only one option
     if (test_subscription_tier === 'free') {
       setShowAddFood(true);
     } else {
-      // For pro and premium plans, show the modal to choose between options
       setShowMealOptionsModal(true);
     }
   };
 
   const handleAddFood = async (foodItem: any) => {
     const mealId = foodItem.mealId || selectedMeal;
+    if (!mealId) { toast.error(t('selectMealFirst')); return; }
     
-    if (!mealId) {
-      toast.error(t('selectMealFirst'));
-      return;
-    }
-    
-    // Create a copy of current meals to avoid direct state mutation
     const updatedMeals = [...meals];
     const mealIndex = updatedMeals.findIndex(meal => meal.id === mealId);
     
     if (mealIndex >= 0) {
       if (editingItem) {
-        // Handle editing existing item
         try {
-          // Find and update the existing item
           const itemIndex = updatedMeals[mealIndex].items.findIndex(item => item.id === editingItem.id);
-          
           if (itemIndex >= 0) {
-            // Update the existing item with new data
-            const updatedItem = {
-              ...foodItem,
-              id: editingItem.id, // Keep the original ID
-              logId: editingItem.logId // Keep the original logId if it exists
-            };
-            
+            const updatedItem = { ...foodItem, id: editingItem.id, logId: editingItem.logId };
             updatedMeals[mealIndex].items[itemIndex] = updatedItem;
             
-            // Update database if authenticated
             if (isAuthenticated && editingItem.logId) {
-              // For now, we'll delete the old entry and create a new one
-              // since there's no direct update function in the service
               await deleteFoodLog(editingItem.logId);
               const dateStr = selectedDate.toISOString().split('T')[0];
               await saveFoodLog(updatedItem, mealId, dateStr);
             } else {
-              // Update localStorage
               saveFoodLogsToLocalStorage(updatedMeals);
             }
             
             setMeals(updatedMeals);
             setRefreshTrigger(prev => prev + 1);
             toast.success(`${foodItem.name} ${t('updated successfully')}`);
-            
-            // Dispatch custom event to notify other components
             window.dispatchEvent(new CustomEvent('foodLogUpdated'));
           }
         } catch (error) {
@@ -291,30 +223,20 @@ const Nutrition = () => {
           toast.error(t('errorSavingData'));
         }
       } else {
-        // Handle adding new item
-        const newFoodItem = {
-          ...foodItem,
-          id: `${mealId}-${Date.now()}`,
-        };
-        
+        const newFoodItem = { ...foodItem, id: `${mealId}-${Date.now()}` };
         updatedMeals[mealIndex].items.push(newFoodItem);
         
-        // Save to database if authenticated, otherwise to localStorage
         try {
           if (isAuthenticated) {
             const dateStr = selectedDate.toISOString().split('T')[0];
             await saveFoodLog(newFoodItem, mealId, dateStr);
           } else {
-            // Fallback to localStorage
             saveFoodLogsToLocalStorage(updatedMeals);
           }
           
           setMeals(updatedMeals);
-          // Trigger a refresh of the summary
           setRefreshTrigger(prev => prev + 1);
           toast.success(`${foodItem.name} ${t('added to meal plan')}`);
-          
-          // Dispatch custom event to notify other components
           window.dispatchEvent(new CustomEvent('foodLogUpdated'));
         } catch (error) {
           console.error('Error saving food log:', error);
@@ -323,54 +245,34 @@ const Nutrition = () => {
       }
     }
     
-    // Reset editing state
     setEditingItem(null);
     setShowAddFood(false);
   };
 
   const handleDeleteFoodItem = async (mealId: string, itemId: string) => {
-    console.log('[Nutrition] Delete requested for:', { mealId, itemId });
-    
-    // Create a copy of current meals to avoid direct state mutation
     const updatedMeals = [...meals];
     const mealIndex = updatedMeals.findIndex(meal => meal.id === mealId);
     
     if (mealIndex >= 0) {
-      // Find the item to delete
       const itemIndex = updatedMeals[mealIndex].items.findIndex(item => item.id === itemId);
-      
       if (itemIndex >= 0) {
-        // Get item before removing (for Supabase deletion)
         const item = updatedMeals[mealIndex].items[itemIndex];
-        console.log('[Nutrition] Found item to delete:', { name: item.name, id: item.id, logId: item.logId });
-        
-        // Remove the item
         updatedMeals[mealIndex].items.splice(itemIndex, 1);
         
         try {
           if (isAuthenticated && item.logId) {
-            // Delete from Supabase
-            console.log('[Nutrition] Deleting from Supabase with logId:', item.logId);
             await deleteFoodLog(item.logId);
-            toast.success(t('Food item deleted'));
           } else {
-            // Update localStorage
             saveFoodLogsToLocalStorage(updatedMeals);
-            toast.success(t('Food item deleted'));
           }
-          
+          toast.success(t('Food item deleted'));
           setMeals(updatedMeals);
-          // Trigger a refresh of the summary
           setRefreshTrigger(prev => prev + 1);
-          
-          // Dispatch custom event to notify other components
           window.dispatchEvent(new CustomEvent('foodLogUpdated'));
         } catch (error) {
           console.error('Error deleting food log:', error);
           toast.error(t('errorDeletingData'));
         }
-      } else {
-        console.error('[Nutrition] Item not found with id:', itemId);
       }
     }
   };
@@ -381,9 +283,7 @@ const Nutrition = () => {
     setShowAddFood(true);
   };
 
-  const handleScanBarcode = () => {
-    setShowScanBarcode(true);
-  };
+  const handleScanBarcode = () => setShowScanBarcode(true);
 
   const handleProductScanned = (product: ProductDetails) => {
     setScannedProduct(product);
@@ -392,7 +292,6 @@ const Nutrition = () => {
   };
 
   const handleAddScannedProduct = (product: ProductDetails) => {
-    // Convert to food item format
     const foodItem = {
       id: `${selectedMeal || '1'}-${Date.now()}`,
       name: product.name,
@@ -406,7 +305,6 @@ const Nutrition = () => {
       mealId: selectedMeal || '1',
       imageUrl: product.imageUrl
     };
-    
     handleAddFood(foodItem);
     setShowProductModal(false);
     setScannedProduct(null);
@@ -418,55 +316,36 @@ const Nutrition = () => {
     setShowScanBarcode(true);
   };
 
-  const handleAIMealAnalyzer = () => {
-    setShowAIMealAnalyzer(true);
-  };
+  const handleAIMealAnalyzer = () => setShowAIMealAnalyzer(true);
 
-  // Determine available add food options based on subscription tier
   const getAddFoodOptions = () => {
     const options = [];
-    
-    // All plans have search functionality
     options.push({
-      key: 'search',
-      icon: Apple,
-      label: t("Add food"),
-      action: () => {
-        setShowMealOptionsModal(false);
-        setShowAddFood(true);
-      }
+      key: 'search', icon: Apple, label: t("Add food"),
+      action: () => { setShowMealOptionsModal(false); setShowAddFood(true); }
     });
-
-    // Pro and Premium have barcode scanning
     if (test_subscription_tier === 'pro' || test_subscription_tier === 'premium') {
       options.push({
-        key: 'barcode',
-        icon: Camera,
-        label: t("Scan Barcode"),
-        action: () => {
-          setShowMealOptionsModal(false);
-          handleScanBarcode();
-        }
+        key: 'barcode', icon: Camera, label: t("Scan Barcode"),
+        action: () => { setShowMealOptionsModal(false); handleScanBarcode(); }
       });
     }
-
-    // Only Premium has AI meal analyzer
     if (test_subscription_tier === 'premium') {
       options.push({
-        key: 'ai',
-        icon: Bot,
-        label: t("AI Meal Analyzer"),
-        action: () => {
-          setShowMealOptionsModal(false);
-          handleAIMealAnalyzer();
-        }
+        key: 'ai', icon: Bot, label: t("AI Meal Analyzer"),
+        action: () => { setShowMealOptionsModal(false); handleAIMealAnalyzer(); }
       });
     }
-
     return options;
   };
 
   const addFoodOptions = getAddFoodOptions();
+
+  // Handler to add recipe to meals - switch to today tab & open add food
+  const handleAddRecipeToMeals = () => {
+    setActiveTab('today');
+    setShowAddFood(true);
+  };
 
   if (isLoading) {
     return (
@@ -483,78 +362,106 @@ const Nutrition = () => {
   return (
     <div className="space-y-6 animate-fade-in w-full max-w-full overflow-x-hidden">
       {!user && <LoginPrompt />}
+      
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="min-w-0">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">{t("nutrition")}</h1>
           <p className="text-sm text-muted-foreground mt-0.5 truncate">{t("Track your daily food intake and macros")}</p>
         </div>
         <div className="flex items-center gap-3">
-          {/* Free plan: Direct button, no modal */}
-          {test_subscription_tier === 'free' ? (
-            <Button 
-              data-testid="add-food-trigger" 
-              onClick={() => setShowAddFood(true)}
-              className="rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              {t("Add food")}
-            </Button>
-          ) : (
-            /* Pro and Premium plans: Modal with multiple options */
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button 
-                  data-testid="add-food-trigger"
-                  className="rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t("Add food")}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="rounded-2xl">
-                <DialogHeader>
-                  <DialogTitle>{t("Add food")}</DialogTitle>
-                  <DialogDescription>
-                    {test_subscription_tier === 'pro' 
-                      ? t("Search for a product or scan a barcode")
-                      : t("Search for a product, scan, or analyze with AI")
-                    }
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex flex-col gap-3 py-4">
-                  {addFoodOptions.map(option => {
-                    const IconComponent = option.icon;
-                    return (
-                      <Button key={option.key} className="flex-1 rounded-xl" onClick={option.action}>
-                        <IconComponent className="mr-2 h-4 w-4" />
-                        {option.label}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </DialogContent>
-            </Dialog>
+          {activeTab === 'today' && (
+            test_subscription_tier === 'free' ? (
+              <Button 
+                onClick={() => setShowAddFood(true)}
+                className="rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {t("Add food")}
+              </Button>
+            ) : (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-lg">
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t("Add food")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle>{t("Add food")}</DialogTitle>
+                    <DialogDescription>
+                      {test_subscription_tier === 'pro' 
+                        ? t("Search for a product or scan a barcode")
+                        : t("Search for a product, scan, or analyze with AI")
+                      }
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-3 py-4">
+                    {addFoodOptions.map(option => {
+                      const IconComponent = option.icon;
+                      return (
+                        <Button key={option.key} className="flex-1 rounded-xl" onClick={option.action}>
+                          <IconComponent className="mr-2 h-4 w-4" />
+                          {option.label}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )
           )}
         </div>
       </div>
 
-      <div className="flex flex-col space-y-4">
-        {/* Date Navigation */}
-        <DateNavigation 
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-        />
-        
-        {/* Daily Summary */}
-        <DailySummary 
-          className="mb-6" 
-          meals={meals}
-          selectedDate={selectedDate}
-          refreshTrigger={refreshTrigger}
-        />
-      </div>
+      {/* Top-level Tabs - like Workouts page */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3 rounded-xl bg-muted/50 p-1">
+          <TabsTrigger value="today" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs sm:text-sm">
+            <CalendarDays className="h-4 w-4 mr-1 sm:mr-2" />
+            {t("Today")}
+          </TabsTrigger>
+          <TabsTrigger value="recipes" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs sm:text-sm">
+            <ChefHat className="h-4 w-4 mr-1 sm:mr-2" />
+            {t("Recipes")}
+          </TabsTrigger>
+          <TabsTrigger value="water" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs sm:text-sm">
+            <GlassWater className="h-4 w-4 mr-1 sm:mr-2" />
+            {t("Water")}
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Meal Options Modal - For pro and premium when clicking "Add item" on a meal */}
+        {/* Today Tab */}
+        <TabsContent value="today" className="mt-6 space-y-4">
+          <DateNavigation selectedDate={selectedDate} onDateChange={setSelectedDate} />
+          <DailySummary className="mb-6" meals={meals} selectedDate={selectedDate} refreshTrigger={refreshTrigger} />
+          
+          {meals.map((meal) => (
+            <MealSection
+              key={meal.id}
+              id={meal.id}
+              name={meal.name}
+              items={meal.items}
+              onAddItem={handleAddItem}
+              onDeleteItem={handleDeleteFoodItem}
+              onEditItem={handleEditFoodItem}
+            />
+          ))}
+        </TabsContent>
+
+        {/* Recipes Tab - Full sub-page */}
+        <TabsContent value="recipes" className="mt-6">
+          <RecipesManager onAddToMeals={handleAddRecipeToMeals} />
+        </TabsContent>
+
+        {/* Water Tab */}
+        <TabsContent value="water" className="mt-6">
+          <WaterTracking />
+        </TabsContent>
+      </Tabs>
+
+      {/* Dialogs */}
       <Dialog open={showMealOptionsModal} onOpenChange={setShowMealOptionsModal}>
         <DialogContent>
           <DialogHeader>
@@ -580,41 +487,29 @@ const Nutrition = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Add Food Dialog */}
       <Dialog open={showAddFood} onOpenChange={(open) => {
         setShowAddFood(open);
-        if (!open) {
-          setEditingItem(null); // Reset editing state when dialog closes
-        }
+        if (!open) setEditingItem(null);
       }}>
         <DialogContent className="p-0">
           <AddFoodDialog 
             meals={meals}
             selectedMeal={selectedMeal}
             editingItem={editingItem}
-            onClose={() => {
-              setShowAddFood(false);
-              setEditingItem(null);
-            }}
+            onClose={() => { setShowAddFood(false); setEditingItem(null); }}
             onAddFood={handleAddFood}
           />
         </DialogContent>
       </Dialog>
 
-      {/* AI Meal Analyzer Dialog - Only for Premium */}
       {test_subscription_tier === 'premium' && (
         <Dialog open={showAIMealAnalyzer} onOpenChange={setShowAIMealAnalyzer}>
           <DialogContent className="p-0">
-            <AIMealAnalyzer
-              meals={meals}
-              onClose={() => setShowAIMealAnalyzer(false)}
-              onAddFood={handleAddFood}
-            />
+            <AIMealAnalyzer meals={meals} onClose={() => setShowAIMealAnalyzer(false)} onAddFood={handleAddFood} />
           </DialogContent>
         </Dialog>
       )}
 
-      {/* Barcode Scanner Dialog - Only for Pro and Premium */}
       {(test_subscription_tier === 'pro' || test_subscription_tier === 'premium') && (
         <Dialog open={showScanBarcode} onOpenChange={setShowScanBarcode}>
           <BarcodeScanner
@@ -625,7 +520,6 @@ const Nutrition = () => {
         </Dialog>
       )}
 
-      {/* Product Modal */}
       <Dialog open={showProductModal} onOpenChange={setShowProductModal}>
         {scannedProduct && (
           <ProductModal
@@ -638,59 +532,10 @@ const Nutrition = () => {
           />
         )}
       </Dialog>
-
-      <div className="mt-4">
-        <Card className="overflow-hidden">
-          <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
-          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Utensils className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold">{t("Today meals")}</h3>
-            </div>
-            <NutritionTabs 
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-            />
-          </div>
-          
-          {activeTab === 'meals' ? (
-            <div className="p-4 space-y-4">
-              {isLoading ? (
-                <div className="p-8 text-center">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <p className="mt-2 text-muted-foreground">{t("loading")}</p>
-                </div>
-              ) : (
-                meals.map((meal) => (
-                  <MealSection
-                    key={meal.id}
-                    id={meal.id}
-                    name={meal.name}
-                    items={meal.items}
-                    onAddItem={handleAddItem}
-                    onDeleteItem={handleDeleteFoodItem}
-                    onEditItem={handleEditFoodItem}
-                  />
-                ))
-              )}
-            </div>
-          ) : activeTab === 'recipes' ? (
-            <div className="p-4">
-              <RecipesManager />
-            </div>
-          ) : (
-            <div className="p-5">
-              <WaterTracking />
-            </div>
-          )}
-        </Card>
-      </div>
       
       {!isAuthenticated && (
         <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-lg">
-          <p className="text-sm">
-            {t('Login To Save Nutrition Data')}
-          </p>
+          <p className="text-sm">{t('Login To Save Nutrition Data')}</p>
         </div>
       )}
     </div>
