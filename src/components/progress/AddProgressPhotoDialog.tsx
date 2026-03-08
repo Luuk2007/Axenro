@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { PHOTO_CATEGORIES, COMMON_TAGS } from '@/types/progressPhotos';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AddProgressPhotoDialogProps {
   open: boolean;
