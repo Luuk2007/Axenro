@@ -110,7 +110,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
                 type="number"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
-                placeholder="Enter your weight"
+                placeholder={t("Enter your weight")}
                 className="w-full"
               />
             </div>
