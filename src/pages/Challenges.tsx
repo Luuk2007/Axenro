@@ -7,7 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChallenges, Challenge } from '@/hooks/useChallenges';
 import { Trophy, Flame, Zap, Target, Clock, CheckCircle2, Play, X, Award, Star, ChevronRight, Loader2 } from 'lucide-react';
-import LoginPrompt from '@/components/auth/LoginPrompt';
+import { LoginPrompt } from '@/components/auth/LoginPrompt';
 
 const difficultyConfig = {
   easy: { label: 'Easy', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: Zap },

@@ -82,6 +82,7 @@ function App() {
                     <Route path="resetyourpassword" element={<PasswordResetPage />} />
                     <Route path="cookiepreferences" element={<CookiePreferencesPage />} />
                     <Route path="beheer" element={<Beheer />} />
+                    <Route path="challenges" element={<Challenges />} />
                     <Route path="install-app" element={<InstallApp />} />
                     <Route path="*" element={<NotFound />} />
                   </Route>

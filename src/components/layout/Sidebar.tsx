@@ -52,6 +52,12 @@ const navItems: NavItem[] = [
     gradient: 'from-pink-500 to-rose-500',
   },
   {
+    titleKey: "challenges",
+    href: '/challenges',
+    icon: Trophy,
+    gradient: 'from-amber-500 to-orange-500',
+  },
+  {
     titleKey: "profile",
     href: '/profile',
     icon: User2,
