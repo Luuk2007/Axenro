@@ -556,7 +556,7 @@ export const english = {
   "Avg cal/serving": "Avg cal/serving",
   "Avg protein": "Avg protein",
   "Total ingredients": "Total ingredients",
-  "total": "total",
+  
   "per serving": "per serving",
   "Create your first recipe to get started": "Create your first recipe to get started",
   "Select recipes to generate a shopping list": "Select recipes to generate a shopping list",
