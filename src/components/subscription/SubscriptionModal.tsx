@@ -180,7 +180,7 @@ export default function SubscriptionModal({ open, onOpenChange }: SubscriptionMo
 
         {/* Plans Grid */}
         <div className="px-6 pb-6 overflow-y-auto max-h-[60vh]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3">
             {plans.map((plan, index) => {
               const isCurrentPlan = currentTier === plan.id;
               const Icon = plan.icon;
