@@ -210,10 +210,10 @@ export default function AddProgressPhotoDialog({
           {/* Category - Only for Premium */}
           {isPremium && (
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category">{t("Category")}</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder={t("Select category")} />
                 </SelectTrigger>
                 <SelectContent>
                   {PHOTO_CATEGORIES.map(cat => (
