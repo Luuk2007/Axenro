@@ -293,10 +293,10 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="0-1">0–1 times per week</SelectItem>
-                  <SelectItem value="2-3">2–3 times per week</SelectItem>
-                  <SelectItem value="4-5">4–5 times per week</SelectItem>
-                  <SelectItem value="6+">6+ times per week</SelectItem>
+                  <SelectItem value="0-1">{t("0-1 days/week")}</SelectItem>
+                  <SelectItem value="2-3">{t("2-3 days/week")}</SelectItem>
+                  <SelectItem value="4-5">{t("4-5 days/week")}</SelectItem>
+                  <SelectItem value="6+">{t("6+ days/week")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
