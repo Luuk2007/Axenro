@@ -129,18 +129,19 @@ const Nutrition = () => {
 
   useEffect(() => {
     const loadFoodLogs = async () => {
-      if (!meals || meals.length === 0) return;
+      const currentStructure = mealStructureRef.current;
+      if (!currentStructure || currentStructure.length === 0) return;
       
       try {
         if (!isAuthenticated || !userId) {
-          loadFoodLogsFromLocalStorage(meals);
+          loadFoodLogsFromLocalStorage(currentStructure);
           return;
         }
         
         const dateStr = selectedDate.toISOString().split('T')[0];
         const logs = await getFoodLogs(dateStr);
         
-        const updatedMeals = meals.map(meal => ({ ...meal, items: [] }));
+        const updatedMeals = currentStructure.map(meal => ({ ...meal, items: [] as FoodItem[] }));
         
         logs.forEach((log: FoodLogEntry) => {
           const mealIndex = updatedMeals.findIndex(meal => meal.id === log.meal_id);
@@ -163,7 +164,7 @@ const Nutrition = () => {
       }
     };
 
-    if (meals.length > 0) {
+    if (mealStructureRef.current.length > 0) {
       loadFoodLogs();
     }
 
