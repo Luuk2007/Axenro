@@ -248,8 +248,8 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-auto py-4 px-3">
-            <ul className="space-y-1.5">
+          <nav className="flex-1 overflow-auto py-2 px-3">
+            <ul className="space-y-0.5">
               {filteredNavItems.map((item, index) => (
                 <li key={index}>
                   <NavLink
@@ -257,7 +257,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                     onClick={handleNavClick}
                     className={({ isActive }) =>
                       cn(
-                        "group flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-300 ease-out",
+                        "group flex items-center gap-3 rounded-xl px-4 py-2.5 transition-all duration-300 ease-out",
                         isActive ? 
                           "bg-primary/10 text-primary shadow-sm" : 
                           "text-muted-foreground hover:bg-accent hover:text-foreground"
