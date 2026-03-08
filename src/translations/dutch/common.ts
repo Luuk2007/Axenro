@@ -125,4 +125,36 @@ export const commonTranslations: Translations = {
   "Failed to start checkout process": "Checkout starten mislukt",
   "Opening settings...": "Instellingen openen...",
   "Failed to open settings": "Instellingen openen mislukt",
+  
+  // Steps connection
+  "Connect your steps": "Koppel je stappen",
+  "Sync your daily steps from Google Fit": "Synchroniseer je dagelijkse stappen via Google Fit",
+  "Please sign in first": "Log eerst in",
+  "Authentication required": "Authenticatie vereist",
+  "Connection failed": "Verbinding mislukt",
+  "Connect with Google Fit": "Verbinden met Google Fit",
+  "Connecting...": "Verbinden...",
+  "Connected to Google Fit": "Verbonden met Google Fit",
+  "Your steps are being tracked": "Je stappen worden bijgehouden",
+  "Sync Now": "Nu synchroniseren",
+  "Syncing...": "Synchroniseren...",
+  "Steps synced successfully": "Stappen succesvol gesynchroniseerd",
+  "Sync failed": "Synchronisatie mislukt",
+  "Disconnect": "Ontkoppelen",
+  "Disconnected successfully": "Succesvol ontkoppeld",
+  "Disconnect failed": "Ontkoppelen mislukt",
+  "Google Fit connects to most step tracking apps": "Google Fit verbindt met de meeste stappen-tracking apps op iOS en Android.",
+  
+  // Progress photos
+  "Category": "Categorie",
+  "Select category": "Selecteer categorie",
+  "Notes": "Notities",
+  "Optional": "Optioneel",
+  "Add notes about this photo...": "Voeg notities toe over deze foto...",
+  "Tags": "Tags",
+  "Add a tag...": "Voeg een tag toe...",
+  
+  // Misc
+  "Add Exercise": "Oefening toevoegen",
+  "Enter exercise name...": "Voer oefeningnaam in...",
 };

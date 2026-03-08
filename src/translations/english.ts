@@ -584,5 +584,65 @@ export const english = {
   "Complete challenges to earn badges!": "Complete challenges to earn badges!",
   "Challenge joined!": "Challenge joined!",
   "Error joining challenge": "Error joining challenge",
-  "Challenge abandoned": "Challenge abandoned"
+  "Challenge abandoned": "Challenge abandoned",
+  
+  // Steps connection
+  "Connect your steps": "Connect your steps",
+  "Sync your daily steps from Google Fit": "Sync your daily steps from Google Fit, which works with most step tracking apps on iOS and Android.",
+  "Please sign in first": "Please sign in first",
+  "Authentication required": "Authentication required",
+  "Connection failed": "Connection failed",
+  "Connect with Google Fit": "Connect with Google Fit",
+  "Connecting...": "Connecting...",
+  "Connected to Google Fit": "Connected to Google Fit",
+  "Your steps are being tracked": "Your steps are being tracked",
+  "Sync Now": "Sync Now",
+  "Syncing...": "Syncing...",
+  "Steps synced successfully": "Steps synced successfully!",
+  "Sync failed": "Failed to sync steps",
+  "Disconnect": "Disconnect",
+  "Disconnected successfully": "Disconnected from Google Fit",
+  "Disconnect failed": "Failed to disconnect",
+  "Google Fit connects to most step tracking apps": "Google Fit connects to most step tracking apps including iOS Health app, Samsung Health, and built-in step counters.",
+  
+  // Progress photos extras
+  "Category": "Category",
+  "Select category": "Select category",
+  "Notes": "Notes",
+  "Optional": "Optional",
+  "Add notes about this photo...": "Add notes about this photo...",
+  "Tags": "Tags",
+  "Add a tag...": "Add a tag...",
+  
+  // Profile placeholders
+  "Enter your full name": "Enter your full name",
+  "Enter your age": "Enter your age",
+  "Enter your height": "Enter your height",
+  "Enter your weight": "Enter your weight",
+  "Enter target weight": "Enter target weight",
+  
+  // BMI
+  "underweight": "Underweight",
+  "healthyWeight": "Healthy weight",
+  "overweight": "Overweight",
+  "obesity": "Obesity",
+  "BMI calculator": "BMI Calculator",
+  "BMI result": "BMI result",
+  "BMI value": "BMI value",
+  "weightToGain": "Weight to gain:",
+  "weightToLose": "Weight to lose:",
+  
+  // Custom exercise
+  "Enter exercise name...": "Enter exercise name...",
+  "Please select a muscle group first": "Please select a muscle group first",
+  
+  // Profile save
+  "Profile updated successfully": "Profile updated successfully",
+  "Failed to save profile": "Failed to save profile",
+  "Please log in to save your profile": "Please log in to save your profile",
+  
+  // Error messages
+  "errorLoadingData": "Error loading data",
+  "Product Found": "Product found",
+  "No results found": "No results found"
 };

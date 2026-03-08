@@ -123,4 +123,26 @@ export const profileTranslations: Translations = {
   "Very active": "Zeer actief",
   "Activity": "Activiteit",
   "days/week": "dagen/week",
+  
+  // Placeholders
+  "Enter your full name": "Vul je volledige naam in",
+  "Enter your age": "Vul je leeftijd in",
+  "Enter your height": "Vul je lengte in",
+  "Enter your weight": "Vul je gewicht in",
+  "Enter target weight": "Vul je streefgewicht in",
+  
+  // BMI
+  "BMI calculator": "BMI Calculator",
+  "BMI result": "BMI Resultaat",
+  "BMI value": "BMI Waarde",
+  "Underweight": "Ondergewicht",
+  "Healthy weight": "Gezond gewicht",
+  "Overweight": "Overgewicht",
+  "Obesity": "Obesitas",
+  
+  // Profile save
+  "Please login to save your profile": "Log in om je profiel op te slaan",
+  "Profile updated successfully": "Profiel succesvol bijgewerkt",
+  "Failed to save profile": "Profiel opslaan mislukt",
+  "Please log in to save your profile": "Log in om je profiel op te slaan",
 };
