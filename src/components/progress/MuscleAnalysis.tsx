@@ -250,23 +250,49 @@ const MuscleAnalysis: React.FC = () => {
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               {t('muscleHeatmap') || 'Lichaam Heatmap'}
             </h3>
-            <div className="flex bg-muted/50 rounded-xl p-1 gap-0.5 border border-border/40">
-              <Button
-                variant={view === 'front' ? 'default' : 'ghost'}
-                size="sm"
-                className="h-7 text-xs rounded-lg px-4"
-                onClick={() => setView('front')}
-              >
-                Front
-              </Button>
-              <Button
-                variant={view === 'back' ? 'default' : 'ghost'}
-                size="sm"
-                className="h-7 text-xs rounded-lg px-4"
-                onClick={() => setView('back')}
-              >
-                Back
-              </Button>
+            <div className="flex gap-2">
+              {/* 2D / 3D toggle */}
+              <div className="flex bg-muted/50 rounded-xl p-1 gap-0.5 border border-border/40">
+                <Button
+                  variant={viewMode === '2d' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-7 text-xs rounded-lg px-3"
+                  onClick={() => setViewMode('2d')}
+                >
+                  <Layers className="h-3 w-3 mr-1" />
+                  2D
+                </Button>
+                <Button
+                  variant={viewMode === '3d' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-7 text-xs rounded-lg px-3"
+                  onClick={() => setViewMode('3d')}
+                >
+                  <Box className="h-3 w-3 mr-1" />
+                  3D
+                </Button>
+              </div>
+              {/* Front/Back toggle (only for 2D) */}
+              {viewMode === '2d' && (
+                <div className="flex bg-muted/50 rounded-xl p-1 gap-0.5 border border-border/40">
+                  <Button
+                    variant={view === 'front' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-7 text-xs rounded-lg px-4"
+                    onClick={() => setView('front')}
+                  >
+                    Front
+                  </Button>
+                  <Button
+                    variant={view === 'back' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-7 text-xs rounded-lg px-4"
+                    onClick={() => setView('back')}
+                  >
+                    Back
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
