@@ -783,6 +783,12 @@ export default function Progress() {
             )}
           </TabsContent>
         )}
+
+        <TabsContent value="muscle-analysis" className="space-y-6">
+          <Suspense fallback={<div className="flex items-center justify-center py-12 text-muted-foreground text-sm">{t("Loading...") || "Laden..."}</div>}>
+            <MuscleAnalysis />
+          </Suspense>
+        </TabsContent>
       </Tabs>
       )}
     </div>
