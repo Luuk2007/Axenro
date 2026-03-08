@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Activity, CheckCircle, AlertTriangle, XCircle, ChevronRight, Dumbbell, TrendingUp, ArrowRight } from 'lucide-react';
+import { Activity, CheckCircle, AlertTriangle, XCircle, ChevronRight, Dumbbell, TrendingUp, ArrowRight, Box, Layers } from 'lucide-react';
 import BodyHeatmapSVG from './BodyHeatmapSVG';
+import Body3DWireframe from './Body3DWireframe';
 import {
   HeatmapMuscle,
   heatmapMuscleGroups,
