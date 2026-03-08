@@ -173,9 +173,14 @@ const Settings = () => {
     try {
       await openCustomerPortal();
       toast.success(t("Opening customer portal..."));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Portal error:', error);
-      toast.error(t("Failed to open customer portal"));
+      if (error?.message === 'NO_STRIPE_CUSTOMER') {
+        toast.error(t("No active Stripe subscription found. Please subscribe first."));
+        setSubscriptionModalOpen(true);
+      } else {
+        toast.error(t("Failed to open customer portal"));
+      }
     }
   };
 
