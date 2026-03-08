@@ -408,7 +408,4 @@ const MuscleAnalysis: React.FC = () => {
   );
 };
 
-// Need to import this for the detail panel color dot
-import { getVolumeColor } from '@/utils/muscleMapping';
-
 export default MuscleAnalysis;
