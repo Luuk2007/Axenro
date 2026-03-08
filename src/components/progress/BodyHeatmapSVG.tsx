@@ -10,127 +10,174 @@ interface BodyHeatmapSVGProps {
 
 interface MusclePathProps {
   muscle: HeatmapMuscle;
-  d: string;
+  paths: string[];
   sets: number;
   selected: boolean;
   onClick: () => void;
-  mirror?: string;
 }
 
-const MusclePath: React.FC<MusclePathProps> = ({ muscle, d, sets, selected, onClick, mirror }) => {
+const MusclePath: React.FC<MusclePathProps> = ({ muscle, paths, sets, selected, onClick }) => {
   const color = getVolumeColor(sets);
   return (
     <>
-      <path
-        d={d}
-        fill={color}
-        stroke={selected ? 'hsl(var(--primary))' : 'hsl(var(--foreground) / 0.2)'}
-        strokeWidth={selected ? 2.5 : 1}
-        opacity={0.85}
-        className="cursor-pointer transition-all duration-200 hover:opacity-100 hover:brightness-110"
-        onClick={onClick}
-        data-muscle={muscle}
-      />
-      {mirror && (
+      {paths.map((d, i) => (
         <path
-          d={mirror}
+          key={`${muscle}-${i}`}
+          d={d}
           fill={color}
-          stroke={selected ? 'hsl(var(--primary))' : 'hsl(var(--foreground) / 0.2)'}
-          strokeWidth={selected ? 2.5 : 1}
-          opacity={0.85}
-          className="cursor-pointer transition-all duration-200 hover:opacity-100 hover:brightness-110"
+          stroke={selected ? 'hsl(var(--primary))' : 'hsl(var(--foreground) / 0.12)'}
+          strokeWidth={selected ? 2 : 0.7}
+          opacity={0.88}
+          className="cursor-pointer transition-all duration-300 hover:opacity-100 hover:brightness-110"
+          style={{ filter: selected ? 'brightness(1.15)' : undefined }}
           onClick={onClick}
           data-muscle={muscle}
         />
-      )}
+      ))}
     </>
   );
 };
 
-// Simplified anatomical SVG paths for a human body silhouette (viewBox 0 0 200 400)
-const frontPaths: Record<string, { d: string; mirror?: string }> = {
-  chest: {
-    d: 'M72,105 Q80,95 100,95 Q120,95 128,105 L130,130 Q115,138 100,140 Q85,138 70,130 Z',
-  },
-  shoulders: {
-    d: 'M55,90 Q60,80 72,85 L72,105 L60,110 Q50,100 55,90 Z',
-    mirror: 'M145,90 Q140,80 128,85 L128,105 L140,110 Q150,100 145,90 Z',
-  },
-  biceps: {
-    d: 'M50,112 L60,110 L62,150 Q55,155 48,150 Z',
-    mirror: 'M150,112 L140,110 L138,150 Q145,155 152,150 Z',
-  },
-  abs: {
-    d: 'M78,140 Q90,138 100,140 Q110,138 122,140 L120,200 Q110,205 100,207 Q90,205 80,200 Z',
-  },
-  quads: {
-    d: 'M75,207 L82,200 Q90,205 100,207 L100,295 Q92,298 85,295 L75,207 Z',
-    mirror: 'M125,207 L118,200 Q110,205 100,207 L100,295 Q108,298 115,295 L125,207 Z',
-  },
+// Much more anatomically detailed body - viewBox 0 0 200 450
+const frontPaths: Record<string, string[]> = {
+  // Chest - pectoral muscles with more shape
+  chest: [
+    // Left pec
+    'M78,108 Q82,100 95,98 Q100,97 100,102 L100,128 Q92,133 82,130 Q75,126 74,118 Z',
+    // Right pec
+    'M122,108 Q118,100 105,98 Q100,97 100,102 L100,128 Q108,133 118,130 Q125,126 126,118 Z',
+  ],
+  // Shoulders / deltoids
+  shoulders: [
+    // Left shoulder
+    'M58,92 Q62,82 72,84 Q78,86 80,92 L78,108 Q74,112 68,112 L62,108 Q54,102 58,92 Z',
+    // Right shoulder
+    'M142,92 Q138,82 128,84 Q122,86 120,92 L122,108 Q126,112 132,112 L138,108 Q146,102 142,92 Z',
+  ],
+  // Biceps
+  biceps: [
+    // Left bicep
+    'M55,114 Q58,110 62,108 L68,112 L66,148 Q60,152 54,148 L52,126 Z',
+    // Right bicep
+    'M145,114 Q142,110 138,108 L132,112 L134,148 Q140,152 146,148 L148,126 Z',
+  ],
+  // Abs - segmented
+  abs: [
+    // Upper abs
+    'M84,132 Q92,130 100,132 Q108,130 116,132 L116,152 Q108,150 100,152 Q92,150 84,152 Z',
+    // Mid abs
+    'M84,154 Q92,152 100,154 Q108,152 116,154 L116,176 Q108,174 100,176 Q92,174 84,176 Z',
+    // Lower abs
+    'M84,178 Q92,176 100,178 Q108,176 116,178 L116,200 Q108,204 100,206 Q92,204 84,200 Z',
+  ],
+  // Quads
+  quads: [
+    // Left quad
+    'M78,210 Q84,206 92,208 L100,210 L100,300 Q94,304 88,300 L78,250 Z',
+    // Right quad
+    'M122,210 Q116,206 108,208 L100,210 L100,300 Q106,304 112,300 L122,250 Z',
+  ],
 };
 
-const backPaths: Record<string, { d: string; mirror?: string }> = {
-  back: {
-    d: 'M72,90 Q85,85 100,85 Q115,85 128,90 L130,155 Q115,162 100,165 Q85,162 70,155 Z',
-  },
-  triceps: {
-    d: 'M50,112 L62,108 L64,150 Q57,155 48,148 Z',
-    mirror: 'M150,112 L138,108 L136,150 Q143,155 152,148 Z',
-  },
-  glutes: {
-    d: 'M78,195 Q90,190 100,192 Q110,190 122,195 L122,225 Q110,232 100,234 Q90,232 78,225 Z',
-  },
-  hamstrings: {
-    d: 'M78,228 L85,225 Q90,232 100,234 L100,310 Q92,313 85,310 L78,228 Z',
-    mirror: 'M122,228 L115,225 Q110,232 100,234 L100,310 Q108,313 115,310 L122,228 Z',
-  },
-  calves: {
-    d: 'M82,312 L88,310 L90,365 Q85,370 80,365 Z',
-    mirror: 'M118,312 L112,310 L110,365 Q115,370 120,365 Z',
-  },
+const backPaths: Record<string, string[]> = {
+  // Back - upper and lower
+  back: [
+    // Upper back / lats left
+    'M74,92 Q80,88 92,86 L100,86 L100,140 Q88,144 78,138 Q72,130 72,118 Z',
+    // Upper back / lats right
+    'M126,92 Q120,88 108,86 L100,86 L100,140 Q112,144 122,138 Q128,130 128,118 Z',
+    // Lower back
+    'M82,142 Q92,138 100,140 Q108,138 118,142 L118,175 Q108,180 100,182 Q92,180 82,175 Z',
+  ],
+  // Triceps
+  triceps: [
+    // Left tricep
+    'M54,114 Q58,108 64,110 L68,114 L66,150 Q60,154 52,148 Z',
+    // Right tricep
+    'M146,114 Q142,108 136,110 L132,114 L134,150 Q140,154 148,148 Z',
+  ],
+  // Glutes
+  glutes: [
+    // Left glute
+    'M80,195 Q88,190 100,192 L100,225 Q90,230 82,226 L78,210 Z',
+    // Right glute
+    'M120,195 Q112,190 100,192 L100,225 Q110,230 118,226 L122,210 Z',
+  ],
+  // Hamstrings
+  hamstrings: [
+    // Left hamstring
+    'M80,228 Q88,224 94,228 L100,230 L100,310 Q94,314 88,310 L80,268 Z',
+    // Right hamstring
+    'M120,228 Q112,224 106,228 L100,230 L100,310 Q106,314 112,310 L120,268 Z',
+  ],
+  // Calves
+  calves: [
+    // Left calf
+    'M84,315 Q90,310 96,314 L96,368 Q92,374 86,370 L82,340 Z',
+    // Right calf
+    'M116,315 Q110,310 104,314 L104,368 Q108,374 114,370 L118,340 Z',
+  ],
 };
 
-// Body outline for context
-const frontOutline = `M100,20 
-  Q115,20 118,35 L118,55 Q118,70 112,75 L128,85 Q150,90 152,112 L155,155 Q155,165 145,165 L135,155 L130,130 
-  L130,200 L128,207 L118,295 L118,310 L122,365 Q122,385 112,388 L88,388 Q78,385 78,365 L82,310 L82,295 L72,207 L70,200 L70,130 
-  L65,155 Q55,165 45,165 Q45,155 48,112 Q50,90 72,85 L88,75 Q82,70 82,55 L82,35 Q85,20 100,20 Z`;
-
-const backOutline = frontOutline; // same silhouette
+// Body silhouette outline - more detailed and realistic
+const bodyOutline = `
+  M100,18 
+  Q116,18 119,34 L119,50 Q120,62 115,72 Q112,78 108,82
+  L126,86 Q140,90 146,98 Q152,108 152,120 L150,155 Q150,162 145,166 L140,164 L138,155 L134,148
+  L130,140 L128,175 L126,200 L124,215 L124,250 L120,295 L120,315
+  L122,345 L122,370 Q122,388 114,392 L108,394 Q104,394 100,394
+  Q96,394 92,394 L86,392 Q78,388 78,370 L78,345 L80,315 L80,295
+  L76,250 L76,215 L72,200 L70,175 L66,148 L62,155 L60,164 L55,166
+  Q50,162 50,155 L48,120 Q48,108 54,98 Q60,90 74,86 L92,82
+  Q88,78 85,72 Q80,62 81,50 L81,34 Q84,18 100,18 Z`;
 
 const BodyHeatmapSVG: React.FC<BodyHeatmapSVGProps> = ({ view, muscleVolumes, onMuscleClick, selectedMuscle }) => {
   const paths = view === 'front' ? frontPaths : backPaths;
 
   return (
     <svg
-      viewBox="0 0 200 410"
-      className="w-full max-w-[220px] mx-auto select-none"
-      style={{ filter: 'drop-shadow(0 2px 8px hsl(var(--foreground) / 0.08))' }}
+      viewBox="0 0 200 420"
+      className="w-full max-w-[260px] mx-auto select-none"
+      style={{ filter: 'drop-shadow(0 4px 16px hsl(var(--foreground) / 0.06))' }}
     >
-      {/* Body silhouette outline */}
+      {/* Subtle glow behind body */}
+      <defs>
+        <radialGradient id="bodyGlow" cx="50%" cy="45%" r="40%">
+          <stop offset="0%" stopColor="hsl(var(--primary) / 0.06)" />
+          <stop offset="100%" stopColor="transparent" />
+        </radialGradient>
+        <linearGradient id="skinGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="hsl(var(--muted-foreground) / 0.12)" />
+          <stop offset="100%" stopColor="hsl(var(--muted-foreground) / 0.06)" />
+        </linearGradient>
+      </defs>
+
+      {/* Background glow */}
+      <ellipse cx="100" cy="200" rx="90" ry="180" fill="url(#bodyGlow)" />
+
+      {/* Body silhouette */}
       <path
-        d={view === 'front' ? frontOutline : backOutline}
-        fill="hsl(var(--muted))"
+        d={bodyOutline}
+        fill="hsl(var(--muted) / 0.8)"
         stroke="hsl(var(--border))"
-        strokeWidth={1.5}
-        opacity={0.5}
+        strokeWidth={1}
+        opacity={0.6}
       />
 
+      {/* Head */}
+      <ellipse cx="100" cy="34" rx="17" ry="19" fill="hsl(var(--muted) / 0.8)" stroke="hsl(var(--border))" strokeWidth={1} opacity={0.6} />
+
       {/* Muscle regions */}
-      {Object.entries(paths).map(([muscle, { d, mirror }]) => (
+      {Object.entries(paths).map(([muscle, musclePaths]) => (
         <MusclePath
           key={muscle}
           muscle={muscle as HeatmapMuscle}
-          d={d}
-          mirror={mirror}
+          paths={musclePaths}
           sets={muscleVolumes[muscle as HeatmapMuscle] || 0}
           selected={selectedMuscle === muscle}
           onClick={() => onMuscleClick(muscle as HeatmapMuscle)}
         />
       ))}
-
-      {/* Head circle */}
-      <circle cx="100" cy="35" r="18" fill="hsl(var(--muted))" stroke="hsl(var(--border))" strokeWidth={1.5} opacity={0.5} />
     </svg>
   );
 };
