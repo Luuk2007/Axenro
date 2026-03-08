@@ -340,7 +340,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 <FormControl>
                   <Input 
                     type="number" 
-                    placeholder="Enter target weight"
+                    placeholder={t("Enter target weight")}
                     value={field.value?.toString() || ''}
                     onChange={(e) => handleNumberChange(field, e.target.value)}
                     step="0.5"

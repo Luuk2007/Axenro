@@ -135,7 +135,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ initialWeight, initialHei
               <p className="text-3xl font-bold mb-2">
                 {t("BMI value")} <span className={getStatusColor(bmi)}>{bmi}</span>
               </p>
-              <p className="mb-4">{t(getBMICategory(bmi))}</p>
+              <p className="mb-4">{getBMICategory(bmi)}</p>
               
               {weightDifference !== null && (
                 <div className="text-sm">
