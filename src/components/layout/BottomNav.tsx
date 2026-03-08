@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Utensils, Dumbbell, BarChart3, Settings, User, Sparkles, ShieldCheck } from 'lucide-react';
+import { Home, Utensils, Dumbbell, BarChart3, Settings, User, Sparkles, ShieldCheck, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
