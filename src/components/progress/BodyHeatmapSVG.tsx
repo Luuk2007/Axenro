@@ -11,182 +11,321 @@ interface BodyHeatmapSVGProps {
 const BodyHeatmapSVG: React.FC<BodyHeatmapSVGProps> = ({ view, muscleVolumes, onMuscleClick, selectedMuscle }) => {
   const c = (m: HeatmapMuscle) => getVolumeColor(muscleVolumes[m] || 0);
   const sel = (m: HeatmapMuscle) => selectedMuscle === m;
-  const ms = (m: HeatmapMuscle): React.CSSProperties => ({
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    filter: sel(m) ? 'brightness(1.15) drop-shadow(0 0 8px rgba(255,255,255,0.5))' : undefined,
-  });
-  const ss = (m: HeatmapMuscle) => sel(m) ? '#fff' : 'rgba(255,255,255,0.6)';
-  const sw = (m: HeatmapMuscle) => sel(m) ? 2.5 : 1.5;
 
-  // Body base colors
-  const B = '#d1d1d1';
-  const BD = '#c4c4c4';
-  const BL = '#d8d8d8';
+  const muscleStyle = (m: HeatmapMuscle): React.CSSProperties => ({
+    cursor: 'pointer',
+    transition: 'all 0.25s ease',
+    filter: sel(m) ? 'brightness(1.2) drop-shadow(0 0 6px rgba(255,255,255,0.4))' : undefined,
+  });
+
+  const stroke = (m: HeatmapMuscle) => sel(m) ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.45)';
+  const sw = (m: HeatmapMuscle) => sel(m) ? 2 : 1;
+
+  // Base body color
+  const BASE = '#c8c8c8';
+  const BASE_DARK = '#b8b8b8';
+  const BASE_LIGHT = '#d4d4d4';
+
+  const click = (m: HeatmapMuscle) => () => onMuscleClick(m);
 
   if (view === 'front') {
     return (
-      <svg viewBox="0 0 340 680" className="w-full max-w-[280px] mx-auto select-none" xmlns="http://www.w3.org/2000/svg">
-        {/* === HEAD === */}
-        <path d="M170,8 Q148,8 140,22 Q132,36 134,52 Q136,68 144,76 Q152,84 170,86 Q188,84 196,76 Q204,68 206,52 Q208,36 200,22 Q192,8 170,8 Z" fill={B} stroke={BD} strokeWidth="0.8"/>
-        
-        {/* === NECK === */}
-        <path d="M155,86 L155,106 Q162,110 170,111 Q178,110 185,106 L185,86 Q178,90 170,91 Q162,90 155,86 Z" fill={B} stroke={BD} strokeWidth="0.5"/>
+      <svg viewBox="0 0 400 820" className="w-full max-w-[300px] mx-auto select-none" xmlns="http://www.w3.org/2000/svg">
+        {/* ========== BASE SILHOUETTE ========== */}
+        {/* Head */}
+        <ellipse cx="200" cy="52" rx="34" ry="42" fill={BASE} stroke={BASE_DARK} strokeWidth="0.5" />
+        {/* Ears */}
+        <ellipse cx="164" cy="52" rx="5" ry="10" fill={BASE_DARK} />
+        <ellipse cx="236" cy="52" rx="5" ry="10" fill={BASE_DARK} />
 
-        {/* === TRAPEZIUS (grey base behind shoulders) === */}
-        <path d="M140,100 L155,106 L170,111 L185,106 L200,100 Q210,96 218,100 L218,118 Q200,112 185,115 L170,116 L155,115 Q140,112 122,118 L122,100 Q130,96 140,100 Z" fill={BD} stroke={BD} strokeWidth="0.5"/>
+        {/* Neck */}
+        <rect x="183" y="92" width="34" height="28" rx="4" fill={BASE} />
 
-        {/* === SHOULDERS (deltoids) === */}
-        {/* Left shoulder */}
-        <path d="M122,108 Q108,106 98,114 Q88,124 84,138 Q82,150 84,162 L90,168 Q94,158 100,148 L106,138 L112,126 L122,118 Z"
-          fill={c('shoulders')} stroke={ss('shoulders')} strokeWidth={sw('shoulders')} style={ms('shoulders')} onClick={() => onMuscleClick('shoulders')}/>
-        {/* Right shoulder */}
-        <path d="M218,108 Q232,106 242,114 Q252,124 256,138 Q258,150 256,162 L250,168 Q246,158 240,148 L234,138 L228,126 L218,118 Z"
-          fill={c('shoulders')} stroke={ss('shoulders')} strokeWidth={sw('shoulders')} style={ms('shoulders')} onClick={() => onMuscleClick('shoulders')}/>
+        {/* Torso base (covers everything behind muscles) */}
+        <path d={`
+          M115,155 Q115,130 140,120 L183,115 L200,113 L217,115 L260,120 Q285,130 285,155
+          L285,210 Q282,260 275,300 L268,340 Q260,365 250,378 L200,390 L150,378
+          Q140,365 132,340 L125,300 Q118,260 115,210 Z
+        `} fill={BASE} />
 
-        {/* === CHEST (pectorals) === */}
-        {/* Left pec */}
-        <path d="M122,118 L112,126 Q106,138 104,148 L108,158 Q116,170 128,176 Q140,180 155,178 L170,174 L170,118 L155,115 Q140,112 122,118 Z"
-          fill={c('chest')} stroke={ss('chest')} strokeWidth={sw('chest')} style={ms('chest')} onClick={() => onMuscleClick('chest')}/>
-        {/* Right pec */}
-        <path d="M218,118 L228,126 Q234,138 236,148 L232,158 Q224,170 212,176 Q200,180 185,178 L170,174 L170,118 L185,115 Q200,112 218,118 Z"
-          fill={c('chest')} stroke={ss('chest')} strokeWidth={sw('chest')} style={ms('chest')} onClick={() => onMuscleClick('chest')}/>
+        {/* Left arm base */}
+        <path d={`
+          M82,180 Q65,175 58,195 L48,250 Q42,290 44,320 L48,360 Q52,390 58,420
+          L62,440 Q55,460 52,470 L48,478 Q46,485 50,488 L62,486 L68,478
+          L72,460 L76,440 Q82,400 86,360 L90,310 Q94,270 92,230 L88,200 Z
+        `} fill={BASE} />
+        {/* Right arm base */}
+        <path d={`
+          M318,180 Q335,175 342,195 L352,250 Q358,290 356,320 L352,360 Q348,390 342,420
+          L338,440 Q345,460 348,470 L352,478 Q354,485 350,488 L338,486 L332,478
+          L328,460 L324,440 Q318,400 314,360 L310,310 Q306,270 308,230 L312,200 Z
+        `} fill={BASE} />
 
-        {/* === BICEPS === */}
-        {/* Left bicep */}
-        <path d="M84,164 Q80,178 76,198 Q74,218 76,238 Q78,252 82,260 L90,264 Q92,248 94,232 L96,212 L98,192 Q96,176 90,168 Z"
-          fill={c('biceps')} stroke={ss('biceps')} strokeWidth={sw('biceps')} style={ms('biceps')} onClick={() => onMuscleClick('biceps')}/>
-        {/* Right bicep */}
-        <path d="M256,164 Q260,178 264,198 Q266,218 264,238 Q262,252 258,260 L250,264 Q248,248 246,232 L244,212 L242,192 Q244,176 250,168 Z"
-          fill={c('biceps')} stroke={ss('biceps')} strokeWidth={sw('biceps')} style={ms('biceps')} onClick={() => onMuscleClick('biceps')}/>
+        {/* Left leg base */}
+        <path d={`
+          M140,375 L125,420 Q115,470 112,520 L115,560 Q118,590 125,620
+          L130,660 Q134,695 138,720 L135,750 Q132,765 130,775 L138,780
+          L165,778 L168,770 L164,750 L158,720 Q152,695 148,660
+          L145,610 Q142,560 145,520 L150,470 Q155,430 162,400 L175,380 Z
+        `} fill={BASE} />
+        {/* Right leg base */}
+        <path d={`
+          M260,375 L275,420 Q285,470 288,520 L285,560 Q282,590 275,620
+          L270,660 Q266,695 262,720 L265,750 Q268,765 270,775 L262,780
+          L235,778 L232,770 L236,750 L242,720 Q248,695 252,660
+          L255,610 Q258,560 255,520 L250,470 Q245,430 238,400 L225,380 Z
+        `} fill={BASE} />
 
-        {/* === FOREARMS (body grey) === */}
-        <path d="M82,264 Q78,284 74,310 Q70,336 68,360 L64,380 L72,386 Q76,366 80,340 Q84,314 88,290 L90,268 Z" fill={BD} stroke={BD} strokeWidth="0.5"/>
-        <path d="M258,264 Q262,284 266,310 Q270,336 272,360 L276,380 L268,386 Q264,366 260,340 Q256,314 252,290 L250,268 Z" fill={BD} stroke={BD} strokeWidth="0.5"/>
-        
-        {/* Hands */}
-        <path d="M60,380 Q56,390 54,400 Q52,410 56,416 Q60,420 66,418 Q70,414 72,406 L76,390 L72,386 Z" fill={BL} stroke={BD} strokeWidth="0.5"/>
-        <path d="M280,380 Q284,390 286,400 Q288,410 284,416 Q280,420 274,418 Q270,414 268,406 L264,390 L268,386 Z" fill={BL} stroke={BD} strokeWidth="0.5"/>
+        {/* ========== MUSCLE OVERLAYS ========== */}
 
-        {/* === ABS === */}
-        {/* Upper abs row */}
-        <path d="M141,182 Q155,176 170,178 L170,210 Q155,208 141,212 Z" fill={c('abs')} stroke="rgba(255,255,255,0.55)" strokeWidth="1.2" style={ms('abs')} onClick={() => onMuscleClick('abs')}/>
-        <path d="M199,182 Q185,176 170,178 L170,210 Q185,208 199,212 Z" fill={c('abs')} stroke="rgba(255,255,255,0.55)" strokeWidth="1.2" style={ms('abs')} onClick={() => onMuscleClick('abs')}/>
-        {/* Mid abs row */}
-        <path d="M140,216 Q155,212 170,214 L170,248 Q155,246 140,250 Z" fill={c('abs')} stroke="rgba(255,255,255,0.55)" strokeWidth="1.2" style={ms('abs')} onClick={() => onMuscleClick('abs')}/>
-        <path d="M200,216 Q185,212 170,214 L170,248 Q185,246 200,250 Z" fill={c('abs')} stroke="rgba(255,255,255,0.55)" strokeWidth="1.2" style={ms('abs')} onClick={() => onMuscleClick('abs')}/>
-        {/* Lower abs row */}
-        <path d="M139,254 Q155,250 170,252 L170,286 Q155,290 139,286 Z" fill={c('abs')} stroke="rgba(255,255,255,0.55)" strokeWidth="1.2" style={ms('abs')} onClick={() => onMuscleClick('abs')}/>
-        <path d="M201,254 Q185,250 170,252 L170,286 Q185,290 201,286 Z" fill={c('abs')} stroke="rgba(255,255,255,0.55)" strokeWidth="1.2" style={ms('abs')} onClick={() => onMuscleClick('abs')}/>
+        {/* SHOULDERS - Left deltoid */}
+        <path d={`
+          M140,120 Q120,118 100,128 Q78,142 72,168 L80,182
+          Q86,170 94,160 L108,148 L118,140 L130,132 Z
+        `}
+          fill={c('shoulders')} stroke={stroke('shoulders')} strokeWidth={sw('shoulders')}
+          style={muscleStyle('shoulders')} onClick={click('shoulders')} />
+        {/* SHOULDERS - Right deltoid */}
+        <path d={`
+          M260,120 Q280,118 300,128 Q322,142 328,168 L320,182
+          Q314,170 306,160 L292,148 L282,140 L270,132 Z
+        `}
+          fill={c('shoulders')} stroke={stroke('shoulders')} strokeWidth={sw('shoulders')}
+          style={muscleStyle('shoulders')} onClick={click('shoulders')} />
 
-        {/* Obliques (grey) */}
-        <path d="M108,162 Q104,182 102,210 L100,250 Q98,270 100,290 L104,300 Q108,280 110,250 L112,210 Q114,182 112,162 Z" fill={BD} stroke={BD} strokeWidth="0.3"/>
-        <path d="M232,162 Q236,182 238,210 L240,250 Q242,270 240,290 L236,300 Q232,280 230,250 L228,210 Q226,182 228,162 Z" fill={BD} stroke={BD} strokeWidth="0.3"/>
+        {/* CHEST - Left pec */}
+        <path d={`
+          M130,140 L118,148 Q108,160 104,172 L106,185 Q112,200 125,210
+          Q140,218 158,216 L195,210 L195,148 L175,142 Q155,136 130,140 Z
+        `}
+          fill={c('chest')} stroke={stroke('chest')} strokeWidth={sw('chest')}
+          style={muscleStyle('chest')} onClick={click('chest')} />
+        {/* CHEST - Right pec */}
+        <path d={`
+          M270,140 L282,148 Q292,160 296,172 L294,185 Q288,200 275,210
+          Q260,218 242,216 L205,210 L205,148 L225,142 Q245,136 270,140 Z
+        `}
+          fill={c('chest')} stroke={stroke('chest')} strokeWidth={sw('chest')}
+          style={muscleStyle('chest')} onClick={click('chest')} />
 
-        {/* === HIP / WAIST connector === */}
-        <path d="M104,295 Q120,302 142,308 L170,312 L198,308 Q220,302 236,295 L240,330 Q230,350 210,358 L170,364 L130,358 Q110,350 100,330 Z" fill={B} stroke={BD} strokeWidth="0.5"/>
+        {/* BICEPS - Left */}
+        <path d={`
+          M80,185 Q74,200 68,225 Q62,255 60,280 Q58,300 62,315
+          L70,320 Q74,300 78,275 L82,250 Q86,225 88,205 L86,190 Z
+        `}
+          fill={c('biceps')} stroke={stroke('biceps')} strokeWidth={sw('biceps')}
+          style={muscleStyle('biceps')} onClick={click('biceps')} />
+        {/* BICEPS - Right */}
+        <path d={`
+          M320,185 Q326,200 332,225 Q338,255 340,280 Q342,300 338,315
+          L330,320 Q326,300 322,275 L318,250 Q314,225 312,205 L314,190 Z
+        `}
+          fill={c('biceps')} stroke={stroke('biceps')} strokeWidth={sw('biceps')}
+          style={muscleStyle('biceps')} onClick={click('biceps')} />
 
-        {/* === QUADS === */}
-        {/* Left quad - outer */}
-        <path d="M100,335 Q108,326 124,334 L138,342 L170,350 L166,460 Q158,485 150,500 L140,504 Q128,480 120,448 Q112,416 106,384 Z"
-          fill={c('quads')} stroke={ss('quads')} strokeWidth={sw('quads')} style={ms('quads')} onClick={() => onMuscleClick('quads')}/>
-        {/* Right quad - outer */}
-        <path d="M240,335 Q232,326 216,334 L202,342 L170,350 L174,460 Q182,485 190,500 L200,504 Q212,480 220,448 Q228,416 234,384 Z"
-          fill={c('quads')} stroke={ss('quads')} strokeWidth={sw('quads')} style={ms('quads')} onClick={() => onMuscleClick('quads')}/>
-        {/* Inner quad detail line */}
-        <line x1="170" y1="352" x2="170" y2="456" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" pointerEvents="none"/>
+        {/* ABS - Full abdominal area */}
+        <path d={`
+          M148,216 Q165,210 200,208 Q235,210 252,216
+          L255,260 Q256,300 252,330 L245,355 Q230,372 200,378
+          Q170,372 155,355 L148,330 Q144,300 145,260 Z
+        `}
+          fill={c('abs')} stroke={stroke('abs')} strokeWidth={sw('abs')}
+          style={muscleStyle('abs')} onClick={click('abs')} />
+        {/* Abs internal lines - 6-pack grid */}
+        <line x1="200" y1="216" x2="200" y2="370" stroke="rgba(255,255,255,0.35)" strokeWidth="0.8" pointerEvents="none" />
+        <line x1="155" y1="248" x2="245" y2="248" stroke="rgba(255,255,255,0.25)" strokeWidth="0.6" pointerEvents="none" />
+        <line x1="153" y1="280" x2="247" y2="280" stroke="rgba(255,255,255,0.25)" strokeWidth="0.6" pointerEvents="none" />
+        <line x1="152" y1="312" x2="248" y2="312" stroke="rgba(255,255,255,0.25)" strokeWidth="0.6" pointerEvents="none" />
+        <line x1="155" y1="342" x2="245" y2="342" stroke="rgba(255,255,255,0.25)" strokeWidth="0.6" pointerEvents="none" />
 
-        {/* === KNEES (grey) === */}
-        <ellipse cx="146" cy="518" rx="18" ry="20" fill={B} stroke={BD} strokeWidth="0.5"/>
-        <ellipse cx="194" cy="518" rx="18" ry="20" fill={B} stroke={BD} strokeWidth="0.5"/>
-        {/* Kneecap detail */}
-        <ellipse cx="146" cy="516" rx="10" ry="12" fill={BL} stroke={BD} strokeWidth="0.3"/>
-        <ellipse cx="194" cy="516" rx="10" ry="12" fill={BL} stroke={BD} strokeWidth="0.3"/>
+        {/* QUADS - Left */}
+        <path d={`
+          M150,378 L140,395 Q128,430 122,470 Q118,510 120,540
+          L128,548 Q138,555 150,550 L162,540 Q166,510 165,470
+          Q162,430 158,400 L165,385 Q175,378 190,382 L200,386
+          L200,550 Q192,555 182,555 L170,548 Q160,558 150,555
+          L138,555 Q125,558 120,548
+          L115,520 Q112,490 115,460 L122,420 Q130,395 140,378 Z
+        `}
+          fill={c('quads')} stroke={stroke('quads')} strokeWidth={sw('quads')}
+          style={muscleStyle('quads')} onClick={click('quads')} />
+        {/* QUADS - Right */}
+        <path d={`
+          M250,378 L260,395 Q272,430 278,470 Q282,510 280,540
+          L272,548 Q262,555 250,550 L238,540 Q234,510 235,470
+          Q238,430 242,400 L235,385 Q225,378 210,382 L200,386
+          L200,550 Q208,555 218,555 L230,548 Q240,558 250,555
+          L262,555 Q275,558 280,548
+          L285,520 Q288,490 285,460 L278,420 Q270,395 260,378 Z
+        `}
+          fill={c('quads')} stroke={stroke('quads')} strokeWidth={sw('quads')}
+          style={muscleStyle('quads')} onClick={click('quads')} />
+        {/* Quad separation line */}
+        <line x1="200" y1="386" x2="200" y2="548" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" pointerEvents="none" />
 
-        {/* === CALVES (front shin - tibialis, as body grey) === */}
-        {/* Left lower leg */}
-        <path d="M130,536 Q140,530 152,534 L156,540 L154,610 Q150,632 146,645 L138,648 Q130,625 128,595 Q126,565 130,536 Z" fill={BD} stroke={BD} strokeWidth="0.4"/>
-        {/* Right lower leg */}
-        <path d="M210,536 Q200,530 188,534 L184,540 L186,610 Q190,632 194,645 L202,648 Q210,625 212,595 Q214,565 210,536 Z" fill={BD} stroke={BD} strokeWidth="0.4"/>
+        {/* CALVES - displayed as shin area on front (grey base visible, no muscle overlay) */}
+        {/* Front view calves are not prominently visible - the base leg shows through */}
 
-        {/* === FEET === */}
-        <path d="M126,646 Q130,656 128,666 L152,668 Q156,658 154,646 Z" fill={BL} stroke={BD} strokeWidth="0.4"/>
-        <path d="M214,646 Q210,656 212,666 L188,668 Q184,658 186,646 Z" fill={BL} stroke={BD} strokeWidth="0.4"/>
+        {/* Kneecaps */}
+        <ellipse cx="155" cy="562" rx="16" ry="14" fill={BASE_LIGHT} stroke={BASE_DARK} strokeWidth="0.5" />
+        <ellipse cx="245" cy="562" rx="16" ry="14" fill={BASE_LIGHT} stroke={BASE_DARK} strokeWidth="0.5" />
       </svg>
     );
   }
 
-  // ===== BACK VIEW =====
+  // =================== BACK VIEW ===================
   return (
-    <svg viewBox="0 0 340 680" className="w-full max-w-[280px] mx-auto select-none" xmlns="http://www.w3.org/2000/svg">
-      {/* === HEAD === */}
-      <path d="M170,8 Q148,8 140,22 Q132,36 134,52 Q136,68 144,76 Q152,84 170,86 Q188,84 196,76 Q204,68 206,52 Q208,36 200,22 Q192,8 170,8 Z" fill={B} stroke={BD} strokeWidth="0.8"/>
-      
-      {/* === NECK === */}
-      <path d="M155,86 L155,106 Q162,110 170,111 Q178,110 185,106 L185,86 Q178,90 170,91 Q162,90 155,86 Z" fill={B} stroke={BD} strokeWidth="0.5"/>
+    <svg viewBox="0 0 400 820" className="w-full max-w-[300px] mx-auto select-none" xmlns="http://www.w3.org/2000/svg">
+      {/* ========== BASE SILHOUETTE ========== */}
+      {/* Head */}
+      <ellipse cx="200" cy="52" rx="34" ry="42" fill={BASE} stroke={BASE_DARK} strokeWidth="0.5" />
+      <ellipse cx="164" cy="52" rx="5" ry="10" fill={BASE_DARK} />
+      <ellipse cx="236" cy="52" rx="5" ry="10" fill={BASE_DARK} />
 
-      {/* === SHOULDERS (deltoids) === */}
-      <path d="M122,108 Q108,106 98,114 Q88,124 84,138 Q82,150 84,162 L90,168 Q94,158 100,148 L106,138 L112,126 L122,118 Z"
-        fill={c('shoulders')} stroke={ss('shoulders')} strokeWidth={sw('shoulders')} style={ms('shoulders')} onClick={() => onMuscleClick('shoulders')}/>
-      <path d="M218,108 Q232,106 242,114 Q252,124 256,138 Q258,150 256,162 L250,168 Q246,158 240,148 L234,138 L228,126 L218,118 Z"
-        fill={c('shoulders')} stroke={ss('shoulders')} strokeWidth={sw('shoulders')} style={ms('shoulders')} onClick={() => onMuscleClick('shoulders')}/>
+      {/* Neck */}
+      <rect x="183" y="92" width="34" height="28" rx="4" fill={BASE} />
 
-      {/* === BACK (traps + lats + lower back) === */}
-      {/* Upper back / traps */}
-      <path d="M122,108 Q140,100 170,98 Q200,100 218,108 L218,118 Q200,112 185,115 L170,116 L155,115 Q140,112 122,118 Z" fill={c('back')} stroke={ss('back')} strokeWidth={sw('back')} style={ms('back')} onClick={() => onMuscleClick('back')}/>
-      
-      {/* Main back - lats */}
-      <path d="M122,118 L112,126 Q104,140 102,160 L100,190 Q98,220 100,250 L104,280 Q108,295 118,305 Q132,314 155,318 L170,320 L185,318 Q208,314 222,305 Q232,295 236,280 L240,250 Q242,220 240,190 L238,160 Q236,140 228,126 L218,118 Q200,112 185,115 L170,116 L155,115 Q140,112 122,118 Z"
-        fill={c('back')} stroke={ss('back')} strokeWidth={sw('back')} style={ms('back')} onClick={() => onMuscleClick('back')}/>
-      
-      {/* Spine line */}
-      <line x1="170" y1="100" x2="170" y2="318" stroke="rgba(255,255,255,0.4)" strokeWidth="1.2" pointerEvents="none"/>
-      {/* Shoulder blade outlines */}
-      <path d="M128,140 Q138,160 142,180 Q146,195 150,205" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8" fill="none" pointerEvents="none"/>
-      <path d="M212,140 Q202,160 198,180 Q194,195 190,205" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8" fill="none" pointerEvents="none"/>
-      {/* Lower back line */}
-      <path d="M140,270 Q155,278 170,280 Q185,278 200,270" stroke="rgba(255,255,255,0.2)" strokeWidth="0.6" fill="none" pointerEvents="none"/>
+      {/* Torso base */}
+      <path d={`
+        M115,155 Q115,130 140,120 L183,115 L200,113 L217,115 L260,120 Q285,130 285,155
+        L285,210 Q282,260 275,300 L268,340 Q260,365 250,378 L200,390 L150,378
+        Q140,365 132,340 L125,300 Q118,260 115,210 Z
+      `} fill={BASE} />
 
-      {/* === TRICEPS === */}
-      <path d="M84,164 Q80,178 76,198 Q74,218 76,238 Q78,252 82,260 L90,264 Q92,248 94,232 L96,212 L98,192 Q96,176 90,168 Z"
-        fill={c('triceps')} stroke={ss('triceps')} strokeWidth={sw('triceps')} style={ms('triceps')} onClick={() => onMuscleClick('triceps')}/>
-      <path d="M256,164 Q260,178 264,198 Q266,218 264,238 Q262,252 258,260 L250,264 Q248,248 246,232 L244,212 L242,192 Q244,176 250,168 Z"
-        fill={c('triceps')} stroke={ss('triceps')} strokeWidth={sw('triceps')} style={ms('triceps')} onClick={() => onMuscleClick('triceps')}/>
+      {/* Left arm base */}
+      <path d={`
+        M82,180 Q65,175 58,195 L48,250 Q42,290 44,320 L48,360 Q52,390 58,420
+        L62,440 Q55,460 52,470 L48,478 Q46,485 50,488 L62,486 L68,478
+        L72,460 L76,440 Q82,400 86,360 L90,310 Q94,270 92,230 L88,200 Z
+      `} fill={BASE} />
+      {/* Right arm base */}
+      <path d={`
+        M318,180 Q335,175 342,195 L352,250 Q358,290 356,320 L352,360 Q348,390 342,420
+        L338,440 Q345,460 348,470 L352,478 Q354,485 350,488 L338,486 L332,478
+        L328,460 L324,440 Q318,400 314,360 L310,310 Q306,270 308,230 L312,200 Z
+      `} fill={BASE} />
 
-      {/* Forearms */}
-      <path d="M82,264 Q78,284 74,310 Q70,336 68,360 L64,380 L72,386 Q76,366 80,340 Q84,314 88,290 L90,268 Z" fill={BD} stroke={BD} strokeWidth="0.5"/>
-      <path d="M258,264 Q262,284 266,310 Q270,336 272,360 L276,380 L268,386 Q264,366 260,340 Q256,314 252,290 L250,268 Z" fill={BD} stroke={BD} strokeWidth="0.5"/>
-      {/* Hands */}
-      <path d="M60,380 Q56,390 54,400 Q52,410 56,416 Q60,420 66,418 Q70,414 72,406 L76,390 L72,386 Z" fill={BL} stroke={BD} strokeWidth="0.5"/>
-      <path d="M280,380 Q284,390 286,400 Q288,410 284,416 Q280,420 274,418 Q270,414 268,406 L264,390 L268,386 Z" fill={BL} stroke={BD} strokeWidth="0.5"/>
+      {/* Left leg base */}
+      <path d={`
+        M140,375 L125,420 Q115,470 112,520 L115,560 Q118,590 125,620
+        L130,660 Q134,695 138,720 L135,750 Q132,765 130,775 L138,780
+        L165,778 L168,770 L164,750 L158,720 Q152,695 148,660
+        L145,610 Q142,560 145,520 L150,470 Q155,430 162,400 L175,380 Z
+      `} fill={BASE} />
+      {/* Right leg base */}
+      <path d={`
+        M260,375 L275,420 Q285,470 288,520 L285,560 Q282,590 275,620
+        L270,660 Q266,695 262,720 L265,750 Q268,765 270,775 L262,780
+        L235,778 L232,770 L236,750 L242,720 Q248,695 252,660
+        L255,610 Q258,560 255,520 L250,470 Q245,430 238,400 L225,380 Z
+      `} fill={BASE} />
 
-      {/* === GLUTES === */}
-      <path d="M110,312 Q125,306 148,310 L168,316 L168,368 Q155,380 138,374 Q122,366 114,348 Q108,332 110,312 Z"
-        fill={c('glutes')} stroke={ss('glutes')} strokeWidth={sw('glutes')} style={ms('glutes')} onClick={() => onMuscleClick('glutes')}/>
-      <path d="M230,312 Q215,306 192,310 L172,316 L172,368 Q185,380 202,374 Q218,366 226,348 Q232,332 230,312 Z"
-        fill={c('glutes')} stroke={ss('glutes')} strokeWidth={sw('glutes')} style={ms('glutes')} onClick={() => onMuscleClick('glutes')}/>
+      {/* ========== MUSCLE OVERLAYS ========== */}
 
-      {/* === HAMSTRINGS === */}
-      <path d="M112,355 Q124,345 140,354 L162,365 L166,370 L162,476 Q154,500 148,512 L136,516 Q124,488 118,450 Q112,412 112,380 Z"
-        fill={c('hamstrings')} stroke={ss('hamstrings')} strokeWidth={sw('hamstrings')} style={ms('hamstrings')} onClick={() => onMuscleClick('hamstrings')}/>
-      <path d="M228,355 Q216,345 200,354 L178,365 L174,370 L178,476 Q186,500 192,512 L204,516 Q216,488 222,450 Q228,412 228,380 Z"
-        fill={c('hamstrings')} stroke={ss('hamstrings')} strokeWidth={sw('hamstrings')} style={ms('hamstrings')} onClick={() => onMuscleClick('hamstrings')}/>
-      {/* Inner hamstring line */}
-      <line x1="170" y1="370" x2="170" y2="472" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" pointerEvents="none"/>
+      {/* SHOULDERS - Left deltoid */}
+      <path d={`
+        M140,120 Q120,118 100,128 Q78,142 72,168 L80,182
+        Q86,170 94,160 L108,148 L118,140 L130,132 Z
+      `}
+        fill={c('shoulders')} stroke={stroke('shoulders')} strokeWidth={sw('shoulders')}
+        style={muscleStyle('shoulders')} onClick={click('shoulders')} />
+      {/* SHOULDERS - Right deltoid */}
+      <path d={`
+        M260,120 Q280,118 300,128 Q322,142 328,168 L320,182
+        Q314,170 306,160 L292,148 L282,140 L270,132 Z
+      `}
+        fill={c('shoulders')} stroke={stroke('shoulders')} strokeWidth={sw('shoulders')}
+        style={muscleStyle('shoulders')} onClick={click('shoulders')} />
 
-      {/* Knees */}
-      <ellipse cx="146" cy="526" rx="18" ry="20" fill={B} stroke={BD} strokeWidth="0.5"/>
-      <ellipse cx="194" cy="526" rx="18" ry="20" fill={B} stroke={BD} strokeWidth="0.5"/>
+      {/* BACK - Full back (traps + lats + lower back) */}
+      <path d={`
+        M130,132 L118,140 Q108,150 104,165 L100,190 Q98,225 100,260
+        L105,300 Q110,330 120,350 Q135,368 160,376 L200,382
+        L240,376 Q265,368 280,350 Q290,330 295,300 L300,260
+        Q302,225 300,190 L296,165 Q292,150 282,140 L270,132
+        L255,128 Q230,122 200,120 Q170,122 145,128 Z
+      `}
+        fill={c('back')} stroke={stroke('back')} strokeWidth={sw('back')}
+        style={muscleStyle('back')} onClick={click('back')} />
+      {/* Spine */}
+      <line x1="200" y1="120" x2="200" y2="378" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2" pointerEvents="none" />
+      {/* Shoulder blades */}
+      <path d="M145,165 Q158,190 162,215 Q165,235 168,250" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8" fill="none" pointerEvents="none" />
+      <path d="M255,165 Q242,190 238,215 Q235,235 232,250" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8" fill="none" pointerEvents="none" />
+      {/* Lower back curve */}
+      <path d="M155,310 Q175,325 200,328 Q225,325 245,310" stroke="rgba(255,255,255,0.18)" strokeWidth="0.6" fill="none" pointerEvents="none" />
 
-      {/* === CALVES === */}
-      <path d="M128,544 Q140,536 154,542 L156,548 L154,620 Q150,642 146,656 L134,660 Q126,635 124,600 Q122,570 128,544 Z"
-        fill={c('calves')} stroke={ss('calves')} strokeWidth={sw('calves')} style={ms('calves')} onClick={() => onMuscleClick('calves')}/>
-      <path d="M212,544 Q200,536 186,542 L184,548 L186,620 Q190,642 194,656 L206,660 Q214,635 216,600 Q218,570 212,544 Z"
-        fill={c('calves')} stroke={ss('calves')} strokeWidth={sw('calves')} style={ms('calves')} onClick={() => onMuscleClick('calves')}/>
+      {/* TRICEPS - Left */}
+      <path d={`
+        M80,185 Q74,200 68,225 Q62,255 60,280 Q58,300 62,315
+        L70,320 Q74,300 78,275 L82,250 Q86,225 88,205 L86,190 Z
+      `}
+        fill={c('triceps')} stroke={stroke('triceps')} strokeWidth={sw('triceps')}
+        style={muscleStyle('triceps')} onClick={click('triceps')} />
+      {/* TRICEPS - Right */}
+      <path d={`
+        M320,185 Q326,200 332,225 Q338,255 340,280 Q342,300 338,315
+        L330,320 Q326,300 322,275 L318,250 Q314,225 312,205 L314,190 Z
+      `}
+        fill={c('triceps')} stroke={stroke('triceps')} strokeWidth={sw('triceps')}
+        style={muscleStyle('triceps')} onClick={click('triceps')} />
 
-      {/* Feet */}
-      <path d="M126,658 Q130,668 128,676 L152,678 Q156,668 154,656 Z" fill={BL} stroke={BD} strokeWidth="0.4"/>
-      <path d="M214,658 Q210,668 212,676 L188,678 Q184,668 186,656 Z" fill={BL} stroke={BD} strokeWidth="0.4"/>
+      {/* GLUTES - Left */}
+      <path d={`
+        M155,370 Q140,368 130,378 Q120,392 122,410 Q126,428 138,435
+        Q152,440 168,435 L195,420 L195,385 L175,378 Z
+      `}
+        fill={c('glutes')} stroke={stroke('glutes')} strokeWidth={sw('glutes')}
+        style={muscleStyle('glutes')} onClick={click('glutes')} />
+      {/* GLUTES - Right */}
+      <path d={`
+        M245,370 Q260,368 270,378 Q280,392 278,410 Q274,428 262,435
+        Q248,440 232,435 L205,420 L205,385 L225,378 Z
+      `}
+        fill={c('glutes')} stroke={stroke('glutes')} strokeWidth={sw('glutes')}
+        style={muscleStyle('glutes')} onClick={click('glutes')} />
+      {/* Glute separation */}
+      <line x1="200" y1="380" x2="200" y2="438" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" pointerEvents="none" />
+
+      {/* HAMSTRINGS - Left */}
+      <path d={`
+        M125,420 Q130,435 138,442 L168,438 L185,445 L195,450
+        L195,555 L175,560 Q160,558 148,552
+        L135,540 Q125,520 120,495 Q115,465 120,438 Z
+      `}
+        fill={c('hamstrings')} stroke={stroke('hamstrings')} strokeWidth={sw('hamstrings')}
+        style={muscleStyle('hamstrings')} onClick={click('hamstrings')} />
+      {/* HAMSTRINGS - Right */}
+      <path d={`
+        M275,420 Q270,435 262,442 L232,438 L215,445 L205,450
+        L205,555 L225,560 Q240,558 252,552
+        L265,540 Q275,520 280,495 Q285,465 280,438 Z
+      `}
+        fill={c('hamstrings')} stroke={stroke('hamstrings')} strokeWidth={sw('hamstrings')}
+        style={muscleStyle('hamstrings')} onClick={click('hamstrings')} />
+      {/* Hamstring separation */}
+      <line x1="200" y1="450" x2="200" y2="555" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8" pointerEvents="none" />
+
+      {/* Kneecaps (back of knee) */}
+      <ellipse cx="155" cy="562" rx="16" ry="12" fill={BASE_DARK} stroke={BASE_DARK} strokeWidth="0.3" />
+      <ellipse cx="245" cy="562" rx="16" ry="12" fill={BASE_DARK} stroke={BASE_DARK} strokeWidth="0.3" />
+
+      {/* CALVES - Left */}
+      <path d={`
+        M125,575 Q135,568 150,572 L162,578 L165,585
+        L162,650 Q158,685 154,710 L148,720 L135,718
+        Q128,690 125,650 Q122,615 125,575 Z
+      `}
+        fill={c('calves')} stroke={stroke('calves')} strokeWidth={sw('calves')}
+        style={muscleStyle('calves')} onClick={click('calves')} />
+      {/* CALVES - Right */}
+      <path d={`
+        M275,575 Q265,568 250,572 L238,578 L235,585
+        L238,650 Q242,685 246,710 L252,720 L265,718
+        Q272,690 275,650 Q278,615 275,575 Z
+      `}
+        fill={c('calves')} stroke={stroke('calves')} strokeWidth={sw('calves')}
+        style={muscleStyle('calves')} onClick={click('calves')} />
     </svg>
   );
 };
