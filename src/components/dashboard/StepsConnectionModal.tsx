@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Activity, CheckCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface StepsConnectionModalProps {
@@ -13,6 +14,7 @@ interface StepsConnectionModalProps {
 
 export default function StepsConnectionModal({ open, onOpenChange }: StepsConnectionModalProps) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -44,19 +46,18 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
 
   const handleConnectGoogleFit = async () => {
     if (!user) {
-      toast.error('Please sign in first');
+      toast.error(t("Please sign in first"));
       return;
     }
 
     setIsConnecting(true);
 
     try {
-      // Get current session to ensure we have a valid token
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session) {
         console.error('Session error:', sessionError);
-        toast.error('Authentication required. Please sign in again.');
+        toast.error(t("Authentication required"));
         setIsConnecting(false);
         return;
       }
@@ -70,35 +71,31 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
 
       if (error) {
         console.error('Error getting auth URL:', error);
-        toast.error('Failed to start connection process');
+        toast.error(t("Connection failed"));
         setIsConnecting(false);
         return;
       }
 
       if (!data?.authUrl) {
         console.error('No auth URL received');
-        toast.error('Failed to get authorization URL');
+        toast.error(t("Connection failed"));
         setIsConnecting(false);
         return;
       }
 
-      console.log('Connecting to Google Fit...');
-      
-      // Always redirect in the same window for mobile compatibility
-      // Store a flag to know we're in the middle of connecting
       localStorage.setItem('google_fit_connecting', 'true');
       window.location.href = data.authUrl;
 
     } catch (error) {
       console.error('Error connecting to Google Fit:', error);
-      toast.error('Failed to connect to Google Fit');
+      toast.error(t("Connection failed"));
       setIsConnecting(false);
     }
   };
 
   const handleSyncSteps = async () => {
     if (!user) {
-      toast.error('Please sign in first');
+      toast.error(t("Please sign in first"));
       return;
     }
 
@@ -109,7 +106,7 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
       
       if (sessionError || !session) {
         console.error('Session error:', sessionError);
-        toast.error('Authentication required. Please sign in again.');
+        toast.error(t("Authentication required"));
         setIsSyncing(false);
         return;
       }
@@ -122,14 +119,14 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
 
       if (error) {
         console.error('Error syncing steps:', error);
-        toast.error('Failed to sync steps data');
+        toast.error(t("Sync failed"));
         return;
       }
 
-      toast.success(data.message || 'Steps synced successfully!');
+      toast.success(t("Steps synced successfully"));
     } catch (error) {
       console.error('Error syncing steps:', error);
-      toast.error('Failed to sync steps data');
+      toast.error(t("Sync failed"));
     } finally {
       setIsSyncing(false);
     }
@@ -147,15 +144,15 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
 
       if (error) {
         console.error('Error disconnecting:', error);
-        toast.error('Failed to disconnect');
+        toast.error(t("Disconnect failed"));
         return;
       }
 
       setIsConnected(false);
-      toast.success('Disconnected from Google Fit');
+      toast.success(t("Disconnected successfully"));
     } catch (error) {
       console.error('Error disconnecting:', error);
-      toast.error('Failed to disconnect');
+      toast.error(t("Disconnect failed"));
     }
   };
 
@@ -163,9 +160,9 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Connect your steps</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">{t("Connect your steps")}</DialogTitle>
           <p className="text-sm text-muted-foreground mt-2">
-            Sync your daily steps from Google Fit, which works with most step tracking apps on iOS and Android.
+            {t("Sync your daily steps from Google Fit")}
           </p>
         </DialogHeader>
         
@@ -181,7 +178,7 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
                 <Activity className="h-5 w-5 text-green-600" />
               </div>
               <span className="font-medium">
-                {isConnecting ? 'Connecting...' : 'Connect with Google Fit'}
+                {isConnecting ? t("Connecting...") : t("Connect with Google Fit")}
               </span>
             </Button>
           ) : (
@@ -191,8 +188,8 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
                   <CheckCircle className="h-5 w-5 text-green-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-green-800">Connected to Google Fit</p>
-                  <p className="text-sm text-green-600">Your steps are being tracked</p>
+                  <p className="font-medium text-green-800">{t("Connected to Google Fit")}</p>
+                  <p className="text-sm text-green-600">{t("Your steps are being tracked")}</p>
                 </div>
               </div>
 
@@ -204,14 +201,14 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
                   disabled={isSyncing}
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-                  {isSyncing ? 'Syncing...' : 'Sync Now'}
+                  {isSyncing ? t("Syncing...") : t("Sync Now")}
                 </Button>
                 
                 <Button
                   variant="outline"
                   onClick={handleDisconnect}
                 >
-                  Disconnect
+                  {t("Disconnect")}
                 </Button>
               </div>
             </div>
@@ -219,8 +216,7 @@ export default function StepsConnectionModal({ open, onOpenChange }: StepsConnec
         </div>
         
         <p className="text-xs text-muted-foreground text-center mt-4">
-          Google Fit connects to most step tracking apps including iOS Health app, Samsung Health, and built-in step counters. 
-          You can disconnect at any time from your profile settings.
+          {t("Google Fit connects to most step tracking apps")}
         </p>
       </DialogContent>
     </Dialog>
