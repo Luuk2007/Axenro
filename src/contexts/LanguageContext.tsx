@@ -60,12 +60,16 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   // Get saved theme from localStorage or default to light
   const getSavedTheme = (): 'light' | 'dark' => {
-    const savedSettings = localStorage.getItem("userSettings");
-    if (savedSettings) {
-      const { theme } = JSON.parse(savedSettings);
-      if (theme === 'light' || theme === 'dark') {
-        return theme as 'light' | 'dark';
+    try {
+      const savedSettings = localStorage.getItem("userSettings");
+      if (savedSettings) {
+        const { theme } = JSON.parse(savedSettings);
+        if (theme === 'light' || theme === 'dark') {
+          return theme as 'light' | 'dark';
+        }
       }
+    } catch (error) {
+      console.error("Error reading saved theme:", error);
     }
     return 'light';
   };
