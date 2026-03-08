@@ -248,8 +248,8 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-auto py-4 px-3">
-            <ul className="space-y-1.5">
+          <nav className="flex-1 overflow-auto py-2 px-3">
+            <ul className="space-y-0.5">
               {filteredNavItems.map((item, index) => (
                 <li key={index}>
                   <NavLink
