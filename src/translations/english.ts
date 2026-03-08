@@ -564,7 +564,7 @@ export const english = {
   "Track your daily food intake and macros": "Track your daily food intake and macros",
   "Today meals": "Today's meals",
   "Login To Save Nutrition Data": "Log in to save your nutrition data",
-  "Delete": "Delete",
+  
   "Food item deleted": "Food item deleted",
   "updated successfully": "updated successfully",
   "added to meal plan": "added to meal plan"
