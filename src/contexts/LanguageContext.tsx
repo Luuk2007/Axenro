@@ -35,21 +35,25 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   // Get saved language from localStorage or use domain-based detection
   const getSavedLanguage = (): Language => {
-    // First check if we should use domain-based language
-    const domainLanguage = getDomainBasedLanguage();
-    
-    // If it's a domain-specific URL, use that language
-    if (window.location.hostname === 'axenro.nl' || window.location.hostname === 'axenro.com') {
-      return domainLanguage;
-    }
-    
-    // Otherwise, check localStorage
-    const savedSettings = localStorage.getItem("userSettings");
-    if (savedSettings) {
-      const { language } = JSON.parse(savedSettings);
-      if (language && Object.keys(translations).includes(language)) {
-        return language as Language;
+    try {
+      // First check if we should use domain-based language
+      const domainLanguage = getDomainBasedLanguage();
+      
+      // If it's a domain-specific URL, use that language
+      if (window.location.hostname === 'axenro.nl' || window.location.hostname === 'axenro.com') {
+        return domainLanguage;
       }
+      
+      // Otherwise, check localStorage
+      const savedSettings = localStorage.getItem("userSettings");
+      if (savedSettings) {
+        const { language } = JSON.parse(savedSettings);
+        if (language && Object.keys(translations).includes(language)) {
+          return language as Language;
+        }
+      }
+    } catch (error) {
+      console.error("Error reading saved language:", error);
     }
     return 'english';
   };
