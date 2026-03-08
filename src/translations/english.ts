@@ -652,5 +652,7 @@ export const english = {
   "Track and manage your training sessions": "Track and manage your training sessions",
   "Customize your app preferences": "Customize your app preferences",
   "New": "New",
+  "Activity added": "Activity added",
+  "Welcome back! Here's your daily overview.": "Welcome back! Here's your daily overview.",
   "completeYourProfile": "Complete your profile to see your nutrition plan"
 };

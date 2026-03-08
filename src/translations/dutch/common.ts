@@ -164,6 +164,8 @@ export const commonTranslations: Translations = {
   "Track and manage your training sessions": "Volg en beheer je trainingen",
   "Customize your app preferences": "Pas je app-voorkeuren aan",
   "New": "Nieuw",
+  "Activity added": "Activiteit toegevoegd",
+  "Welcome back! Here's your daily overview.": "Welkom terug! Hier is je dagelijks overzicht.",
   
   // Misc missing
   "Loading...": "Laden...",
