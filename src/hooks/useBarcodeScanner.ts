@@ -1,5 +1,5 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
-import Quagga from 'quagga';
+import { useRef, useState, useCallback } from 'react';
+import { Html5Qrcode } from 'html5-qrcode';
 
 interface BarcodeScannerConfig {
   onDetected: (barcode: string) => void;
@@ -12,263 +12,122 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
   const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
   const [isInitializing, setIsInitializing] = useState(false);
   const scannerRef = useRef<HTMLDivElement>(null);
+  const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const processedBarcodes = useRef<Set<string>>(new Set());
-  const streamRef = useRef<MediaStream | null>(null);
-  const quaggaInitialized = useRef(false);
-
-  const checkCameraPermission = async () => {
-    try {
-      const result = await navigator.permissions.query({ name: 'camera' as PermissionName });
-      setCameraPermission(result.state);
-      
-      result.addEventListener('change', () => {
-        setCameraPermission(result.state);
-      });
-    } catch (error) {
-      console.warn('Permission API not supported');
-    }
-  };
-
-  const requestCameraAccess = async (): Promise<MediaStream> => {
-    console.log('Requesting camera access...');
-    
-    try {
-      // Optimized camera constraints for better performance and quality
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: 'environment' },
-          width: { min: 640, ideal: 1280, max: 1920 },
-          height: { min: 480, ideal: 720, max: 1080 },
-          frameRate: { ideal: 30, max: 60 }
-        }
-      });
-      
-      console.log('Camera access granted:', stream);
-      setCameraPermission('granted');
-      streamRef.current = stream;
-      return stream;
-    } catch (err: any) {
-      console.error('Camera access denied:', err);
-      
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setCameraPermission('denied');
-        throw new Error('Camera access denied. Please allow camera access and try again.');
-      } else if (err.name === 'NotFoundError') {
-        throw new Error('No camera found on this device.');
-      } else if (err.name === 'NotReadableError') {
-        throw new Error('Camera is being used by another application.');
-      } else {
-        throw new Error('Could not access camera. Please check your camera settings.');
-      }
-    }
-  };
+  const scannerContainerId = 'barcode-scanner-container';
 
   const startScanner = useCallback(async () => {
-    if (isScanning || isInitializing) {
-      console.log('Scanner already running or initializing');
-      return;
-    }
+    if (isScanning || isInitializing) return;
 
-    if (!scannerRef.current) {
-      console.error('Scanner ref not available');
-      onError('Camera container not ready. Please try again.');
-      return;
-    }
-
-    console.log('Starting camera scanner...');
     setIsInitializing(true);
     setIsScanning(true);
     setCameraActive(false);
     processedBarcodes.current.clear();
 
     try {
-      // Stop any existing Quagga instance
-      if (quaggaInitialized.current) {
-        try {
-          Quagga.stop();
-          Quagga.offDetected();
-          Quagga.offProcessed();
-        } catch (e) {
-          console.warn('Error stopping existing Quagga:', e);
-        }
-        quaggaInitialized.current = false;
-      }
-
-      // Request camera access first
-      const stream = await requestCameraAccess();
-      console.log('Camera stream obtained, initializing Quagga...');
-
-      // Create video element immediately and attach stream
-      if (scannerRef.current && stream) {
-        const videoElement = document.createElement('video');
-        videoElement.srcObject = stream;
-        videoElement.autoplay = true;
-        videoElement.playsInline = true;
-        videoElement.muted = true;
-        videoElement.style.width = '100%';
-        videoElement.style.height = '100%';
-        videoElement.style.objectFit = 'cover';
-        videoElement.style.position = 'absolute';
-        videoElement.style.top = '0';
-        videoElement.style.left = '0';
-        videoElement.style.zIndex = '1';
-        
-        // Clear any existing content and add video
+      // Create scanner element inside ref
+      if (scannerRef.current) {
         scannerRef.current.innerHTML = '';
-        scannerRef.current.appendChild(videoElement);
-        
-        // Set camera active immediately when video can start playing
-        videoElement.oncanplay = () => {
-          setCameraActive(true);
-          setIsInitializing(false);
-          console.log('Video stream ready, camera active');
-        };
+        const scanDiv = document.createElement('div');
+        scanDiv.id = scannerContainerId;
+        scanDiv.style.width = '100%';
+        scanDiv.style.height = '100%';
+        scannerRef.current.appendChild(scanDiv);
       }
 
-      // Initialize Quagga with optimized settings for faster scanning
-      await new Promise<void>((resolve, reject) => {
-        const config = {
-          inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: scannerRef.current,
-            constraints: {
-              width: { min: 640, ideal: 1280, max: 1920 },
-              height: { min: 480, ideal: 720, max: 1080 },
-              facingMode: "environment",
-              aspectRatio: { min: 1, max: 2 }
-            }
-          },
-          locator: {
-            patchSize: "large",
-            halfSample: false, // Keep full resolution for better accuracy
-            debug: {
-              showCanvas: false,
-              showPatches: false,
-              showFoundPatches: false,
-              showSkeleton: false,
-              showLabels: false,
-              showPatchLabels: false,
-              showRemainingPatchLabels: false,
-              boxFromPatches: {
-                showTransformed: false,
-                showTransformedBox: false,
-                showBB: false
-              }
-            }
-          },
-          // Increase worker count for better performance
-          numOfWorkers: Math.min(navigator.hardwareConcurrency || 4, 8),
-          // Increase frequency for faster scanning
-          frequency: 30,
-          decoder: {
-            readers: [
-              "ean_reader",
-              "ean_8_reader",
-              "upc_reader",
-              "upc_e_reader",
-              "code_128_reader",
-              "code_39_reader",
-              "code_39_vin_reader",
-              "codabar_reader",
-              "i2of5_reader",
-              "2of5_reader",
-              "code_93_reader"
-            ],
-            // Optimize decoder settings for speed and accuracy
-            multiple: false,
-            debug: {
-              drawBoundingBox: false,
-              showFrequency: false,
-              drawScanline: false,
-              drawPatches: false
-            }
-          },
-          locate: true
-        };
+      const html5QrCode = new Html5Qrcode(scannerContainerId);
+      html5QrCodeRef.current = html5QrCode;
 
-        console.log('Initializing Quagga with optimized config:', config);
-        
-        Quagga.init(config, (err) => {
-          if (err) {
-            console.error('Quagga initialization failed:', err);
-            reject(new Error('Failed to initialize barcode scanner: ' + err.message));
-            return;
+      // Get available cameras, prefer back camera
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras || cameras.length === 0) {
+        throw new Error('No camera found on this device.');
+      }
+
+      setCameraPermission('granted');
+
+      // Find back camera
+      const backCamera = cameras.find(c => 
+        c.label.toLowerCase().includes('back') || 
+        c.label.toLowerCase().includes('rear') ||
+        c.label.toLowerCase().includes('environment')
+      );
+      const cameraId = backCamera?.id || cameras[cameras.length - 1].id;
+
+      await html5QrCode.start(
+        cameraId,
+        {
+          fps: 15,
+          qrbox: { width: 280, height: 150 },
+          aspectRatio: 1.5,
+          disableFlip: false,
+        },
+        (decodedText) => {
+          // Barcode successfully scanned
+          if (!processedBarcodes.current.has(decodedText)) {
+            processedBarcodes.current.add(decodedText);
+            console.log('Barcode detected:', decodedText);
+            onDetected(decodedText);
+
+            // Allow rescanning same barcode after delay
+            setTimeout(() => {
+              processedBarcodes.current.delete(decodedText);
+            }, 3000);
           }
-          
-          console.log('Quagga initialized successfully');
-          quaggaInitialized.current = true;
-          
-          // Start Quagga scanner
-          Quagga.start();
-          console.log('Quagga started');
-          
-          resolve();
-        });
-      });
-
-      // Set up barcode detection with improved confidence filtering
-      Quagga.onDetected((data) => {
-        const code = data.codeResult.code;
-        
-        // Calculate average error rate (lower is better)
-        const errors = data.codeResult.decodedCodes
-          .map(c => c.error || 0)
-          .filter(e => e !== undefined);
-        const avgError = errors.length > 0 
-          ? errors.reduce((acc, err) => acc + err, 0) / errors.length 
-          : 1;
-        
-        console.log('Barcode detected:', code, 'Average error:', avgError);
-        
-        // More lenient threshold for better detection (0.35 instead of 0.25)
-        // Also check if barcode has valid length (typical barcodes are 8, 12, or 13 digits)
-        const isValidLength = code && (code.length === 8 || code.length === 12 || code.length === 13 || code.length === 14);
-        
-        if (avgError < 0.35 && isValidLength && !processedBarcodes.current.has(code)) {
-          processedBarcodes.current.add(code);
-          console.log('Processing valid barcode:', code);
-          onDetected(code);
-          
-          // Clear the processed barcode after a shorter delay for faster rescanning
-          setTimeout(() => {
-            processedBarcodes.current.delete(code);
-          }, 800);
+        },
+        () => {
+          // Scan failure (no barcode found in frame) - this is expected, ignore
         }
-      });
+      );
 
+      setCameraActive(true);
+      setIsInitializing(false);
+
+      // Style the video for better appearance
+      if (scannerRef.current) {
+        const video = scannerRef.current.querySelector('video');
+        if (video) {
+          video.style.objectFit = 'cover';
+          video.style.borderRadius = '0';
+        }
+        // Hide the default qr-shaded-region border
+        const shadedRegion = scannerRef.current.querySelector('#qr-shaded-region');
+        if (shadedRegion) {
+          (shadedRegion as HTMLElement).style.borderColor = 'rgba(34, 197, 94, 0.5)';
+        }
+      }
     } catch (err: any) {
       console.error('Scanner start error:', err);
-      onError(err.message || 'Failed to start camera scanner');
+      
+      if (err.name === 'NotAllowedError' || err.message?.includes('denied')) {
+        setCameraPermission('denied');
+        onError('Camera access denied. Please allow camera access and try again.');
+      } else {
+        onError(err.message || 'Failed to start camera scanner');
+      }
+      
       setIsScanning(false);
       setCameraActive(false);
       setIsInitializing(false);
     }
   }, [onDetected, onError, isScanning, isInitializing]);
 
-  const stopScanner = useCallback(() => {
+  const stopScanner = useCallback(async () => {
     console.log('Stopping scanner...');
     
-    if (quaggaInitialized.current) {
+    if (html5QrCodeRef.current) {
       try {
-        Quagga.stop();
-        Quagga.offDetected();
-        Quagga.offProcessed();
+        const state = html5QrCodeRef.current.getState();
+        if (state === 2) { // SCANNING state
+          await html5QrCodeRef.current.stop();
+        }
+        html5QrCodeRef.current.clear();
       } catch (error) {
-        console.warn('Error stopping Quagga:', error);
+        console.warn('Error stopping scanner:', error);
       }
-      quaggaInitialized.current = false;
+      html5QrCodeRef.current = null;
     }
 
-    // Clean up media streams
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => {
-        track.stop();
-      });
-      streamRef.current = null;
-    }
-
-    // Clear the scanner container
     if (scannerRef.current) {
       scannerRef.current.innerHTML = '';
     }
@@ -278,14 +137,6 @@ export const useBarcodeScanner = ({ onDetected, onError }: BarcodeScannerConfig)
     setIsInitializing(false);
     processedBarcodes.current.clear();
   }, []);
-
-  useEffect(() => {
-    checkCameraPermission();
-    
-    return () => {
-      stopScanner();
-    };
-  }, [stopScanner]);
 
   return {
     scannerRef,
