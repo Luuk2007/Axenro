@@ -8,145 +8,139 @@ interface BodyHeatmapSVGProps {
   selectedMuscle: HeatmapMuscle | null;
 }
 
-interface MusclePathProps {
-  muscle: HeatmapMuscle;
-  paths: string[];
-  sets: number;
-  selected: boolean;
-  onClick: () => void;
-}
-
-const MusclePath: React.FC<MusclePathProps> = ({ muscle, paths, sets, selected, onClick }) => {
-  const color = getVolumeColor(sets);
-  return (
-    <>
-      {paths.map((d, i) => (
-        <path
-          key={`${muscle}-${i}`}
-          d={d}
-          fill={color}
-          stroke={selected ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.15)'}
-          strokeWidth={selected ? 2.5 : 0.5}
-          opacity={sets === 0 ? 0.25 : 0.55}
-          className="cursor-pointer transition-all duration-300 hover:opacity-70"
-          style={{ 
-            mixBlendMode: 'multiply',
-            filter: selected ? 'brightness(1.2) saturate(1.3)' : undefined,
-          }}
-          onClick={onClick}
-          data-muscle={muscle}
-        />
-      ))}
-    </>
-  );
-};
-
-// SVG paths carefully mapped to the generated body images (viewBox matches image aspect 512x1024)
-// These paths are positioned to overlay on the realistic mannequin
-
-// Front body muscle overlay paths (mapped to 512x1024 image)
-const frontPaths: Record<string, string[]> = {
-  chest: [
-    // Left pec
-    'M175,260 Q195,240 230,235 Q256,233 256,245 L256,310 Q235,325 210,320 Q185,315 175,300 Z',
-    // Right pec
-    'M337,260 Q317,240 282,235 Q256,233 256,245 L256,310 Q277,325 302,320 Q327,315 337,300 Z',
-  ],
-  shoulders: [
-    // Left deltoid
-    'M130,215 Q140,195 165,200 Q180,205 185,215 L180,260 Q170,275 155,275 L140,265 Q125,248 130,215 Z',
-    // Right deltoid
-    'M382,215 Q372,195 347,200 Q332,205 327,215 L332,260 Q342,275 357,275 L372,265 Q387,248 382,215 Z',
-  ],
-  biceps: [
-    // Left bicep
-    'M118,280 Q128,270 140,268 L155,275 L150,370 Q138,378 125,372 L115,320 Z',
-    // Right bicep
-    'M394,280 Q384,270 372,268 L357,275 L362,370 Q374,378 387,372 L397,320 Z',
-  ],
-  abs: [
-    // Upper abs
-    'M218,320 Q237,315 256,318 Q275,315 294,320 L294,370 Q275,365 256,368 Q237,365 218,370 Z',
-    // Mid abs
-    'M218,374 Q237,370 256,372 Q275,370 294,374 L294,425 Q275,420 256,422 Q237,420 218,425 Z',
-    // Lower abs
-    'M220,428 Q238,424 256,426 Q274,424 292,428 L290,480 Q274,488 256,490 Q238,488 222,480 Z',
-  ],
-  quads: [
-    // Left quad
-    'M190,500 Q205,492 225,495 L256,500 L252,700 Q235,708 220,700 L190,580 Z',
-    // Right quad
-    'M322,500 Q307,492 287,495 L256,500 L260,700 Q277,708 292,700 L322,580 Z',
-  ],
-};
-
-// Back body muscle overlay paths
-const backPaths: Record<string, string[]> = {
-  back: [
-    // Left lat/upper back
-    'M175,225 Q195,215 230,210 L256,210 L256,345 Q230,355 205,345 Q180,330 175,300 Z',
-    // Right lat/upper back
-    'M337,225 Q317,215 282,210 L256,210 L256,345 Q282,355 307,345 Q332,330 337,300 Z',
-    // Lower back
-    'M215,350 Q236,342 256,345 Q276,342 297,350 L295,410 Q276,420 256,422 Q236,420 217,410 Z',
-  ],
-  triceps: [
-    // Left tricep
-    'M115,280 Q125,268 140,270 L155,278 L150,375 Q138,382 122,372 Z',
-    // Right tricep
-    'M397,280 Q387,268 372,270 L357,278 L362,375 Q374,382 390,372 Z',
-  ],
-  glutes: [
-    // Left glute
-    'M200,440 Q220,430 256,435 L256,500 Q230,510 210,502 L198,470 Z',
-    // Right glute
-    'M312,440 Q292,430 256,435 L256,500 Q282,510 302,502 L314,470 Z',
-  ],
-  hamstrings: [
-    // Left hamstring
-    'M195,510 Q215,502 235,508 L252,512 L248,710 Q232,718 218,710 L195,600 Z',
-    // Right hamstring
-    'M317,510 Q297,502 277,508 L260,512 L264,710 Q280,718 294,710 L317,600 Z',
-  ],
-  calves: [
-    // Left calf
-    'M210,725 Q225,715 240,720 L242,850 Q230,862 215,855 L205,780 Z',
-    // Right calf
-    'M302,725 Q287,715 272,720 L270,850 Q282,862 297,855 L307,780 Z',
-  ],
-};
-
 const BodyHeatmapSVG: React.FC<BodyHeatmapSVGProps> = ({ view, muscleVolumes, onMuscleClick, selectedMuscle }) => {
-  const paths = view === 'front' ? frontPaths : backPaths;
-  const imageSrc = view === 'front' ? '/images/body-front.png' : '/images/body-back.png';
+  const getColor = (muscle: HeatmapMuscle) => getVolumeColor(muscleVolumes[muscle] || 0);
+  const isSelected = (muscle: HeatmapMuscle) => selectedMuscle === muscle;
+  const stroke = (muscle: HeatmapMuscle) => isSelected(muscle) ? '#fff' : 'rgba(255,255,255,0.3)';
+  const sw = (muscle: HeatmapMuscle) => isSelected(muscle) ? 2.5 : 1;
 
-  return (
-    <div className="relative w-full max-w-[280px] mx-auto select-none">
-      {/* Realistic body image */}
-      <img
-        src={imageSrc}
-        alt={view === 'front' ? 'Body front view' : 'Body back view'}
-        className="w-full h-auto pointer-events-none"
-        draggable={false}
-      />
-      {/* SVG overlay for colored muscle regions */}
-      <svg
-        viewBox="0 0 512 1024"
-        className="absolute inset-0 w-full h-full"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        {Object.entries(paths).map(([muscle, musclePaths]) => (
-          <MusclePath
-            key={muscle}
-            muscle={muscle as HeatmapMuscle}
-            paths={musclePaths}
-            sets={muscleVolumes[muscle as HeatmapMuscle] || 0}
-            selected={selectedMuscle === muscle}
-            onClick={() => onMuscleClick(muscle as HeatmapMuscle)}
-          />
-        ))}
+  const muscleProps = (muscle: HeatmapMuscle) => ({
+    fill: getColor(muscle),
+    stroke: stroke(muscle),
+    strokeWidth: sw(muscle),
+    className: 'cursor-pointer transition-all duration-200 hover:brightness-110 hover:opacity-90',
+    onClick: () => onMuscleClick(muscle),
+    style: { filter: isSelected(muscle) ? 'brightness(1.15) saturate(1.2)' : undefined } as React.CSSProperties,
+  });
+
+  // Base body color
+  const bodyFill = 'hsl(0 0% 78%)';
+  const bodyStroke = 'hsl(0 0% 68%)';
+
+  if (view === 'front') {
+    return (
+      <svg viewBox="0 0 400 820" className="w-full max-w-[300px] mx-auto select-none" xmlns="http://www.w3.org/2000/svg">
+        {/* Head */}
+        <ellipse cx="200" cy="52" rx="32" ry="40" fill={bodyFill} stroke={bodyStroke} strokeWidth="1" />
+        {/* Neck */}
+        <rect x="186" y="88" width="28" height="28" rx="6" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+
+        {/* Torso base (grey) */}
+        <path d="M138,116 Q145,110 170,108 L200,106 L230,108 Q255,110 262,116 L270,160 L274,220 L270,300 L264,340 Q250,370 230,380 L200,388 L170,380 Q150,370 136,340 L130,300 L126,220 L130,160 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="1" />
+
+        {/* === MUSCLES === */}
+
+        {/* Shoulders (deltoids) */}
+        <path d="M138,116 Q125,118 114,130 Q106,142 108,160 L112,178 Q118,172 126,164 L130,160 L138,130 Z" {...muscleProps('shoulders')} />
+        <path d="M262,116 Q275,118 286,130 Q294,142 292,160 L288,178 Q282,172 274,164 L270,160 L262,130 Z" {...muscleProps('shoulders')} />
+
+        {/* Chest (pectorals) */}
+        <path d="M145,135 Q160,126 185,124 L200,123 L200,190 Q180,198 162,192 Q148,184 142,168 Z" {...muscleProps('chest')} />
+        <path d="M255,135 Q240,126 215,124 L200,123 L200,190 Q220,198 238,192 Q252,184 258,168 Z" {...muscleProps('chest')} />
+
+        {/* Biceps */}
+        <path d="M108,164 Q104,178 100,210 Q98,240 100,270 L106,280 Q114,272 118,250 L122,220 L126,190 Q124,172 118,164 Z" {...muscleProps('biceps')} />
+        <path d="M292,164 Q296,178 300,210 Q302,240 300,270 L294,280 Q286,272 282,250 L278,220 L274,190 Q276,172 282,164 Z" {...muscleProps('biceps')} />
+
+        {/* Abs */}
+        <path d="M172,200 Q186,194 200,196 Q214,194 228,200 L230,240 Q214,236 200,238 Q186,236 170,240 Z" fill={getColor('abs')} stroke="rgba(255,255,255,0.4)" strokeWidth="0.8" className="cursor-pointer transition-all duration-200 hover:brightness-110" onClick={() => onMuscleClick('abs')} />
+        <path d="M170,244 Q186,240 200,242 Q214,240 230,244 L232,286 Q214,282 200,284 Q186,282 168,286 Z" fill={getColor('abs')} stroke="rgba(255,255,255,0.4)" strokeWidth="0.8" className="cursor-pointer transition-all duration-200 hover:brightness-110" onClick={() => onMuscleClick('abs')} />
+        <path d="M168,290 Q186,286 200,288 Q214,286 232,290 L234,332 Q216,338 200,340 Q184,338 166,332 Z" fill={getColor('abs')} stroke="rgba(255,255,255,0.4)" strokeWidth="0.8" className="cursor-pointer transition-all duration-200 hover:brightness-110" onClick={() => onMuscleClick('abs')} />
+        {/* Ab center line */}
+        <line x1="200" y1="196" x2="200" y2="340" stroke="rgba(255,255,255,0.5)" strokeWidth="1" pointerEvents="none" />
+
+        {/* Forearms (body color) */}
+        <path d="M100,280 Q96,310 92,340 Q88,370 86,395 L94,400 Q98,380 102,355 Q106,330 110,300 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+        <path d="M300,280 Q304,310 308,340 Q312,370 314,395 L306,400 Q302,380 298,355 Q294,330 290,300 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+
+        {/* Hands */}
+        <ellipse cx="88" cy="410" rx="12" ry="18" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+        <ellipse cx="312" cy="410" rx="12" ry="18" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+
+        {/* Hip/waist connector (grey) */}
+        <path d="M160,345 Q180,355 200,358 Q220,355 240,345 L244,400 Q230,415 200,418 Q170,415 156,400 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+
+        {/* Quads */}
+        <path d="M156,400 Q162,395 180,405 L198,412 L194,520 Q185,560 178,580 L168,582 Q158,540 154,490 Z" {...muscleProps('quads')} />
+        <path d="M244,400 Q238,395 220,405 L202,412 L206,520 Q215,560 222,580 L232,582 Q242,540 246,490 Z" {...muscleProps('quads')} />
+
+        {/* Knees (grey) */}
+        <ellipse cx="174" cy="598" rx="18" ry="22" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+        <ellipse cx="226" cy="598" rx="18" ry="22" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+
+        {/* Calves (front - tibialis, shown as body color or light) */}
+        <path d="M158,618 Q166,612 178,616 L180,700 Q174,730 170,745 L162,748 Q156,710 155,670 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+        <path d="M242,618 Q234,612 222,616 L220,700 Q226,730 230,745 L238,748 Q244,710 245,670 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+
+        {/* Feet */}
+        <path d="M154,748 Q158,762 154,775 L176,778 Q182,766 180,750 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+        <path d="M246,748 Q242,762 246,775 L224,778 Q218,766 220,750 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
       </svg>
-    </div>
+    );
+  }
+
+  // BACK VIEW
+  return (
+    <svg viewBox="0 0 400 820" className="w-full max-w-[300px] mx-auto select-none" xmlns="http://www.w3.org/2000/svg">
+      {/* Head */}
+      <ellipse cx="200" cy="52" rx="32" ry="40" fill={bodyFill} stroke={bodyStroke} strokeWidth="1" />
+      {/* Neck */}
+      <rect x="186" y="88" width="28" height="28" rx="6" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+
+      {/* Torso base */}
+      <path d="M138,116 Q145,110 170,108 L200,106 L230,108 Q255,110 262,116 L270,160 L274,220 L270,300 L264,340 Q250,370 230,380 L200,388 L170,380 Q150,370 136,340 L130,300 L126,220 L130,160 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="1" />
+
+      {/* Shoulders */}
+      <path d="M138,116 Q125,118 114,130 Q106,142 108,160 L112,178 Q118,172 126,164 L130,160 L138,130 Z" {...muscleProps('shoulders')} />
+      <path d="M262,116 Q275,118 286,130 Q294,142 292,160 L288,178 Q282,172 274,164 L270,160 L262,130 Z" {...muscleProps('shoulders')} />
+
+      {/* Back (traps + lats + lower back) */}
+      <path d="M148,120 Q170,114 200,112 Q230,114 252,120 L260,160 L264,220 Q262,260 256,290 L248,310 Q230,318 200,320 Q170,318 152,310 L144,290 Q138,260 136,220 L140,160 Z" {...muscleProps('back')} />
+      {/* Back spine line */}
+      <line x1="200" y1="115" x2="200" y2="320" stroke="rgba(255,255,255,0.4)" strokeWidth="1" pointerEvents="none" />
+
+      {/* Triceps */}
+      <path d="M108,164 Q104,178 100,210 Q98,240 100,270 L106,280 Q114,272 118,250 L122,220 L126,190 Q124,172 118,164 Z" {...muscleProps('triceps')} />
+      <path d="M292,164 Q296,178 300,210 Q302,240 300,270 L294,280 Q286,272 282,250 L278,220 L274,190 Q276,172 282,164 Z" {...muscleProps('triceps')} />
+
+      {/* Forearms */}
+      <path d="M100,280 Q96,310 92,340 Q88,370 86,395 L94,400 Q98,380 102,355 Q106,330 110,300 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+      <path d="M300,280 Q304,310 308,340 Q312,370 314,395 L306,400 Q302,380 298,355 Q294,330 290,300 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+
+      {/* Hands */}
+      <ellipse cx="88" cy="410" rx="12" ry="18" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+      <ellipse cx="312" cy="410" rx="12" ry="18" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+
+      {/* Glutes */}
+      <path d="M160,345 Q175,338 198,342 L198,395 Q185,405 168,398 Q158,385 156,365 Z" {...muscleProps('glutes')} />
+      <path d="M240,345 Q225,338 202,342 L202,395 Q215,405 232,398 Q242,385 244,365 Z" {...muscleProps('glutes')} />
+
+      {/* Hamstrings */}
+      <path d="M156,405 Q165,398 182,408 L196,414 L192,530 Q184,565 178,582 L166,584 Q158,545 154,495 Z" {...muscleProps('hamstrings')} />
+      <path d="M244,405 Q235,398 218,408 L204,414 L208,530 Q216,565 222,582 L234,584 Q242,545 246,495 Z" {...muscleProps('hamstrings')} />
+
+      {/* Knees */}
+      <ellipse cx="174" cy="598" rx="18" ry="22" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+      <ellipse cx="226" cy="598" rx="18" ry="22" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+
+      {/* Calves */}
+      <path d="M158,618 Q168,610 180,616 L182,700 Q176,732 172,748 L160,750 Q154,710 155,665 Z" {...muscleProps('calves')} />
+      <path d="M242,618 Q232,610 220,616 L218,700 Q224,732 228,748 L240,750 Q246,710 245,665 Z" {...muscleProps('calves')} />
+
+      {/* Feet */}
+      <path d="M154,748 Q158,762 154,775 L176,778 Q182,766 180,750 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+      <path d="M246,748 Q242,762 246,775 L224,778 Q218,766 220,750 Z" fill={bodyFill} stroke={bodyStroke} strokeWidth="0.5" />
+    </svg>
   );
 };
 
