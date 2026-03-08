@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { X, Heart, Star } from 'lucide-react';
 import { ProgressPhoto, PHOTO_CATEGORIES, COMMON_TAGS } from '@/types/progressPhotos';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EditProgressPhotoDialogProps {
   open: boolean;
