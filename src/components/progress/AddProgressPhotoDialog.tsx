@@ -229,10 +229,10 @@ export default function AddProgressPhotoDialog({
           {/* Notes - Only for Premium */}
           {isPremium && (
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Label htmlFor="notes">{t("Notes")} ({t("Optional")})</Label>
               <Textarea
                 id="notes"
-                placeholder="Add notes about this photo..."
+                placeholder={t("Add notes about this photo...")}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
