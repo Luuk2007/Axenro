@@ -339,10 +339,11 @@ export default function Progress() {
 
       {initialized && (
         <Tabs defaultValue="weight" className="w-full">
-          <TabsList className={`grid mb-4 ${showPhotosTab ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          <TabsList className={`grid mb-4 ${showPhotosTab ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="weight">{t("Weight")}</TabsTrigger>
             <TabsTrigger value="measurements">{t("Measurements")}</TabsTrigger>
             {showPhotosTab && <TabsTrigger value="photos">{t("Photos")}</TabsTrigger>}
+            <TabsTrigger value="muscle-analysis">{t("muscleAnalysisTab") || "Spieranalyse"}</TabsTrigger>
           </TabsList>
         
         <TabsContent value="weight" className="space-y-6">
