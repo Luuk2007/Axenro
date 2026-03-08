@@ -316,7 +316,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select goal" />
+                    <SelectValue placeholder={t("Select goal")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
