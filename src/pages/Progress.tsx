@@ -339,11 +339,11 @@ export default function Progress() {
 
       {initialized && (
         <Tabs defaultValue="weight" className="w-full">
-          <TabsList className={`grid mb-4 ${showPhotosTab ? 'grid-cols-4' : 'grid-cols-3'}`}>
-            <TabsTrigger value="weight">{t("Weight")}</TabsTrigger>
-            <TabsTrigger value="measurements">{t("Measurements")}</TabsTrigger>
-            {showPhotosTab && <TabsTrigger value="photos">{t("Photos")}</TabsTrigger>}
-            <TabsTrigger value="muscle-analysis">{t("muscleAnalysisTab") || "Spieranalyse"}</TabsTrigger>
+          <TabsList className={`grid w-full rounded-xl bg-muted/50 p-1 mb-4 ${showPhotosTab ? 'grid-cols-4' : 'grid-cols-3'}`}>
+            <TabsTrigger value="weight" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs sm:text-sm">{t("Weight")}</TabsTrigger>
+            <TabsTrigger value="measurements" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs sm:text-sm">{t("Measurements")}</TabsTrigger>
+            {showPhotosTab && <TabsTrigger value="photos" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs sm:text-sm">{t("Photos")}</TabsTrigger>}
+            <TabsTrigger value="muscle-analysis" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs sm:text-sm">{t("muscleAnalysisTab") || "Spieranalyse"}</TabsTrigger>
           </TabsList>
         
         <TabsContent value="weight" className="space-y-6">
