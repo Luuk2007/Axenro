@@ -367,7 +367,7 @@ export default function Progress() {
                 const iconColors = ['text-blue-500', 'text-emerald-500', 'text-amber-500', 'text-purple-500'];
                 
                 return (
-                  <Card key={type.id} className="border-0 shadow-md overflow-hidden">
+                  <Card key={type.id} className="border border-border/40 overflow-hidden" style={{ boxShadow: 'var(--shadow-sm)' }}>
                     <div className={`h-1 bg-gradient-to-r ${colors[index % colors.length]}`} />
                     <CardContent className="p-4 text-center">
                       <div className="flex items-center justify-center gap-1 mb-2">
