@@ -14,37 +14,28 @@ export default function TopBar() {
   const isMobile = useIsMobile();
   const { t } = useLanguage();
   const { test_mode, test_subscription_tier, subscription_tier } = useSubscription();
-  
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleSidebarNavigate = () => {
-    setSidebarOpen(false);
-  };
-
-  // Determine current tier
   const currentTier = test_mode ? test_subscription_tier : subscription_tier;
-  
-  // Only show theme switch for pro and premium plans
   const showThemeSwitch = currentTier === 'pro' || currentTier === 'premium';
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border/50 bg-background/80 backdrop-blur-xl px-4 md:px-6">
+    <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-border/30 bg-background/80 backdrop-blur-xl px-4 md:px-6">
       <div className="flex items-center gap-4">
         {isMobile && (
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden rounded-xl">
+              <Button variant="ghost" size="icon" className="md:hidden rounded-xl h-9 w-9">
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-80">
-              <Sidebar onNavigate={handleSidebarNavigate} />
+              <Sidebar onNavigate={() => setSidebarOpen(false)} />
             </SheetContent>
           </Sheet>
         )}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <LanguageSwitch />
         {showThemeSwitch && <ThemeSwitch />}
         <UserMenu />

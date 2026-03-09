@@ -34,47 +34,45 @@ export default function StatsCard({
   return (
     <div 
       className={cn(
-        "group relative overflow-hidden rounded-2xl bg-card p-3 sm:p-5 transition-all duration-300",
-        "hover:shadow-lg hover:-translate-y-1",
-        "border border-border/50",
+        "group relative overflow-hidden rounded-2xl bg-card p-4 sm:p-5 transition-all duration-300",
+        "border border-border/40",
+        "hover:-translate-y-0.5",
         onClick && "cursor-pointer",
         className
       )}
+      style={{ boxShadow: 'var(--shadow-sm)' }}
       onClick={onClick}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
     >
-      {/* Subtle gradient overlay on hover */}
+      {/* Top accent line */}
       <div className={cn(
-        "absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300",
-        "bg-gradient-to-br",
-        gradientClass
-      )} />
-      
-      {/* Top gradient line */}
-      <div className={cn(
-        "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r",
+        "absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r opacity-60",
         gradientClass
       )} />
       
       <div className="relative flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1 space-y-0.5">
+        <div className="min-w-0 flex-1 space-y-1">
           <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
             {title}
           </p>
-          <p className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight truncate">
+          <p className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight truncate">
             {value}
           </p>
           {description && (
-            <p className="text-[10px] sm:text-xs text-muted-foreground/80 truncate mt-0.5">
+            <p className="text-[10px] sm:text-xs text-muted-foreground/70 truncate mt-0.5">
               {description}
             </p>
           )}
         </div>
         
         <div className={cn(
-          "flex-shrink-0 rounded-xl p-2 sm:p-3",
-          "bg-gradient-to-br shadow-lg",
+          "flex-shrink-0 rounded-xl p-2 sm:p-2.5",
+          "bg-gradient-to-br",
           gradientClass
-        )}>
+        )}
+        style={{ boxShadow: '0 4px 12px -2px rgb(0 0 0 / 0.15)' }}
+        >
           <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
         </div>
       </div>
