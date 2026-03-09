@@ -389,7 +389,7 @@ export default function Progress() {
 
           <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
             {/* All Measurements Card */}
-            <Card className="border-0 shadow-md">
+            <Card className="border border-border/40" style={{ boxShadow: 'var(--shadow-sm)' }}>
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <Ruler className="h-5 w-5 text-primary" />
