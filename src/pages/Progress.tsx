@@ -339,11 +339,11 @@ export default function Progress() {
 
       {initialized && (
         <Tabs defaultValue="weight" className="w-full">
-          <TabsList className={`grid w-full rounded-xl bg-muted/50 p-1 mb-4 ${showPhotosTab ? 'grid-cols-4' : 'grid-cols-3'}`}>
-            <TabsTrigger value="weight" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs sm:text-sm">{t("Weight")}</TabsTrigger>
-            <TabsTrigger value="measurements" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs sm:text-sm">{t("Measurements")}</TabsTrigger>
-            {showPhotosTab && <TabsTrigger value="photos" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs sm:text-sm">{t("Photos")}</TabsTrigger>}
-            <TabsTrigger value="muscle-analysis" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs sm:text-sm">{t("muscleAnalysisTab") || "Spieranalyse"}</TabsTrigger>
+          <TabsList className={`grid mb-4 ${showPhotosTab ? 'grid-cols-4' : 'grid-cols-3'}`}>
+            <TabsTrigger value="weight">{t("Weight")}</TabsTrigger>
+            <TabsTrigger value="measurements">{t("Measurements")}</TabsTrigger>
+            {showPhotosTab && <TabsTrigger value="photos">{t("Photos")}</TabsTrigger>}
+            <TabsTrigger value="muscle-analysis">{t("muscleAnalysisTab") || "Spieranalyse"}</TabsTrigger>
           </TabsList>
         
         <TabsContent value="weight" className="space-y-6">
@@ -367,7 +367,7 @@ export default function Progress() {
                 const iconColors = ['text-blue-500', 'text-emerald-500', 'text-amber-500', 'text-purple-500'];
                 
                 return (
-                  <Card key={type.id} className="border border-border/40 overflow-hidden" style={{ boxShadow: 'var(--shadow-sm)' }}>
+                  <Card key={type.id} className="border-0 shadow-md overflow-hidden">
                     <div className={`h-1 bg-gradient-to-r ${colors[index % colors.length]}`} />
                     <CardContent className="p-4 text-center">
                       <div className="flex items-center justify-center gap-1 mb-2">
@@ -389,7 +389,7 @@ export default function Progress() {
 
           <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
             {/* All Measurements Card */}
-            <Card className="border border-border/40" style={{ boxShadow: 'var(--shadow-sm)' }}>
+            <Card className="border-0 shadow-md">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <Ruler className="h-5 w-5 text-primary" />
