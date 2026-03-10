@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, ChevronDown, ChevronUp, Crown, Pencil } from "lucide-react";
+import { X, Crown, Pencil, Target } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { exerciseDatabase } from '@/types/workout';
 import { useSubscription } from "@/hooks/useSubscription";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { getSubscriptionLimits, formatUsageText, canAddMore } from "@/utils/subscriptionLimits";
+import { detectTargetMuscle, setCustomMuscleOverride, getCustomMuscleOverride, heatmapMuscleGroups, muscleLabels } from "@/utils/muscleMapping";
 
 interface CustomExercise {
   id: string;
@@ -19,25 +19,28 @@ interface CustomExercise {
   muscleGroup: string;
 }
 
-const ExercisesSettings = () => {
+interface ExercisesSettingsProps {
+  embedded?: boolean;
+}
+
+const ExercisesSettings: React.FC<ExercisesSettingsProps> = ({ embedded }) => {
   const { t } = useLanguage();
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
   const { customExercises, addCustomExercise, updateCustomExercise, deleteCustomExercise, loading: exercisesLoading } = useCustomExercises();
   
   const [newExerciseName, setNewExerciseName] = useState('');
   const [newMuscleGroup, setNewMuscleGroup] = useState('');
-  const [exercisesOpen, setExercisesOpen] = useState(false);
   const [showExistingExercises, setShowExistingExercises] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<CustomExercise | null>(null);
   const [editExerciseName, setEditExerciseName] = useState('');
   const [editMuscleGroup, setEditMuscleGroup] = useState('');
+  const [editTargetMuscle, setEditTargetMuscle] = useState('');
 
   const muscleGroups = [
     'chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'cardio', 'full body'
   ];
 
-  // Get subscription limits
   const limits = getSubscriptionLimits(subscribed, subscription_tier, test_mode, test_subscription_tier);
   const customExercisesCount = customExercises.length;
   const canAddMoreExercises = canAddMore(customExercisesCount, limits.customExercises);
@@ -47,21 +50,29 @@ const ExercisesSettings = () => {
     return exerciseDatabase[muscleGroup as keyof typeof exerciseDatabase] || [];
   };
 
+  const getTargetMuscleForExercise = (exercise: CustomExercise): string => {
+    const override = getCustomMuscleOverride(exercise.name);
+    if (override) return override;
+    return detectTargetMuscle(exercise.name, exercise.muscleGroup);
+  };
+
   const handleAddCustomExercise = async () => {
     if (!newExerciseName.trim()) {
       toast.error(t("Please enter an exercise name"));
       return;
     }
-
     if (!newMuscleGroup) {
       toast.error(t("Please select a muscle group"));
       return;
     }
-
-    // Check subscription limit
     if (!canAddMoreExercises) {
       toast.error(t("You've reached your custom exercises limit. Upgrade to add more."));
       return;
+    }
+
+    const detectedMuscle = detectTargetMuscle(newExerciseName.trim(), newMuscleGroup);
+    if (detectedMuscle) {
+      setCustomMuscleOverride(newExerciseName.trim(), detectedMuscle);
     }
 
     const newExercise = await addCustomExercise({
@@ -73,8 +84,6 @@ const ExercisesSettings = () => {
       setNewExerciseName('');
       setNewMuscleGroup('');
       setShowExistingExercises(false);
-      
-      // Dispatch event to notify other components
       window.dispatchEvent(new Event('exercisesChanged'));
       toast.success(t("Exercise added successfully"));
     }
@@ -84,20 +93,30 @@ const ExercisesSettings = () => {
     setEditingExercise(exercise);
     setEditExerciseName(exercise.name);
     setEditMuscleGroup(exercise.muscleGroup);
+    setEditTargetMuscle(getTargetMuscleForExercise(exercise));
     setEditModalOpen(true);
   };
 
   const handleUpdateExercise = async () => {
     if (!editingExercise) return;
-
     if (!editExerciseName.trim()) {
       toast.error(t("Please enter an exercise name"));
       return;
     }
-
     if (!editMuscleGroup) {
       toast.error(t("Please select a muscle group"));
       return;
+    }
+
+    // Save target muscle override
+    if (editTargetMuscle) {
+      setCustomMuscleOverride(editExerciseName.trim(), editTargetMuscle);
+      // If name changed, remove old override
+      if (editExerciseName.trim().toLowerCase() !== editingExercise.name.toLowerCase()) {
+        const overrides = JSON.parse(localStorage.getItem('customExerciseTargetMuscles') || '{}');
+        delete overrides[editingExercise.name.toLowerCase()];
+        localStorage.setItem('customExerciseTargetMuscles', JSON.stringify(overrides));
+      }
     }
 
     const success = await updateCustomExercise(editingExercise.id, {
@@ -108,27 +127,143 @@ const ExercisesSettings = () => {
     if (success) {
       setEditModalOpen(false);
       setEditingExercise(null);
-      setEditExerciseName('');
-      setEditMuscleGroup('');
-      
-      // Dispatch event to notify other components
       window.dispatchEvent(new Event('exercisesChanged'));
       toast.success(t("Exercise updated successfully"));
     }
   };
 
   const handleRemoveCustomExercise = async (exerciseId: string) => {
+    const exercise = customExercises.find(e => e.id === exerciseId);
+    if (exercise) {
+      // Remove override
+      const overrides = JSON.parse(localStorage.getItem('customExerciseTargetMuscles') || '{}');
+      delete overrides[exercise.name.toLowerCase()];
+      localStorage.setItem('customExerciseTargetMuscles', JSON.stringify(overrides));
+    }
     await deleteCustomExercise(exerciseId);
-    
-    // Dispatch event to notify other components
     window.dispatchEvent(new Event('exercisesChanged'));
     toast.success(t("Exercise removed successfully"));
   };
 
   const showUpgradePrompt = !canAddMoreExercises && limits.customExercises !== -1;
 
-  return (
-    <>
+  // Auto-detect preview
+  const previewTargetMuscle = newExerciseName.trim() 
+    ? detectTargetMuscle(newExerciseName.trim(), newMuscleGroup) 
+    : '';
+
+  const content = (
+    <div className="space-y-5">
+      {/* Usage counter */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground">{usageText}</span>
+      </div>
+
+      {/* Custom exercises list */}
+      <div className="space-y-2">
+        <h3 className="font-medium text-sm">{t("Custom exercises")}</h3>
+        <div className="space-y-2">
+          {customExercises.map((exercise) => {
+            const targetMuscle = getTargetMuscleForExercise(exercise);
+            return (
+              <div key={exercise.id} className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-medium text-sm">{exercise.name}</span>
+                  <Badge variant="secondary" className="text-xs">
+                    {t(exercise.muscleGroup)}
+                  </Badge>
+                  {targetMuscle && (
+                    <Badge variant="outline" className="text-xs gap-1">
+                      <Target className="h-3 w-3" />
+                      {muscleLabels[targetMuscle as keyof typeof muscleLabels] || targetMuscle}
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => handleEditExercise(exercise)} className="h-7 w-7 p-0 rounded-lg">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleRemoveCustomExercise(exercise.id)} className="text-destructive hover:text-destructive h-7 w-7 p-0 rounded-lg">
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+          {customExercises.length === 0 && (
+            <p className="text-muted-foreground text-sm py-4 text-center">{t("No custom exercises added yet")}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Add new exercise */}
+      <div className="space-y-3">
+        <h3 className="font-medium text-sm">{t("Add custom exercise")}</h3>
+        
+        {showUpgradePrompt && (
+          <div className="p-3 border border-orange-200 bg-orange-50 dark:bg-orange-950/30 dark:border-orange-800 rounded-xl">
+            <div className="flex items-center gap-2 text-orange-800 dark:text-orange-300">
+              <Crown className="h-4 w-4" />
+              <span className="text-sm font-medium">{t("Upgrade to add more custom exercises")}</span>
+            </div>
+          </div>
+        )}
+        
+        <div className="space-y-3">
+          <Input
+            placeholder={t("Enter exercise name")}
+            value={newExerciseName}
+            onChange={(e) => setNewExerciseName(e.target.value)}
+            className="rounded-xl"
+            disabled={!canAddMoreExercises}
+          />
+          <Select 
+            value={newMuscleGroup} 
+            onValueChange={(value) => { setNewMuscleGroup(value); setShowExistingExercises(!!value); }}
+            disabled={!canAddMoreExercises}
+          >
+            <SelectTrigger className="rounded-xl">
+              <SelectValue placeholder={t("Select muscle group")} />
+            </SelectTrigger>
+            <SelectContent>
+              {muscleGroups.map((group) => (
+                <SelectItem key={group} value={group}>{t(group)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Auto-detected target muscle preview */}
+          {previewTargetMuscle && (
+            <div className="flex items-center gap-2 p-2 rounded-xl bg-primary/5 border border-primary/20">
+              <Target className="h-4 w-4 text-primary" />
+              <span className="text-xs text-muted-foreground">{t("Detected target muscle")}:</span>
+              <Badge variant="outline" className="text-xs">
+                {muscleLabels[previewTargetMuscle as keyof typeof muscleLabels] || previewTargetMuscle}
+              </Badge>
+            </div>
+          )}
+          
+          {showExistingExercises && newMuscleGroup && (
+            <div className="p-3 rounded-xl bg-muted/30 border border-border">
+              <h4 className="text-xs font-medium mb-2">{t("Existing exercises in")} {t(newMuscleGroup)}:</h4>
+              <div className="grid grid-cols-1 gap-1 max-h-32 overflow-y-auto">
+                {getExistingExercisesForGroup(newMuscleGroup).map((exercise) => (
+                  <div key={exercise.id} className="text-xs text-muted-foreground">• {exercise.name}</div>
+                ))}
+              </div>
+            </div>
+          )}
+          <Button 
+            onClick={handleAddCustomExercise} 
+            className="w-full rounded-xl"
+            disabled={!canAddMoreExercises || loading || exercisesLoading}
+          >
+            {t("Add Exercise")}
+          </Button>
+        </div>
+      </div>
+
+      {/* Edit Modal */}
       <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -141,162 +276,61 @@ const ExercisesSettings = () => {
                 placeholder={t("Enter exercise name")}
                 value={editExerciseName}
                 onChange={(e) => setEditExerciseName(e.target.value)}
+                className="rounded-xl"
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("Muscle group")}</label>
               <Select value={editMuscleGroup} onValueChange={setEditMuscleGroup}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl">
                   <SelectValue placeholder={t("Select muscle group")} />
                 </SelectTrigger>
                 <SelectContent>
                   {muscleGroups.map((group) => (
-                    <SelectItem key={group} value={group}>
-                      {t(group)}
-                    </SelectItem>
+                    <SelectItem key={group} value={group}>{t(group)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                {t("Target muscle (heatmap)")}
+              </label>
+              <Select value={editTargetMuscle} onValueChange={setEditTargetMuscle}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder={t("Select target muscle")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {heatmapMuscleGroups.map((muscle) => (
+                    <SelectItem key={muscle} value={muscle}>
+                      {muscleLabels[muscle]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {t("This determines which muscle is highlighted on the heatmap")}
+              </p>
+            </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditModalOpen(false)}>
+            <Button variant="outline" onClick={() => setEditModalOpen(false)} className="rounded-xl">
               {t("Cancel")}
             </Button>
-            <Button onClick={handleUpdateExercise}>
+            <Button onClick={handleUpdateExercise} className="rounded-xl">
               {t("Save changes")}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <Card>
-        <Collapsible open={exercisesOpen} onOpenChange={setExercisesOpen}>
-        <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-base">{t("Exercises")}</CardTitle>
-                <span className="text-sm text-muted-foreground">{usageText}</span>
-              </div>
-              {exercisesOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-            </div>
-          </CardHeader>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <CardContent className="space-y-3 py-3">
-            <div className="space-y-2">
-              <h3 className="font-medium text-sm">{t("Custom exercises")}</h3>
-              <div className="space-y-2">
-                {customExercises.map((exercise) => (
-                  <div key={exercise.id} className="flex items-center justify-between p-2 border rounded">
-                    <div>
-                      <span className="font-medium text-sm">{exercise.name}</span>
-                      <span className="text-xs text-muted-foreground ml-2">
-                        ({t(exercise.muscleGroup)})
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditExercise(exercise)}
-                        className="h-6 w-6 p-0"
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveCustomExercise(exercise.id)}
-                        className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                {customExercises.length === 0 && (
-                  <p className="text-muted-foreground text-sm">No custom exercises added yet</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="font-medium text-sm">{t("Add custom exercise")}</h3>
-              
-              {showUpgradePrompt && (
-                <div className="p-3 border border-orange-200 bg-orange-50 rounded-md">
-                  <div className="flex items-center gap-2 text-orange-800">
-                    <Crown className="h-4 w-4" />
-                    <span className="text-sm font-medium">
-                      {t("Upgrade to add more custom exercises")}
-                    </span>
-                  </div>
-                  <p className="text-xs text-orange-700 mt-1">
-                    {limits.customExercises === 2 
-                      ? t("Pro plan: 5 custom exercises, Premium: unlimited")
-                      : t("Premium plan: unlimited custom exercises")
-                    }
-                  </p>
-                </div>
-              )}
-              
-              <div className="space-y-2">
-                <Input
-                  placeholder={t("Enter exercise name")}
-                  value={newExerciseName}
-                  onChange={(e) => setNewExerciseName(e.target.value)}
-                  className="text-sm h-9"
-                  disabled={!canAddMoreExercises}
-                />
-                <Select 
-                  value={newMuscleGroup} 
-                  onValueChange={(value) => {
-                    setNewMuscleGroup(value);
-                    setShowExistingExercises(!!value);
-                  }}
-                  disabled={!canAddMoreExercises}
-                >
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder={t("Select muscle group")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {muscleGroups.map((group) => (
-                      <SelectItem key={group} value={group}>
-                        {t(group)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                {showExistingExercises && newMuscleGroup && (
-                  <div className="mt-3 p-3 border rounded-md bg-muted/30">
-                    <h4 className="text-xs font-medium mb-2">{t("Existing exercises in")} {t(newMuscleGroup)}:</h4>
-                    <div className="grid grid-cols-1 gap-1 max-h-32 overflow-y-auto">
-                      {getExistingExercisesForGroup(newMuscleGroup).map((exercise) => (
-                        <div key={exercise.id} className="text-xs text-muted-foreground">
-                          • {exercise.name}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <Button 
-                  onClick={handleAddCustomExercise} 
-                  className="w-full h-9"
-                  disabled={!canAddMoreExercises || loading || exercisesLoading}
-                >
-                  {t("Add Exercise")}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </CollapsibleContent>
-      </Collapsible>
-    </Card>
-    </>
+    </div>
   );
+
+  if (embedded) return content;
+
+  // Legacy fallback (not used with new Settings)
+  return content;
 };
 
 export default ExercisesSettings;

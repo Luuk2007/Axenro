@@ -8,7 +8,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMeasurementSystem, MeasurementSystem } from '@/hooks/useMeasurementSystem';
 
-const MeasurementSystemSettings = () => {
+interface Props {
+  embedded?: boolean;
+}
+
+const MeasurementSystemSettings: React.FC<Props> = ({ embedded }) => {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const { measurementSystem, updateMeasurementSystem, loading } = useMeasurementSystem();
@@ -16,6 +20,32 @@ const MeasurementSystemSettings = () => {
   const handleSystemChange = (newSystem: MeasurementSystem) => {
     updateMeasurementSystem(newSystem);
   };
+
+  const content = (
+    <div className="space-y-3">
+      <div className="space-y-2">
+        <Label>{t("Measurement system")}</Label>
+        <Select
+          value={measurementSystem}
+          onValueChange={(value) => handleSystemChange(value as MeasurementSystem)}
+          disabled={loading}
+        >
+          <SelectTrigger className="w-full rounded-xl">
+            <SelectValue placeholder={t("Select system")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="metric">{t("Metric")} (kg, cm)</SelectItem>
+            <SelectItem value="imperial">{t("Imperial")} (lbs, inches)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {t("This affects how weights and measurements are displayed throughout the app")}
+      </p>
+    </div>
+  );
+
+  if (embedded) return content;
 
   return (
     <Card>
@@ -30,34 +60,7 @@ const MeasurementSystemSettings = () => {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="space-y-3 py-3">
-            <p className="text-sm text-muted-foreground">
-              {t("Choose measurement system")}
-            </p>
-            
-            <div className="flex items-center justify-between">
-              <Label htmlFor="measurement-system">{t("System")}</Label>
-              <Select
-                value={measurementSystem}
-                onValueChange={handleSystemChange}
-                disabled={loading}
-              >
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder={t("selectSystem")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="metric">
-                    {t("metric")} (cm, kg, km)
-                  </SelectItem>
-                  <SelectItem value="imperial">
-                    {t("imperial")} (in, lbs, mi)
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="text-xs text-muted-foreground mt-2">
-              <p>{t("")}</p>
-            </div>
+            {content}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
