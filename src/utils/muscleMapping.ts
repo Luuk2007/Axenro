@@ -117,7 +117,40 @@ const namePatterns: [RegExp, string][] = [
   [/shrug/i, 'shoulders'],
 ];
 
+// Get custom exercise muscle overrides from localStorage
+function getCustomMuscleOverrides(): Record<string, string> {
+  try {
+    const data = localStorage.getItem('customExerciseTargetMuscles');
+    return data ? JSON.parse(data) : {};
+  } catch { return {}; }
+}
+
+export function setCustomMuscleOverride(exerciseName: string, muscle: string) {
+  const overrides = getCustomMuscleOverrides();
+  overrides[exerciseName.toLowerCase()] = muscle;
+  localStorage.setItem('customExerciseTargetMuscles', JSON.stringify(overrides));
+}
+
+export function getCustomMuscleOverride(exerciseName: string): string | undefined {
+  const overrides = getCustomMuscleOverrides();
+  return overrides[exerciseName.toLowerCase()];
+}
+
+export function detectTargetMuscle(exerciseName: string, muscleGroup?: string): string {
+  for (const [pattern, muscle] of namePatterns) {
+    if (pattern.test(exerciseName)) return muscle;
+  }
+  if (muscleGroup && muscleGroupToHeatmap[muscleGroup]) {
+    return muscleGroupToHeatmap[muscleGroup];
+  }
+  return '';
+}
+
 export function getHeatmapMuscle(exerciseId: string, exerciseName: string, muscleGroup?: string): string {
+  // 0. Check custom overrides first
+  const override = getCustomMuscleOverride(exerciseName);
+  if (override) return override;
+
   // 1. Direct ID mapping
   if (exerciseToMuscle[exerciseId]) return exerciseToMuscle[exerciseId];
 
