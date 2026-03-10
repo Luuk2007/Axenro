@@ -32,7 +32,11 @@ const defaultMeasurements: MeasurementType[] = [
   { id: 'bodyfat', name: 'Body Fat', unit: '%', enabled: false },
 ];
 
-const BodyMeasurementsSettings = () => {
+interface Props {
+  embedded?: boolean;
+}
+
+const BodyMeasurementsSettings: React.FC<Props> = ({ embedded }) => {
   const { t } = useLanguage();
   const { measurementSystem } = useMeasurementSystem();
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
