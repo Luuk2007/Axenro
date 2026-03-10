@@ -163,6 +163,35 @@ export const settingsTranslations: Translations = {
   "Select theme": "Selecteer thema",
   "Select language": "Selecteer taal",
   
+  // Settings card grid
+  "General settings": "Algemene instellingen",
+  "Theme and language preferences": "Pas thema en kleuren van de app aan",
+  "Choose between kg/lbs and cm/inches": "Kies tussen kilogram / pounds en meters / feet",
+  "Manage custom exercises and muscles": "Pas oefening voorkeuren aan",
+  "Configure which measurements to track": "Configureer welke metingen je bijhoudt",
+  "Set default meal categories": "Stel standaard maaltijdcategorieën in",
+  "Manage tracking and analytics cookies": "Beheer tracking en analytische cookies",
+  "Manage your Axenro subscription": "Beheer je Axenro abonnement",
+  "Export or delete your data": "Exporteer of verwijder je gegevens",
+  "Account": "Account",
+  "Customize your app preferences": "Pas je app voorkeuren aan",
+  "Nutrition": "Voeding",
+  
+  // Target muscle
+  "Target muscle (heatmap)": "Doelspier (heatmap)",
+  "Select target muscle": "Selecteer doelspier",
+  "This determines which muscle is highlighted on the heatmap": "Dit bepaalt welke spier wordt gemarkeerd op de heatmap",
+  "Detected target muscle": "Gedetecteerde doelspier",
+  "No custom exercises added yet": "Nog geen aangepaste oefeningen toegevoegd",
+  
   // Misc
   "used": "gebruikt",
+  "Metric": "Metrisch",
+  "Imperial": "Imperiaal",
+  "This affects how weights and measurements are displayed throughout the app": "Dit beïnvloedt hoe gewichten en metingen worden weergegeven in de app",
+  "Essential cookies short": "Nodig voor basisfunctionaliteit",
+  "Analytics cookies short": "Voor website analyse en verbetering",
+  "Marketing cookies short": "Voor gepersonaliseerde advertenties",
+  "Last updated": "Laatst bijgewerkt",
+  "Cookie preferences saved": "Cookie voorkeuren opgeslagen",
 };
