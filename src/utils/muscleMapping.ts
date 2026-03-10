@@ -96,17 +96,24 @@ const muscleGroupToHeatmap: Record<string, string> = {
 };
 
 // Name-based fallback matching (case-insensitive)
+// IMPORTANT: More specific patterns (calves, hamstrings, glutes) MUST come before
+// generic patterns (legs, squat, leg press) to correctly classify exercises like "Leg Press Kuiten"
 const namePatterns: [RegExp, string][] = [
-  [/bench|chest|pec|fly/i, 'chest'],
-  [/shoulder|lateral raise|front raise|overhead press|military press|arnold/i, 'shoulders'],
-  [/bicep|curl|hammer curl|preacher/i, 'biceps'],
-  [/tricep|pushdown|skull crush|dip/i, 'triceps'],
-  [/squat|leg press|lunge|leg extension|quad/i, 'quads'],
-  [/hamstring|leg curl|romanian|rdl/i, 'hamstrings'],
-  [/calf|calves/i, 'calves'],
-  [/glute|hip thrust|glut/i, 'glutes'],
-  [/pull.?up|row|lat pull|deadlift|back/i, 'back'],
-  [/crunch|plank|ab|core|sit.?up/i, 'abs'],
+  // Specific muscles first (including Dutch translations)
+  [/calf|calves|kuit|kuiten/i, 'calves'],
+  [/hamstring|hamstrings|bovenbeen achter/i, 'hamstrings'],
+  [/glute|glutes|hip thrust|glut|bil|billen/i, 'glutes'],
+  [/bicep|biceps|curl|hammer curl|preacher/i, 'biceps'],
+  [/tricep|triceps|pushdown|skull crush/i, 'triceps'],
+  
+  // Then broader patterns
+  [/bench|chest|pec|fly|borst/i, 'chest'],
+  [/shoulder|lateral raise|front raise|overhead press|military press|arnold|schouder/i, 'shoulders'],
+  [/squat|leg press|lunge|leg extension|quad|been/i, 'quads'],
+  [/leg curl|romanian|rdl/i, 'hamstrings'],
+  [/dip/i, 'triceps'],
+  [/pull.?up|row|lat pull|deadlift|back|rug/i, 'back'],
+  [/crunch|plank|ab|core|sit.?up|buik/i, 'abs'],
   [/shrug/i, 'shoulders'],
 ];
 
