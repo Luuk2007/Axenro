@@ -10,7 +10,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCookieConsent } from '@/contexts/CookieContext';
 import { toast } from 'sonner';
 
-const CookieSettings = () => {
+interface Props {
+  embedded?: boolean;
+}
+
+const CookieSettings: React.FC<Props> = ({ embedded }) => {
   const { t } = useLanguage();
   const { consent, updateConsent } = useCookieConsent();
   const [isOpen, setIsOpen] = useState(false);
