@@ -12,7 +12,11 @@ import { getSubscriptionLimits, formatUsageText, canAddMore } from "@/utils/subs
 import { useCustomMeals } from "@/hooks/useCustomMeals";
 import { useDeletedMeals } from "@/hooks/useDeletedMeals";
 
-const MealsSettings = () => {
+interface Props {
+  embedded?: boolean;
+}
+
+const MealsSettings: React.FC<Props> = ({ embedded }) => {
   const { t } = useLanguage();
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading: subscriptionLoading } = useSubscription();
   const { customMeals, loading: customMealsLoading, addCustomMeal: addCustomMealHook, deleteCustomMeal } = useCustomMeals();
