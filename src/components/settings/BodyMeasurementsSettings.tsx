@@ -32,7 +32,11 @@ const defaultMeasurements: MeasurementType[] = [
   { id: 'bodyfat', name: 'Body Fat', unit: '%', enabled: false },
 ];
 
-const BodyMeasurementsSettings = () => {
+interface Props {
+  embedded?: boolean;
+}
+
+const BodyMeasurementsSettings: React.FC<Props> = ({ embedded }) => {
   const { t } = useLanguage();
   const { measurementSystem } = useMeasurementSystem();
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
@@ -132,6 +136,100 @@ const BodyMeasurementsSettings = () => {
 
   const showUpgradePrompt = !canAddMoreMeasurements && limits.customMeasurements !== -1;
 
+  const bodyContent = (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        {t("Choose which body measurements to track in your progress")}
+      </p>
+      
+      <div className="space-y-3">
+        {measurementTypes.map((measurement) => (
+          <div key={measurement.id} className="flex items-center justify-between p-3 rounded-xl border border-border">
+            <div className="flex items-center gap-3">
+              <Label htmlFor={measurement.id} className="font-medium">
+                {getDisplayName(measurement)}
+              </Label>
+              <span className="text-sm text-muted-foreground">({getDisplayUnit(measurement.unit)})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id={measurement.id}
+                checked={measurement.enabled}
+                onCheckedChange={(enabled) => handleToggleMeasurement(measurement.id, enabled)}
+              />
+              {measurement.isCustom && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  onClick={() => handleDeleteCustomMeasurement(measurement.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="pt-2">
+        {showUpgradePrompt && (
+          <div className="p-3 border border-orange-200 bg-orange-50 dark:bg-orange-950/30 dark:border-orange-800 rounded-xl mb-3">
+            <div className="flex items-center gap-2 text-orange-800 dark:text-orange-300">
+              <Crown className="h-4 w-4" />
+              <span className="text-sm font-medium">{t("Upgrade to add more custom measurements")}</span>
+            </div>
+          </div>
+        )}
+        
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="w-full rounded-xl" disabled={!canAddMoreMeasurements || loading}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t("Add Custom Measurement")}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("Add Custom Measurement")}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="measurement-name">{t("Measurement Name")}</Label>
+                <Input
+                  id="measurement-name"
+                  value={newMeasurementName}
+                  onChange={(e) => setNewMeasurementName(e.target.value)}
+                  placeholder={t("Enter measurement name")}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="measurement-unit">{t("Unit")}</Label>
+                <select
+                  id="measurement-unit"
+                  className="w-full rounded-xl border border-input bg-background px-3 py-2"
+                  value={newMeasurementUnit}
+                  onChange={(e) => setNewMeasurementUnit(e.target.value)}
+                >
+                  <option value="cm">cm</option>
+                  <option value="%">%</option>
+                  <option value="mm">mm</option>
+                  <option value="in">in</option>
+                </select>
+              </div>
+              <Button onClick={handleAddCustomMeasurement} className="w-full rounded-xl">
+                {t("add")}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+
+  if (embedded) return bodyContent;
+
   return (
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -148,104 +246,7 @@ const BodyMeasurementsSettings = () => {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="space-y-4 py-3">
-            <p className="text-sm text-muted-foreground">
-              {t("Choose which body measurements to track in your progress")}
-            </p>
-            
-            <div className="space-y-3">
-              {measurementTypes.map((measurement) => (
-                <div key={measurement.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Label htmlFor={measurement.id} className="font-medium">
-                      {getDisplayName(measurement)}
-                    </Label>
-                    <span className="text-sm text-muted-foreground">({getDisplayUnit(measurement.unit)})</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id={measurement.id}
-                      checked={measurement.enabled}
-                      onCheckedChange={(enabled) => handleToggleMeasurement(measurement.id, enabled)}
-                    />
-                    {measurement.isCustom && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => handleDeleteCustomMeasurement(measurement.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-2">
-              {showUpgradePrompt && (
-                <div className="p-3 border border-orange-200 bg-orange-50 rounded-md mb-3">
-                  <div className="flex items-center gap-2 text-orange-800">
-                    <Crown className="h-4 w-4" />
-                    <span className="text-sm font-medium">
-                      {t("Upgrade to add more custom measurements")}
-                    </span>
-                  </div>
-                  <p className="text-xs text-orange-700 mt-1">
-                    {limits.customMeasurements === 2 
-                      ? t("Pro plan: 5 custom measurements, Premium: unlimited")
-                      : t("Premium plan: unlimited custom measurements")
-                    }
-                  </p>
-                </div>
-              )}
-              
-              <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-                <DialogTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    disabled={!canAddMoreMeasurements || loading}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    {t("Add Custom Measurement")}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>{t("Add Custom Measurement")}</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="measurement-name">{t("Measurement Name")}</Label>
-                      <Input
-                        id="measurement-name"
-                        value={newMeasurementName}
-                        onChange={(e) => setNewMeasurementName(e.target.value)}
-                        placeholder={t("Enter measurement name")}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="measurement-unit">{t("Unit")}</Label>
-                      <select
-                        id="measurement-unit"
-                        className="w-full rounded-md border border-input bg-background px-3 py-2"
-                        value={newMeasurementUnit}
-                        onChange={(e) => setNewMeasurementUnit(e.target.value)}
-                      >
-                        <option value="cm">cm</option>
-                        <option value="%">%</option>
-                        <option value="mm">mm</option>
-                        <option value="in">in</option>
-                      </select>
-                    </div>
-                    <Button onClick={handleAddCustomMeasurement} className="w-full">
-                      {t("add")}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
+            {bodyContent}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

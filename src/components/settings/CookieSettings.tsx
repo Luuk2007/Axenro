@@ -10,7 +10,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCookieConsent } from '@/contexts/CookieContext';
 import { toast } from 'sonner';
 
-const CookieSettings = () => {
+interface Props {
+  embedded?: boolean;
+}
+
+const CookieSettings: React.FC<Props> = ({ embedded }) => {
   const { t } = useLanguage();
   const { consent, updateConsent } = useCookieConsent();
   const [isOpen, setIsOpen] = useState(false);
@@ -37,6 +41,66 @@ const CookieSettings = () => {
     return new Date(consent.timestamp).toLocaleDateString();
   };
 
+  const cookieContent = (
+    <div className="space-y-4">
+      <div className="text-sm text-muted-foreground">
+        <p className="mt-2">
+          <span className="font-medium">{t('Last updated')}: </span>
+          {formatConsentDate()}
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between p-3 border rounded-xl">
+          <div className="flex items-center gap-3">
+            <Shield className="h-4 w-4 text-emerald-600" />
+            <div>
+              <Label className="text-sm font-medium">{t('Essential cookies')}</Label>
+              <p className="text-xs text-muted-foreground">{t('Essential cookies short')}</p>
+            </div>
+          </div>
+          <Switch checked disabled />
+        </div>
+
+        <div className="flex items-center justify-between p-3 border rounded-xl">
+          <div className="flex items-center gap-3">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            <div>
+              <Label className="text-sm font-medium">{t('Analytics cookies')}</Label>
+              <p className="text-xs text-muted-foreground">{t('Analytics cookies short')}</p>
+            </div>
+          </div>
+          <Switch 
+            checked={localConsent.analytics}
+            onCheckedChange={(checked) => handleSwitchChange('analytics', checked)}
+          />
+        </div>
+
+        <div className="flex items-center justify-between p-3 border rounded-xl">
+          <div className="flex items-center gap-3">
+            <Target className="h-4 w-4 text-violet-600" />
+            <div>
+              <Label className="text-sm font-medium">{t('Marketing cookies')}</Label>
+              <p className="text-xs text-muted-foreground">{t('Marketing cookies short')}</p>
+            </div>
+          </div>
+          <Switch 
+            checked={localConsent.marketing}
+            onCheckedChange={(checked) => handleSwitchChange('marketing', checked)}
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end pt-2">
+        <Button onClick={handleSavePreferences} className="rounded-xl">
+          {t('Save preferences')}
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (embedded) return cookieContent;
+
   return (
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -51,61 +115,8 @@ const CookieSettings = () => {
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="space-y-4 py-3">
-            <div className="text-sm text-muted-foreground">
-              <p>{t('')}</p>
-              <p className="mt-2">
-                <span className="font-medium">{t('Last updated')}: </span>
-                {formatConsentDate()}
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Shield className="h-4 w-4 text-green-600" />
-                  <div>
-                    <Label className="text-sm font-medium">{t('Essential cookies')}</Label>
-                    <p className="text-xs text-muted-foreground">{t('Essential cookies short')}</p>
-                  </div>
-                </div>
-                <Switch checked disabled />
-              </div>
-
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <BarChart3 className="h-4 w-4 text-blue-600" />
-                  <div>
-                    <Label className="text-sm font-medium">{t('Analytics cookies')}</Label>
-                    <p className="text-xs text-muted-foreground">{t('Analytics cookies short')}</p>
-                  </div>
-                </div>
-                <Switch 
-                  checked={localConsent.analytics}
-                  onCheckedChange={(checked) => handleSwitchChange('analytics', checked)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Target className="h-4 w-4 text-purple-600" />
-                  <div>
-                    <Label className="text-sm font-medium">{t('Marketing cookies')}</Label>
-                    <p className="text-xs text-muted-foreground">{t('Marketing cookies short')}</p>
-                  </div>
-                </div>
-                <Switch 
-                  checked={localConsent.marketing}
-                  onCheckedChange={(checked) => handleSwitchChange('marketing', checked)}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <Button onClick={handleSavePreferences}>
-                {t('Save preferences')}
-              </Button>
-            </div>
+          <CardContent className="py-3">
+            {cookieContent}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
