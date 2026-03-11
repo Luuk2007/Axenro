@@ -138,8 +138,9 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
             <label className="text-sm font-medium block mb-2">{t("Workout name")}</label>
             <Input
               value={workoutName}
-              onChange={(e) => setWorkoutName(e.target.value)}
-              placeholder={t("My Cardio Session")}
+              readOnly
+              className="bg-muted/50"
+              placeholder={t("Wordt automatisch gegenereerd")}
             />
           </div>
           
