@@ -268,7 +268,7 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
             </Button>
             <Button
               onClick={handleSaveWorkout}
-              disabled={!workoutName.trim() || exercises.length === 0}
+              disabled={exercises.length === 0 || exercises.every(ex => !ex.name)}
               className="flex-1"
             >
               {editingWorkout ? t("Update workout") : t("Save workout")}
