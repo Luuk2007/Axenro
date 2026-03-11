@@ -58,8 +58,9 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
   }, [editingWorkout, measurementSystem]);
 
   const handleSaveWorkout = () => {
-    if (!workoutName.trim() || exercises.length === 0) return;
-    
+    if (exercises.length === 0) return;
+    const autoName = exercises.map(ex => ex.name).filter(Boolean);
+    const finalName = autoName.length > 0 ? [...new Set(autoName)].join('/') : 'Cardio';
     // Convert cardio exercises to the standard format
     const exercisesForStorage = exercises.map(exercise => {
       const distanceInKm = exercise.distance ? convertDistance(exercise.distance, measurementSystem, 'metric') : 0;
