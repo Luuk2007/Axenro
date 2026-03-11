@@ -84,7 +84,7 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
       };
     });
     
-    onSaveWorkout(workoutName, exercisesForStorage, workoutDate);
+    onSaveWorkout(finalName, exercisesForStorage, workoutDate);
     
     if (!editingWorkout) {
       setWorkoutName('');
