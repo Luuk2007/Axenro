@@ -58,8 +58,9 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
   }, [editingWorkout, measurementSystem]);
 
   const handleSaveWorkout = () => {
-    if (!workoutName.trim() || exercises.length === 0) return;
-    
+    if (exercises.length === 0) return;
+    const autoName = exercises.map(ex => ex.name).filter(Boolean);
+    const finalName = autoName.length > 0 ? [...new Set(autoName)].join('/') : 'Cardio';
     // Convert cardio exercises to the standard format
     const exercisesForStorage = exercises.map(exercise => {
       const distanceInKm = exercise.distance ? convertDistance(exercise.distance, measurementSystem, 'metric') : 0;
@@ -83,7 +84,7 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
       };
     });
     
-    onSaveWorkout(workoutName, exercisesForStorage, workoutDate);
+    onSaveWorkout(finalName, exercisesForStorage, workoutDate);
     
     if (!editingWorkout) {
       setWorkoutName('');
@@ -107,9 +108,17 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
   };
 
   const handleUpdateExercise = (index: number, field: string, value: any) => {
-    setExercises(prev => prev.map((exercise, i) => 
-      i === index ? { ...exercise, [field]: value } : exercise
-    ));
+    setExercises(prev => {
+      const updated = prev.map((exercise, i) => 
+        i === index ? { ...exercise, [field]: value } : exercise
+      );
+      // Auto-generate workout name from exercise names
+      const names = updated.map(ex => ex.name).filter(Boolean);
+      if (names.length > 0) {
+        setWorkoutName([...new Set(names)].join('/'));
+      }
+      return updated;
+    });
   };
 
   return (
@@ -129,8 +138,9 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
             <label className="text-sm font-medium block mb-2">{t("Workout name")}</label>
             <Input
               value={workoutName}
-              onChange={(e) => setWorkoutName(e.target.value)}
-              placeholder={t("My Cardio Session")}
+              readOnly
+              className="bg-muted/50"
+              placeholder={t("Wordt automatisch gegenereerd")}
             />
           </div>
           
@@ -258,7 +268,7 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
             </Button>
             <Button
               onClick={handleSaveWorkout}
-              disabled={!workoutName.trim() || exercises.length === 0}
+              disabled={exercises.length === 0 || exercises.every(ex => !ex.name)}
               className="flex-1"
             >
               {editingWorkout ? t("Update workout") : t("Save workout")}
