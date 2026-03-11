@@ -71,6 +71,22 @@ export const getWorkoutTitleFromExercises = (exercises: WorkoutExerciseLike[]): 
   const groups = getWorkoutMuscleGroupsFromExercises(exercises);
   if (groups.length === 0) return "Workout";
 
+  // If all exercises are cardio, use the specific exercise names instead of "Cardio"
+  const allCardio = exercises.every((ex) => {
+    const group = normalizeMuscleGroup(ex?.muscleGroup) ?? 
+      (ex?.name ? findMuscleGroupByExerciseName(ex.name) : null);
+    return group === "cardio";
+  });
+
+  if (allCardio) {
+    const uniqueNames = [...new Set(
+      exercises
+        .map((ex) => ex?.name?.trim())
+        .filter(Boolean)
+    )];
+    if (uniqueNames.length > 0) return uniqueNames.join("/");
+  }
+
   return groups
     .map((g) => GROUP_LABELS.get(g) ?? g.charAt(0).toUpperCase() + g.slice(1))
     .join("/");

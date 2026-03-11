@@ -107,9 +107,17 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
   };
 
   const handleUpdateExercise = (index: number, field: string, value: any) => {
-    setExercises(prev => prev.map((exercise, i) => 
-      i === index ? { ...exercise, [field]: value } : exercise
-    ));
+    setExercises(prev => {
+      const updated = prev.map((exercise, i) => 
+        i === index ? { ...exercise, [field]: value } : exercise
+      );
+      // Auto-generate workout name from exercise names
+      const names = updated.map(ex => ex.name).filter(Boolean);
+      if (names.length > 0) {
+        setWorkoutName([...new Set(names)].join('/'));
+      }
+      return updated;
+    });
   };
 
   return (
