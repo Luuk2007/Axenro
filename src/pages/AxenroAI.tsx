@@ -51,7 +51,7 @@ export default function AxenroAI() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [streamingResponse, setStreamingResponse] = useState('');
   const [questionsUsedToday, setQuestionsUsedToday] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -122,11 +122,7 @@ export default function AxenroAI() {
 
       setConversations(Array.from(convMap.values()));
       
-      // Auto-select first conversation if none active
-      if (!activeConversationId && convMap.size > 0) {
-        const firstKey = Array.from(convMap.keys())[0];
-        setActiveConversationId(firstKey);
-      }
+      // Don't auto-select - start with empty chat
     } catch (error) {
       console.error('Error loading conversations:', error);
     }
@@ -319,7 +315,7 @@ export default function AxenroAI() {
             <span className="font-medium">
               {questionLimit === -1
                 ? `${questionsUsedToday} vragen vandaag`
-                : `${questionsUsedToday}/${questionLimit} vragen`}
+                : `${questionLimit - questionsUsedToday} van ${questionLimit} over`}
             </span>
           </div>
         </div>

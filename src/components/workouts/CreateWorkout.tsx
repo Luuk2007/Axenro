@@ -4,13 +4,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, X, Trash2, Dumbbell, ChevronUp, ChevronDown, GripVertical, CheckCircle2, Circle, Flag } from 'lucide-react';
+import { Plus, X, Trash2, Dumbbell, ChevronUp, ChevronDown, GripVertical, CheckCircle2, Circle, Flag, Trophy } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AddExerciseDialog from './AddExerciseDialog';
 import { Workout, Exercise, ExerciseSet } from '@/types/workout';
 import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
 import { convertWeight, getWeightUnit } from '@/utils/unitConversions';
 import { getWorkoutTitleFromExercises } from '@/utils/workoutNaming';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CreateWorkoutProps {
   open: boolean;
@@ -21,12 +23,14 @@ interface CreateWorkoutProps {
 
 const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: CreateWorkoutProps) => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const { measurementSystem } = useMeasurementSystem();
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
-  // Raw string state for input fields to support intermediate values like "12."
   const [rawInputs, setRawInputs] = useState<Record<string, string>>({});
+  // Personal records lookup: exerciseName -> best weight in kg
+  const [personalRecords, setPersonalRecords] = useState<Record<string, number>>({});
 
   // Auto-generate workout name based on muscle groups (with fallback lookup for older workouts)
   const generatedWorkoutName = useMemo(() => {
@@ -55,14 +59,61 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }));
   };
 
+  // Fetch personal records for all exercises when dialog opens
+  useEffect(() => {
+    if (!open || !user) return;
+    const fetchPRs = async () => {
+      const { data } = await supabase
+        .from('personal_records')
+        .select('exercise_name, weight')
+        .eq('user_id', user.id);
+      if (data) {
+        const prMap: Record<string, number> = {};
+        data.forEach((pr: any) => {
+          const name = pr.exercise_name.toLowerCase();
+          if (!prMap[name] || pr.weight > prMap[name]) {
+            prMap[name] = pr.weight;
+          }
+        });
+        // Also check workout history for max weights
+        const { data: workouts } = await supabase
+          .from('workouts')
+          .select('exercises')
+          .eq('user_id', user.id);
+        if (workouts) {
+          workouts.forEach((w: any) => {
+            if (!Array.isArray(w.exercises)) return;
+            w.exercises.forEach((ex: any) => {
+              if (!ex.name || !ex.sets) return;
+              const name = ex.name.toLowerCase();
+              ex.sets.forEach((s: any) => {
+                if (s.weight && (!prMap[name] || s.weight > prMap[name])) {
+                  prMap[name] = s.weight;
+                }
+              });
+            });
+          });
+        }
+        setPersonalRecords(prMap);
+      }
+    };
+    fetchPRs();
+  }, [open, user]);
+
+  // Check if a set weight is a new PR (compare in metric/kg)
+  const isNewPR = (exerciseName: string, displayWeight: number): boolean => {
+    if (!exerciseName || displayWeight <= 0) return false;
+    const weightInKg = convertWeight(displayWeight, measurementSystem, 'metric');
+    const currentBest = personalRecords[exerciseName.toLowerCase()] || 0;
+    return weightInKg > currentBest;
+  };
+
   // Load editing workout data when editingWorkout changes
   useEffect(() => {
     if (editingWorkout) {
       setWorkoutDate(editingWorkout.date);
-      // Convert weights for display
       setExercises(convertExercisesForDisplay(editingWorkout.exercises));
     } else {
-      // Reset form when not editing
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
     }
@@ -313,8 +364,10 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                         </div>
                         
                         <div className="space-y-2">
-                          {exercise.sets.map((set, index) => (
-                            <div key={set.id} className="flex items-center gap-2 text-sm">
+                          {exercise.sets.map((set, index) => {
+                            const prDetected = exercise.muscleGroup !== 'calisthenics' && isNewPR(exercise.name, set.weight);
+                            return (
+                            <div key={set.id} className={`flex items-center gap-2 text-sm ${prDetected ? 'bg-amber-500/10 rounded-lg px-1 py-0.5 border border-amber-500/30' : ''}`}>
                               <span className="w-10 text-muted-foreground flex-shrink-0">{t("Set")} {index + 1}</span>
                               <div className="flex items-center gap-1">
                                 <Input
@@ -332,10 +385,13 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                     type="number"
                                     value={getInputValue(exercise.id, set.id, 'weight', set.weight)}
                                     onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
-                                    className="w-full min-w-[60px] h-8 px-2"
+                                    className={`w-full min-w-[60px] h-8 px-2 ${prDetected ? 'border-amber-500/50' : ''}`}
                                     placeholder="Weight"
                                   />
                                   <span className="text-xs text-muted-foreground flex-shrink-0">{getWeightUnit(measurementSystem)}</span>
+                                  {prDetected && (
+                                    <Trophy className="h-4 w-4 text-amber-500 flex-shrink-0 animate-pulse" />
+                                  )}
                                 </div>
                               )}
                               <Button
@@ -348,7 +404,8 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                 <X className="h-3 w-3" />
                               </Button>
                             </div>
-                          ))}
+                            );
+                          })}
                           
                           <Button
                             variant="outline"

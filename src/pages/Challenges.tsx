@@ -3,16 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChallenges, Challenge } from '@/hooks/useChallenges';
-import { Trophy, Flame, Zap, Target, Clock, CheckCircle2, Play, X, Award, Star, ChevronRight, Loader2 } from 'lucide-react';
+import { Trophy, Flame, Zap, Target, Clock, CheckCircle2, Play, X, Award, Star, ChevronRight, Loader2, Calendar, MessageSquare, TrendingUp } from 'lucide-react';
 import { LoginPrompt } from '@/components/auth/LoginPrompt';
 
 const difficultyConfig = {
-  easy: { label: 'Easy', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: Zap },
-  medium: { label: 'Medium', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', icon: Flame },
-  hard: { label: 'Hard', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20', icon: Target },
+  easy: { label: 'Makkelijk', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: Zap },
+  medium: { label: 'Gemiddeld', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', icon: Flame },
+  hard: { label: 'Moeilijk', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20', icon: Target },
 };
 
 const categoryIcons: Record<string, string> = {
@@ -21,6 +24,11 @@ const categoryIcons: Record<string, string> = {
   legs: '🦵',
   core: '🔥',
   flexibility: '🧘',
+  cardio: '❤️',
+  upper_body: '💪',
+  full_body: '🏋️',
+  endurance: '🏃‍♂️',
+  mobility: '🤸',
 };
 
 const Challenges: React.FC = () => {
@@ -28,80 +36,113 @@ const Challenges: React.FC = () => {
   const { user } = useAuth();
   const { challenges, userChallenges, challengeProgress, badges, loading, joinChallenge, logDay, abandonChallenge } = useChallenges();
   const [selectedTab, setSelectedTab] = useState<'discover' | 'active' | 'badges'>('discover');
+  const [logModalOpen, setLogModalOpen] = useState(false);
+  const [logTarget, setLogTarget] = useState<{ ucId: string; dayNumber: number; challengeTitle: string } | null>(null);
+  const [logNotes, setLogNotes] = useState('');
+  const [logMood, setLogMood] = useState<string>('good');
+  const [logDifficulty, setLogDifficulty] = useState<string>('medium');
 
   if (!user) return <LoginPrompt />;
 
   const activeChallenges = userChallenges.filter(uc => uc.status === 'active');
   const completedChallenges = userChallenges.filter(uc => uc.status === 'completed');
-  const joinedIds = userChallenges.map(uc => uc.challenge_id);
+  // Only show as joined if status is 'active'
+  const activeJoinedIds = activeChallenges.map(uc => uc.challenge_id);
 
   const getChallenge = (id: string) => challenges.find(c => c.id === id);
 
   const tabs = [
-    { key: 'discover' as const, label: t('Discover') || 'Discover', icon: Zap, count: challenges.length },
-    { key: 'active' as const, label: t('Active') || 'Active', icon: Flame, count: activeChallenges.length },
-    { key: 'badges' as const, label: t('Badges') || 'Badges', icon: Trophy, count: badges.length },
+    { key: 'discover' as const, label: 'Ontdekken', icon: Zap, count: challenges.length },
+    { key: 'active' as const, label: 'Actief', icon: Flame, count: activeChallenges.length },
+    { key: 'badges' as const, label: 'Badges', icon: Trophy, count: badges.length },
+  ];
+
+  const openLogModal = (ucId: string, dayNumber: number, challengeTitle: string) => {
+    setLogTarget({ ucId, dayNumber, challengeTitle });
+    setLogNotes('');
+    setLogMood('good');
+    setLogDifficulty('medium');
+    setLogModalOpen(true);
+  };
+
+  const handleLogSubmit = async () => {
+    if (!logTarget) return;
+    const notes = [
+      logNotes,
+      `Gevoel: ${logMood}`,
+      `Moeilijkheid: ${logDifficulty}`,
+    ].filter(Boolean).join(' | ');
+    await logDay(logTarget.ucId, logTarget.dayNumber, notes);
+    setLogModalOpen(false);
+    setLogTarget(null);
+  };
+
+  const moodOptions = [
+    { value: 'great', label: '🔥 Geweldig', desc: 'Vol energie' },
+    { value: 'good', label: '💪 Goed', desc: 'Lekker gedaan' },
+    { value: 'okay', label: '😐 Oké', desc: 'Kon beter' },
+    { value: 'tough', label: '😤 Zwaar', desc: 'Moeilijke dag' },
+  ];
+
+  const diffOptions = [
+    { value: 'easy', label: 'Makkelijk' },
+    { value: 'medium', label: 'Gemiddeld' },
+    { value: 'hard', label: 'Zwaar' },
   ];
 
   return (
-    <div className="min-h-screen pb-24 md:pb-8">
-      {/* Hero */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl mx-2 md:mx-0 mb-6 p-6 md:p-8"
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-orange-500/10 to-red-500/20 rounded-2xl" />
-        <div className="absolute inset-0 bg-card/60 backdrop-blur-sm rounded-2xl border border-border/50" />
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25">
-              <Trophy className="h-6 w-6 text-white" />
+    <div className="space-y-6 animate-fade-in pb-24 md:pb-8">
+      {/* Header - consistent with other pages */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">
+            {t('Challenges') || 'Challenges'}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {t('challengesDesc') || 'Verleg je grenzen met dagelijkse challenges'}
+          </p>
+        </div>
+      </div>
+
+      {/* Stats cards */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="border-border/50">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <CheckCircle2 className="h-5 w-5 text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                {t('Challenges') || 'Challenges'}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {t('challengesDesc') || 'Push your limits with daily challenges'}
-              </p>
+              <p className="text-xl font-bold text-foreground">{completedChallenges.length}</p>
+              <p className="text-xs text-muted-foreground">Voltooid</p>
             </div>
-          </div>
-          {/* Stats row */}
-          <div className="flex gap-4 mt-4">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-lg font-bold text-foreground">{completedChallenges.length}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('Completed') || 'Completed'}</p>
-              </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+              <Flame className="h-5 w-5 text-amber-400" />
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                <Flame className="h-4 w-4 text-amber-400" />
-              </div>
-              <div>
-                <p className="text-lg font-bold text-foreground">{activeChallenges.length}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('Active') || 'Active'}</p>
-              </div>
+            <div>
+              <p className="text-xl font-bold text-foreground">{activeChallenges.length}</p>
+              <p className="text-xs text-muted-foreground">Actief</p>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                <Award className="h-4 w-4 text-violet-400" />
-              </div>
-              <div>
-                <p className="text-lg font-bold text-foreground">{badges.length}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('Badges') || 'Badges'}</p>
-              </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
+              <Award className="h-5 w-5 text-violet-400" />
             </div>
-          </div>
-        </div>
-      </motion.div>
+            <div>
+              <p className="text-xl font-bold text-foreground">{badges.length}</p>
+              <p className="text-xs text-muted-foreground">Badges</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Tab Switcher */}
-      <div className="flex gap-1.5 mx-2 md:mx-0 mb-5 p-1 rounded-xl bg-muted/50 border border-border/50">
+      <div className="flex gap-1.5 p-1 rounded-xl bg-muted/50 border border-border/50">
         {tabs.map(tab => (
           <button
             key={tab.key}
@@ -137,12 +178,12 @@ const Challenges: React.FC = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="grid gap-3 mx-2 md:mx-0"
+              className="grid gap-3"
             >
               {challenges.map((challenge, i) => {
                 const diff = difficultyConfig[challenge.difficulty_level];
                 const DiffIcon = diff.icon;
-                const isJoined = joinedIds.includes(challenge.id);
+                const isJoined = activeJoinedIds.includes(challenge.id);
                 const emoji = categoryIcons[challenge.category] || '🏋️';
 
                 return (
@@ -161,14 +202,18 @@ const Challenges: React.FC = () => {
                               <h3 className="font-semibold text-foreground truncate">{challenge.title}</h3>
                             </div>
                             <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{challenge.description}</p>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 flex-wrap">
                               <Badge variant="outline" className={`${diff.bg} ${diff.color} border text-xs`}>
                                 <DiffIcon className="h-3 w-3 mr-1" />
                                 {diff.label}
                               </Badge>
                               <span className="text-xs text-muted-foreground flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {challenge.duration_days} {t('days') || 'days'}
+                                {challenge.duration_days} dagen
+                              </span>
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <TrendingUp className="h-3 w-3" />
+                                🥇 {challenge.badge_gold_threshold}%
                               </span>
                             </div>
                           </div>
@@ -176,7 +221,7 @@ const Challenges: React.FC = () => {
                             {isJoined ? (
                               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
-                                {t('Joined') || 'Joined'}
+                                Actief
                               </Badge>
                             ) : (
                               <Button
@@ -185,7 +230,7 @@ const Challenges: React.FC = () => {
                                 className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg shadow-amber-500/25"
                               >
                                 <Play className="h-3.5 w-3.5 mr-1" />
-                                {t('Join') || 'Join'}
+                                Start
                               </Button>
                             )}
                           </div>
@@ -204,7 +249,7 @@ const Challenges: React.FC = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="grid gap-3 mx-2 md:mx-0"
+              className="grid gap-3"
             >
               {activeChallenges.length === 0 ? (
                 <Card className="border-border/50">
@@ -212,13 +257,13 @@ const Challenges: React.FC = () => {
                     <div className="mx-auto w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
                       <Target className="h-8 w-8 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground mb-1">{t('No active challenges') || 'No active challenges'}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">{t('Join a challenge to get started!') || 'Join a challenge to get started!'}</p>
+                    <h3 className="font-semibold text-foreground mb-1">Geen actieve challenges</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Doe mee aan een challenge om te beginnen!</p>
                     <Button
                       variant="outline"
                       onClick={() => setSelectedTab('discover')}
                     >
-                      {t('Discover Challenges') || 'Discover Challenges'}
+                      Ontdek Challenges
                       <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </CardContent>
@@ -236,6 +281,17 @@ const Challenges: React.FC = () => {
                     const now = new Date();
                     return d.toDateString() === now.toDateString();
                   });
+                  const emoji = categoryIcons[challenge.category] || '🏋️';
+                  const diff = difficultyConfig[challenge.difficulty_level];
+
+                  // Calculate streak
+                  let streak = 0;
+                  const sortedProgress = [...progress].sort((a, b) => b.day_number - a.day_number);
+                  for (let d = 0; d < sortedProgress.length; d++) {
+                    if (sortedProgress[d].day_number === completedDays - d) {
+                      streak++;
+                    } else break;
+                  }
 
                   return (
                     <motion.div
@@ -247,11 +303,21 @@ const Challenges: React.FC = () => {
                       <Card className="overflow-hidden border-border/50">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-3">
-                            <div>
-                              <h3 className="font-semibold text-foreground">{challenge.title}</h3>
-                              <p className="text-xs text-muted-foreground">
-                                {t('Day') || 'Day'} {completedDays} / {challenge.duration_days}
-                              </p>
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{emoji}</span>
+                              <div>
+                                <h3 className="font-semibold text-foreground">{challenge.title}</h3>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-xs text-muted-foreground">
+                                    Dag {completedDays} / {challenge.duration_days}
+                                  </span>
+                                  {streak > 1 && (
+                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-amber-500/10 text-amber-400 border-amber-500/20">
+                                      🔥 {streak} streak
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                             <Button
                               variant="ghost"
@@ -274,6 +340,13 @@ const Challenges: React.FC = () => {
                             <div className="absolute inset-0 flex items-center justify-center">
                               <span className="text-[9px] font-bold text-foreground drop-shadow-sm">{pct}%</span>
                             </div>
+                          </div>
+
+                          {/* Badge thresholds */}
+                          <div className="flex items-center gap-2 mb-3 text-[10px] text-muted-foreground">
+                            <span>🥉 {challenge.badge_bronze_threshold}%</span>
+                            <span>🥈 {challenge.badge_silver_threshold}%</span>
+                            <span>🥇 {challenge.badge_gold_threshold}%</span>
                           </div>
 
                           {/* Day grid */}
@@ -302,16 +375,16 @@ const Challenges: React.FC = () => {
                           {!todayLogged && completedDays < challenge.duration_days && (
                             <Button
                               className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
-                              onClick={() => logDay(uc.id, nextDay)}
+                              onClick={() => openLogModal(uc.id, nextDay, challenge.title)}
                             >
                               <CheckCircle2 className="h-4 w-4 mr-2" />
-                              {t('Log Day') || 'Log Day'} {nextDay}
+                              Dag {nextDay} loggen
                             </Button>
                           )}
                           {todayLogged && (
-                            <div className="text-center text-sm text-emerald-400 font-medium flex items-center justify-center gap-2">
+                            <div className="text-center text-sm text-emerald-400 font-medium flex items-center justify-center gap-2 py-2">
                               <CheckCircle2 className="h-4 w-4" />
-                              {t('Today completed!') || 'Today completed!'}
+                              Vandaag voltooid! 🎉
                             </div>
                           )}
                         </CardContent>
@@ -329,7 +402,6 @@ const Challenges: React.FC = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="mx-2 md:mx-0"
             >
               {badges.length === 0 ? (
                 <Card className="border-border/50">
@@ -337,8 +409,8 @@ const Challenges: React.FC = () => {
                     <div className="mx-auto w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
                       <Award className="h-8 w-8 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground mb-1">{t('No badges yet') || 'No badges yet'}</h3>
-                    <p className="text-sm text-muted-foreground">{t('Complete challenges to earn badges!') || 'Complete challenges to earn badges!'}</p>
+                    <h3 className="font-semibold text-foreground mb-1">Nog geen badges</h3>
+                    <p className="text-sm text-muted-foreground">Voltooi challenges om badges te verdienen!</p>
                   </CardContent>
                 </Card>
               ) : (
@@ -381,6 +453,88 @@ const Challenges: React.FC = () => {
           )}
         </AnimatePresence>
       )}
+
+      {/* Log Day Modal */}
+      <Dialog open={logModalOpen} onOpenChange={setLogModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-amber-500" />
+              Dag {logTarget?.dayNumber} loggen
+            </DialogTitle>
+            <DialogDescription>
+              {logTarget?.challengeTitle}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 pt-2">
+            {/* Mood selection */}
+            <div>
+              <label className="text-sm font-medium block mb-2">Hoe voelde je je?</label>
+              <div className="grid grid-cols-2 gap-2">
+                {moodOptions.map(mood => (
+                  <button
+                    key={mood.value}
+                    onClick={() => setLogMood(mood.value)}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      logMood === mood.value
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-border/80 hover:bg-muted/50'
+                    }`}
+                  >
+                    <span className="text-sm font-medium">{mood.label}</span>
+                    <p className="text-xs text-muted-foreground mt-0.5">{mood.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Difficulty */}
+            <div>
+              <label className="text-sm font-medium block mb-2">Moeilijkheidsgraad</label>
+              <div className="flex gap-2">
+                {diffOptions.map(d => (
+                  <button
+                    key={d.value}
+                    onClick={() => setLogDifficulty(d.value)}
+                    className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all ${
+                      logDifficulty === d.value
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-border text-muted-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="text-sm font-medium block mb-2">Notities (optioneel)</label>
+              <Textarea
+                value={logNotes}
+                onChange={(e) => setLogNotes(e.target.value)}
+                placeholder="Hoe ging het vandaag? Wat heb je gedaan?"
+                className="min-h-[80px] resize-none"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" onClick={() => setLogModalOpen(false)} className="flex-1">
+                Annuleren
+              </Button>
+              <Button 
+                onClick={handleLogSubmit}
+                className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Dag loggen
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
