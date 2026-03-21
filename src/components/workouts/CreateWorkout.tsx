@@ -4,13 +4,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, X, Trash2, Dumbbell, ChevronUp, ChevronDown, GripVertical, CheckCircle2, Circle, Flag } from 'lucide-react';
+import { Plus, X, Trash2, Dumbbell, ChevronUp, ChevronDown, GripVertical, CheckCircle2, Circle, Flag, Trophy } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AddExerciseDialog from './AddExerciseDialog';
 import { Workout, Exercise, ExerciseSet } from '@/types/workout';
 import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
 import { convertWeight, getWeightUnit } from '@/utils/unitConversions';
 import { getWorkoutTitleFromExercises } from '@/utils/workoutNaming';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CreateWorkoutProps {
   open: boolean;
