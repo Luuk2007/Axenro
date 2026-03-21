@@ -364,8 +364,10 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                         </div>
                         
                         <div className="space-y-2">
-                          {exercise.sets.map((set, index) => (
-                            <div key={set.id} className="flex items-center gap-2 text-sm">
+                          {exercise.sets.map((set, index) => {
+                            const prDetected = exercise.muscleGroup !== 'calisthenics' && isNewPR(exercise.name, set.weight);
+                            return (
+                            <div key={set.id} className={`flex items-center gap-2 text-sm ${prDetected ? 'bg-amber-500/10 rounded-lg px-1 py-0.5 border border-amber-500/30' : ''}`}>
                               <span className="w-10 text-muted-foreground flex-shrink-0">{t("Set")} {index + 1}</span>
                               <div className="flex items-center gap-1">
                                 <Input
@@ -383,10 +385,13 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                     type="number"
                                     value={getInputValue(exercise.id, set.id, 'weight', set.weight)}
                                     onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
-                                    className="w-full min-w-[60px] h-8 px-2"
+                                    className={`w-full min-w-[60px] h-8 px-2 ${prDetected ? 'border-amber-500/50' : ''}`}
                                     placeholder="Weight"
                                   />
                                   <span className="text-xs text-muted-foreground flex-shrink-0">{getWeightUnit(measurementSystem)}</span>
+                                  {prDetected && (
+                                    <Trophy className="h-4 w-4 text-amber-500 flex-shrink-0 animate-pulse" />
+                                  )}
                                 </div>
                               )}
                               <Button
@@ -399,7 +404,8 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                 <X className="h-3 w-3" />
                               </Button>
                             </div>
-                          ))}
+                            );
+                          })}
                           
                           <Button
                             variant="outline"
