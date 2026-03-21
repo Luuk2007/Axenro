@@ -122,11 +122,7 @@ export default function AxenroAI() {
 
       setConversations(Array.from(convMap.values()));
       
-      // Auto-select first conversation if none active
-      if (!activeConversationId && convMap.size > 0) {
-        const firstKey = Array.from(convMap.keys())[0];
-        setActiveConversationId(firstKey);
-      }
+      // Don't auto-select - start with empty chat
     } catch (error) {
       console.error('Error loading conversations:', error);
     }
