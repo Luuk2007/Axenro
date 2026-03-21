@@ -23,12 +23,14 @@ interface CreateWorkoutProps {
 
 const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: CreateWorkoutProps) => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const { measurementSystem } = useMeasurementSystem();
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
-  // Raw string state for input fields to support intermediate values like "12."
   const [rawInputs, setRawInputs] = useState<Record<string, string>>({});
+  // Personal records lookup: exerciseName -> best weight in kg
+  const [personalRecords, setPersonalRecords] = useState<Record<string, number>>({});
 
   // Auto-generate workout name based on muscle groups (with fallback lookup for older workouts)
   const generatedWorkoutName = useMemo(() => {
