@@ -319,7 +319,7 @@ export default function AxenroAI() {
             <span className="font-medium">
               {questionLimit === -1
                 ? `${questionsUsedToday} vragen vandaag`
-                : `${questionsUsedToday}/${questionLimit} vragen`}
+                : `${questionLimit - questionsUsedToday} van ${questionLimit} over`}
             </span>
           </div>
         </div>
