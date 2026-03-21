@@ -38,47 +38,47 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
   const [workoutName, setWorkoutName] = useState('');
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
   const [exercises, setExercises] = useState<any[]>([]);
+  // Raw string inputs for decimal support
+  const [rawInputs, setRawInputs] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (editingWorkout) {
       setWorkoutName(editingWorkout.name);
       setWorkoutDate(editingWorkout.date);
-      // Convert cardio exercises back to display format
       setExercises(editingWorkout.exercises.map(ex => ({
         id: ex.id,
         name: ex.name,
-        duration: ex.sets[0]?.reps || 0, // Duration stored in reps
-        distance: ex.sets[0]?.weight ? convertDistance(ex.sets[0].weight, 'metric', measurementSystem) : 0 // Distance stored in weight
+        duration: ex.sets[0]?.reps || 0,
+        distance: ex.sets[0]?.weight ? convertDistance(ex.sets[0].weight, 'metric', measurementSystem) : 0
       })));
     } else {
       setWorkoutName('');
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
     }
+    setRawInputs({});
   }, [editingWorkout, measurementSystem]);
 
   const handleSaveWorkout = () => {
     if (exercises.length === 0) return;
     const autoName = exercises.map(ex => ex.name).filter(Boolean);
     const finalName = autoName.length > 0 ? [...new Set(autoName)].join('/') : 'Cardio';
-    // Convert cardio exercises to the standard format
     const exercisesForStorage = exercises.map(exercise => {
       const distanceInKm = exercise.distance ? convertDistance(exercise.distance, measurementSystem, 'metric') : 0;
       const durationInMinutes = exercise.duration / 60;
-      // Calculate pace: minutes per km (only if distance > 0)
       const pace = distanceInKm > 0 ? durationInMinutes / distanceInKm : 0;
       
       return {
         id: exercise.id,
         name: exercise.name,
-        muscleGroup: 'cardio', // Mark as cardio exercise
+        muscleGroup: 'cardio',
         sets: [
           {
             id: 1,
-            reps: exercise.duration, // Store duration as reps
-            weight: distanceInKm, // Store distance as weight (in km)
+            reps: exercise.duration,
+            weight: distanceInKm,
             completed: true,
-            pace: pace // Store calculated pace
+            pace: pace
           }
         ]
       };
@@ -90,6 +90,7 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
       setWorkoutName('');
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
+      setRawInputs({});
     }
   };
 
@@ -97,7 +98,7 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
     const newExercise = {
       id: Date.now().toString(),
       name: '',
-      duration: 1800, // Default 30 minutes (in seconds)
+      duration: 1800,
       distance: 0
     };
     setExercises(prev => [...prev, newExercise]);
@@ -112,13 +113,38 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
       const updated = prev.map((exercise, i) => 
         i === index ? { ...exercise, [field]: value } : exercise
       );
-      // Auto-generate workout name from exercise names
       const names = updated.map(ex => ex.name).filter(Boolean);
       if (names.length > 0) {
         setWorkoutName([...new Set(names)].join('/'));
       }
       return updated;
     });
+  };
+
+  const getRawKey = (index: number, field: string) => `${index}-${field}`;
+
+  const handleNumericInput = (index: number, field: string, rawValue: string) => {
+    const key = getRawKey(index, field);
+    // Store raw string for display
+    setRawInputs(prev => ({ ...prev, [key]: rawValue }));
+
+    if (rawValue === '' || rawValue === '.' || rawValue.endsWith('.')) {
+      if (rawValue === '') {
+        handleUpdateExercise(index, field, 0);
+      }
+      return;
+    }
+
+    const numValue = parseFloat(rawValue);
+    if (!isNaN(numValue)) {
+      handleUpdateExercise(index, field, numValue);
+    }
+  };
+
+  const getInputValue = (index: number, field: string, numericValue: number) => {
+    const key = getRawKey(index, field);
+    if (key in rawInputs) return rawInputs[key];
+    return numericValue?.toString() || '';
   };
 
   return (
@@ -211,8 +237,10 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
                             <label className="text-xs font-medium block mb-1">{t("Duration")} (min)</label>
                             <Input
                               type="number"
-                              value={Math.floor((exercise.duration || 0) / 60).toString()}
+                              value={getInputValue(index, 'durationMin', Math.floor((exercise.duration || 0) / 60))}
                               onChange={(e) => {
+                                const key = getRawKey(index, 'durationMin');
+                                setRawInputs(prev => ({ ...prev, [key]: e.target.value }));
                                 const mins = parseInt(e.target.value) || 0;
                                 const secs = (exercise.duration || 0) % 60;
                                 handleUpdateExercise(index, 'duration', mins * 60 + secs);
@@ -226,8 +254,10 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
                             <label className="text-xs font-medium block mb-1">{t("Duration")} (sec)</label>
                             <Input
                               type="number"
-                              value={((exercise.duration || 0) % 60).toString()}
+                              value={getInputValue(index, 'durationSec', (exercise.duration || 0) % 60)}
                               onChange={(e) => {
+                                const key = getRawKey(index, 'durationSec');
+                                setRawInputs(prev => ({ ...prev, [key]: e.target.value }));
                                 const mins = Math.floor((exercise.duration || 0) / 60);
                                 const secs = parseInt(e.target.value) || 0;
                                 handleUpdateExercise(index, 'duration', mins * 60 + secs);
@@ -243,9 +273,9 @@ const CreateCardioWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout
                           <label className="text-xs font-medium block mb-1">{t("Distance")} ({getDistanceUnit(measurementSystem)})</label>
                           <Input
                             type="number"
-                            step="0.1"
-                            value={exercise.distance?.toString() || ''}
-                            onChange={(e) => handleUpdateExercise(index, 'distance', parseFloat(e.target.value) || 0)}
+                            step="0.01"
+                            value={getInputValue(index, 'distance', exercise.distance)}
+                            onChange={(e) => handleNumericInput(index, 'distance', e.target.value)}
                             className="h-8"
                             placeholder="5.0"
                           />
