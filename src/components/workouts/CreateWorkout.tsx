@@ -59,14 +59,61 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }));
   };
 
+  // Fetch personal records for all exercises when dialog opens
+  useEffect(() => {
+    if (!open || !user) return;
+    const fetchPRs = async () => {
+      const { data } = await supabase
+        .from('personal_records')
+        .select('exercise_name, weight')
+        .eq('user_id', user.id);
+      if (data) {
+        const prMap: Record<string, number> = {};
+        data.forEach((pr: any) => {
+          const name = pr.exercise_name.toLowerCase();
+          if (!prMap[name] || pr.weight > prMap[name]) {
+            prMap[name] = pr.weight;
+          }
+        });
+        // Also check workout history for max weights
+        const { data: workouts } = await supabase
+          .from('workouts')
+          .select('exercises')
+          .eq('user_id', user.id);
+        if (workouts) {
+          workouts.forEach((w: any) => {
+            if (!Array.isArray(w.exercises)) return;
+            w.exercises.forEach((ex: any) => {
+              if (!ex.name || !ex.sets) return;
+              const name = ex.name.toLowerCase();
+              ex.sets.forEach((s: any) => {
+                if (s.weight && (!prMap[name] || s.weight > prMap[name])) {
+                  prMap[name] = s.weight;
+                }
+              });
+            });
+          });
+        }
+        setPersonalRecords(prMap);
+      }
+    };
+    fetchPRs();
+  }, [open, user]);
+
+  // Check if a set weight is a new PR (compare in metric/kg)
+  const isNewPR = (exerciseName: string, displayWeight: number): boolean => {
+    if (!exerciseName || displayWeight <= 0) return false;
+    const weightInKg = convertWeight(displayWeight, measurementSystem, 'metric');
+    const currentBest = personalRecords[exerciseName.toLowerCase()] || 0;
+    return weightInKg > currentBest;
+  };
+
   // Load editing workout data when editingWorkout changes
   useEffect(() => {
     if (editingWorkout) {
       setWorkoutDate(editingWorkout.date);
-      // Convert weights for display
       setExercises(convertExercisesForDisplay(editingWorkout.exercises));
     } else {
-      // Reset form when not editing
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
     }
