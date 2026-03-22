@@ -142,21 +142,21 @@ const Challenges: React.FC = () => {
       </div>
 
       {/* Tab Switcher */}
-      <div className="flex gap-1.5 p-1 rounded-xl bg-muted/50 border border-border/50">
+      <div className="flex gap-1 p-1 rounded-xl bg-muted/50 border border-border/50 overflow-x-auto">
         {tabs.map(tab => (
           <button
             key={tab.key}
             onClick={() => setSelectedTab(tab.key)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
               selectedTab === tab.key
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <tab.icon className="h-4 w-4" />
+            <tab.icon className="h-3.5 w-3.5 flex-shrink-0" />
             <span>{tab.label}</span>
             {tab.count > 0 && (
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                 selectedTab === tab.key ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
               }`}>
                 {tab.count}
