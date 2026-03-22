@@ -194,42 +194,35 @@ const Challenges: React.FC = () => {
                     transition={{ delay: i * 0.05 }}
                   >
                     <Card className="overflow-hidden border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg">
-                      <CardContent className="p-4">
+                      <CardContent className="p-3 sm:p-4">
                         <div className="flex items-start gap-3">
-                          <div className="text-3xl">{emoji}</div>
+                          <div className="text-2xl flex-shrink-0">{emoji}</div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-foreground truncate">{challenge.title}</h3>
-                            </div>
-                            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{challenge.description}</p>
-                            <div className="flex items-center gap-3 flex-wrap">
-                              <Badge variant="outline" className={`${diff.bg} ${diff.color} border text-xs`}>
+                            <h3 className="font-semibold text-foreground text-sm sm:text-base truncate pr-2">{challenge.title}</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2 sm:mb-3">{challenge.description}</p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge variant="outline" className={`${diff.bg} ${diff.color} border text-[10px] sm:text-xs`}>
                                 <DiffIcon className="h-3 w-3 mr-1" />
                                 {diff.label}
                               </Badge>
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <span className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {challenge.duration_days} dagen
-                              </span>
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <TrendingUp className="h-3 w-3" />
-                                🥇 {challenge.badge_gold_threshold}%
+                                {challenge.duration_days}d
                               </span>
                             </div>
                           </div>
-                          <div className="flex-shrink-0">
+                          <div className="flex-shrink-0 ml-1">
                             {isJoined ? (
-                              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-                                <CheckCircle2 className="h-3 w-3 mr-1" />
-                                Actief
-                              </Badge>
+                              <div className="h-7 w-7 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                              </div>
                             ) : (
                               <Button
                                 size="sm"
                                 onClick={() => joinChallenge(challenge.id)}
-                                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg shadow-amber-500/25"
+                                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg shadow-amber-500/25 h-8 px-3 text-xs"
                               >
-                                <Play className="h-3.5 w-3.5 mr-1" />
+                                <Play className="h-3 w-3 mr-1" />
                                 Start
                               </Button>
                             )}
