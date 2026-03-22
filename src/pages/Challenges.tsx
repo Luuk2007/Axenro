@@ -407,7 +407,7 @@ const Challenges: React.FC = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                   {badges.map((badge, i) => {
                     const challenge = challenges.find(c => c.id === badge.challenge_id);
                     const badgeColors = {
@@ -425,14 +425,14 @@ const Challenges: React.FC = () => {
                         transition={{ delay: i * 0.1 }}
                       >
                         <Card className="border-border/50 overflow-hidden">
-                          <CardContent className="p-4 text-center">
-                            <div className={`mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br ${badgeColors[badge.badge_type]} flex items-center justify-center mb-3 shadow-lg`}>
-                              <span className="text-2xl">{badgeEmoji[badge.badge_type]}</span>
+                          <CardContent className="p-3 sm:p-4 text-center">
+                            <div className={`mx-auto w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${badgeColors[badge.badge_type]} flex items-center justify-center mb-2 sm:mb-3 shadow-lg`}>
+                              <span className="text-xl sm:text-2xl">{badgeEmoji[badge.badge_type]}</span>
                             </div>
-                            <p className="text-xs font-semibold text-foreground truncate">
+                            <p className="text-[10px] sm:text-xs font-semibold text-foreground line-clamp-2">
                               {challenge?.title || 'Challenge'}
                             </p>
-                            <p className="text-[10px] text-muted-foreground capitalize mt-0.5">
+                            <p className="text-[9px] sm:text-[10px] text-muted-foreground capitalize mt-0.5">
                               {badge.badge_type} • {Math.round(badge.completion_percentage)}%
                             </p>
                           </CardContent>

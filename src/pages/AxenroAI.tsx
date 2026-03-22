@@ -324,22 +324,14 @@ export default function AxenroAI() {
 
       {/* Main chat layout */}
       <div className="flex gap-0 h-[calc(100vh-220px)] min-h-[400px] rounded-xl border border-border overflow-hidden bg-background">
-        {/* Sidebar */}
-        {/* Mobile sidebar overlay backdrop */}
-        {isMobile && sidebarOpen && (
-          <div className="absolute inset-0 z-40 bg-black/40" onClick={() => setSidebarOpen(false)} />
-        )}
-        <div
-          className={cn(
-            'flex-shrink-0 border-r border-border bg-background flex flex-col transition-all duration-200',
-            sidebarOpen ? 'w-64' : 'w-0',
-            isMobile && sidebarOpen && 'absolute inset-y-0 left-0 z-50 w-[75%] max-w-[280px] shadow-xl',
-            isMobile && !sidebarOpen && 'hidden'
-          )}
-        >
-          {sidebarOpen && (
-            <>
-              <div className="p-3 border-b border-border">
+        {/* Mobile sidebar as Sheet */}
+        {isMobile && (
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <SheetContent side="left" className="w-[280px] p-0">
+              <SheetHeader className="p-3 border-b border-border">
+                <SheetTitle className="text-sm">Gesprekken</SheetTitle>
+              </SheetHeader>
+              <div className="p-3">
                 <Button onClick={startNewChat} variant="outline" className="w-full justify-start gap-2" size="sm">
                   <Plus className="h-4 w-4" />
                   Nieuw gesprek
@@ -360,7 +352,7 @@ export default function AxenroAI() {
                       )}
                       onClick={() => {
                         setActiveConversationId(conv.id);
-                        if (isMobile) setSidebarOpen(false);
+                        setSidebarOpen(false);
                       }}
                     >
                       <MessageSquare className="h-3.5 w-3.5 flex-shrink-0" />
@@ -380,9 +372,62 @@ export default function AxenroAI() {
                   ))
                 )}
               </div>
-            </>
-          )}
-        </div>
+            </SheetContent>
+          </Sheet>
+        )}
+
+        {/* Desktop sidebar */}
+        {!isMobile && (
+          <div
+            className={cn(
+              'flex-shrink-0 border-r border-border bg-background flex flex-col transition-all duration-200',
+              sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'
+            )}
+          >
+            {sidebarOpen && (
+              <>
+                <div className="p-3 border-b border-border">
+                  <Button onClick={startNewChat} variant="outline" className="w-full justify-start gap-2" size="sm">
+                    <Plus className="h-4 w-4" />
+                    Nieuw gesprek
+                  </Button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
+                  {conversations.length === 0 ? (
+                    <p className="text-xs text-muted-foreground text-center py-4">Geen gesprekken</p>
+                  ) : (
+                    conversations.map((conv) => (
+                      <div
+                        key={conv.id}
+                        className={cn(
+                          'group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm transition-colors',
+                          activeConversationId === conv.id
+                            ? 'bg-primary/10 text-foreground'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                        )}
+                        onClick={() => setActiveConversationId(conv.id)}
+                      >
+                        <MessageSquare className="h-3.5 w-3.5 flex-shrink-0" />
+                        <span className="truncate flex-1">{conv.title}</span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 flex-shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteConversation(conv.id);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Chat area */}
         <div className="flex-1 flex flex-col min-w-0">
@@ -394,7 +439,13 @@ export default function AxenroAI() {
               className="h-8 w-8 p-0"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
-              {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {isMobile ? (
+                <Menu className="h-4 w-4" />
+              ) : sidebarOpen ? (
+                <ChevronLeft className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </Button>
             {activeConversationId && (
               <span className="text-sm font-medium ml-2 truncate">
