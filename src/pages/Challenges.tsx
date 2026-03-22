@@ -105,58 +105,58 @@ const Challenges: React.FC = () => {
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <Card className="border-border/50">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
             </div>
-            <div>
-              <p className="text-xl font-bold text-foreground">{completedChallenges.length}</p>
-              <p className="text-xs text-muted-foreground">Voltooid</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-xl font-bold text-foreground">{completedChallenges.length}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Voltooid</p>
             </div>
           </CardContent>
         </Card>
         <Card className="border-border/50">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-              <Flame className="h-5 w-5 text-amber-400" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+              <Flame className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400" />
             </div>
-            <div>
-              <p className="text-xl font-bold text-foreground">{activeChallenges.length}</p>
-              <p className="text-xs text-muted-foreground">Actief</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-xl font-bold text-foreground">{activeChallenges.length}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Actief</p>
             </div>
           </CardContent>
         </Card>
         <Card className="border-border/50">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-              <Award className="h-5 w-5 text-violet-400" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-violet-500/10 flex items-center justify-center flex-shrink-0">
+              <Award className="h-4 w-4 sm:h-5 sm:w-5 text-violet-400" />
             </div>
-            <div>
-              <p className="text-xl font-bold text-foreground">{badges.length}</p>
-              <p className="text-xs text-muted-foreground">Badges</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-xl font-bold text-foreground">{badges.length}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Badges</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Tab Switcher */}
-      <div className="flex gap-1.5 p-1 rounded-xl bg-muted/50 border border-border/50">
+      <div className="flex gap-1 p-1 rounded-xl bg-muted/50 border border-border/50 overflow-x-auto">
         {tabs.map(tab => (
           <button
             key={tab.key}
             onClick={() => setSelectedTab(tab.key)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
               selectedTab === tab.key
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <tab.icon className="h-4 w-4" />
+            <tab.icon className="h-3.5 w-3.5 flex-shrink-0" />
             <span>{tab.label}</span>
             {tab.count > 0 && (
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                 selectedTab === tab.key ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
               }`}>
                 {tab.count}
@@ -194,42 +194,35 @@ const Challenges: React.FC = () => {
                     transition={{ delay: i * 0.05 }}
                   >
                     <Card className="overflow-hidden border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg">
-                      <CardContent className="p-4">
+                      <CardContent className="p-3 sm:p-4">
                         <div className="flex items-start gap-3">
-                          <div className="text-3xl">{emoji}</div>
+                          <div className="text-2xl flex-shrink-0">{emoji}</div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-foreground truncate">{challenge.title}</h3>
-                            </div>
-                            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{challenge.description}</p>
-                            <div className="flex items-center gap-3 flex-wrap">
-                              <Badge variant="outline" className={`${diff.bg} ${diff.color} border text-xs`}>
+                            <h3 className="font-semibold text-foreground text-sm sm:text-base truncate pr-2">{challenge.title}</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2 sm:mb-3">{challenge.description}</p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge variant="outline" className={`${diff.bg} ${diff.color} border text-[10px] sm:text-xs`}>
                                 <DiffIcon className="h-3 w-3 mr-1" />
                                 {diff.label}
                               </Badge>
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <span className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {challenge.duration_days} dagen
-                              </span>
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <TrendingUp className="h-3 w-3" />
-                                🥇 {challenge.badge_gold_threshold}%
+                                {challenge.duration_days}d
                               </span>
                             </div>
                           </div>
-                          <div className="flex-shrink-0">
+                          <div className="flex-shrink-0 ml-1">
                             {isJoined ? (
-                              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-                                <CheckCircle2 className="h-3 w-3 mr-1" />
-                                Actief
-                              </Badge>
+                              <div className="h-7 w-7 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                              </div>
                             ) : (
                               <Button
                                 size="sm"
                                 onClick={() => joinChallenge(challenge.id)}
-                                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg shadow-amber-500/25"
+                                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg shadow-amber-500/25 h-8 px-3 text-xs"
                               >
-                                <Play className="h-3.5 w-3.5 mr-1" />
+                                <Play className="h-3 w-3 mr-1" />
                                 Start
                               </Button>
                             )}
@@ -414,7 +407,7 @@ const Challenges: React.FC = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                   {badges.map((badge, i) => {
                     const challenge = challenges.find(c => c.id === badge.challenge_id);
                     const badgeColors = {
@@ -432,14 +425,14 @@ const Challenges: React.FC = () => {
                         transition={{ delay: i * 0.1 }}
                       >
                         <Card className="border-border/50 overflow-hidden">
-                          <CardContent className="p-4 text-center">
-                            <div className={`mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br ${badgeColors[badge.badge_type]} flex items-center justify-center mb-3 shadow-lg`}>
-                              <span className="text-2xl">{badgeEmoji[badge.badge_type]}</span>
+                          <CardContent className="p-3 sm:p-4 text-center">
+                            <div className={`mx-auto w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${badgeColors[badge.badge_type]} flex items-center justify-center mb-2 sm:mb-3 shadow-lg`}>
+                              <span className="text-xl sm:text-2xl">{badgeEmoji[badge.badge_type]}</span>
                             </div>
-                            <p className="text-xs font-semibold text-foreground truncate">
+                            <p className="text-[10px] sm:text-xs font-semibold text-foreground line-clamp-2">
                               {challenge?.title || 'Challenge'}
                             </p>
-                            <p className="text-[10px] text-muted-foreground capitalize mt-0.5">
+                            <p className="text-[9px] sm:text-[10px] text-muted-foreground capitalize mt-0.5">
                               {badge.badge_type} • {Math.round(badge.completion_percentage)}%
                             </p>
                           </CardContent>
