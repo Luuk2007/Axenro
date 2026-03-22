@@ -382,7 +382,8 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                         
                         <div className="space-y-2">
                           {exercise.sets.map((set, index) => {
-                            const prDetected = exercise.muscleGroup !== 'calisthenics' && isNewPR(exercise.name, set.weight);
+                            const setKey = `${exercise.id}-${set.id}`;
+                            const prDetected = exercise.muscleGroup !== 'calisthenics' && isNewPR(exercise.name, setKey, set.weight);
                             return (
                             <div key={set.id} className={`flex items-center gap-2 text-sm ${prDetected ? 'bg-amber-500/10 rounded-lg px-1 py-0.5 border border-amber-500/30' : ''}`}>
                               <span className="w-10 text-muted-foreground flex-shrink-0">{t("Set")} {index + 1}</span>
@@ -402,6 +403,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                     type="number"
                                     value={getInputValue(exercise.id, set.id, 'weight', set.weight)}
                                     onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
+                                    onBlur={() => flagPR(exercise.name, setKey, set.weight)}
                                     className={`w-full min-w-[60px] h-8 px-2 ${prDetected ? 'border-amber-500/50' : ''}`}
                                     placeholder="Weight"
                                   />
