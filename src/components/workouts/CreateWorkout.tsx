@@ -100,12 +100,29 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     fetchPRs();
   }, [open, user]);
 
+  // Track which sets are flagged as PR during this session
+  const [prSets, setPrSets] = useState<Set<string>>(new Set());
+
   // Check if a set weight is a new PR (compare in metric/kg)
-  const isNewPR = (exerciseName: string, displayWeight: number): boolean => {
+  const isNewPR = (exerciseName: string, setKey: string, displayWeight: number): boolean => {
     if (!exerciseName || displayWeight <= 0) return false;
+    // If already flagged as PR in this session, keep showing it
+    if (prSets.has(setKey)) return true;
     const weightInKg = convertWeight(displayWeight, measurementSystem, 'metric');
     const currentBest = personalRecords[exerciseName.toLowerCase()] || 0;
     return weightInKg > currentBest;
+  };
+
+  // Flag a specific set as PR when value is confirmed
+  const flagPR = (exerciseName: string, setKey: string, displayWeight: number) => {
+    if (!exerciseName || displayWeight <= 0) return;
+    const weightInKg = convertWeight(displayWeight, measurementSystem, 'metric');
+    const currentBest = personalRecords[exerciseName.toLowerCase()] || 0;
+    if (weightInKg > currentBest) {
+      setPrSets(prev => new Set(prev).add(setKey));
+      // Update the local PR map so only THIS set (the highest) shows the badge
+      setPersonalRecords(prev => ({ ...prev, [exerciseName.toLowerCase()]: weightInKg }));
+    }
   };
 
   // Load editing workout data when editingWorkout changes
@@ -365,7 +382,8 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                         
                         <div className="space-y-2">
                           {exercise.sets.map((set, index) => {
-                            const prDetected = exercise.muscleGroup !== 'calisthenics' && isNewPR(exercise.name, set.weight);
+                            const setKey = `${exercise.id}-${set.id}`;
+                            const prDetected = exercise.muscleGroup !== 'calisthenics' && isNewPR(exercise.name, setKey, set.weight);
                             return (
                             <div key={set.id} className={`flex items-center gap-2 text-sm ${prDetected ? 'bg-amber-500/10 rounded-lg px-1 py-0.5 border border-amber-500/30' : ''}`}>
                               <span className="w-10 text-muted-foreground flex-shrink-0">{t("Set")} {index + 1}</span>
@@ -385,6 +403,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                     type="number"
                                     value={getInputValue(exercise.id, set.id, 'weight', set.weight)}
                                     onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
+                                    onBlur={() => flagPR(exercise.name, setKey, set.weight)}
                                     className={`w-full min-w-[60px] h-8 px-2 ${prDetected ? 'border-amber-500/50' : ''}`}
                                     placeholder="Weight"
                                   />

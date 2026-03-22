@@ -301,7 +301,7 @@ export default function AxenroAI() {
   const isLastMessageStreaming = loading && streamingResponse;
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-4 animate-fade-in w-full max-w-full overflow-x-hidden">
       {/* Header - consistent with other pages */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="min-w-0">
@@ -324,11 +324,16 @@ export default function AxenroAI() {
       {/* Main chat layout */}
       <div className="flex gap-0 h-[calc(100vh-220px)] min-h-[400px] rounded-xl border border-border overflow-hidden bg-background">
         {/* Sidebar */}
+        {/* Mobile sidebar overlay backdrop */}
+        {isMobile && sidebarOpen && (
+          <div className="absolute inset-0 z-40 bg-black/40" onClick={() => setSidebarOpen(false)} />
+        )}
         <div
           className={cn(
-            'flex-shrink-0 border-r border-border bg-muted/30 flex flex-col transition-all duration-200',
+            'flex-shrink-0 border-r border-border bg-background flex flex-col transition-all duration-200',
             sidebarOpen ? 'w-64' : 'w-0',
-            isMobile && sidebarOpen && 'absolute inset-y-0 left-0 z-50 w-72 shadow-xl'
+            isMobile && sidebarOpen && 'absolute inset-y-0 left-0 z-50 w-[75%] max-w-[280px] shadow-xl',
+            isMobile && !sidebarOpen && 'hidden'
           )}
         >
           {sidebarOpen && (
