@@ -105,37 +105,37 @@ const Challenges: React.FC = () => {
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <Card className="border-border/50">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
             </div>
-            <div>
-              <p className="text-xl font-bold text-foreground">{completedChallenges.length}</p>
-              <p className="text-xs text-muted-foreground">Voltooid</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-xl font-bold text-foreground">{completedChallenges.length}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Voltooid</p>
             </div>
           </CardContent>
         </Card>
         <Card className="border-border/50">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-              <Flame className="h-5 w-5 text-amber-400" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+              <Flame className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400" />
             </div>
-            <div>
-              <p className="text-xl font-bold text-foreground">{activeChallenges.length}</p>
-              <p className="text-xs text-muted-foreground">Actief</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-xl font-bold text-foreground">{activeChallenges.length}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Actief</p>
             </div>
           </CardContent>
         </Card>
         <Card className="border-border/50">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-              <Award className="h-5 w-5 text-violet-400" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-violet-500/10 flex items-center justify-center flex-shrink-0">
+              <Award className="h-4 w-4 sm:h-5 sm:w-5 text-violet-400" />
             </div>
-            <div>
-              <p className="text-xl font-bold text-foreground">{badges.length}</p>
-              <p className="text-xs text-muted-foreground">Badges</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-xl font-bold text-foreground">{badges.length}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Badges</p>
             </div>
           </CardContent>
         </Card>
