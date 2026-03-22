@@ -301,7 +301,7 @@ export default function AxenroAI() {
   const isLastMessageStreaming = loading && streamingResponse;
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-4 animate-fade-in w-full max-w-full overflow-x-hidden">
       {/* Header - consistent with other pages */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="min-w-0">

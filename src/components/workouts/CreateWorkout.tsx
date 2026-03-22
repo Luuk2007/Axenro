@@ -100,12 +100,29 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     fetchPRs();
   }, [open, user]);
 
+  // Track which sets are flagged as PR during this session
+  const [prSets, setPrSets] = useState<Set<string>>(new Set());
+
   // Check if a set weight is a new PR (compare in metric/kg)
-  const isNewPR = (exerciseName: string, displayWeight: number): boolean => {
+  const isNewPR = (exerciseName: string, setKey: string, displayWeight: number): boolean => {
     if (!exerciseName || displayWeight <= 0) return false;
+    // If already flagged as PR in this session, keep showing it
+    if (prSets.has(setKey)) return true;
     const weightInKg = convertWeight(displayWeight, measurementSystem, 'metric');
     const currentBest = personalRecords[exerciseName.toLowerCase()] || 0;
     return weightInKg > currentBest;
+  };
+
+  // Flag a specific set as PR when value is confirmed
+  const flagPR = (exerciseName: string, setKey: string, displayWeight: number) => {
+    if (!exerciseName || displayWeight <= 0) return;
+    const weightInKg = convertWeight(displayWeight, measurementSystem, 'metric');
+    const currentBest = personalRecords[exerciseName.toLowerCase()] || 0;
+    if (weightInKg > currentBest) {
+      setPrSets(prev => new Set(prev).add(setKey));
+      // Update the local PR map so only THIS set (the highest) shows the badge
+      setPersonalRecords(prev => ({ ...prev, [exerciseName.toLowerCase()]: weightInKg }));
+    }
   };
 
   // Load editing workout data when editingWorkout changes
