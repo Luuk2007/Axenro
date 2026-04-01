@@ -63,66 +63,77 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   useEffect(() => {
     if (!open || !user) return;
     const fetchPRs = async () => {
+      const prMap: Record<string, number> = {};
+      
+      // Check personal_records table
       const { data } = await supabase
         .from('personal_records')
         .select('exercise_name, weight')
         .eq('user_id', user.id);
       if (data) {
-        const prMap: Record<string, number> = {};
         data.forEach((pr: any) => {
           const name = pr.exercise_name.toLowerCase();
           if (!prMap[name] || pr.weight > prMap[name]) {
             prMap[name] = pr.weight;
           }
         });
-        // Also check workout history for max weights
-        const { data: workouts } = await supabase
-          .from('workouts')
-          .select('exercises')
-          .eq('user_id', user.id);
-        if (workouts) {
-          workouts.forEach((w: any) => {
-            if (!Array.isArray(w.exercises)) return;
-            w.exercises.forEach((ex: any) => {
-              if (!ex.name || !ex.sets) return;
-              const name = ex.name.toLowerCase();
-              ex.sets.forEach((s: any) => {
-                if (s.weight && (!prMap[name] || s.weight > prMap[name])) {
-                  prMap[name] = s.weight;
-                }
-              });
+      }
+      
+      // Also check workout history for max weights per set
+      const { data: workouts } = await supabase
+        .from('workouts')
+        .select('exercises')
+        .eq('user_id', user.id);
+      if (workouts) {
+        workouts.forEach((w: any) => {
+          if (!Array.isArray(w.exercises)) return;
+          w.exercises.forEach((ex: any) => {
+            if (!ex.name || !ex.sets) return;
+            const name = ex.name.toLowerCase();
+            ex.sets.forEach((s: any) => {
+              if (s.weight && (!prMap[name] || s.weight > prMap[name])) {
+                prMap[name] = s.weight;
+              }
             });
           });
-        }
-        setPersonalRecords(prMap);
+        });
       }
+      
+      setPersonalRecords(prMap);
     };
     fetchPRs();
   }, [open, user]);
 
   // Track which sets are flagged as PR during this session
   const [prSets, setPrSets] = useState<Set<string>>(new Set());
+  
+  // Store the original PR values at session start (before any updates)
+  const [originalPRs, setOriginalPRs] = useState<Record<string, number>>({});
+  
+  useEffect(() => {
+    if (Object.keys(personalRecords).length > 0 && Object.keys(originalPRs).length === 0) {
+      setOriginalPRs({ ...personalRecords });
+    }
+  }, [personalRecords]);
 
-  // Check if a set weight is a new PR (compare in metric/kg)
-  const isNewPR = (exerciseName: string, setKey: string, displayWeight: number): boolean => {
-    if (!exerciseName || displayWeight <= 0) return false;
-    // If already flagged as PR in this session, keep showing it
-    if (prSets.has(setKey)) return true;
-    const weightInKg = convertWeight(displayWeight, measurementSystem, 'metric');
-    const currentBest = personalRecords[exerciseName.toLowerCase()] || 0;
-    return weightInKg > currentBest;
-  };
-
-  // Flag a specific set as PR when value is confirmed
+  // Check and flag PR on blur
   const flagPR = (exerciseName: string, setKey: string, displayWeight: number) => {
     if (!exerciseName || displayWeight <= 0) return;
     const weightInKg = convertWeight(displayWeight, measurementSystem, 'metric');
-    const currentBest = personalRecords[exerciseName.toLowerCase()] || 0;
-    if (weightInKg > currentBest) {
+    const baseline = originalPRs[exerciseName.toLowerCase()] || 0;
+    if (weightInKg > baseline) {
       setPrSets(prev => new Set(prev).add(setKey));
-      // Update the local PR map so only THIS set (the highest) shows the badge
-      setPersonalRecords(prev => ({ ...prev, [exerciseName.toLowerCase()]: weightInKg }));
+      // Update personalRecords so subsequent sets compare against the new highest
+      setPersonalRecords(prev => {
+        const current = prev[exerciseName.toLowerCase()] || 0;
+        return weightInKg > current ? { ...prev, [exerciseName.toLowerCase()]: weightInKg } : prev;
+      });
     }
+  };
+
+  // Check if a set is a confirmed PR
+  const isPRSet = (setKey: string): boolean => {
+    return prSets.has(setKey);
   };
 
   // Load editing workout data when editingWorkout changes
@@ -134,7 +145,10 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
     }
-  }, [editingWorkout, measurementSystem]);
+    // Reset PR tracking when dialog opens/closes
+    setPrSets(new Set());
+    setOriginalPRs({});
+  }, [editingWorkout, measurementSystem, open]);
 
   const handleSaveWorkout = (finished: boolean = false) => {
     if (exercises.length === 0) return;
@@ -383,7 +397,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                         <div className="space-y-2">
                           {exercise.sets.map((set, index) => {
                             const setKey = `${exercise.id}-${set.id}`;
-                            const prDetected = exercise.muscleGroup !== 'calisthenics' && isNewPR(exercise.name, setKey, set.weight);
+                            const prDetected = exercise.muscleGroup !== 'calisthenics' && isPRSet(setKey);
                             return (
                             <div key={set.id} className={`flex items-center gap-2 text-sm ${prDetected ? 'bg-amber-500/10 rounded-lg px-1 py-0.5 border border-amber-500/30' : ''}`}>
                               <span className="w-10 text-muted-foreground flex-shrink-0">{t("Set")} {index + 1}</span>
@@ -409,7 +423,10 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                   />
                                   <span className="text-xs text-muted-foreground flex-shrink-0">{getWeightUnit(measurementSystem)}</span>
                                   {prDetected && (
-                                    <Trophy className="h-4 w-4 text-amber-500 flex-shrink-0 animate-pulse" />
+                                    <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-600 dark:text-amber-400 flex-shrink-0">
+                                      <Trophy className="h-3 w-3" />
+                                      <span className="text-[10px] font-bold">PR</span>
+                                    </span>
                                   )}
                                 </div>
                               )}

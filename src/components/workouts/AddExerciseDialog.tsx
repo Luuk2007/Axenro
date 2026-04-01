@@ -160,7 +160,7 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
                 <SelectItem value="all">{t("All Exercises")}</SelectItem>
                 {muscleGroups.map((group) => (
                   <SelectItem key={group.value} value={group.value}>
-                    {group.label}
+                    {t(group.label)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -186,7 +186,7 @@ const AddExerciseDialog: React.FC<AddExerciseDialogProps> = ({
                   <>
                     {muscleGroups.map((group) => (
                       <SelectGroup key={group.value}>
-                        <SelectLabel>{group.label}</SelectLabel>
+                        <SelectLabel>{t(group.label)}</SelectLabel>
                         {allExercises
                           .filter(ex => ex.muscleGroup === group.value)
                           .map(exercise => (

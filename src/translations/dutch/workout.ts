@@ -163,4 +163,12 @@ export const workoutTranslations: Translations = {
   "Save as in progress": "Opslaan als bezig",
   "In progress": "Bezig",
   "Workout saved as in progress": "Training opgeslagen als bezig",
+  "Total Volume": "Totaal Volume",
+  "totalKg": "Totaal kg",
+  "Best Volume Day": "Beste Volume Dag",
+  "bestVolumeDay": "Beste Volume Dag",
+  "noVolumeData": "Nog geen volume data beschikbaar",
+  "volume": "volume",
+  "Personal Best": "Persoonlijk Record",
+  "New PR!": "Nieuw PR!",
 };

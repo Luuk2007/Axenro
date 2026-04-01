@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2, Calendar, Edit, Copy, Dumbbell, Activity, Clock, ListChecks, ChevronRight } from "lucide-react";
+import { Trash2, Calendar, Edit, Copy, Dumbbell, Activity, ListChecks, Weight, ChevronRight, Trophy, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
 import { getWorkoutSummary, formatDuration } from "@/utils/workoutUtils";
 import { getWorkoutTitleFromExercises } from "@/utils/workoutNaming";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface WorkoutListProps {
   workouts: Workout[];
@@ -15,11 +16,18 @@ interface WorkoutListProps {
   onDeleteWorkout: (workoutId: string) => void;
 }
 
+const getTotalVolume = (workout: Workout): number => {
+  return workout.exercises.reduce((total, ex) => {
+    if (ex.muscleGroup === 'cardio') return total;
+    return total + ex.sets.reduce((setTotal, set) => setTotal + (set.weight || 0) * (set.reps || 0), 0);
+  }, 0);
+};
+
 const statCards = [
   { key: 'workouts', icon: Dumbbell, gradient: 'from-emerald-500 to-teal-500', bgGradient: 'from-emerald-500/10 to-teal-500/10' },
   { key: 'exercises', icon: Activity, gradient: 'from-blue-500 to-cyan-500', bgGradient: 'from-blue-500/10 to-cyan-500/10' },
   { key: 'sets', icon: ListChecks, gradient: 'from-violet-500 to-purple-500', bgGradient: 'from-violet-500/10 to-purple-500/10' },
-  { key: 'completed', icon: Clock, gradient: 'from-orange-500 to-amber-500', bgGradient: 'from-orange-500/10 to-amber-500/10' },
+  { key: 'totalKg', icon: Weight, gradient: 'from-orange-500 to-amber-500', bgGradient: 'from-orange-500/10 to-amber-500/10' },
 ];
 
 const WorkoutList: React.FC<WorkoutListProps> = ({ 
@@ -30,20 +38,28 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
   onDeleteWorkout 
 }) => {
   const { t } = useLanguage();
+  const [showVolumeModal, setShowVolumeModal] = useState(false);
+
+  const totalVolume = workouts.reduce((sum, w) => sum + getTotalVolume(w), 0);
 
   const stats = {
     workouts: workouts.length,
     exercises: workouts.reduce((acc, w) => acc + w.exercises.length, 0),
     sets: workouts.reduce((acc, w) => acc + w.exercises.reduce((a, e) => a + e.sets.length, 0), 0),
-    completed: workouts.filter(w => w.completed).length,
+    totalKg: Math.round(totalVolume),
   };
 
   const statLabels = {
     workouts: t("Total Workouts"),
     exercises: t("Total Exercises"),
     sets: t("Total Sets"),
-    completed: t("completed"),
+    totalKg: t("Total Volume"),
   };
+
+  // Find best volume day
+  const bestVolumeWorkout = workouts.length > 0
+    ? workouts.reduce((best, w) => getTotalVolume(w) > getTotalVolume(best) ? w : best, workouts[0])
+    : null;
 
   if (workouts.length === 0) {
     return (
@@ -94,18 +110,21 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
     <div className="space-y-8">
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {statCards.map((card, index) => {
+        {statCards.map((card) => {
           const Icon = card.icon;
           const value = stats[card.key as keyof typeof stats];
           const label = statLabels[card.key as keyof typeof statLabels];
+          const isClickable = card.key === 'totalKg';
           
           return (
             <div 
               key={card.key}
+              onClick={isClickable ? () => setShowVolumeModal(true) : undefined}
               className={cn(
                 "relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:scale-[1.02]",
                 "bg-gradient-to-br border border-border/50",
-                card.bgGradient
+                card.bgGradient,
+                isClickable && "cursor-pointer"
               )}
             >
               <div className={cn(
@@ -120,7 +139,7 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
                   <Icon className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{value}</p>
+                  <p className="text-2xl font-bold">{typeof value === 'number' && value > 9999 ? `${(value / 1000).toFixed(1)}k` : value}</p>
                   <p className="text-xs text-muted-foreground">{label}</p>
                 </div>
               </div>
@@ -129,11 +148,48 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
         })}
       </div>
 
+      {/* Best Volume Day Modal */}
+      <Dialog open={showVolumeModal} onOpenChange={setShowVolumeModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-amber-500" />
+              {t("Best Volume Day")}
+            </DialogTitle>
+          </DialogHeader>
+          {bestVolumeWorkout ? (
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+                <h4 className="font-semibold text-lg">{getWorkoutTitleFromExercises(bestVolumeWorkout.exercises) || "Workout"}</h4>
+                <p className="text-sm text-muted-foreground mt-1">{bestVolumeWorkout.date}</p>
+                <p className="text-3xl font-bold mt-3 text-amber-600 dark:text-amber-400">
+                  {Math.round(getTotalVolume(bestVolumeWorkout)).toLocaleString()} kg
+                </p>
+              </div>
+              <div className="space-y-2">
+                {bestVolumeWorkout.exercises.filter(ex => ex.muscleGroup !== 'cardio').map((ex, i) => {
+                  const exVolume = ex.sets.reduce((sum, s) => sum + (s.weight || 0) * (s.reps || 0), 0);
+                  return (
+                    <div key={i} className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
+                      <span className="text-sm font-medium">{ex.name}</span>
+                      <span className="text-sm text-muted-foreground">{Math.round(exVolume)} kg</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-center py-4">{t("noVolumeData")}</p>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Workouts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {workouts.map((workout, index) => {
           const summaryData = renderWorkoutSummary(workout);
           const gradient = getWorkoutGradient(workout);
+          const volume = getTotalVolume(workout);
           
           return (
             <div 
@@ -156,14 +212,12 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
                       <span>{workout.date}</span>
                     </div>
                   </div>
-                  <span className={cn(
-                    "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium border",
-                    workout.completed 
-                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
-                  )}>
-                    {workout.completed ? t("completed") : t("In progress")}
-                  </span>
+                  {volume > 0 && (
+                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500/10 to-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                      <Weight className="h-3 w-3 mr-1" />
+                      {Math.round(volume).toLocaleString()} kg
+                    </span>
+                  )}
                 </div>
                 
                 <div className="flex flex-wrap gap-2 mb-5">
@@ -180,6 +234,14 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
                       {summaryData.duration}
                     </span>
                   )}
+                  <span className={cn(
+                    "inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium",
+                    workout.completed 
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  )}>
+                    {workout.completed ? t("completed") : t("In progress")}
+                  </span>
                 </div>
                 
                 <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
