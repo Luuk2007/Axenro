@@ -63,66 +63,77 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   useEffect(() => {
     if (!open || !user) return;
     const fetchPRs = async () => {
+      const prMap: Record<string, number> = {};
+      
+      // Check personal_records table
       const { data } = await supabase
         .from('personal_records')
         .select('exercise_name, weight')
         .eq('user_id', user.id);
       if (data) {
-        const prMap: Record<string, number> = {};
         data.forEach((pr: any) => {
           const name = pr.exercise_name.toLowerCase();
           if (!prMap[name] || pr.weight > prMap[name]) {
             prMap[name] = pr.weight;
           }
         });
-        // Also check workout history for max weights
-        const { data: workouts } = await supabase
-          .from('workouts')
-          .select('exercises')
-          .eq('user_id', user.id);
-        if (workouts) {
-          workouts.forEach((w: any) => {
-            if (!Array.isArray(w.exercises)) return;
-            w.exercises.forEach((ex: any) => {
-              if (!ex.name || !ex.sets) return;
-              const name = ex.name.toLowerCase();
-              ex.sets.forEach((s: any) => {
-                if (s.weight && (!prMap[name] || s.weight > prMap[name])) {
-                  prMap[name] = s.weight;
-                }
-              });
+      }
+      
+      // Also check workout history for max weights per set
+      const { data: workouts } = await supabase
+        .from('workouts')
+        .select('exercises')
+        .eq('user_id', user.id);
+      if (workouts) {
+        workouts.forEach((w: any) => {
+          if (!Array.isArray(w.exercises)) return;
+          w.exercises.forEach((ex: any) => {
+            if (!ex.name || !ex.sets) return;
+            const name = ex.name.toLowerCase();
+            ex.sets.forEach((s: any) => {
+              if (s.weight && (!prMap[name] || s.weight > prMap[name])) {
+                prMap[name] = s.weight;
+              }
             });
           });
-        }
-        setPersonalRecords(prMap);
+        });
       }
+      
+      setPersonalRecords(prMap);
     };
     fetchPRs();
   }, [open, user]);
 
   // Track which sets are flagged as PR during this session
   const [prSets, setPrSets] = useState<Set<string>>(new Set());
+  
+  // Store the original PR values at session start (before any updates)
+  const [originalPRs, setOriginalPRs] = useState<Record<string, number>>({});
+  
+  useEffect(() => {
+    if (Object.keys(personalRecords).length > 0 && Object.keys(originalPRs).length === 0) {
+      setOriginalPRs({ ...personalRecords });
+    }
+  }, [personalRecords]);
 
-  // Check if a set weight is a new PR (compare in metric/kg)
-  const isNewPR = (exerciseName: string, setKey: string, displayWeight: number): boolean => {
-    if (!exerciseName || displayWeight <= 0) return false;
-    // If already flagged as PR in this session, keep showing it
-    if (prSets.has(setKey)) return true;
-    const weightInKg = convertWeight(displayWeight, measurementSystem, 'metric');
-    const currentBest = personalRecords[exerciseName.toLowerCase()] || 0;
-    return weightInKg > currentBest;
-  };
-
-  // Flag a specific set as PR when value is confirmed
+  // Check and flag PR on blur
   const flagPR = (exerciseName: string, setKey: string, displayWeight: number) => {
     if (!exerciseName || displayWeight <= 0) return;
     const weightInKg = convertWeight(displayWeight, measurementSystem, 'metric');
-    const currentBest = personalRecords[exerciseName.toLowerCase()] || 0;
-    if (weightInKg > currentBest) {
+    const baseline = originalPRs[exerciseName.toLowerCase()] || 0;
+    if (weightInKg > baseline) {
       setPrSets(prev => new Set(prev).add(setKey));
-      // Update the local PR map so only THIS set (the highest) shows the badge
-      setPersonalRecords(prev => ({ ...prev, [exerciseName.toLowerCase()]: weightInKg }));
+      // Update personalRecords so subsequent sets compare against the new highest
+      setPersonalRecords(prev => {
+        const current = prev[exerciseName.toLowerCase()] || 0;
+        return weightInKg > current ? { ...prev, [exerciseName.toLowerCase()]: weightInKg } : prev;
+      });
     }
+  };
+
+  // Check if a set is a confirmed PR
+  const isPRSet = (setKey: string): boolean => {
+    return prSets.has(setKey);
   };
 
   // Load editing workout data when editingWorkout changes
