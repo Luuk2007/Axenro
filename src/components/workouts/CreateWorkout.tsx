@@ -145,7 +145,10 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
     }
-  }, [editingWorkout, measurementSystem]);
+    // Reset PR tracking when dialog opens/closes
+    setPrSets(new Set());
+    setOriginalPRs({});
+  }, [editingWorkout, measurementSystem, open]);
 
   const handleSaveWorkout = (finished: boolean = false) => {
     if (exercises.length === 0) return;
