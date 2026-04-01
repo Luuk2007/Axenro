@@ -76,7 +76,7 @@ export const settingsTranslations: Translations = {
   "Enable analytics": "Analytische cookies inschakelen",
   "Enable marketing": "Marketing cookies inschakelen",
   "Save preferences": "Voorkeuren opslaan",
-  "Back": "Rug",
+  "Back": "Terug",
   "For more information, please see our": "Voor meer informatie, bekijk onze",
   "privacy policy": "privacybeleid",
   "and": "en",
