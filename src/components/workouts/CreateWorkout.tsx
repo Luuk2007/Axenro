@@ -394,7 +394,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                         <div className="space-y-2">
                           {exercise.sets.map((set, index) => {
                             const setKey = `${exercise.id}-${set.id}`;
-                            const prDetected = exercise.muscleGroup !== 'calisthenics' && isNewPR(exercise.name, setKey, set.weight);
+                            const prDetected = exercise.muscleGroup !== 'calisthenics' && isPRSet(setKey);
                             return (
                             <div key={set.id} className={`flex items-center gap-2 text-sm ${prDetected ? 'bg-amber-500/10 rounded-lg px-1 py-0.5 border border-amber-500/30' : ''}`}>
                               <span className="w-10 text-muted-foreground flex-shrink-0">{t("Set")} {index + 1}</span>
