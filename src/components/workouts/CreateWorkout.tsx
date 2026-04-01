@@ -32,6 +32,8 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   const [rawInputs, setRawInputs] = useState<Record<string, string>>({});
   // Personal records lookup: exerciseName -> best weight in kg
   const [personalRecords, setPersonalRecords] = useState<Record<string, number>>({});
+  // Cardio measurement types per exercise: exerciseId -> 'seconds' | 'minutes' | 'reps' | 'km'
+  const [cardioMeasurements, setCardioMeasurements] = useState<Record<string, string>>({});
 
   // Auto-generate workout name based on muscle groups (with fallback lookup for older workouts)
   const generatedWorkoutName = useMemo(() => {
