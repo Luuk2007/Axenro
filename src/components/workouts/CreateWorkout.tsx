@@ -397,10 +397,36 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                           </div>
                         </div>
                         
+                        {/* Cardio measurement type selector */}
+                        {exercise.muscleGroup === 'cardio' && (
+                          <div className="mb-2">
+                            <Select
+                              value={cardioMeasurements[exercise.id] || 'minutes'}
+                              onValueChange={(val) => setCardioMeasurements(prev => ({ ...prev, [exercise.id]: val }))}
+                            >
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder={t("Select measurement")} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="seconds">{t("Time (seconds)")}</SelectItem>
+                                <SelectItem value="minutes">{t("Time (minutes)")}</SelectItem>
+                                <SelectItem value="reps">{t("Reps")}</SelectItem>
+                                <SelectItem value="km">{t("Distance (km)")}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                        
                         <div className="space-y-2">
                           {exercise.sets.map((set, index) => {
                             const setKey = `${exercise.id}-${set.id}`;
-                            const prDetected = exercise.muscleGroup !== 'calisthenics' && isPRSet(setKey);
+                            const isCardio = exercise.muscleGroup === 'cardio';
+                            const prDetected = !isCardio && exercise.muscleGroup !== 'calisthenics' && isPRSet(setKey);
+                            const measureType = cardioMeasurements[exercise.id] || 'minutes';
+                            const unitLabel = isCardio 
+                              ? (measureType === 'seconds' ? t("sec") : measureType === 'minutes' ? t("min") : measureType === 'km' ? t("km") : 'reps')
+                              : 'reps';
+                            
                             return (
                             <div key={set.id} className={`flex items-center gap-2 text-sm ${prDetected ? 'bg-amber-500/10 rounded-lg px-1 py-0.5 border border-amber-500/30' : ''}`}>
                               <span className="w-10 text-muted-foreground flex-shrink-0">{t("Set")} {index + 1}</span>
@@ -409,12 +435,12 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                   type="number"
                                   value={getInputValue(exercise.id, set.id, 'reps', set.reps)}
                                   onChange={(e) => handleUpdateSet(exercise.id, set.id, 'reps', e.target.value)}
-                                  className="w-14 h-8 text-center px-1"
-                                  placeholder="Reps"
+                                  className="w-16 h-8 text-center px-1"
+                                  placeholder={isCardio ? unitLabel : "Reps"}
                                 />
-                                <span className="text-xs text-muted-foreground">reps</span>
+                                <span className="text-xs text-muted-foreground">{unitLabel}</span>
                               </div>
-                              {exercise.muscleGroup !== 'calisthenics' && (
+                              {!isCardio && exercise.muscleGroup !== 'calisthenics' && (
                                 <div className="flex items-center gap-1 flex-1 min-w-0">
                                   <Input
                                     type="number"
