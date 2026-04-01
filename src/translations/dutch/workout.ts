@@ -171,4 +171,24 @@ export const workoutTranslations: Translations = {
   "volume": "volume",
   "Personal Best": "Persoonlijk Record",
   "New PR!": "Nieuw PR!",
+  
+  // Lowercase muscle group keys (used in filters)
+  "chest": "Borst",
+  "back": "Rug",
+  "shoulders": "Schouders",
+  "arms": "Armen",
+  "legs": "Benen",
+  "core": "Core",
+  "calisthenics": "Calisthenics",
+  
+  // Cardio measurement types
+  "Measurement Type": "Meettype",
+  "Select measurement": "Selecteer meting",
+  "Time (seconds)": "Tijd (seconden)",
+  "Time (minutes)": "Tijd (minuten)",
+  "Reps": "Herhalingen",
+  "Distance (km)": "Afstand (km)",
+  "sec": "sec",
+  "min": "min",
+  "km": "km",
 };
