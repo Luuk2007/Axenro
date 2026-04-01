@@ -171,5 +171,4 @@ export const workoutTranslations: Translations = {
   "volume": "volume",
   "Personal Best": "Persoonlijk Record",
   "New PR!": "Nieuw PR!",
-  "Cardio": "Cardio",
 };
