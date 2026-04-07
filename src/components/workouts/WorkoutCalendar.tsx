@@ -55,22 +55,32 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
     });
   
   
-  // Helper function to check if a workout is cardio
-  const isCardioWorkout = (workout: Workout) => {
-    return workout.exercises.some(exercise => 
-      exercise.muscleGroup === 'cardio'
-    );
+  // Helper functions for workout type classification
+  const isPureCardioWorkout = (workout: Workout) => {
+    return workout.exercises.length > 0 && workout.exercises.every(ex => ex.muscleGroup === 'cardio');
+  };
+  const isPureStrengthWorkout = (workout: Workout) => {
+    return workout.exercises.length > 0 && workout.exercises.every(ex => ex.muscleGroup !== 'cardio');
+  };
+  const isMixedWorkout = (workout: Workout) => {
+    const hasCardio = workout.exercises.some(ex => ex.muscleGroup === 'cardio');
+    const hasStrength = workout.exercises.some(ex => ex.muscleGroup !== 'cardio');
+    return hasCardio && hasStrength;
   };
   
-  // Get cardio workout dates
+  // Get dates by workout type
   const cardioWorkoutDates = workouts
-    .filter(workout => workout.completed && isCardioWorkout(workout))
+    .filter(workout => workout.completed && isPureCardioWorkout(workout))
     .map(workout => parse(workout.date, "yyyy-MM-dd", new Date()))
     .filter(date => isValid(date));
   
-  // Get strength workout dates
   const strengthWorkoutDates = workouts
-    .filter(workout => workout.completed && !isCardioWorkout(workout))
+    .filter(workout => workout.completed && isPureStrengthWorkout(workout))
+    .map(workout => parse(workout.date, "yyyy-MM-dd", new Date()))
+    .filter(date => isValid(date));
+
+  const mixedWorkoutDates = workouts
+    .filter(workout => workout.completed && isMixedWorkout(workout))
     .map(workout => parse(workout.date, "yyyy-MM-dd", new Date()))
     .filter(date => isValid(date));
   
@@ -101,7 +111,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
   const getCardioWorkoutsForDate = (date: Date) => {
     return workouts.filter(workout => {
       const workoutDate = parse(workout.date, "yyyy-MM-dd", new Date());
-      return workout.completed && isCardioWorkout(workout) &&
+      return workout.completed && isPureCardioWorkout(workout) &&
         date.getDate() === workoutDate.getDate() && 
         date.getMonth() === workoutDate.getMonth() && 
         date.getFullYear() === workoutDate.getFullYear();
@@ -112,7 +122,18 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
   const getStrengthWorkoutsForDate = (date: Date) => {
     return workouts.filter(workout => {
       const workoutDate = parse(workout.date, "yyyy-MM-dd", new Date());
-      return workout.completed && !isCardioWorkout(workout) &&
+      return workout.completed && isPureStrengthWorkout(workout) &&
+        date.getDate() === workoutDate.getDate() && 
+        date.getMonth() === workoutDate.getMonth() && 
+        date.getFullYear() === workoutDate.getFullYear();
+    });
+  };
+
+  // Function to get mixed workouts for a specific date
+  const getMixedWorkoutsForDate = (date: Date) => {
+    return workouts.filter(workout => {
+      const workoutDate = parse(workout.date, "yyyy-MM-dd", new Date());
+      return workout.completed && isMixedWorkout(workout) &&
         date.getDate() === workoutDate.getDate() && 
         date.getMonth() === workoutDate.getMonth() && 
         date.getFullYear() === workoutDate.getFullYear();
@@ -126,7 +147,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
            date1.getFullYear() === date2.getFullYear();
   };
 
-  // Check for dates that have both cardio and strength workouts
+  // Check for dates that have both pure cardio AND pure strength workouts (separate sessions)
   const getBothWorkoutTypeDates = () => {
     return cardioWorkoutDates.filter(cardioDate => 
       strengthWorkoutDates.some(strengthDate => isSameDay(cardioDate, strengthDate))
@@ -140,21 +161,20 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
     strengthWorkout: strengthWorkoutDates.filter(strengthDate => 
       !cardioWorkoutDates.some(cardioDate => isSameDay(cardioDate, strengthDate))
     ),
-    bothWorkouts: getBothWorkoutTypeDates()
+    bothWorkouts: getBothWorkoutTypeDates(),
+    mixedWorkout: mixedWorkoutDates
   };
 
-  console.log("Calendar modifiers:", modifiers);
-
-  // Create modifiers for the calendar with CSS class names
   const modifiersClassNames = {
     cardioWorkout: "cardioWorkout",
     strengthWorkout: "strengthWorkout", 
-    bothWorkouts: "bothWorkouts"
+    bothWorkouts: "bothWorkouts",
+    mixedWorkout: "mixedWorkout"
   };
 
-  // Get workouts for selected date to display below calendar
   const selectedDateCardio = selectedDate ? getCardioWorkoutsForDate(selectedDate) : [];
   const selectedDateStrength = selectedDate ? getStrengthWorkoutsForDate(selectedDate) : [];
+  const selectedDateMixed = selectedDate ? getMixedWorkoutsForDate(selectedDate) : [];
 
   
   return (
@@ -217,7 +237,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                 {t("Workout calendar")}
               </CardTitle>
               <div className="flex items-center justify-between sm:justify-end gap-4">
-                <div className="flex gap-3 text-xs">
+                <div className="flex gap-3 text-xs flex-wrap">
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-green-600"></div>
                     <span>{t("Strength")}</span>
@@ -225,6 +245,10 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-blue-500"></div>
                     <span>{t("Cardio")}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded bg-purple-500"></div>
+                    <span>Mix</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -326,6 +350,18 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                     background: linear-gradient(135deg, hsl(142 71% 35%), hsl(217 91% 50%)) !important;
                     transform: scale(1.05);
                   }
+                  
+                  /* Mixed workouts (single workout with both types) */
+                  .workout-calendar .mixedWorkout {
+                    background-color: hsl(271 81% 56%) !important;
+                    color: white !important;
+                    font-weight: 600 !important;
+                  }
+                  
+                  .workout-calendar .mixedWorkout:hover {
+                    background-color: hsl(271 81% 46%) !important;
+                    transform: scale(1.05);
+                  }
                 `
               }} />
               
@@ -366,7 +402,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
             </div>
 
             {/* Selected Date Details */}
-            {selectedDate && (selectedDateCardio.length > 0 || selectedDateStrength.length > 0) && (
+            {selectedDate && (selectedDateCardio.length > 0 || selectedDateStrength.length > 0 || selectedDateMixed.length > 0) && (
               <div className="mt-4 p-4 bg-muted rounded-lg space-y-3">
                 <div className="font-semibold text-sm flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4" />
@@ -404,6 +440,29 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                     </div>
                     <div className="space-y-2">
                       {selectedDateCardio.map((workout) => (
+                        <Card 
+                          key={workout.id} 
+                          className="p-3 cursor-pointer hover:bg-accent transition-colors"
+                          onClick={() => onViewWorkout?.(workout)}
+                        >
+                          <div className="font-medium text-sm">{workout.name}</div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {workout.exercises.length} {t("exercises")}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {selectedDateMixed.length > 0 && (
+                  <div>
+                    <div className="text-xs font-medium text-purple-600 dark:text-purple-400 mb-2 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Mix
+                    </div>
+                    <div className="space-y-2">
+                      {selectedDateMixed.map((workout) => (
                         <Card 
                           key={workout.id} 
                           className="p-3 cursor-pointer hover:bg-accent transition-colors"

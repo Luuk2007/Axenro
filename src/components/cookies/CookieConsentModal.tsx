@@ -196,7 +196,7 @@ const CookieConsentModal = () => {
                   {t('Save preferences')}
                 </Button>
                 <Button onClick={() => setShowCustomization(false)} variant="outline" className="w-full sm:w-auto">
-                  {t('Back')}
+                  {t('goBack')}
                 </Button>
               </div>
             </div>
