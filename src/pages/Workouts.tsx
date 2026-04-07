@@ -107,9 +107,9 @@ const Workouts = () => {
   };
 
   const handleEditWorkout = (workout: Workout) => {
-    const isCardio = getWorkoutMuscleGroupsFromExercises(workout.exercises).includes('cardio');
+    const allCardio = workout.exercises.length > 0 && workout.exercises.every(ex => ex.muscleGroup === 'cardio');
     setEditingWorkout(workout);
-    if (isCardio) {
+    if (allCardio) {
       setShowCardioForm(true);
     } else {
       setShowWorkoutForm(true);
