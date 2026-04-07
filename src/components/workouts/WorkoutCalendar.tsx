@@ -147,7 +147,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
            date1.getFullYear() === date2.getFullYear();
   };
 
-  // Check for dates that have both cardio and strength workouts
+  // Check for dates that have both pure cardio AND pure strength workouts (separate sessions)
   const getBothWorkoutTypeDates = () => {
     return cardioWorkoutDates.filter(cardioDate => 
       strengthWorkoutDates.some(strengthDate => isSameDay(cardioDate, strengthDate))
@@ -161,16 +161,15 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
     strengthWorkout: strengthWorkoutDates.filter(strengthDate => 
       !cardioWorkoutDates.some(cardioDate => isSameDay(cardioDate, strengthDate))
     ),
-    bothWorkouts: getBothWorkoutTypeDates()
+    bothWorkouts: getBothWorkoutTypeDates(),
+    mixedWorkout: mixedWorkoutDates
   };
 
-  console.log("Calendar modifiers:", modifiers);
-
-  // Create modifiers for the calendar with CSS class names
   const modifiersClassNames = {
     cardioWorkout: "cardioWorkout",
     strengthWorkout: "strengthWorkout", 
-    bothWorkouts: "bothWorkouts"
+    bothWorkouts: "bothWorkouts",
+    mixedWorkout: "mixedWorkout"
   };
 
   // Get workouts for selected date to display below calendar
