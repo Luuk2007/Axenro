@@ -30,17 +30,16 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [rawInputs, setRawInputs] = useState<Record<string, string>>({});
-  // Personal records lookup: exerciseName -> best weight in kg
   const [personalRecords, setPersonalRecords] = useState<Record<string, number>>({});
-  // Cardio measurement types per exercise: exerciseId -> 'seconds' | 'minutes' | 'reps' | 'km'
+  // Cardio measurement types per exercise: exerciseId -> 'time' | 'reps' | 'km'
   const [cardioMeasurements, setCardioMeasurements] = useState<Record<string, string>>({});
+  // Cardio time inputs: exerciseId-setId -> { minutes, seconds }
+  const [cardioTimeInputs, setCardioTimeInputs] = useState<Record<string, { minutes: string; seconds: string }>>({});
 
-  // Auto-generate workout name based on muscle groups (with fallback lookup for older workouts)
   const generatedWorkoutName = useMemo(() => {
     return getWorkoutTitleFromExercises(exercises);
   }, [exercises]);
 
-  // Convert stored metric weights to display weights for editing
   const convertExercisesForDisplay = (exerciseList: Exercise[]) => {
     return exerciseList.map(exercise => ({
       ...exercise,
@@ -51,7 +50,6 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }));
   };
 
-  // Convert display weights back to metric for storage
   const convertExercisesForStorage = (exerciseList: Exercise[]) => {
     return exerciseList.map(exercise => ({
       ...exercise,
@@ -62,13 +60,10 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }));
   };
 
-  // Fetch personal records for all exercises when dialog opens
   useEffect(() => {
     if (!open || !user) return;
     const fetchPRs = async () => {
       const prMap: Record<string, number> = {};
-      
-      // Check personal_records table
       const { data } = await supabase
         .from('personal_records')
         .select('exercise_name, weight')
@@ -81,8 +76,6 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
           }
         });
       }
-      
-      // Also check workout history for max weights per set
       const { data: workouts } = await supabase
         .from('workouts')
         .select('exercises')
@@ -101,16 +94,12 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
           });
         });
       }
-      
       setPersonalRecords(prMap);
     };
     fetchPRs();
   }, [open, user]);
 
-  // Track which sets are flagged as PR during this session
   const [prSets, setPrSets] = useState<Set<string>>(new Set());
-  
-  // Store the original PR values at session start (before any updates)
   const [originalPRs, setOriginalPRs] = useState<Record<string, number>>({});
   
   useEffect(() => {
@@ -119,14 +108,12 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }
   }, [personalRecords]);
 
-  // Check and flag PR on blur
   const flagPR = (exerciseName: string, setKey: string, displayWeight: number) => {
     if (!exerciseName || displayWeight <= 0) return;
     const weightInKg = convertWeight(displayWeight, measurementSystem, 'metric');
     const baseline = originalPRs[exerciseName.toLowerCase()] || 0;
     if (weightInKg > baseline) {
       setPrSets(prev => new Set(prev).add(setKey));
-      // Update personalRecords so subsequent sets compare against the new highest
       setPersonalRecords(prev => {
         const current = prev[exerciseName.toLowerCase()] || 0;
         return weightInKg > current ? { ...prev, [exerciseName.toLowerCase()]: weightInKg } : prev;
@@ -134,37 +121,60 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     }
   };
 
-  // Check if a set is a confirmed PR
   const isPRSet = (setKey: string): boolean => {
     return prSets.has(setKey);
   };
 
-  // Load editing workout data when editingWorkout changes
+  // Initialize cardio time inputs from existing exercise data (for editing)
+  const initCardioTimeInputs = (exerciseList: Exercise[]) => {
+    const timeInputs: Record<string, { minutes: string; seconds: string }> = {};
+    exerciseList.forEach(exercise => {
+      if (exercise.muscleGroup === 'cardio') {
+        exercise.sets.forEach(set => {
+          const key = `${exercise.id}-${set.id}`;
+          const totalSeconds = set.reps || 0;
+          const mins = Math.floor(totalSeconds / 60);
+          const secs = totalSeconds % 60;
+          timeInputs[key] = { minutes: mins.toString(), seconds: secs.toString() };
+        });
+      }
+    });
+    setCardioTimeInputs(timeInputs);
+  };
+
   useEffect(() => {
     if (editingWorkout) {
       setWorkoutDate(editingWorkout.date);
-      setExercises(convertExercisesForDisplay(editingWorkout.exercises));
+      const displayExercises = convertExercisesForDisplay(editingWorkout.exercises);
+      setExercises(displayExercises);
+      initCardioTimeInputs(editingWorkout.exercises);
+      // Auto-detect measurement types for cardio exercises
+      const measurements: Record<string, string> = {};
+      editingWorkout.exercises.forEach(ex => {
+        if (ex.muscleGroup === 'cardio') {
+          // Default to 'time' for existing cardio exercises
+          measurements[ex.id] = 'time';
+        }
+      });
+      setCardioMeasurements(measurements);
     } else {
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
+      setCardioTimeInputs({});
     }
-    // Reset PR tracking when dialog opens/closes
     setPrSets(new Set());
     setOriginalPRs({});
   }, [editingWorkout, measurementSystem, open]);
 
   const handleSaveWorkout = (finished: boolean = false) => {
     if (exercises.length === 0) return;
-    
-    // Convert weights back to metric for storage
     const exercisesForStorage = convertExercisesForStorage(exercises);
     onSaveWorkout(generatedWorkoutName, exercisesForStorage, workoutDate, finished);
-    
-    // Reset form only if not editing (will be handled by parent component)
     if (!editingWorkout) {
       setWorkoutDate(new Date().toISOString().split('T')[0]);
       setExercises([]);
       setRawInputs({});
+      setCardioTimeInputs({});
     }
   };
 
@@ -180,13 +190,21 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
       name: exerciseData.name,
       muscleGroup: exerciseData.muscleGroup,
       sets: exerciseData.sets || [
-        { id: 1, reps: 12, weight: 0, completed: false },
-        { id: 2, reps: 12, weight: 0, completed: false },
-        { id: 3, reps: 12, weight: 0, completed: false }
+        { id: 1, reps: 0, weight: 0, completed: false },
+        { id: 2, reps: 0, weight: 0, completed: false },
+        { id: 3, reps: 0, weight: 0, completed: false }
       ]
     };
-    
     setExercises(prev => [...prev, newExercise]);
+    if (exerciseData.muscleGroup === 'cardio') {
+      setCardioMeasurements(prev => ({ ...prev, [newExercise.id]: 'time' }));
+      // Initialize time inputs for the new cardio exercise sets
+      const timeInputs: Record<string, { minutes: string; seconds: string }> = {};
+      newExercise.sets.forEach(set => {
+        timeInputs[`${newExercise.id}-${set.id}`] = { minutes: '0', seconds: '0' };
+      });
+      setCardioTimeInputs(prev => ({ ...prev, ...timeInputs }));
+    }
     setShowAddExercise(false);
   };
 
@@ -198,16 +216,10 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     setExercises(prev => {
       const index = prev.findIndex(ex => ex.id === exerciseId);
       if (index === -1) return prev;
-      
       const newIndex = direction === 'up' ? index - 1 : index + 1;
-      
-      // Check bounds
       if (newIndex < 0 || newIndex >= prev.length) return prev;
-      
-      // Swap exercises
       const newExercises = [...prev];
       [newExercises[index], newExercises[newIndex]] = [newExercises[newIndex], newExercises[index]];
-      
       return newExercises;
     });
   };
@@ -216,12 +228,14 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     setExercises(prev => prev.map(exercise => {
       if (exercise.id === exerciseId) {
         const newSetId = exercise.sets.length + 1;
-        const newSet: ExerciseSet = {
-          id: newSetId,
-          reps: 12,
-          weight: 0,
-          completed: false
-        };
+        const newSet: ExerciseSet = { id: newSetId, reps: 0, weight: 0, completed: false };
+        // Initialize time input for new cardio set
+        if (exercise.muscleGroup === 'cardio') {
+          setCardioTimeInputs(prev => ({
+            ...prev,
+            [`${exerciseId}-${newSetId}`]: { minutes: '0', seconds: '0' }
+          }));
+        }
         return { ...exercise, sets: [...exercise.sets, newSet] };
       }
       return exercise;
@@ -243,13 +257,8 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
     if (field === 'reps' || field === 'weight') {
       const key = getRawInputKey(exerciseId, setId, field);
       const strValue = String(value);
-      
-      // Store raw string for display
       setRawInputs(prev => ({ ...prev, [key]: strValue }));
-      
-      // Only update numeric state when we have a complete number
       if (strValue === '' || strValue === '.' || strValue === '-' || strValue.endsWith('.')) {
-        // Don't update numeric state yet for incomplete input
         if (strValue === '') {
           setExercises(prev => prev.map(exercise => {
             if (exercise.id === exerciseId) {
@@ -260,7 +269,6 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
         }
         return;
       }
-      
       const numValue = parseFloat(strValue);
       if (!isNaN(numValue)) {
         setExercises(prev => prev.map(exercise => {
@@ -272,11 +280,29 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
       }
       return;
     }
-
-    // completed field
     setExercises(prev => prev.map(exercise => {
       if (exercise.id === exerciseId) {
         return { ...exercise, sets: exercise.sets.map(set => set.id === setId ? { ...set, completed: Boolean(value) } : set) };
+      }
+      return exercise;
+    }));
+  };
+
+  const handleCardioTimeChange = (exerciseId: string, setId: number, field: 'minutes' | 'seconds', value: string) => {
+    const key = `${exerciseId}-${setId}`;
+    setCardioTimeInputs(prev => {
+      const current = prev[key] || { minutes: '0', seconds: '0' };
+      const updated = { ...current, [field]: value };
+      return { ...prev, [key]: updated };
+    });
+    // Calculate total seconds and store in reps
+    const currentInputs = cardioTimeInputs[key] || { minutes: '0', seconds: '0' };
+    const mins = parseInt(field === 'minutes' ? value : currentInputs.minutes) || 0;
+    const secs = parseInt(field === 'seconds' ? value : currentInputs.seconds) || 0;
+    const totalSeconds = mins * 60 + secs;
+    setExercises(prev => prev.map(exercise => {
+      if (exercise.id === exerciseId) {
+        return { ...exercise, sets: exercise.sets.map(set => set.id === setId ? { ...set, reps: totalSeconds } : set) };
       }
       return exercise;
     }));
@@ -302,7 +328,6 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
           </DialogHeader>
           
           <div className="space-y-4">
-            {/* Auto-generated workout name display */}
             <div className="p-3 bg-muted/50 rounded-lg border">
               <div className="flex items-center gap-2">
                 <Dumbbell className="h-4 w-4 text-muted-foreground" />
@@ -353,7 +378,6 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
-                            {/* Reorder buttons */}
                             <div className="flex flex-col -my-1">
                               <Button
                                 variant="ghost"
@@ -401,15 +425,14 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                         {exercise.muscleGroup === 'cardio' && (
                           <div className="mb-2">
                             <Select
-                              value={cardioMeasurements[exercise.id] || 'minutes'}
+                              value={cardioMeasurements[exercise.id] || 'time'}
                               onValueChange={(val) => setCardioMeasurements(prev => ({ ...prev, [exercise.id]: val }))}
                             >
                               <SelectTrigger className="h-8 text-xs">
                                 <SelectValue placeholder={t("Select measurement")} />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="seconds">{t("Time (seconds)")}</SelectItem>
-                                <SelectItem value="minutes">{t("Time (minutes)")}</SelectItem>
+                                <SelectItem value="time">{t("Duration")}</SelectItem>
                                 <SelectItem value="reps">{t("Reps")}</SelectItem>
                                 <SelectItem value="km">{t("Distance (km)")}</SelectItem>
                               </SelectContent>
@@ -422,43 +445,81 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                             const setKey = `${exercise.id}-${set.id}`;
                             const isCardio = exercise.muscleGroup === 'cardio';
                             const prDetected = !isCardio && exercise.muscleGroup !== 'calisthenics' && isPRSet(setKey);
-                            const measureType = cardioMeasurements[exercise.id] || 'minutes';
-                            const unitLabel = isCardio 
-                              ? (measureType === 'seconds' ? t("sec") : measureType === 'minutes' ? t("min") : measureType === 'km' ? t("km") : 'reps')
-                              : 'reps';
+                            const measureType = cardioMeasurements[exercise.id] || 'time';
+                            const timeKey = `${exercise.id}-${set.id}`;
+                            const timeInput = cardioTimeInputs[timeKey] || { minutes: '0', seconds: '0' };
                             
                             return (
                             <div key={set.id} className={`flex items-center gap-2 text-sm ${prDetected ? 'bg-amber-500/10 rounded-lg px-1 py-0.5 border border-amber-500/30' : ''}`}>
                               <span className="w-10 text-muted-foreground flex-shrink-0">{t("Set")} {index + 1}</span>
-                              <div className="flex items-center gap-1">
-                                <Input
-                                  type="number"
-                                  value={getInputValue(exercise.id, set.id, 'reps', set.reps)}
-                                  onChange={(e) => handleUpdateSet(exercise.id, set.id, 'reps', e.target.value)}
-                                  className="w-16 h-8 text-center px-1"
-                                  placeholder={isCardio ? unitLabel : "Reps"}
-                                />
-                                <span className="text-xs text-muted-foreground">{unitLabel}</span>
-                              </div>
-                              {!isCardio && exercise.muscleGroup !== 'calisthenics' && (
-                                <div className="flex items-center gap-1 flex-1 min-w-0">
+                              
+                              {isCardio && measureType === 'time' ? (
+                                <div className="flex items-center gap-1 flex-1">
                                   <Input
                                     type="number"
-                                    value={getInputValue(exercise.id, set.id, 'weight', set.weight)}
-                                    onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
-                                    onBlur={() => flagPR(exercise.name, setKey, set.weight)}
-                                    className={`w-full min-w-[60px] h-8 px-2 ${prDetected ? 'border-amber-500/50' : ''}`}
-                                    placeholder="Weight"
+                                    value={timeInput.minutes}
+                                    onChange={(e) => handleCardioTimeChange(exercise.id, set.id, 'minutes', e.target.value)}
+                                    className="w-14 h-8 text-center px-1"
+                                    placeholder="0"
+                                    min="0"
                                   />
-                                  <span className="text-xs text-muted-foreground flex-shrink-0">{getWeightUnit(measurementSystem)}</span>
-                                  {prDetected && (
-                                    <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-600 dark:text-amber-400 flex-shrink-0">
-                                      <Trophy className="h-3 w-3" />
-                                      <span className="text-[10px] font-bold">PR</span>
-                                    </span>
-                                  )}
+                                  <span className="text-xs text-muted-foreground">{t("min")}</span>
+                                  <Input
+                                    type="number"
+                                    value={timeInput.seconds}
+                                    onChange={(e) => handleCardioTimeChange(exercise.id, set.id, 'seconds', e.target.value)}
+                                    className="w-14 h-8 text-center px-1"
+                                    placeholder="0"
+                                    min="0"
+                                    max="59"
+                                  />
+                                  <span className="text-xs text-muted-foreground">{t("sec")}</span>
                                 </div>
+                              ) : isCardio ? (
+                                <div className="flex items-center gap-1">
+                                  <Input
+                                    type="number"
+                                    value={getInputValue(exercise.id, set.id, 'reps', set.reps)}
+                                    onChange={(e) => handleUpdateSet(exercise.id, set.id, 'reps', e.target.value)}
+                                    className="w-16 h-8 text-center px-1"
+                                    placeholder={measureType === 'km' ? 'km' : 'reps'}
+                                  />
+                                  <span className="text-xs text-muted-foreground">{measureType === 'km' ? t("km") : 'reps'}</span>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="flex items-center gap-1">
+                                    <Input
+                                      type="number"
+                                      value={getInputValue(exercise.id, set.id, 'reps', set.reps)}
+                                      onChange={(e) => handleUpdateSet(exercise.id, set.id, 'reps', e.target.value)}
+                                      className="w-16 h-8 text-center px-1"
+                                      placeholder="Reps"
+                                    />
+                                    <span className="text-xs text-muted-foreground">reps</span>
+                                  </div>
+                                  {exercise.muscleGroup !== 'calisthenics' && (
+                                    <div className="flex items-center gap-1 flex-1 min-w-0">
+                                      <Input
+                                        type="number"
+                                        value={getInputValue(exercise.id, set.id, 'weight', set.weight)}
+                                        onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
+                                        onBlur={() => flagPR(exercise.name, setKey, set.weight)}
+                                        className={`w-full min-w-[60px] h-8 px-2 ${prDetected ? 'border-amber-500/50' : ''}`}
+                                        placeholder="Weight"
+                                      />
+                                      <span className="text-xs text-muted-foreground flex-shrink-0">{getWeightUnit(measurementSystem)}</span>
+                                      {prDetected && (
+                                        <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-600 dark:text-amber-400 flex-shrink-0">
+                                          <Trophy className="h-3 w-3" />
+                                          <span className="text-[10px] font-bold">PR</span>
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </>
                               )}
+                              
                               <Button
                                 variant="ghost"
                                 size="sm"
