@@ -124,7 +124,7 @@ export const settingsTranslations: Translations = {
   personalDetails: "Persoonlijke gegevens",
   profileSettings: "Profiel instellingen",
   nutritionPlan: "Voedingsplan",
-  back: "Terug",
+  goBack: "Terug",
   
   // New subscription limit translations
   "You've reached your custom meals limit. Upgrade to add more.": "Je hebt je limiet voor aangepaste maaltijden bereikt. Upgrade om er meer toe te voegen.",
