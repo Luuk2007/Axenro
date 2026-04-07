@@ -454,6 +454,29 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                     </div>
                   </div>
                 )}
+                
+                {selectedDateMixed.length > 0 && (
+                  <div>
+                    <div className="text-xs font-medium text-purple-600 dark:text-purple-400 mb-2 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Mix
+                    </div>
+                    <div className="space-y-2">
+                      {selectedDateMixed.map((workout) => (
+                        <Card 
+                          key={workout.id} 
+                          className="p-3 cursor-pointer hover:bg-accent transition-colors"
+                          onClick={() => onViewWorkout?.(workout)}
+                        >
+                          <div className="font-medium text-sm">{workout.name}</div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {workout.exercises.length} {t("exercises")}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
         </CardContent>
