@@ -172,9 +172,9 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
     mixedWorkout: "mixedWorkout"
   };
 
-  // Get workouts for selected date to display below calendar
   const selectedDateCardio = selectedDate ? getCardioWorkoutsForDate(selectedDate) : [];
   const selectedDateStrength = selectedDate ? getStrengthWorkoutsForDate(selectedDate) : [];
+  const selectedDateMixed = selectedDate ? getMixedWorkoutsForDate(selectedDate) : [];
 
   
   return (
@@ -237,7 +237,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                 {t("Workout calendar")}
               </CardTitle>
               <div className="flex items-center justify-between sm:justify-end gap-4">
-                <div className="flex gap-3 text-xs">
+                <div className="flex gap-3 text-xs flex-wrap">
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-green-600"></div>
                     <span>{t("Strength")}</span>
@@ -245,6 +245,10 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded bg-blue-500"></div>
                     <span>{t("Cardio")}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded bg-purple-500"></div>
+                    <span>Mix</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -344,6 +348,18 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                   
                   .workout-calendar .bothWorkouts:hover {
                     background: linear-gradient(135deg, hsl(142 71% 35%), hsl(217 91% 50%)) !important;
+                    transform: scale(1.05);
+                  }
+                  
+                  /* Mixed workouts (single workout with both types) */
+                  .workout-calendar .mixedWorkout {
+                    background-color: hsl(271 81% 56%) !important;
+                    color: white !important;
+                    font-weight: 600 !important;
+                  }
+                  
+                  .workout-calendar .mixedWorkout:hover {
+                    background-color: hsl(271 81% 46%) !important;
                     transform: scale(1.05);
                   }
                 `
