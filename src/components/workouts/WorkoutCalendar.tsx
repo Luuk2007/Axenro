@@ -55,22 +55,32 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
     });
   
   
-  // Helper function to check if a workout is cardio
-  const isCardioWorkout = (workout: Workout) => {
-    return workout.exercises.some(exercise => 
-      exercise.muscleGroup === 'cardio'
-    );
+  // Helper functions for workout type classification
+  const isPureCardioWorkout = (workout: Workout) => {
+    return workout.exercises.length > 0 && workout.exercises.every(ex => ex.muscleGroup === 'cardio');
+  };
+  const isPureStrengthWorkout = (workout: Workout) => {
+    return workout.exercises.length > 0 && workout.exercises.every(ex => ex.muscleGroup !== 'cardio');
+  };
+  const isMixedWorkout = (workout: Workout) => {
+    const hasCardio = workout.exercises.some(ex => ex.muscleGroup === 'cardio');
+    const hasStrength = workout.exercises.some(ex => ex.muscleGroup !== 'cardio');
+    return hasCardio && hasStrength;
   };
   
-  // Get cardio workout dates
+  // Get dates by workout type
   const cardioWorkoutDates = workouts
-    .filter(workout => workout.completed && isCardioWorkout(workout))
+    .filter(workout => workout.completed && isPureCardioWorkout(workout))
     .map(workout => parse(workout.date, "yyyy-MM-dd", new Date()))
     .filter(date => isValid(date));
   
-  // Get strength workout dates
   const strengthWorkoutDates = workouts
-    .filter(workout => workout.completed && !isCardioWorkout(workout))
+    .filter(workout => workout.completed && isPureStrengthWorkout(workout))
+    .map(workout => parse(workout.date, "yyyy-MM-dd", new Date()))
+    .filter(date => isValid(date));
+
+  const mixedWorkoutDates = workouts
+    .filter(workout => workout.completed && isMixedWorkout(workout))
     .map(workout => parse(workout.date, "yyyy-MM-dd", new Date()))
     .filter(date => isValid(date));
   
@@ -101,7 +111,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
   const getCardioWorkoutsForDate = (date: Date) => {
     return workouts.filter(workout => {
       const workoutDate = parse(workout.date, "yyyy-MM-dd", new Date());
-      return workout.completed && isCardioWorkout(workout) &&
+      return workout.completed && isPureCardioWorkout(workout) &&
         date.getDate() === workoutDate.getDate() && 
         date.getMonth() === workoutDate.getMonth() && 
         date.getFullYear() === workoutDate.getFullYear();
@@ -112,7 +122,18 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
   const getStrengthWorkoutsForDate = (date: Date) => {
     return workouts.filter(workout => {
       const workoutDate = parse(workout.date, "yyyy-MM-dd", new Date());
-      return workout.completed && !isCardioWorkout(workout) &&
+      return workout.completed && isPureStrengthWorkout(workout) &&
+        date.getDate() === workoutDate.getDate() && 
+        date.getMonth() === workoutDate.getMonth() && 
+        date.getFullYear() === workoutDate.getFullYear();
+    });
+  };
+
+  // Function to get mixed workouts for a specific date
+  const getMixedWorkoutsForDate = (date: Date) => {
+    return workouts.filter(workout => {
+      const workoutDate = parse(workout.date, "yyyy-MM-dd", new Date());
+      return workout.completed && isMixedWorkout(workout) &&
         date.getDate() === workoutDate.getDate() && 
         date.getMonth() === workoutDate.getMonth() && 
         date.getFullYear() === workoutDate.getFullYear();
