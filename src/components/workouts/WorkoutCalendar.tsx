@@ -402,7 +402,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
             </div>
 
             {/* Selected Date Details */}
-            {selectedDate && (selectedDateCardio.length > 0 || selectedDateStrength.length > 0) && (
+            {selectedDate && (selectedDateCardio.length > 0 || selectedDateStrength.length > 0 || selectedDateMixed.length > 0) && (
               <div className="mt-4 p-4 bg-muted rounded-lg space-y-3">
                 <div className="font-semibold text-sm flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4" />
