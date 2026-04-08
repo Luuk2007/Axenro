@@ -379,7 +379,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                     modifiers={modifiers}
                     modifiersClassNames={modifiersClassNames}
                     weekStartsOn={1}
-                    showOutsideDays={false}
+                    showOutsideDays={true}
                   />
                 </div>
                 
@@ -395,7 +395,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts, onViewWorko
                     modifiers={modifiers}
                     modifiersClassNames={modifiersClassNames}
                     weekStartsOn={1}
-                    showOutsideDays={false}
+                    showOutsideDays={true}
                   />
                 </div>
               </div>
