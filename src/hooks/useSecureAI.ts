@@ -35,7 +35,7 @@ export const useSecureAI = () => {
         }
       }
 
-      // Validate meal description for meal analyzer
+      // Validate meal description for meal analyzer (text is optional when image is provided)
       if (functionName === 'ai-meal-analyzer' && body.mealDescription) {
         const validation = validateChatInput(body.mealDescription);
         if (!validation.isValid) {
