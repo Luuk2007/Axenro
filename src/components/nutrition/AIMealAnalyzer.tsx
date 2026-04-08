@@ -285,14 +285,72 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    variant="outline"
-                    className="h-24 flex-col gap-2"
-                    onClick={() => cameraInputRef.current?.click()}
+                  <button
+                    className="h-24 flex flex-col items-center justify-center gap-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground text-sm font-medium"
+                    onClick={() => {
+                      // Use getUserMedia for live camera
+                      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                          .then(stream => {
+                            // Create a video element to capture
+                            const video = document.createElement('video');
+                            video.srcObject = stream;
+                            video.setAttribute('playsinline', 'true');
+                            video.play();
+                            
+                            // Create overlay
+                            const overlay = document.createElement('div');
+                            overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+                            
+                            video.style.cssText = 'width:100%;max-height:80vh;object-fit:contain;';
+                            overlay.appendChild(video);
+                            
+                            const btnContainer = document.createElement('div');
+                            btnContainer.style.cssText = 'display:flex;gap:16px;margin-top:16px;';
+                            
+                            const captureBtn = document.createElement('button');
+                            captureBtn.textContent = '📸 ' + t('Take photo');
+                            captureBtn.style.cssText = 'padding:12px 32px;border-radius:999px;background:white;color:black;font-weight:600;font-size:16px;border:none;cursor:pointer;';
+                            
+                            const cancelBtn = document.createElement('button');
+                            cancelBtn.textContent = t('cancel');
+                            cancelBtn.style.cssText = 'padding:12px 24px;border-radius:999px;background:rgba(255,255,255,0.2);color:white;font-weight:500;font-size:14px;border:none;cursor:pointer;';
+                            
+                            btnContainer.appendChild(captureBtn);
+                            btnContainer.appendChild(cancelBtn);
+                            overlay.appendChild(btnContainer);
+                            document.body.appendChild(overlay);
+                            
+                            const cleanup = () => {
+                              stream.getTracks().forEach(t => t.stop());
+                              overlay.remove();
+                            };
+                            
+                            cancelBtn.onclick = cleanup;
+                            
+                            captureBtn.onclick = () => {
+                              const canvas = document.createElement('canvas');
+                              canvas.width = video.videoWidth;
+                              canvas.height = video.videoHeight;
+                              canvas.getContext('2d')?.drawImage(video, 0, 0);
+                              const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                              setImagePreview(dataUrl);
+                              setImageBase64(dataUrl);
+                              cleanup();
+                            };
+                          })
+                          .catch(() => {
+                            // Fallback to file input with capture
+                            cameraInputRef.current?.click();
+                          });
+                      } else {
+                        cameraInputRef.current?.click();
+                      }
+                    }}
                   >
                     <Camera className="h-6 w-6" />
                     <span className="text-xs">{t("Take photo")}</span>
-                  </Button>
+                  </button>
                   <Button
                     variant="outline"
                     className="h-24 flex-col gap-2"
