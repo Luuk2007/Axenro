@@ -1,44 +1,17 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  try {
-    const { mealDescription, portionSize = 1 } = await req.json();
-
-    if (!mealDescription || typeof mealDescription !== 'string') {
-      return new Response(JSON.stringify({ error: 'Meal description is required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    console.log('Analyzing meal:', mealDescription, 'Portion size:', portionSize);
-
-    // Create a detailed prompt for nutritional analysis with better handling of multiple foods
-    const systemPrompt = `You are a professional nutritionist with expertise in food analysis. 
-Your task is to analyze meal descriptions and provide accurate nutritional estimates.
+const systemPrompt = `You are a professional nutritionist with expertise in food analysis. 
+Your task is to analyze meal descriptions or photos and provide accurate nutritional estimates.
 
 CRITICAL INSTRUCTIONS FOR MULTIPLE FOODS:
-1. When multiple foods are mentioned, analyze EACH item separately first
+1. When multiple foods are mentioned or visible, analyze EACH item separately first
 2. Calculate the nutrition for each food item individually
 3. Sum up all the values to get the TOTAL nutrition
 4. Show your breakdown in the notes
@@ -49,147 +22,153 @@ ACCURACY GUIDELINES:
 - Account for cooking methods (fried vs grilled affects calories)
 - Be conservative with estimates if unclear
 
+PHOTO ANALYSIS GUIDELINES (when analyzing a photo):
+- Identify each distinct food item visible on the plate/in the image
+- Estimate portion sizes based on plate size, utensils, or other reference objects
+- If foods are mixed together (e.g., a stew), estimate total weight and composition
+- Note any sauces, dressings, or toppings that add calories
+- If the image is unclear or not food, say so in the notes and give low confidence
+
 CONFIDENCE LEVELS:
-- "high": Specific quantities and common foods (e.g., "2 slices whole wheat bread")
-- "medium": General descriptions (e.g., "chicken sandwich")
-- "low": Vague descriptions (e.g., "some pasta")`;
+- "high": Specific quantities and common foods clearly visible or described
+- "medium": General descriptions or partially visible foods
+- "low": Vague descriptions, blurry images, or mixed/unclear foods`;
 
-    const userPrompt = `Analyze this meal and provide total nutritional values:
+const toolDefinition = {
+  type: "function",
+  function: {
+    name: "provide_nutrition_analysis",
+    description: "Provide detailed nutritional analysis for a meal",
+    parameters: {
+      type: "object",
+      properties: {
+        calories: { type: "number", description: "Total calories for the entire meal" },
+        protein: { type: "number", description: "Total protein in grams" },
+        carbs: { type: "number", description: "Total carbohydrates in grams" },
+        fat: { type: "number", description: "Total fat in grams" },
+        confidence: { type: "string", enum: ["high", "medium", "low"], description: "Confidence level of the estimate" },
+        notes: { type: "string", description: "Brief breakdown showing individual food items and their contributions to the total" }
+      },
+      required: ["calories", "protein", "carbs", "fat", "confidence", "notes"],
+      additionalProperties: false
+    }
+  }
+};
 
-Meal Description: "${mealDescription}"
-Portion Multiplier: ${portionSize}x
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
 
-Instructions:
-1. Identify all food items in the description
-2. Calculate nutrition for each item separately
-3. Multiply each by the portion multiplier (${portionSize})
-4. Sum all values for the total
-5. In notes, briefly show your breakdown (e.g., "Bread: 150cal + Chicken: 200cal + Cheese: 100cal = 450cal total")
+  try {
+    const { mealDescription, imageBase64, portionSize = 1 } = await req.json();
 
-Provide accurate totals in the response.`;
+    const hasText = mealDescription && typeof mealDescription === 'string' && mealDescription.trim();
+    const hasImage = imageBase64 && typeof imageBase64 === 'string';
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    if (!hasText && !hasImage) {
+      return new Response(JSON.stringify({ error: 'Meal description or image is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Use Lovable AI Gateway (supports vision via Gemini)
+    const apiKey = Deno.env.get('LOVABLE_API_KEY');
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: 'AI API key not configured' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log('Analyzing meal:', hasText ? mealDescription : '(photo)', 'Portion size:', portionSize);
+
+    // Build user message content
+    const userContent: any[] = [];
+
+    if (hasImage) {
+      userContent.push({
+        type: "image_url",
+        image_url: { url: imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}` }
+      });
+      userContent.push({
+        type: "text",
+        text: hasText 
+          ? `Analyze this photo of food along with the description: "${mealDescription}". Portion Multiplier: ${portionSize}x. Identify all food items, estimate portions, calculate nutrition for each, multiply by the portion multiplier, and sum all values. In notes, show your breakdown.`
+          : `Analyze this photo of food. Portion Multiplier: ${portionSize}x. Identify all visible food items, estimate portion sizes based on visual cues, calculate nutrition for each item, multiply by the portion multiplier, and sum all values. In notes, show your breakdown and describe what you identified.`
+      });
+    } else {
+      userContent.push({
+        type: "text",
+        text: `Analyze this meal and provide total nutritional values:\n\nMeal Description: "${mealDescription}"\nPortion Multiplier: ${portionSize}x\n\nInstructions:\n1. Identify all food items in the description\n2. Calculate nutrition for each item separately\n3. Multiply each by the portion multiplier (${portionSize})\n4. Sum all values for the total\n5. In notes, briefly show your breakdown`
+      });
+    }
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'google/gemini-2.5-flash',
         messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: userPrompt
-          }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userContent }
         ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "provide_nutrition_analysis",
-              description: "Provide detailed nutritional analysis for a meal",
-              parameters: {
-                type: "object",
-                properties: {
-                  calories: {
-                    type: "number",
-                    description: "Total calories for the entire meal"
-                  },
-                  protein: {
-                    type: "number",
-                    description: "Total protein in grams"
-                  },
-                  carbs: {
-                    type: "number",
-                    description: "Total carbohydrates in grams"
-                  },
-                  fat: {
-                    type: "number",
-                    description: "Total fat in grams"
-                  },
-                  confidence: {
-                    type: "string",
-                    enum: ["high", "medium", "low"],
-                    description: "Confidence level of the estimate"
-                  },
-                  notes: {
-                    type: "string",
-                    description: "Brief breakdown showing individual food items and their contributions to the total"
-                  }
-                },
-                required: ["calories", "protein", "carbs", "fat", "confidence", "notes"],
-                additionalProperties: false
-              }
-            }
-          }
-        ],
-        tool_choice: {
-          type: "function",
-          function: { name: "provide_nutrition_analysis" }
-        },
+        tools: [toolDefinition],
+        tool_choice: { type: "function", function: { name: "provide_nutrition_analysis" } },
         max_tokens: 800,
         temperature: 0.2,
       }),
     });
 
     if (!response.ok) {
-      console.error('OpenAI API error:', response.status, response.statusText);
+      const status = response.status;
+      console.error('AI API error:', status, response.statusText);
+      if (status === 429) {
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded, please try again later' }), {
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (status === 402) {
+        return new Response(JSON.stringify({ error: 'AI credits exhausted' }), {
+          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       return new Response(JSON.stringify({ error: 'Failed to analyze meal with AI' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const data = await response.json();
-    console.log('Full AI Response:', JSON.stringify(data, null, 2));
+    console.log('AI Response received');
 
-    // Extract nutrition data from tool call response
-    let nutritionData;
-    try {
-      const toolCall = data.choices[0]?.message?.tool_calls?.[0];
-      
-      if (!toolCall || !toolCall.function || !toolCall.function.arguments) {
-        console.error('No tool call in response:', data);
-        return new Response(JSON.stringify({ error: 'Invalid AI response format' }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      nutritionData = JSON.parse(toolCall.function.arguments);
-      console.log('Parsed nutrition data:', nutritionData);
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError);
-      return new Response(JSON.stringify({ error: 'Failed to parse AI response' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall?.function?.arguments) {
+      console.error('No tool call in response:', JSON.stringify(data));
+      return new Response(JSON.stringify({ error: 'Invalid AI response format' }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Validate the response structure
-    if (!nutritionData.calories || !nutritionData.protein || !nutritionData.carbs || !nutritionData.fat) {
-      console.error('Invalid nutrition data structure:', nutritionData);
+    const nutritionData = JSON.parse(toolCall.function.arguments);
+
+    if (!nutritionData.calories && !nutritionData.protein && !nutritionData.carbs && !nutritionData.fat) {
       return new Response(JSON.stringify({ error: 'Incomplete nutrition analysis' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Round values to reasonable precision
     const result = {
-      calories: Math.round(nutritionData.calories),
-      protein: Math.round(nutritionData.protein * 10) / 10,
-      carbs: Math.round(nutritionData.carbs * 10) / 10,
-      fat: Math.round(nutritionData.fat * 10) / 10,
+      calories: Math.round(nutritionData.calories || 0),
+      protein: Math.round((nutritionData.protein || 0) * 10) / 10,
+      carbs: Math.round((nutritionData.carbs || 0) * 10) / 10,
+      fat: Math.round((nutritionData.fat || 0) * 10) / 10,
       confidence: nutritionData.confidence || 'medium',
-      notes: nutritionData.notes || 'Nutritional estimate based on meal description'
+      notes: nutritionData.notes || 'Nutritional estimate based on analysis'
     };
-
-    console.log('Final result:', result);
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -198,8 +177,7 @@ Provide accurate totals in the response.`;
   } catch (error) {
     console.error('Error in ai-meal-analyzer function:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
