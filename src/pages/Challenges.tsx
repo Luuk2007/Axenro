@@ -91,7 +91,7 @@ const Challenges: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in pb-24 md:pb-8 w-full max-w-full overflow-x-hidden px-0">
+    <div className="space-y-6 animate-fade-in pb-24 md:pb-8 w-full max-w-full overflow-x-hidden">
       {/* Header - consistent with other pages */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="min-w-0">
