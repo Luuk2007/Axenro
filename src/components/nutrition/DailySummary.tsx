@@ -36,7 +36,17 @@ export default function DailySummary({ className, meals = [], selectedDate = new
       const savedProfile = localStorage.getItem("userProfile");
       if (savedProfile) {
         try {
-          const profileData: ProfileData = JSON.parse(savedProfile);
+          const raw = JSON.parse(savedProfile);
+          // Map snake_case keys from DB to camelCase expected by macroCalculations
+          const profileData: ProfileData = {
+            weight: raw.weight,
+            height: raw.height,
+            age: raw.age,
+            gender: raw.gender,
+            activityLevel: raw.activity_level || raw.activityLevel,
+            exerciseFrequency: raw.exercise_frequency || raw.exerciseFrequency,
+            fitnessGoal: raw.fitness_goal || raw.fitnessGoal,
+          };
           
           // Calculate macros using centralized function
           const macroGoals = calculateMacroGoals(profileData);
