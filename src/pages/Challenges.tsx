@@ -457,7 +457,7 @@ const Challenges: React.FC = () => {
                               <span className="text-xl">{badgeEmoji[badge.badge_type]}</span>
                             </div>
                             <p className="text-[10px] font-semibold text-foreground line-clamp-2">
-                              {challenge?.title || 'Challenge'}
+                              {challenge ? (t(challenge.title) !== challenge.title ? t(challenge.title) : challenge.title) : 'Challenge'}
                             </p>
                             <p className="text-[9px] text-muted-foreground capitalize mt-0.5">
                               {badge.badge_type} • {Math.round(badge.completion_percentage)}%
@@ -489,12 +489,12 @@ const Challenges: React.FC = () => {
                   <div className="flex items-center gap-3 mb-1">
                     <span className="text-3xl">{emoji}</span>
                     <div>
-                      <DialogTitle className="text-lg leading-tight">{selectedChallenge.title}</DialogTitle>
+                      <DialogTitle className="text-lg leading-tight">{t(selectedChallenge.title) !== selectedChallenge.title ? t(selectedChallenge.title) : selectedChallenge.title}</DialogTitle>
                     </div>
                   </div>
                 </DialogHeader>
                 <div className="space-y-4 pt-2">
-                  <p className="text-sm text-muted-foreground">{selectedChallenge.description}</p>
+                  <p className="text-sm text-muted-foreground">{t(selectedChallenge.description) !== selectedChallenge.description ? t(selectedChallenge.description) : selectedChallenge.description}</p>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-xl bg-muted/30 border border-border/50">
