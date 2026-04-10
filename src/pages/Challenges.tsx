@@ -228,8 +228,8 @@ const Challenges: React.FC = () => {
                         <div className="flex items-start gap-3">
                           <div className="text-2xl flex-shrink-0 mt-0.5">{emoji}</div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground text-sm leading-tight pr-1">{challenge.title}</h3>
-                            <p className="text-xs text-muted-foreground line-clamp-2 mt-1 mb-2">{challenge.description}</p>
+                            <h3 className="font-semibold text-foreground text-sm leading-tight pr-1">{t(challenge.title) !== challenge.title ? t(challenge.title) : challenge.title}</h3>
+                            <p className="text-xs text-muted-foreground line-clamp-2 mt-1 mb-2">{t(challenge.description) !== challenge.description ? t(challenge.description) : challenge.description}</p>
                             <div className="flex items-center gap-2 flex-wrap">
                               <Badge variant="outline" className={`${diff.bg} ${diff.color} border text-[10px]`}>
                                 <DiffIcon className="h-3 w-3 mr-1" />
@@ -325,7 +325,7 @@ const Challenges: React.FC = () => {
                             <div className="flex items-center gap-3 min-w-0">
                               <span className="text-2xl flex-shrink-0">{emoji}</span>
                               <div className="min-w-0">
-                                <h3 className="font-semibold text-foreground text-sm truncate">{challenge.title}</h3>
+                                <h3 className="font-semibold text-foreground text-sm truncate">{t(challenge.title) !== challenge.title ? t(challenge.title) : challenge.title}</h3>
                                 <div className="flex items-center gap-2 mt-0.5">
                                   <span className="text-xs text-muted-foreground">
                                     {t('chDay')} {completedDays} / {challenge.duration_days}
