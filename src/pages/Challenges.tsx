@@ -228,8 +228,8 @@ const Challenges: React.FC = () => {
                         <div className="flex items-start gap-3">
                           <div className="text-2xl flex-shrink-0 mt-0.5">{emoji}</div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground text-sm leading-tight pr-1">{challenge.title}</h3>
-                            <p className="text-xs text-muted-foreground line-clamp-2 mt-1 mb-2">{challenge.description}</p>
+                            <h3 className="font-semibold text-foreground text-sm leading-tight pr-1">{t(challenge.title) !== challenge.title ? t(challenge.title) : challenge.title}</h3>
+                            <p className="text-xs text-muted-foreground line-clamp-2 mt-1 mb-2">{t(challenge.description) !== challenge.description ? t(challenge.description) : challenge.description}</p>
                             <div className="flex items-center gap-2 flex-wrap">
                               <Badge variant="outline" className={`${diff.bg} ${diff.color} border text-[10px]`}>
                                 <DiffIcon className="h-3 w-3 mr-1" />
@@ -253,7 +253,7 @@ const Challenges: React.FC = () => {
                                 className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg shadow-amber-500/25 h-8 px-3 text-xs"
                               >
                                 <Play className="h-3 w-3 mr-1" />
-                                Start
+                                {t('chStartChallenge')}
                               </Button>
                             )}
                           </div>
@@ -325,14 +325,14 @@ const Challenges: React.FC = () => {
                             <div className="flex items-center gap-3 min-w-0">
                               <span className="text-2xl flex-shrink-0">{emoji}</span>
                               <div className="min-w-0">
-                                <h3 className="font-semibold text-foreground text-sm truncate">{challenge.title}</h3>
+                                <h3 className="font-semibold text-foreground text-sm truncate">{t(challenge.title) !== challenge.title ? t(challenge.title) : challenge.title}</h3>
                                 <div className="flex items-center gap-2 mt-0.5">
                                   <span className="text-xs text-muted-foreground">
                                     {t('chDay')} {completedDays} / {challenge.duration_days}
                                   </span>
                                   {streak > 1 && (
                                     <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-amber-500/10 text-amber-400 border-amber-500/20">
-                                      🔥 {streak} streak
+                                      🔥 {streak} {t('chStreak')}
                                     </Badge>
                                   )}
                                 </div>
@@ -457,7 +457,7 @@ const Challenges: React.FC = () => {
                               <span className="text-xl">{badgeEmoji[badge.badge_type]}</span>
                             </div>
                             <p className="text-[10px] font-semibold text-foreground line-clamp-2">
-                              {challenge?.title || 'Challenge'}
+                              {challenge ? (t(challenge.title) !== challenge.title ? t(challenge.title) : challenge.title) : 'Challenge'}
                             </p>
                             <p className="text-[9px] text-muted-foreground capitalize mt-0.5">
                               {badge.badge_type} • {Math.round(badge.completion_percentage)}%
@@ -489,12 +489,12 @@ const Challenges: React.FC = () => {
                   <div className="flex items-center gap-3 mb-1">
                     <span className="text-3xl">{emoji}</span>
                     <div>
-                      <DialogTitle className="text-lg leading-tight">{selectedChallenge.title}</DialogTitle>
+                      <DialogTitle className="text-lg leading-tight">{t(selectedChallenge.title) !== selectedChallenge.title ? t(selectedChallenge.title) : selectedChallenge.title}</DialogTitle>
                     </div>
                   </div>
                 </DialogHeader>
                 <div className="space-y-4 pt-2">
-                  <p className="text-sm text-muted-foreground">{selectedChallenge.description}</p>
+                  <p className="text-sm text-muted-foreground">{t(selectedChallenge.description) !== selectedChallenge.description ? t(selectedChallenge.description) : selectedChallenge.description}</p>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-xl bg-muted/30 border border-border/50">

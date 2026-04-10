@@ -339,7 +339,7 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
         {!nutritionResult && (
           <Button variant="ghost" size="sm" onClick={() => { setMode('select'); clearImage(); setMealDescription(''); }} className="gap-1 -ml-1">
             <ArrowLeft className="h-4 w-4" />
-            {t("Back")}
+            {t("goBack")}
           </Button>
         )}
 
