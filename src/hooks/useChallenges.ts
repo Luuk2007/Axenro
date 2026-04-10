@@ -45,116 +45,38 @@ export interface ChallengeBadge {
   earned_at: string;
 }
 
-const DEFAULT_CHALLENGES: Omit<Challenge, 'id'>[] = [
-  {
-    title: '30 Day Push-Up Challenge',
-    description: 'Start met 10 push-ups per dag en werk op naar 100. Bouw kracht en discipline op!',
-    duration_days: 30, difficulty_level: 'medium', category: 'strength', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '7 Day Core Blast',
-    description: 'Een week intensieve core workouts om je buikspieren sterker te maken.',
-    duration_days: 7, difficulty_level: 'easy', category: 'core', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '21 Day Consistency',
-    description: 'Train elke dag minstens één keer gedurende 21 dagen om een blijvende gewoonte te bouwen.',
-    duration_days: 21, difficulty_level: 'medium', category: 'fitness', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '14 Day Squat Challenge',
-    description: 'Beheers de squat met progressieve overbelasting in 14 dagen.',
-    duration_days: 14, difficulty_level: 'medium', category: 'legs', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '30 Day Plank Challenge',
-    description: 'Houd elke dag een plank, oplopend van 30 seconden tot 5 minuten.',
-    duration_days: 30, difficulty_level: 'hard', category: 'core', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '7 Day Stretching',
-    description: 'Verbeter je flexibiliteit met dagelijkse 15 minuten stretch routines.',
-    duration_days: 7, difficulty_level: 'easy', category: 'flexibility', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '10 Day Running Start',
-    description: 'Begin met hardlopen: 10 dagen van 15 minuten joggen, bouw stamina op.',
-    duration_days: 10, difficulty_level: 'easy', category: 'cardio', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '14 Day Pull-Up Progressie',
-    description: 'Werk naar je eerste (of meer) pull-ups toe met dagelijkse oefeningen.',
-    duration_days: 14, difficulty_level: 'hard', category: 'strength', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '30 Day Full Body',
-    description: 'Een complete full body challenge: elke dag een andere spiergroep.',
-    duration_days: 30, difficulty_level: 'hard', category: 'full_body', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '7 Day Mobility Flow',
-    description: 'Verbeter je mobiliteit en beweeglijkheid met dagelijkse mobility oefeningen.',
-    duration_days: 7, difficulty_level: 'easy', category: 'mobility', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '14 Day Morning Workout',
-    description: 'Begin je dag goed met 15 minuten ochtend workouts. Boost je energie en productiviteit!',
-    duration_days: 14, difficulty_level: 'easy', category: 'fitness', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '21 Day Water Intake',
-    description: 'Drink elke dag je dagelijkse waterdoel. Bouw een gezonde gewoonte op voor hydratatie!',
-    duration_days: 21, difficulty_level: 'easy', category: 'nutrition', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '30 Day Squat Challenge',
-    description: 'Bouw beenkracht op en verbeter je mobiliteit met dagelijkse squat variaties.',
-    duration_days: 30, difficulty_level: 'medium', category: 'legs', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '7 Day No Sugar Challenge',
-    description: 'Elimineer toegevoegde suikers uit je dieet voor een week. Verbeter je energie en focus!',
-    duration_days: 7, difficulty_level: 'medium', category: 'nutrition', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '14 Day Push-Up Challenge',
-    description: 'Bouw bovenlichaamkracht op met dagelijkse push-up routines. Start op je eigen niveau!',
-    duration_days: 14, difficulty_level: 'medium', category: 'strength', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '10 Day Meditation & Recovery',
-    description: 'Combineer meditatie met recovery oefeningen voor een betere mentale en fysieke gezondheid.',
-    duration_days: 10, difficulty_level: 'easy', category: 'recovery', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '21 Day Upper Body',
-    description: 'Focus 21 dagen op je bovenlichaam met gevarieerde oefeningen voor borst, rug en schouders.',
-    duration_days: 21, difficulty_level: 'hard', category: 'upper_body', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
-  {
-    title: '30 Day Cardio Endurance',
-    description: 'Bouw je uithoudingsvermogen op met 30 dagen progressieve cardio training.',
-    duration_days: 30, difficulty_level: 'hard', category: 'endurance', is_public: true,
-    badge_bronze_threshold: 50, badge_silver_threshold: 75, badge_gold_threshold: 100,
-  },
+const CHALLENGE_KEYS = [
+  { titleKey: 'chTitle_pushup30', descKey: 'chDesc_pushup30', duration_days: 30, difficulty_level: 'medium' as const, category: 'strength' },
+  { titleKey: 'chTitle_core7', descKey: 'chDesc_core7', duration_days: 7, difficulty_level: 'easy' as const, category: 'core' },
+  { titleKey: 'chTitle_consistency21', descKey: 'chDesc_consistency21', duration_days: 21, difficulty_level: 'medium' as const, category: 'fitness' },
+  { titleKey: 'chTitle_squat14', descKey: 'chDesc_squat14', duration_days: 14, difficulty_level: 'medium' as const, category: 'legs' },
+  { titleKey: 'chTitle_plank30', descKey: 'chDesc_plank30', duration_days: 30, difficulty_level: 'hard' as const, category: 'core' },
+  { titleKey: 'chTitle_stretch7', descKey: 'chDesc_stretch7', duration_days: 7, difficulty_level: 'easy' as const, category: 'flexibility' },
+  { titleKey: 'chTitle_running10', descKey: 'chDesc_running10', duration_days: 10, difficulty_level: 'easy' as const, category: 'cardio' },
+  { titleKey: 'chTitle_pullup14', descKey: 'chDesc_pullup14', duration_days: 14, difficulty_level: 'hard' as const, category: 'strength' },
+  { titleKey: 'chTitle_fullbody30', descKey: 'chDesc_fullbody30', duration_days: 30, difficulty_level: 'hard' as const, category: 'full_body' },
+  { titleKey: 'chTitle_mobility7', descKey: 'chDesc_mobility7', duration_days: 7, difficulty_level: 'easy' as const, category: 'mobility' },
+  { titleKey: 'chTitle_morning14', descKey: 'chDesc_morning14', duration_days: 14, difficulty_level: 'easy' as const, category: 'fitness' },
+  { titleKey: 'chTitle_water21', descKey: 'chDesc_water21', duration_days: 21, difficulty_level: 'easy' as const, category: 'nutrition' },
+  { titleKey: 'chTitle_squat30', descKey: 'chDesc_squat30', duration_days: 30, difficulty_level: 'medium' as const, category: 'legs' },
+  { titleKey: 'chTitle_nosugar7', descKey: 'chDesc_nosugar7', duration_days: 7, difficulty_level: 'medium' as const, category: 'nutrition' },
+  { titleKey: 'chTitle_pushup14', descKey: 'chDesc_pushup14', duration_days: 14, difficulty_level: 'medium' as const, category: 'strength' },
+  { titleKey: 'chTitle_meditation10', descKey: 'chDesc_meditation10', duration_days: 10, difficulty_level: 'easy' as const, category: 'recovery' },
+  { titleKey: 'chTitle_upperbody21', descKey: 'chDesc_upperbody21', duration_days: 21, difficulty_level: 'hard' as const, category: 'upper_body' },
+  { titleKey: 'chTitle_cardio30', descKey: 'chDesc_cardio30', duration_days: 30, difficulty_level: 'hard' as const, category: 'endurance' },
 ];
+
+const DEFAULT_CHALLENGES: Omit<Challenge, 'id'>[] = CHALLENGE_KEYS.map(k => ({
+  title: k.titleKey,
+  description: k.descKey,
+  duration_days: k.duration_days,
+  difficulty_level: k.difficulty_level,
+  category: k.category,
+  is_public: true,
+  badge_bronze_threshold: 50,
+  badge_silver_threshold: 75,
+  badge_gold_threshold: 100,
+}));
 
 export function useChallenges() {
   const { user } = useAuth();
