@@ -253,7 +253,7 @@ const Challenges: React.FC = () => {
                                 className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg shadow-amber-500/25 h-8 px-3 text-xs"
                               >
                                 <Play className="h-3 w-3 mr-1" />
-                                Start
+                                {t('chStartChallenge')}
                               </Button>
                             )}
                           </div>
@@ -332,7 +332,7 @@ const Challenges: React.FC = () => {
                                   </span>
                                   {streak > 1 && (
                                     <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-amber-500/10 text-amber-400 border-amber-500/20">
-                                      🔥 {streak} streak
+                                      🔥 {streak} {t('chStreak')}
                                     </Badge>
                                   )}
                                 </div>
