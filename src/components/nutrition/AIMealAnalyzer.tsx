@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -45,8 +45,27 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
   const [analyzing, setAnalyzing] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setShowCamera(false);
+  }, []);
+
+  // Cleanup camera on unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
 
   const compressImage = (file: File, maxWidth = 800): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -91,11 +110,45 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
     }
   };
 
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      streamRef.current = stream;
+      setShowCamera(true);
+      // Attach stream to video after state update
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+        }
+      }, 100);
+    } catch (err) {
+      console.error('Camera error:', err);
+      toast.error(t('Could not access camera. Please use upload instead.'));
+    }
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+    setImagePreview(dataUrl);
+    setImageBase64(dataUrl);
+    stopCamera();
+  };
+
   const clearImage = () => {
     setImagePreview(null);
     setImageBase64(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
-    if (cameraInputRef.current) cameraInputRef.current.value = '';
   };
 
   const handleAnalyze = async () => {
@@ -122,6 +175,10 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
         functionName: 'ai-meal-analyzer',
         body,
         onSuccess: (data) => {
+          if (data?.error) {
+            toast.error(data.error);
+            return;
+          }
           setNutritionResult(data);
           if (!customMealName.trim()) {
             if (mode === 'text') {
@@ -179,47 +236,82 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
     }
   };
 
+  // Live camera view (full screen overlay via portal)
+  if (showCamera) {
+    return (
+      <DialogContent className="sm:max-w-lg mx-auto p-0 gap-0">
+        <div className="relative bg-black rounded-lg overflow-hidden">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full aspect-[4/3] object-cover"
+          />
+          {/* Camera overlay controls */}
+          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex items-center justify-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={stopCamera}
+              className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+            >
+              {t("cancel")}
+            </Button>
+            <button
+              onClick={capturePhoto}
+              className="h-16 w-16 rounded-full border-4 border-white bg-white/20 hover:bg-white/40 transition-colors flex items-center justify-center"
+            >
+              <div className="h-12 w-12 rounded-full bg-white" />
+            </button>
+            <div className="w-[68px]" /> {/* spacer for centering */}
+          </div>
+        </div>
+      </DialogContent>
+    );
+  }
+
   // Mode selection screen
   if (mode === 'select') {
     return (
-      <DialogContent className="sm:max-w-md mx-auto p-0 gap-0">
-        <DialogHeader className="p-4 pb-3 text-center">
-          <DialogTitle className="text-xl font-semibold flex items-center justify-center gap-2">
-            <Bot className="h-5 w-5" />
+      <DialogContent className="sm:max-w-md mx-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Bot className="h-5 w-5 text-primary" />
             {t("AI Meal Analyzer")}
           </DialogTitle>
           <DialogDescription>
             {t("Choose how you want to analyze your meal")}
           </DialogDescription>
         </DialogHeader>
-        <div className="px-4 pb-4 space-y-3">
+        <div className="space-y-3 pt-2">
           <button
             onClick={() => setMode('text')}
-            className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-colors text-left"
+            className="w-full flex items-center gap-4 p-4 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors text-left"
           >
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Type className="h-6 w-6 text-primary" />
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Type className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <p className="font-semibold text-foreground">{t("Describe with text")}</p>
-              <p className="text-xs text-muted-foreground">{t("Type what you ate for AI analysis")}</p>
+            <div className="min-w-0">
+              <p className="font-medium text-sm text-foreground">{t("Describe with text")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("Type what you ate for AI analysis")}</p>
             </div>
           </button>
 
           <button
             onClick={() => setMode('photo')}
-            className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-colors text-left"
+            className="w-full flex items-center gap-4 p-4 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors text-left"
           >
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Camera className="h-6 w-6 text-primary" />
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Camera className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <p className="font-semibold text-foreground">{t("Analyze with photo")}</p>
-              <p className="text-xs text-muted-foreground">{t("Take a photo or upload an image of your meal")}</p>
+            <div className="min-w-0">
+              <p className="font-medium text-sm text-foreground">{t("Analyze with photo")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("Take a photo or upload an image of your meal")}</p>
             </div>
           </button>
 
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-end pt-1">
             <Button variant="outline" onClick={onClose} size="sm">{t("cancel")}</Button>
           </div>
         </div>
@@ -228,10 +320,10 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
   }
 
   return (
-    <DialogContent className="sm:max-w-md mx-auto p-0 gap-0 max-h-[90vh] overflow-y-auto">
-      <DialogHeader className="p-4 pb-3 text-center">
-        <DialogTitle className="text-xl font-semibold flex items-center justify-center gap-2">
-          <Bot className="h-5 w-5" />
+    <DialogContent className="sm:max-w-md mx-auto max-h-[90vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <Bot className="h-5 w-5 text-primary" />
           {mode === 'text' ? t("AI Meal Analyzer") : t("Photo Meal Analyzer")}
         </DialogTitle>
         <DialogDescription>
@@ -242,10 +334,10 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
         </DialogDescription>
       </DialogHeader>
       
-      <div className="px-4 pb-4 space-y-4">
+      <div className="space-y-4">
         {/* Back button */}
         {!nutritionResult && (
-          <Button variant="ghost" size="sm" onClick={() => { setMode('select'); clearImage(); setMealDescription(''); }} className="gap-1 -mt-1 -ml-1">
+          <Button variant="ghost" size="sm" onClick={() => { setMode('select'); clearImage(); setMealDescription(''); }} className="gap-1 -ml-1">
             <ArrowLeft className="h-4 w-4" />
             {t("Back")}
           </Button>
@@ -285,72 +377,14 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <button
-                    className="h-24 flex flex-col items-center justify-center gap-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground text-sm font-medium"
-                    onClick={() => {
-                      // Use getUserMedia for live camera
-                      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-                          .then(stream => {
-                            // Create a video element to capture
-                            const video = document.createElement('video');
-                            video.srcObject = stream;
-                            video.setAttribute('playsinline', 'true');
-                            video.play();
-                            
-                            // Create overlay
-                            const overlay = document.createElement('div');
-                            overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;';
-                            
-                            video.style.cssText = 'width:100%;max-height:80vh;object-fit:contain;';
-                            overlay.appendChild(video);
-                            
-                            const btnContainer = document.createElement('div');
-                            btnContainer.style.cssText = 'display:flex;gap:16px;margin-top:16px;';
-                            
-                            const captureBtn = document.createElement('button');
-                            captureBtn.textContent = '📸 ' + t('Take photo');
-                            captureBtn.style.cssText = 'padding:12px 32px;border-radius:999px;background:white;color:black;font-weight:600;font-size:16px;border:none;cursor:pointer;';
-                            
-                            const cancelBtn = document.createElement('button');
-                            cancelBtn.textContent = t('cancel');
-                            cancelBtn.style.cssText = 'padding:12px 24px;border-radius:999px;background:rgba(255,255,255,0.2);color:white;font-weight:500;font-size:14px;border:none;cursor:pointer;';
-                            
-                            btnContainer.appendChild(captureBtn);
-                            btnContainer.appendChild(cancelBtn);
-                            overlay.appendChild(btnContainer);
-                            document.body.appendChild(overlay);
-                            
-                            const cleanup = () => {
-                              stream.getTracks().forEach(t => t.stop());
-                              overlay.remove();
-                            };
-                            
-                            cancelBtn.onclick = cleanup;
-                            
-                            captureBtn.onclick = () => {
-                              const canvas = document.createElement('canvas');
-                              canvas.width = video.videoWidth;
-                              canvas.height = video.videoHeight;
-                              canvas.getContext('2d')?.drawImage(video, 0, 0);
-                              const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                              setImagePreview(dataUrl);
-                              setImageBase64(dataUrl);
-                              cleanup();
-                            };
-                          })
-                          .catch(() => {
-                            // Fallback to file input with capture
-                            cameraInputRef.current?.click();
-                          });
-                      } else {
-                        cameraInputRef.current?.click();
-                      }
-                    }}
+                  <Button
+                    variant="outline"
+                    className="h-24 flex-col gap-2"
+                    onClick={startCamera}
                   >
                     <Camera className="h-6 w-6" />
                     <span className="text-xs">{t("Take photo")}</span>
-                  </button>
+                  </Button>
                   <Button
                     variant="outline"
                     className="h-24 flex-col gap-2"
@@ -361,7 +395,6 @@ const AIMealAnalyzer = ({ meals, onClose, onAddFood }: AIMealAnalyzerProps) => {
                   </Button>
                 </div>
 
-                <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageSelect} />
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
               </div>
             ) : (
