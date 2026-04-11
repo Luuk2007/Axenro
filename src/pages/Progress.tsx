@@ -27,6 +27,7 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import { useProgressPhotos } from '@/hooks/useProgressPhotos';
+import { useMeasurementTypes } from '@/hooks/useMeasurementTypes';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useBodyMeasurements } from '@/hooks/useBodyMeasurements';
 import AddProgressPhotoDialog from '@/components/progress/AddProgressPhotoDialog';
