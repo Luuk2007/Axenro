@@ -39,6 +39,7 @@ import { ProgressPhoto, PHOTO_CATEGORIES } from '@/types/progressPhotos';
 
 interface MeasurementType {
   id: string;
+  measurementId: string;
   name: string;
   unit: string;
   enabled: boolean;
