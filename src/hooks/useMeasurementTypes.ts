@@ -73,6 +73,8 @@ export const useMeasurementTypes = () => {
           isCustom: item.is_custom
         }));
         setMeasurementTypes(formattedTypes);
+        // Sync to localStorage as backup
+        localStorage.setItem('measurementTypes', JSON.stringify(formattedTypes));
       } else {
         // Initialize with defaults if no data exists
         await initializeDefaultTypes();
