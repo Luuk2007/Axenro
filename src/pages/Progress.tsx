@@ -64,7 +64,7 @@ export default function Progress() {
   const [measurementType, setMeasurementType] = useState('waist');
   const [measurementValue, setMeasurementValue] = useState('');
   const [measurementDate, setMeasurementDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [measurementTypes, setMeasurementTypes] = useState<MeasurementType[]>([]);
+  const { measurementTypes, loading: measurementTypesLoading } = useMeasurementTypes();
 
   const { measurements, loading: measurementsLoading, addMeasurement, deleteMeasurement } = useBodyMeasurements();
   const { photos, loading: photosLoading, addPhoto, updatePhoto, deletePhoto } = useProgressPhotos();
