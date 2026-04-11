@@ -98,7 +98,7 @@ export default function Progress() {
       return measurement.name;
     }
     // For default measurements, use translation if available, otherwise use the name
-    return t(measurement.id) || measurement.name;
+    return t(measurement.measurementId) || measurement.name;
   };
 
   const handleAddMeasurement = async () => {
@@ -114,7 +114,7 @@ export default function Progress() {
       return;
     }
     
-    const selectedType = measurementTypes.find(type => type.id === measurementType);
+    const selectedType = measurementTypes.find(type => type.measurementId === measurementType);
     
     if (!selectedType) {
       toast.error(t('invalidMeasurementType'));
@@ -268,15 +268,15 @@ export default function Progress() {
                     onChange={(e) => setMeasurementType(e.target.value)}
                   >
                     {enabledMeasurementTypes.map(type => (
-                      <option key={type.id} value={type.id}>
-                        {t(type.id) || type.name}
+                      <option key={type.id} value={type.measurementId}>
+                        {t(type.measurementId) || type.name}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    {t("value")} ({measurementTypes.find(type => type.id === measurementType)?.unit})
+                    {t("value")} ({measurementTypes.find(type => type.measurementId === measurementType)?.unit})
                   </label>
                   <Input 
                     type="number" 
@@ -325,7 +325,7 @@ export default function Progress() {
           {enabledMeasurementTypes.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {enabledMeasurementTypes.slice(0, 4).map((type, index) => {
-                const latestMeasurement = getLatestMeasurement(type.id);
+                const latestMeasurement = getLatestMeasurement(type.measurementId);
                 const colors = [
                   'from-blue-500 to-blue-600',
                   'from-emerald-500 to-emerald-600', 
@@ -365,7 +365,7 @@ export default function Progress() {
                 </h3>
                 <div className="space-y-3">
                   {enabledMeasurementTypes.map(type => {
-                    const latestMeasurement = getLatestMeasurement(type.id);
+                    const latestMeasurement = getLatestMeasurement(type.measurementId);
                     
                     return (
                       <div key={type.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
@@ -411,7 +411,7 @@ export default function Progress() {
                     {[...measurements]
                       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                       .map(measurement => {
-                        const measurementTypeInfo = measurementTypes.find(type => type.id === measurement.type);
+                        const measurementTypeInfo = measurementTypes.find(type => type.measurementId === measurement.type);
                         return (
                           <div key={measurement.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                             <div className="flex items-center gap-3">
@@ -469,24 +469,24 @@ export default function Progress() {
                       <TrendingUp className="h-5 w-5 text-primary" />
                       {t("Measurement Trends")}
                     </h3>
-                    <Tabs defaultValue={enabledMeasurementTypes[0]?.id} className="w-full">
+                    <Tabs defaultValue={enabledMeasurementTypes[0]?.measurementId} className="w-full">
                       <TabsList className={`mb-4 w-full ${isMobile ? 'grid h-auto p-2' : 'flex flex-wrap'}`} style={isMobile ? { gridTemplateColumns: `repeat(${Math.min(enabledMeasurementTypes.length, 2)}, 1fr)` } : undefined}>
                         {enabledMeasurementTypes.map(type => {
-                          const hasData = getMeasurementsByType(type.id).length > 0;
+                          const hasData = getMeasurementsByType(type.measurementId).length > 0;
                           return (
-                            <TabsTrigger key={type.id} value={type.id} disabled={!hasData} className={isMobile ? 'text-xs py-2 px-1' : ''}>
-                              {isMobile ? getDisplayName(type) : `${getDisplayName(type)} ${hasData ? `(${getMeasurementsByType(type.id).length})` : ''}`}
+                            <TabsTrigger key={type.id} value={type.measurementId} disabled={!hasData} className={isMobile ? 'text-xs py-2 px-1' : ''}>
+                              {isMobile ? getDisplayName(type) : `${getDisplayName(type)} ${hasData ? `(${getMeasurementsByType(type.measurementId).length})` : ''}`}
                             </TabsTrigger>
                           );
                         })}
                       </TabsList>
                       
                       {enabledMeasurementTypes.map(type => (
-                        <TabsContent key={type.id} value={type.id}>
-                          {getMeasurementsByType(type.id).length > 0 ? (
+                        <TabsContent key={type.id} value={type.measurementId}>
+                          {getMeasurementsByType(type.measurementId).length > 0 ? (
                             <div className={`${isMobile ? 'h-[250px]' : 'h-[300px]'} w-full`}>
                               <ProgressChart
-                                data={prepareMeasurementDataForChart(type.id)}
+                                data={prepareMeasurementDataForChart(type.measurementId)}
                                 title=""
                                 label={type.unit}
                                 color="#4F46E5"
