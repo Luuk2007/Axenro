@@ -81,49 +81,15 @@ export default function Progress() {
   const [comparisonPhotos, setComparisonPhotos] = useState<ProgressPhoto[]>([]);
   const [selectionMode, setSelectionMode] = useState(false);
 
-  const defaultMeasurementTypes: MeasurementType[] = [
-    { id: 'chest', name: 'Chest', unit: 'cm', enabled: true },
-    { id: 'waist', name: 'Waist', unit: 'cm', enabled: true },
-    { id: 'hips', name: 'Hips', unit: 'cm', enabled: true },
-    { id: 'biceps', name: 'Biceps', unit: 'cm', enabled: true },
-    { id: 'thighs', name: 'Thighs', unit: 'cm', enabled: true },
-    { id: 'calves', name: 'Calves', unit: 'cm', enabled: false },
-    { id: 'bodyfat', name: 'Body Fat', unit: '%', enabled: false },
-  ];
-
-  const loadMeasurementTypes = () => {
-    const savedTypes = localStorage.getItem('measurementTypes');
-    if (savedTypes) {
-      try {
-        const types = JSON.parse(savedTypes);
-        setMeasurementTypes(types);
-        const firstEnabled = types.find((type: MeasurementType) => type.enabled);
-        if (firstEnabled) {
-          setMeasurementType(firstEnabled.id);
-        }
-      } catch (error) {
-        console.error('Error loading measurement types:', error);
-        setMeasurementTypes(defaultMeasurementTypes);
+  // Set initial measurement type when types load
+  useEffect(() => {
+    if (measurementTypes.length > 0) {
+      const firstEnabled = measurementTypes.find(type => type.enabled);
+      if (firstEnabled) {
+        setMeasurementType(firstEnabled.measurementId || firstEnabled.id);
       }
-    } else {
-      setMeasurementTypes(defaultMeasurementTypes);
     }
-  };
-  
-  useEffect(() => {
-    loadMeasurementTypes();
-  }, []);
-
-  useEffect(() => {
-    const handleMeasurementTypesChange = () => {
-      loadMeasurementTypes();
-    };
-
-    window.addEventListener('measurementTypesChanged', handleMeasurementTypesChange);
-    return () => {
-      window.removeEventListener('measurementTypesChanged', handleMeasurementTypesChange);
-    };
-  }, []);
+  }, [measurementTypes]);
 
   const getDisplayName = (measurement: MeasurementType) => {
     // For custom measurements, always show the custom name
