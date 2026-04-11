@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -12,25 +12,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useMeasurementTypes } from '@/hooks/useMeasurementTypes';
 import { getSubscriptionLimits, formatUsageText, canAddMore } from '@/utils/subscriptionLimits';
-
-interface MeasurementType {
-  id: string;
-  name: string;
-  unit: string;
-  enabled: boolean;
-  isCustom?: boolean;
-}
-
-const defaultMeasurements: MeasurementType[] = [
-  { id: 'chest', name: 'Chest', unit: 'cm', enabled: true },
-  { id: 'waist', name: 'Waist', unit: 'cm', enabled: true },
-  { id: 'hips', name: 'Hips', unit: 'cm', enabled: true },
-  { id: 'biceps', name: 'Biceps', unit: 'cm', enabled: true },
-  { id: 'thighs', name: 'Thighs', unit: 'cm', enabled: true },
-  { id: 'calves', name: 'Calves', unit: 'cm', enabled: false },
-  { id: 'bodyfat', name: 'Body Fat', unit: '%', enabled: false },
-];
 
 interface Props {
   embedded?: boolean;
@@ -40,8 +23,14 @@ const BodyMeasurementsSettings: React.FC<Props> = ({ embedded }) => {
   const { t } = useLanguage();
   const { measurementSystem } = useMeasurementSystem();
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
+  const { 
+    measurementTypes, 
+    updateMeasurementType, 
+    addCustomMeasurementType, 
+    deleteMeasurementType,
+    loading: measurementTypesLoading 
+  } = useMeasurementTypes();
   
-  const [measurementTypes, setMeasurementTypes] = useState<MeasurementType[]>(defaultMeasurements);
   const [isOpen, setIsOpen] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newMeasurementName, setNewMeasurementName] = useState('');
@@ -53,34 +42,14 @@ const BodyMeasurementsSettings: React.FC<Props> = ({ embedded }) => {
   const canAddMoreMeasurements = canAddMore(customMeasurementsCount, limits.customMeasurements);
   const usageText = formatUsageText(customMeasurementsCount, limits.customMeasurements);
 
-  useEffect(() => {
-    const savedMeasurementTypes = localStorage.getItem('measurementTypes');
-    if (savedMeasurementTypes) {
-      try {
-        setMeasurementTypes(JSON.parse(savedMeasurementTypes));
-      } catch (error) {
-        console.error('Error loading measurement types:', error);
-      }
-    }
-  }, []);
-
-  const saveMeasurementTypes = (types: MeasurementType[]) => {
-    localStorage.setItem('measurementTypes', JSON.stringify(types));
-    setMeasurementTypes(types);
-    
+  const handleToggleMeasurement = async (id: string, enabled: boolean) => {
+    await updateMeasurementType(id, { enabled });
     // Dispatch event to notify Progress page about changes
     window.dispatchEvent(new CustomEvent('measurementTypesChanged'));
-  };
-
-  const handleToggleMeasurement = (id: string, enabled: boolean) => {
-    const updatedTypes = measurementTypes.map(type =>
-      type.id === id ? { ...type, enabled } : type
-    );
-    saveMeasurementTypes(updatedTypes);
     toast.success(t('Settings saved'));
   };
 
-  const handleAddCustomMeasurement = () => {
+  const handleAddCustomMeasurement = async () => {
     if (!newMeasurementName.trim()) {
       toast.error(t('pleaseEnterValue'));
       return;
@@ -92,27 +61,26 @@ const BodyMeasurementsSettings: React.FC<Props> = ({ embedded }) => {
       return;
     }
 
-    const customId = `custom_${Date.now()}`;
-    const newMeasurement: MeasurementType = {
-      id: customId,
+    const result = await addCustomMeasurementType({
+      measurementId: `custom_${Date.now()}`,
       name: newMeasurementName.trim(),
       unit: newMeasurementUnit,
       enabled: true,
       isCustom: true
-    };
+    });
 
-    const updatedTypes = [...measurementTypes, newMeasurement];
-    saveMeasurementTypes(updatedTypes);
-    
-    setNewMeasurementName('');
-    setNewMeasurementUnit('cm');
-    setShowAddDialog(false);
-    toast.success(t('measurementAdded'));
+    if (result) {
+      setNewMeasurementName('');
+      setNewMeasurementUnit('cm');
+      setShowAddDialog(false);
+      window.dispatchEvent(new CustomEvent('measurementTypesChanged'));
+      toast.success(t('measurementAdded'));
+    }
   };
 
-  const handleDeleteCustomMeasurement = (id: string) => {
-    const updatedTypes = measurementTypes.filter(type => type.id !== id);
-    saveMeasurementTypes(updatedTypes);
+  const handleDeleteCustomMeasurement = async (id: string) => {
+    await deleteMeasurementType(id);
+    window.dispatchEvent(new CustomEvent('measurementTypesChanged'));
     toast.success(t('measurementDeleted'));
   };
 
@@ -125,13 +93,11 @@ const BodyMeasurementsSettings: React.FC<Props> = ({ embedded }) => {
   };
 
   // Get display name for measurement
-  const getDisplayName = (measurement: MeasurementType) => {
-    // For custom measurements, always show the custom name
+  const getDisplayName = (measurement: { name: string; isCustom: boolean; measurementId: string }) => {
     if (measurement.isCustom) {
       return measurement.name;
     }
-    // For default measurements, use translation if available, otherwise use the name
-    return t(measurement.id) || measurement.name;
+    return t(measurement.measurementId) || measurement.name;
   };
 
   const showUpgradePrompt = !canAddMoreMeasurements && limits.customMeasurements !== -1;
@@ -184,7 +150,7 @@ const BodyMeasurementsSettings: React.FC<Props> = ({ embedded }) => {
         
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="w-full rounded-xl" disabled={!canAddMoreMeasurements || loading}>
+            <Button variant="outline" className="w-full rounded-xl" disabled={!canAddMoreMeasurements || loading || measurementTypesLoading}>
               <Plus className="mr-2 h-4 w-4" />
               {t("Add Custom Measurement")}
             </Button>
