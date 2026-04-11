@@ -50,6 +50,8 @@ export const useCustomMeals = () => {
           orderIndex: item.order_index || 0
         }));
         setCustomMeals(formattedMeals);
+        // Sync to localStorage so getAvailableMeals() works
+        localStorage.setItem('customMeals', JSON.stringify(formattedMeals));
       }
     } catch (error) {
       console.error('Error loading custom meals:', error);
