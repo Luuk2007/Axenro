@@ -3,19 +3,20 @@ import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import MobileTopBar from './MobileTopBar';
 import BottomNav from './BottomNav';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile, useIsMobileOrTablet } from '@/hooks/use-mobile';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import AnimatedOutlet from './AnimatedOutlet';
 
 export default function Layout() {
   const isMobile = useIsMobile();
+  const isMobileOrTablet = useIsMobileOrTablet();
 
-  if (isMobile) {
+  if (isMobileOrTablet) {
     return (
       <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-background mesh-gradient">
         <MobileTopBar />
         <div className="w-full max-w-full overflow-x-hidden pb-24">
-          <div className="px-3 py-3">
+          <div className={isMobile ? "px-3 py-3" : "px-6 py-4"}>
             <AnimatedOutlet />
           </div>
         </div>
