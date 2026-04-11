@@ -38,6 +38,8 @@ export const useDeletedMeals = () => {
       if (data) {
         const mealIds = data.map(item => item.meal_id);
         setDeletedMeals(mealIds);
+        // Sync to localStorage so getAvailableMeals() works
+        localStorage.setItem('deletedMeals', JSON.stringify(mealIds));
       }
     } catch (error) {
       console.error('Error loading deleted meals:', error);

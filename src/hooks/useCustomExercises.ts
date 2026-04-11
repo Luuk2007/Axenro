@@ -50,6 +50,8 @@ export const useCustomExercises = () => {
           muscleGroup: item.muscle_group
         }));
         setCustomExercises(formattedExercises);
+        // Sync to localStorage as backup
+        localStorage.setItem('customExercises', JSON.stringify(formattedExercises));
       }
     } catch (error) {
       console.error('Error loading custom exercises:', error);
