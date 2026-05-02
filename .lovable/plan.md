@@ -1,58 +1,81 @@
+# Community Pagina Plan
 
+## Wat we bouwen
+Een nieuwe `/community` pagina waar gebruikers vrienden kunnen toevoegen via username of QR code, vriendverzoeken accepteren/weigeren, leaderboards bekijken (PRs per oefening + activiteit), en workouts delen (direct of via feed).
 
-# Translation Overhaul Plan
+## Database (nieuwe tabellen)
 
-## Problem
-Multiple pages have untranslated or incorrectly translated strings:
-1. **"Back" ambiguity**: `t("Back")` returns "Rug" (muscle group) everywhere, including navigation contexts where it should be "Terug"
-2. **AI Meal Analyzer**: ~10 new strings (photo tips, mode selection) have no Dutch translations
-3. **Challenges page**: Challenge titles/descriptions are hardcoded in Dutch in `DEFAULT_CHALLENGES` - need English versions. Also hardcoded "Start" (line 256) and "streak" (line 335) not using `t()`
-4. **Missing `goBack` in English**: exists in Dutch settings but not in `english.ts`
+**`user_profiles` uitbreiden** met `username` (unique, lowercase, 3-20 chars) en `friend_code` (auto-gegenereerde UUID gebruikt voor QR).
 
-## Plan
+**`friendships`** — bevriendingen
+- `id`, `requester_id`, `addressee_id`, `status` ('pending'|'accepted'|'declined'), `created_at`, `updated_at`
+- Unique constraint op (requester_id, addressee_id)
+- RLS: beide partijen kunnen zien; alleen requester insert; addressee update status
 
-### 1. Fix "Back" vs "Terug" disambiguation
-- In `AIMealAnalyzer.tsx` line 342: change `t("Back")` to `t("goBack")`
-- Add `"goBack": "Go back"` to `english.ts`
-- `goBack: "Terug"` already exists in Dutch settings - confirm it's in the flattened output
+**`shared_workouts`** — gedeelde workouts
+- `id`, `sender_id`, `recipient_id` (nullable = feed post), `workout_data` (jsonb), `message`, `created_at`, `is_public_to_friends` (bool)
+- RLS: sender ziet eigen, recipient ziet directe shares, vrienden zien feed posts
 
-### 2. Add missing Dutch translations for AI Meal Analyzer
-Add to `src/translations/dutch/nutrition.ts`:
-- `"Choose how you want to analyze your meal"` → `"Kies hoe je je maaltijd wilt analyseren"`
-- `"Describe with text"` → `"Beschrijf met tekst"`
-- `"Type what you ate for AI analysis"` → `"Typ wat je hebt gegeten voor AI-analyse"`
-- `"Analyze with photo"` → `"Analyseer met foto"`
-- `"Take a photo or upload an image of your meal"` → `"Maak een foto of upload een afbeelding van je maaltijd"`
-- `"Photo Meal Analyzer"` → `"Foto Maaltijdanalyse"`
-- `"Take a photo of your meal for AI-powered nutritional analysis"` → `"Maak een foto van je maaltijd voor AI-gestuurde voedingsanalyse"`
-- `"Tips for best results"` → `"Tips voor het beste resultaat"`
-- `"Separate foods on your plate so each is clearly visible"` → `"Scheid voedsel op je bord zodat alles duidelijk zichtbaar is"`
-- `"Take the photo from above for the best overview"` → `"Maak de foto van bovenaf voor het beste overzicht"`
-- `"Make sure there's good lighting"` → `"Zorg voor goede verlichting"`
-- `"Include a fork or knife for size reference"` → `"Leg een vork of mes erbij als maatverwijzing"`
-- `"Take photo"` → `"Foto maken"`
-- `"Upload photo"` → `"Foto uploaden"`
-- `"Optional: add details about what's on the photo"` → `"Optioneel: voeg details toe over wat er op de foto staat"`
+**`workout_feed_likes`** — likes op feed posts
+- `id`, `shared_workout_id`, `user_id`, `created_at`
 
-Also add all these as English keys in `english.ts`.
+**Helper functies (SECURITY DEFINER)**:
+- `are_friends(user_a, user_b)` — checkt of twee users bevriend zijn
+- `get_friend_ids(user_id)` — geeft array van friend IDs terug
+- Trigger op signup: genereer unieke username (fallback: `user_<6chars>`) en `friend_code`
 
-### 3. Make Challenge titles/descriptions translatable
-- Add translation keys for each challenge title and description (e.g., `chTitle_pushup30`, `chDesc_pushup30`)
-- Update `DEFAULT_CHALLENGES` in `useChallenges.ts` to use translation key references
-- Add English translations for all challenge titles/descriptions
-- Add Dutch translations in `challenges.ts`
-- Fix hardcoded "Start" (line 256) → `t('chStartChallenge')` (already exists)
-- Fix hardcoded "streak" (line 335) → add `chStreak` translation key
+## UI Componenten
 
-### 4. Scan remaining pages for hardcoded strings
-- Check all pages for any remaining untranslated UI text
-- Ensure consistency across the app
+**`src/pages/Community.tsx`** — hoofdpagina met 4 tabs:
+1. **Friends** — lijst van vrienden met avatar, username, laatste activiteit; remove knop
+2. **Add friend** — eigen QR code groot getoond, eigen username met copy-knop, "Scan QR" knop, input "Voer username in"
+3. **Leaderboards** — sub-tabs: "Per oefening" (dropdown om oefening te kiezen, top gewicht ranking) en "Activiteit" (workouts deze week, streaks, totaal volume)
+4. **Feed** — gedeelde workouts van vrienden chronologisch met like-knop
 
-### Files to edit
-- `src/translations/english.ts` — add ~30 new keys
-- `src/translations/dutch/nutrition.ts` — add ~15 AI photo mode translations
-- `src/translations/dutch/challenges.ts` — add challenge titles, descriptions, streak
-- `src/hooks/useChallenges.ts` — use translation keys for challenge content
-- `src/pages/Challenges.tsx` — fix hardcoded "Start" and "streak"
-- `src/components/nutrition/AIMealAnalyzer.tsx` — change `t("Back")` to `t("goBack")`
+**`src/components/community/QRScannerDialog.tsx`** — gebruikt bestaande html5-qrcode (zoals BarcodeScanner), scant friend QR en triggert vriendverzoek.
 
+**`src/components/community/FriendRequestsBadge.tsx`** — bell-icoon bovenin met aantal pending requests, dropdown met accept/decline knoppen.
+
+**`src/components/community/ShareWorkoutDialog.tsx`** — vanuit Workouts pagina: kies vrienden uit lijst (multi-select) + checkbox "ook in feed plaatsen" + optioneel bericht.
+
+**Navigatie**: Community link toevoegen aan `BottomNav` en `Sidebar` (Users icon).
+
+## Technische details
+
+- **QR code generatie**: lib `qrcode.react` (`bun add qrcode.react`); QR bevat URL `https://axenro.com/community?add=<friend_code>`
+- **QR scan handling**: bij scan parse de friend_code, zoek user_id, stuur friendverzoek met status 'pending'
+- **Leaderboards**:
+  - PRs: query `personal_records` waar `user_id IN (friend_ids + self)`, group by exercise_name, max(weight)
+  - Activiteit: query `workouts` (completed=true, last 7 days) per friend, count + sum exercises volume
+- **Feed**: query `shared_workouts` waar `recipient_id = self OR (is_public_to_friends AND sender_id IN friend_ids)`, sort by created_at desc
+- **Vertalingen**: nieuwe keys in `src/translations/dutch/` (nieuw bestand `community.ts`) en `english.ts` voor alle UI strings
+- **Realtime** (optioneel maar aanbevolen): Supabase realtime channel op `friendships` tabel zodat nieuwe verzoeken direct verschijnen
+
+## Files
+
+**Nieuwe files**:
+- `src/pages/Community.tsx`
+- `src/components/community/FriendsList.tsx`
+- `src/components/community/AddFriend.tsx`
+- `src/components/community/Leaderboards.tsx`
+- `src/components/community/CommunityFeed.tsx`
+- `src/components/community/QRScannerDialog.tsx`
+- `src/components/community/FriendRequestsBadge.tsx`
+- `src/components/community/ShareWorkoutDialog.tsx`
+- `src/hooks/useFriends.ts`
+- `src/hooks/useFriendRequests.ts`
+- `src/hooks/useLeaderboards.ts`
+- `src/hooks/useSharedWorkouts.ts`
+- `src/translations/dutch/community.ts`
+
+**Aan te passen**:
+- `src/App.tsx` — route `/community`
+- `src/components/layout/BottomNav.tsx` & `Sidebar.tsx` — nav link
+- `src/translations/dutch/index.ts` & `english.ts` — community keys
+- `src/components/workouts/WorkoutList.tsx` — "Share with friends" knop op workouts
+- DB migratie voor 3 nieuwe tabellen + username/friend_code op user_profiles + helper functies + trigger
+
+## Limitaties / aandachtspunten
+- QR scannen vereist HTTPS + camera permissie (preview & axenro.com hebben dit al)
+- Username uniqueness wordt op DB-niveau afgedwongen
+- Leaderboards tonen alleen vrienden + jezelf (geen globale ranking) voor privacy
