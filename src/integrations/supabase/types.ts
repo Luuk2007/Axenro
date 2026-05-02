@@ -554,6 +554,33 @@ export type Database = {
         }
         Relationships: []
       }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       health_connections: {
         Row: {
           access_token: string | null
@@ -860,6 +887,36 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_workouts: {
+        Row: {
+          created_at: string
+          id: string
+          is_public_to_friends: boolean
+          message: string | null
+          recipient_id: string | null
+          sender_id: string
+          workout_data: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_public_to_friends?: boolean
+          message?: string | null
+          recipient_id?: string | null
+          sender_id: string
+          workout_data: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_public_to_friends?: boolean
+          message?: string | null
+          recipient_id?: string | null
+          sender_id?: string
+          workout_data?: Json
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           created_at: string
@@ -980,6 +1037,7 @@ export type Database = {
           created_at: string
           exercise_frequency: string | null
           fitness_goal: string | null
+          friend_code: string | null
           gender: string | null
           height: number | null
           id: string
@@ -987,6 +1045,7 @@ export type Database = {
           target_weight: number | null
           updated_at: string
           user_id: string
+          username: string | null
           weekly_workout_goal: number | null
           weight: number | null
         }
@@ -996,6 +1055,7 @@ export type Database = {
           created_at?: string
           exercise_frequency?: string | null
           fitness_goal?: string | null
+          friend_code?: string | null
           gender?: string | null
           height?: number | null
           id?: string
@@ -1003,6 +1063,7 @@ export type Database = {
           target_weight?: number | null
           updated_at?: string
           user_id: string
+          username?: string | null
           weekly_workout_goal?: number | null
           weight?: number | null
         }
@@ -1012,6 +1073,7 @@ export type Database = {
           created_at?: string
           exercise_frequency?: string | null
           fitness_goal?: string | null
+          friend_code?: string | null
           gender?: string | null
           height?: number | null
           id?: string
@@ -1019,6 +1081,7 @@ export type Database = {
           target_weight?: number | null
           updated_at?: string
           user_id?: string
+          username?: string | null
           weekly_workout_goal?: number | null
           weight?: number | null
         }
@@ -1132,6 +1195,35 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_feed_likes: {
+        Row: {
+          created_at: string
+          id: string
+          shared_workout_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          shared_workout_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          shared_workout_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_feed_likes_shared_workout_id_fkey"
+            columns: ["shared_workout_id"]
+            isOneToOne: false
+            referencedRelation: "shared_workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workouts: {
         Row: {
           completed: boolean
@@ -1209,6 +1301,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      are_friends: {
+        Args: { _user_a: string; _user_b: string }
+        Returns: boolean
+      }
+      get_friend_ids: { Args: { _user_id: string }; Returns: string[] }
       get_latest_daily_steps: { Args: { user_uuid: string }; Returns: number }
       has_role: {
         Args: {
