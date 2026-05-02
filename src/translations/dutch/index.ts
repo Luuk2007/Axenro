@@ -9,10 +9,11 @@ import { profileTranslations } from './profile';
 import { settingsTranslations } from './settings';
 import { aiTranslations } from './ai';
 import { challengeTranslations } from './challenges';
+import { communityTranslations } from './community';
 import { DomainTranslations, Translations } from '../types';
 
 // Combine all domain-specific translations into a single object
-const domainTranslations: DomainTranslations & { ai: Translations; challenges: Translations } = {
+const domainTranslations: DomainTranslations & { ai: Translations; challenges: Translations; community: Translations } = {
   common: commonTranslations,
   auth: authTranslations,
   dashboard: dashboardTranslations,
@@ -23,6 +24,7 @@ const domainTranslations: DomainTranslations & { ai: Translations; challenges: T
   settings: settingsTranslations,
   ai: aiTranslations,
   challenges: challengeTranslations,
+  community: communityTranslations,
 };
 
 // Flatten the translations for backward compatibility

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Utensils, Dumbbell, BarChart3, Settings, User, Sparkles, ShieldCheck, Trophy } from 'lucide-react';
+import { Home, Utensils, Dumbbell, BarChart3, Settings, User, Sparkles, ShieldCheck, Trophy, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
@@ -13,6 +13,7 @@ const baseNavItems = [
   { titleKey: 'workouts' as const, href: '/workouts', icon: Dumbbell },
   { titleKey: 'progress' as const, href: '/progress', icon: BarChart3 },
   { titleKey: 'challenges' as const, href: '/challenges', icon: Trophy },
+  { titleKey: 'community' as const, href: '/community', icon: Users },
   { label: 'Axenro AI', href: '/axenro-ai', icon: Sparkles },
   { titleKey: 'profile' as const, href: '/profile', icon: User },
   { titleKey: 'settings' as const, href: '/settings', icon: Settings },

@@ -22,6 +22,7 @@ import CookiePreferencesPage from "@/pages/CookiePreferencesPage";
 import Beheer from "@/pages/Beheer";
 import InstallApp from "@/pages/InstallApp";
 import Challenges from "@/pages/Challenges";
+import Community from "@/pages/Community";
 import CookieConsentModal from "@/components/cookies/CookieConsentModal";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,6 +84,7 @@ function App() {
                     <Route path="cookiepreferences" element={<CookiePreferencesPage />} />
                     <Route path="beheer" element={<Beheer />} />
                     <Route path="challenges" element={<Challenges />} />
+                    <Route path="community" element={<Community />} />
                     <Route path="install-app" element={<InstallApp />} />
                     <Route path="*" element={<NotFound />} />
                   </Route>
