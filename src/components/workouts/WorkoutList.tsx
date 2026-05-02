@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2, Calendar, Edit, Copy, Dumbbell, Activity, ListChecks, Weight, ChevronRight, Trophy, X } from "lucide-react";
+import { Trash2, Calendar, Edit, Copy, Dumbbell, Activity, ListChecks, Weight, ChevronRight, Trophy, X, Share2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Workout } from "@/types/workout";
 import { getWorkoutSummary, formatDuration } from "@/utils/workoutUtils";
 import { getWorkoutTitleFromExercises } from "@/utils/workoutNaming";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import ShareWorkoutDialog from "@/components/community/ShareWorkoutDialog";
 
 interface WorkoutListProps {
   workouts: Workout[];
