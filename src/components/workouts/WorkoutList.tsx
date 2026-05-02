@@ -40,6 +40,7 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
 }) => {
   const { t } = useLanguage();
   const [showVolumeModal, setShowVolumeModal] = useState(false);
+  const [shareWorkout, setShareWorkout] = useState<Workout | null>(null);
 
   const totalVolume = workouts.reduce((sum, w) => sum + getTotalVolume(w), 0);
 
@@ -271,6 +272,15 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
+                  <Button
+                    onClick={() => setShareWorkout(workout)}
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9 rounded-xl"
+                    title={t('cmShareWorkout')}
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
                   <Button 
                     variant="destructive" 
                     size="icon"
@@ -285,6 +295,11 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
           );
         })}
       </div>
+      <ShareWorkoutDialog
+        open={!!shareWorkout}
+        onOpenChange={(o) => { if (!o) setShareWorkout(null); }}
+        workoutData={shareWorkout}
+      />
     </div>
   );
 };
