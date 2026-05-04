@@ -204,9 +204,9 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
               <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", gradient)} />
               
               <div className="p-5">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-lg group-hover:text-primary transition-colors">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-lg group-hover:text-primary transition-colors break-words">
                       {getWorkoutTitleFromExercises(workout.exercises) || "Workout"}
                     </h4>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1.5">
@@ -215,7 +215,7 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
                     </div>
                   </div>
                   {volume > 0 && (
-                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500/10 to-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    <span className="self-start inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500/10 to-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
                       <Weight className="h-3 w-3 mr-1" />
                       {Math.round(volume).toLocaleString()} kg
                     </span>

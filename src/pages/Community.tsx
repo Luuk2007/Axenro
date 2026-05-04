@@ -49,7 +49,7 @@ export default function Community() {
   return (
     <div className="space-y-4 pb-24">
       <div>
-        <h1 className="text-2xl font-bold">{t('community')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">{t('community')}</h1>
         <p className="text-sm text-muted-foreground">{t('communityDesc')}</p>
       </div>
 
