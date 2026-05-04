@@ -103,30 +103,30 @@ export default function WorkoutsSummary({
               return (
                 <div 
                   key={workout.id}
-                  className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500/5 to-teal-500/5 p-4 transition-all duration-300 hover:from-emerald-500/10 hover:to-teal-500/10 cursor-pointer border border-border/50"
+                  className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500/5 to-teal-500/5 p-3 sm:p-4 transition-all duration-300 hover:from-emerald-500/10 hover:to-teal-500/10 cursor-pointer border border-border/50 w-full max-w-full min-w-0"
                   onClick={() => navigate('/workouts')}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2 sm:gap-3 min-w-0">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                       <div className="rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 p-2 flex-shrink-0">
                         <Dumbbell className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-sm truncate">{workout.name}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5 min-w-0">
                           <Calendar className="h-3 w-3 flex-shrink-0" />
-                          <span>{formatWorkoutDate(workout.date)}</span>
+                          <span className="truncate">{formatWorkoutDate(workout.date)}</span>
                           {exerciseCount > 0 && (
                             <>
-                              <span>•</span>
-                              <span>{exerciseCount} {t("exercises")}</span>
+                              <span className="flex-shrink-0">•</span>
+                              <span className="truncate">{exerciseCount} {t("exercises")}</span>
                             </>
                           )}
                         </div>
                       </div>
                     </div>
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex-shrink-0">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex-shrink-0">
                       {t("completed")}
                     </span>
                   </div>
