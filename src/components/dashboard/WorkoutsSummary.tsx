@@ -156,16 +156,16 @@ export default function WorkoutsSummary({
       
       {/* Footer */}
       {recentWorkouts.length > 0 && (
-        <div className="px-5 py-4 border-t border-border/50 bg-muted/20">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
+        <div className="px-3 sm:px-5 py-3 sm:py-4 border-t border-border/50 bg-muted/20">
+          <div className="flex items-center justify-between gap-2 text-sm min-w-0">
+            <span className="text-muted-foreground text-xs sm:text-sm truncate">
               {recentWorkouts.length} {t("recent workouts")}
             </span>
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={() => navigate('/workouts')}
-              className="text-xs h-8 rounded-lg"
+              className="text-xs h-8 rounded-lg flex-shrink-0 px-2"
             >
               <TrendingUp className="h-3 w-3 mr-1" />
               {t("View progress")}
