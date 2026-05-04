@@ -69,20 +69,20 @@ export default function MealsList({
 
   return (
     <div className={cn(
-      "rounded-2xl border border-border/50 bg-card h-full flex flex-col overflow-hidden",
+      "rounded-2xl border border-border/50 bg-card h-full flex flex-col overflow-hidden w-full max-w-full min-w-0",
       className
     )}>
       {/* Header */}
-      <div className="p-5 pb-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 p-2.5 shadow-lg">
-              <Utensils className="h-5 w-5 text-white" />
+      <div className="p-3 sm:p-5 pb-0">
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <div className="rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 p-2 sm:p-2.5 shadow-lg flex-shrink-0">
+              <Utensils className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
             </div>
-            <h3 className="font-semibold text-lg">{title}</h3>
+            <h3 className="font-semibold text-base sm:text-lg truncate">{title}</h3>
           </div>
           {onViewAll && (
-            <Button variant="ghost" size="sm" onClick={() => navigate('/nutrition')} className="rounded-lg">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/nutrition')} className="rounded-lg flex-shrink-0 px-2 text-xs sm:text-sm">
               {t("viewAll")}
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
@@ -91,26 +91,26 @@ export default function MealsList({
       </div>
       
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-5 pt-4">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-5 pt-3 sm:pt-4 min-w-0">
         {meals.length > 0 ? (
           <div className="space-y-3">
             {meals.map((meal, index) => (
               <div 
                 key={meal.id}
-                className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-500/5 to-amber-500/5 p-4 transition-all duration-300 hover:from-orange-500/10 hover:to-amber-500/10 cursor-pointer border border-border/50"
+                className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-500/5 to-amber-500/5 p-3 sm:p-4 transition-all duration-300 hover:from-orange-500/10 hover:to-amber-500/10 cursor-pointer border border-border/50 w-full max-w-full min-w-0"
                 onClick={() => navigate('/nutrition')}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2 sm:gap-3 min-w-0">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     <div className="rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/20 p-2 flex-shrink-0">
                       <Utensils className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                     </div>
                     <p className="font-medium text-sm truncate">{meal.name}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="font-semibold text-sm">{meal.calories} cal</p>
-                    <p className="text-xs text-muted-foreground">{meal.protein}g {t("protein")}</p>
+                    <p className="font-semibold text-xs sm:text-sm">{meal.calories} cal</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">{meal.protein}g {t("protein")}</p>
                   </div>
                 </div>
               </div>
