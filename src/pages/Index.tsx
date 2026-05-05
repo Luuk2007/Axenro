@@ -183,8 +183,8 @@ const Dashboard = () => {
       />
 
       {/* Workouts and Meals */}
-      <div className="grid gap-4 md:grid-cols-2 items-start w-full max-w-full">
-        <div className="min-w-0 max-h-[420px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 items-start w-full max-w-full overflow-hidden">
+        <div className="min-w-0 w-full max-w-full overflow-hidden max-h-[420px]">
           <WorkoutsSummary
             title={t("Recent workouts")}
             onViewAll={navigateToWorkouts}
@@ -192,7 +192,7 @@ const Dashboard = () => {
           />
         </div>
         
-        <div className="min-w-0 max-h-[420px]">
+        <div className="min-w-0 w-full max-w-full overflow-hidden max-h-[420px]">
           <MealsList
             title={format(date, 'PPP') === format(new Date(), 'PPP') ? t("Today meals") : `${format(date, 'MMM d')} ${t("meals")}`}
             onViewAll={navigateToNutrition}
