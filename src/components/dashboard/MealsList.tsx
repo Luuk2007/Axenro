@@ -73,18 +73,16 @@ export default function MealsList({
       className
     )}>
       {/* Header */}
-      <div className="p-3 sm:p-5 pb-0">
-        <div className="flex items-center justify-between gap-2 min-w-0">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <div className="rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 p-2 sm:p-2.5 shadow-lg flex-shrink-0">
+      <div className="p-3 sm:p-5 pb-0 min-w-0">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:gap-3 min-w-0 max-w-full">
+          <div className="rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 p-2 sm:p-2.5 shadow-lg flex-shrink-0">
               <Utensils className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-            </div>
-            <h3 className="font-semibold text-base sm:text-lg truncate">{title}</h3>
           </div>
+          <h3 className="font-semibold text-lg sm:text-xl truncate min-w-0">{title}</h3>
           {onViewAll && (
-            <Button variant="ghost" size="sm" onClick={() => navigate('/nutrition')} className="rounded-lg flex-shrink-0 px-2 text-xs sm:text-sm">
-              {t("viewAll")}
-              <ChevronRight className="h-4 w-4 ml-1" />
+            <Button variant="ghost" size="sm" onClick={() => navigate('/nutrition')} className="rounded-lg min-w-0 max-w-[6.75rem] flex-shrink-0 px-2 text-xs sm:text-sm">
+              <span className="truncate">{t("viewAll")}</span>
+              <ChevronRight className="h-4 w-4 ml-0.5 sm:ml-1 flex-shrink-0" />
             </Button>
           )}
         </div>
@@ -117,7 +115,7 @@ export default function MealsList({
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center">
+          <div className="flex flex-col items-center justify-center h-full text-center px-2">
             <div className="rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 p-5 mb-4 shadow-lg">
               <Utensils className="h-8 w-8 text-white" />
             </div>
@@ -135,10 +133,10 @@ export default function MealsList({
                   }
                 }, 100);
               }}
-              className="rounded-xl"
+              className="rounded-xl max-w-full px-4"
             >
               <Plus className="h-4 w-4 mr-2" />
-              {t("Add meal")}
+              <span className="truncate">{t("Add meal")}</span>
             </Button>
           </div>
         )}
