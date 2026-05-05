@@ -27,6 +27,7 @@ import CookieConsentModal from "@/components/cookies/CookieConsentModal";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import PasswordResetModal from "@/components/auth/PasswordResetModal";
+import UpdateSummaryNotice from "@/components/update/UpdateSummaryNotice";
 
 const queryClient = new QueryClient();
 
@@ -91,6 +92,7 @@ function App() {
                 </Routes>
                 
                 <CookieConsentModal />
+                <UpdateSummaryNotice />
                 <PasswordResetModal 
                   open={showPasswordReset}
                   onOpenChange={setShowPasswordReset}

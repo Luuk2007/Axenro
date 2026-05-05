@@ -23,6 +23,8 @@ export default function CommunityFeed() {
   const { items, loading, toggleLike } = useSharedWorkouts();
   const [selected, setSelected] = useState<SharedWorkoutItem | null>(null);
 
+  const openWorkout = (item: SharedWorkoutItem) => setSelected(item);
+
   if (loading) return <p className="text-sm text-muted-foreground py-8 text-center">...</p>;
   if (items.length === 0) {
     return (
@@ -39,7 +41,19 @@ export default function CommunityFeed() {
           const ex = it.workout_data?.exercises || [];
           const exCount = Array.isArray(ex) ? ex.length : 0;
           return (
-            <Card key={it.id} className="p-4">
+            <Card
+              key={it.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => openWorkout(it)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  openWorkout(it);
+                }
+              }}
+              className="p-4 cursor-pointer transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
               <div className="flex items-center gap-3 mb-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={it.sender_avatar || undefined} />
@@ -51,23 +65,22 @@ export default function CommunityFeed() {
                 </div>
               </div>
               {it.message && <p className="text-sm mb-2">{it.message}</p>}
-              <button
-                type="button"
-                onClick={() => setSelected(it)}
-                className="w-full text-left rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors p-3 flex items-center gap-3"
-              >
+              <div className="w-full text-left rounded-lg bg-muted/50 transition-colors p-3 flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0"><Dumbbell className="h-5 w-5 text-primary" /></div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{it.workout_data?.name || 'Workout'}</p>
                   <p className="text-xs text-muted-foreground">{exCount} {t('exercises')}</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              </button>
+              </div>
               <div className="flex items-center gap-2 mt-3">
                 <Button
                   size="sm"
                   variant={it.liked_by_me ? 'default' : 'ghost'}
-                  onClick={() => toggleLike(it.id, it.liked_by_me)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleLike(it.id, it.liked_by_me);
+                  }}
                 >
                   <Heart className={`h-4 w-4 mr-1 ${it.liked_by_me ? 'fill-current' : ''}`} />
                   {it.likes_count}

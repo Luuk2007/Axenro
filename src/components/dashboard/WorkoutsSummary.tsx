@@ -76,18 +76,16 @@ export default function WorkoutsSummary({
       className
     )}>
       {/* Header */}
-      <div className="p-3 sm:p-5 pb-0">
-        <div className="flex items-center justify-between gap-2 min-w-0">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 p-2 sm:p-2.5 shadow-lg flex-shrink-0">
+      <div className="p-3 sm:p-5 pb-0 min-w-0">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:gap-3 min-w-0 max-w-full">
+          <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 p-2 sm:p-2.5 shadow-lg flex-shrink-0">
               <Dumbbell className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-            </div>
-            <h3 className="font-semibold text-base sm:text-lg truncate">{title || t("Recent workouts")}</h3>
           </div>
+          <h3 className="font-semibold text-lg sm:text-xl truncate min-w-0">{title || t("Recent workouts")}</h3>
           {onViewAll && (
-            <Button variant="ghost" size="sm" onClick={onViewAll} className="rounded-lg flex-shrink-0 px-2 text-xs sm:text-sm">
-              {t("viewAll")}
-              <ChevronRight className="h-4 w-4 ml-1" />
+            <Button variant="ghost" size="sm" onClick={onViewAll} className="rounded-lg min-w-0 max-w-[6.75rem] flex-shrink-0 px-2 text-xs sm:text-sm">
+              <span className="truncate">{t("viewAll")}</span>
+              <ChevronRight className="h-4 w-4 ml-0.5 sm:ml-1 flex-shrink-0" />
             </Button>
           )}
         </div>
@@ -126,7 +124,7 @@ export default function WorkoutsSummary({
                         </div>
                       </div>
                     </div>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex-shrink-0">
+                    <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex-shrink-0">
                       {t("completed")}
                     </span>
                   </div>
@@ -165,10 +163,10 @@ export default function WorkoutsSummary({
               variant="ghost" 
               size="sm" 
               onClick={() => navigate('/workouts')}
-              className="text-xs h-8 rounded-lg flex-shrink-0 px-2"
+              className="text-xs h-8 rounded-lg min-w-0 max-w-[48%] flex-shrink-0 px-2"
             >
-              <TrendingUp className="h-3 w-3 mr-1" />
-              {t("View progress")}
+              <TrendingUp className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="truncate">{t("View progress")}</span>
             </Button>
           </div>
         </div>
