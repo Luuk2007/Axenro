@@ -87,11 +87,8 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
   // Extract exercise history from all workouts
   const getExerciseHistory = (): ExerciseHistoryEntry[] => {
     const history: ExerciseHistoryEntry[] = [];
-    let globalMaxWeight = 0;
-    let globalMaxReps = 0; // Track global max reps for calisthenics
-    let globalBestPace = Infinity; // Best pace is lowest value
+    let globalBestPace = Infinity;
 
-    // First pass: collect all entries
     workouts.forEach((workout) => {
       const exercise = workout.exercises.find(
         (ex) => ex.name.toLowerCase() === exerciseName.toLowerCase()
@@ -99,20 +96,13 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
 
       if (exercise) {
         if (isCardio) {
-          const maxDuration = Math.max(
-            ...exercise.sets.map((set) => set.reps || 0)
-          );
-          const maxDistance = Math.max(
-            ...exercise.sets.map((set) => set.weight || 0)
-          );
-          
-          // Calculate pace (minutes per km)
+          const maxDuration = Math.max(...exercise.sets.map((set) => set.reps || 0));
+          const maxDistance = Math.max(...exercise.sets.map((set) => set.weight || 0));
           let pace: number | undefined = undefined;
           if (maxDuration > 0 && maxDistance > 0) {
             pace = (maxDuration / 60) / maxDistance;
             globalBestPace = Math.min(globalBestPace, pace);
           }
-
           history.push({
             date: workout.date,
             workoutName: workout.name,
@@ -123,12 +113,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             isPersonalRecord: false,
           });
         } else if (isCalisthenics) {
-          // For calisthenics, track max reps per session
-          const maxRepsInSession = Math.max(
-            ...exercise.sets.map((set) => set.reps || 0)
-          );
-          globalMaxReps = Math.max(globalMaxReps, maxRepsInSession);
-
+          const maxRepsInSession = Math.max(...exercise.sets.map((set) => set.reps || 0));
           history.push({
             date: workout.date,
             workoutName: workout.name,
@@ -137,43 +122,57 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             isPersonalRecord: false,
           });
         } else {
-          const maxWeightInSession = Math.max(
-            ...exercise.sets
-              .filter((set) => set.weight > 0)
-              .map((set) => set.weight)
+          const validSets = exercise.sets.filter((set) => set.weight > 0);
+          if (validSets.length === 0) return;
+          const bestSet = validSets.reduce((best, s) =>
+            s.weight > best.weight || (s.weight === best.weight && (s.reps || 0) > (best.reps || 0))
+              ? s
+              : best
           );
-          globalMaxWeight = Math.max(globalMaxWeight, maxWeightInSession);
-
-          const maxWeightSet = exercise.sets.find(
-            (set) => set.weight === maxWeightInSession
-          );
-
           history.push({
             date: workout.date,
             workoutName: workout.name,
             sets: exercise.sets,
-            maxWeight: maxWeightInSession,
-            maxReps: maxWeightSet?.reps || 0,
+            maxWeight: bestSet.weight,
+            maxReps: bestSet.reps || 0,
             isPersonalRecord: false,
           });
         }
       }
     });
 
-    // Second pass: mark personal records
-    history.forEach((entry) => {
-      if (isCardio) {
-        // For cardio, mark as PR if it has the best (lowest) pace
-        entry.isPersonalRecord = entry.pace !== undefined && entry.pace === globalBestPace;
-      } else if (isCalisthenics) {
-        // For calisthenics, mark as PR if it has the highest reps
-        entry.isPersonalRecord = entry.maxReps === globalMaxReps;
-      } else {
-        entry.isPersonalRecord = entry.maxWeight === globalMaxWeight;
-      }
-    });
+    // Mark only ONE single best PR
+    if (isCardio) {
+      const prIndex = history.findIndex(
+        (e) => e.pace !== undefined && e.pace === globalBestPace
+      );
+      if (prIndex >= 0) history[prIndex].isPersonalRecord = true;
+    } else if (isCalisthenics) {
+      let bestIdx = -1;
+      let bestReps = -1;
+      history.forEach((e, i) => {
+        if ((e.maxReps || 0) > bestReps) {
+          bestReps = e.maxReps || 0;
+          bestIdx = i;
+        }
+      });
+      if (bestIdx >= 0) history[bestIdx].isPersonalRecord = true;
+    } else {
+      let bestIdx = -1;
+      let bestW = -1;
+      let bestR = -1;
+      history.forEach((e, i) => {
+        const w = e.maxWeight || 0;
+        const r = e.maxReps || 0;
+        if (w > bestW || (w === bestW && r > bestR)) {
+          bestW = w;
+          bestR = r;
+          bestIdx = i;
+        }
+      });
+      if (bestIdx >= 0) history[bestIdx].isPersonalRecord = true;
+    }
 
-    // Sort by date
     return history.sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
