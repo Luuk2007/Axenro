@@ -87,11 +87,8 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
   // Extract exercise history from all workouts
   const getExerciseHistory = (): ExerciseHistoryEntry[] => {
     const history: ExerciseHistoryEntry[] = [];
-    let globalMaxWeight = 0;
-    let globalMaxReps = 0; // Track global max reps for calisthenics
-    let globalBestPace = Infinity; // Best pace is lowest value
+    let globalBestPace = Infinity;
 
-    // First pass: collect all entries
     workouts.forEach((workout) => {
       const exercise = workout.exercises.find(
         (ex) => ex.name.toLowerCase() === exerciseName.toLowerCase()
@@ -99,20 +96,13 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
 
       if (exercise) {
         if (isCardio) {
-          const maxDuration = Math.max(
-            ...exercise.sets.map((set) => set.reps || 0)
-          );
-          const maxDistance = Math.max(
-            ...exercise.sets.map((set) => set.weight || 0)
-          );
-          
-          // Calculate pace (minutes per km)
+          const maxDuration = Math.max(...exercise.sets.map((set) => set.reps || 0));
+          const maxDistance = Math.max(...exercise.sets.map((set) => set.weight || 0));
           let pace: number | undefined = undefined;
           if (maxDuration > 0 && maxDistance > 0) {
             pace = (maxDuration / 60) / maxDistance;
             globalBestPace = Math.min(globalBestPace, pace);
           }
-
           history.push({
             date: workout.date,
             workoutName: workout.name,
@@ -123,12 +113,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             isPersonalRecord: false,
           });
         } else if (isCalisthenics) {
-          // For calisthenics, track max reps per session
-          const maxRepsInSession = Math.max(
-            ...exercise.sets.map((set) => set.reps || 0)
-          );
-          globalMaxReps = Math.max(globalMaxReps, maxRepsInSession);
-
+          const maxRepsInSession = Math.max(...exercise.sets.map((set) => set.reps || 0));
           history.push({
             date: workout.date,
             workoutName: workout.name,
@@ -137,43 +122,57 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             isPersonalRecord: false,
           });
         } else {
-          const maxWeightInSession = Math.max(
-            ...exercise.sets
-              .filter((set) => set.weight > 0)
-              .map((set) => set.weight)
+          const validSets = exercise.sets.filter((set) => set.weight > 0);
+          if (validSets.length === 0) return;
+          const bestSet = validSets.reduce((best, s) =>
+            s.weight > best.weight || (s.weight === best.weight && (s.reps || 0) > (best.reps || 0))
+              ? s
+              : best
           );
-          globalMaxWeight = Math.max(globalMaxWeight, maxWeightInSession);
-
-          const maxWeightSet = exercise.sets.find(
-            (set) => set.weight === maxWeightInSession
-          );
-
           history.push({
             date: workout.date,
             workoutName: workout.name,
             sets: exercise.sets,
-            maxWeight: maxWeightInSession,
-            maxReps: maxWeightSet?.reps || 0,
+            maxWeight: bestSet.weight,
+            maxReps: bestSet.reps || 0,
             isPersonalRecord: false,
           });
         }
       }
     });
 
-    // Second pass: mark personal records
-    history.forEach((entry) => {
-      if (isCardio) {
-        // For cardio, mark as PR if it has the best (lowest) pace
-        entry.isPersonalRecord = entry.pace !== undefined && entry.pace === globalBestPace;
-      } else if (isCalisthenics) {
-        // For calisthenics, mark as PR if it has the highest reps
-        entry.isPersonalRecord = entry.maxReps === globalMaxReps;
-      } else {
-        entry.isPersonalRecord = entry.maxWeight === globalMaxWeight;
-      }
-    });
+    // Mark only ONE single best PR
+    if (isCardio) {
+      const prIndex = history.findIndex(
+        (e) => e.pace !== undefined && e.pace === globalBestPace
+      );
+      if (prIndex >= 0) history[prIndex].isPersonalRecord = true;
+    } else if (isCalisthenics) {
+      let bestIdx = -1;
+      let bestReps = -1;
+      history.forEach((e, i) => {
+        if ((e.maxReps || 0) > bestReps) {
+          bestReps = e.maxReps || 0;
+          bestIdx = i;
+        }
+      });
+      if (bestIdx >= 0) history[bestIdx].isPersonalRecord = true;
+    } else {
+      let bestIdx = -1;
+      let bestW = -1;
+      let bestR = -1;
+      history.forEach((e, i) => {
+        const w = e.maxWeight || 0;
+        const r = e.maxReps || 0;
+        if (w > bestW || (w === bestW && r > bestR)) {
+          bestW = w;
+          bestR = r;
+          bestIdx = i;
+        }
+      });
+      if (bestIdx >= 0) history[bestIdx].isPersonalRecord = true;
+    }
 
-    // Sort by date
     return history.sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
@@ -193,30 +192,35 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
     : isCalisthenics
     ? Math.max(...exerciseHistory.map((e) => e.maxReps || 0))
     : Math.max(...exerciseHistory.map((e) => e.maxWeight || 0));
-  const averagePace = isCardio && exerciseHistory.some(e => e.pace)
-    ? exerciseHistory.filter(e => e.pace).reduce((sum, e) => sum + (e.pace || 0), 0) /
-      exerciseHistory.filter(e => e.pace).length
-    : 0;
-  const averagePerformance = isCardio
-    ? averagePace
-    : isCalisthenics
-    ? exerciseHistory.reduce((sum, e) => sum + (e.maxReps || 0), 0) / totalSessions
-    : exerciseHistory.reduce((sum, e) => sum + (e.maxWeight || 0), 0) / totalSessions;
 
-  const firstSession = exerciseHistory[exerciseHistory.length - 1];
-  const lastSession = exerciseHistory[0];
+  // Determine truly oldest session regardless of current sort order
+  const oldestSession = [...exerciseHistory].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  )[0];
+  const newestSession = [...exerciseHistory].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  )[0];
+
+  const firstPerformance = !oldestSession
+    ? 0
+    : isCardio
+    ? oldestSession.pace || 0
+    : isCalisthenics
+    ? oldestSession.maxReps || 0
+    : oldestSession.maxWeight || 0;
+
   const progressPercentage =
-    firstSession && lastSession
+    oldestSession && newestSession
       ? isCardio
-        ? (((lastSession.maxDuration || 0) - (firstSession.maxDuration || 0)) /
-            (firstSession.maxDuration || 1)) *
+        ? (((newestSession.maxDuration || 0) - (oldestSession.maxDuration || 0)) /
+            (oldestSession.maxDuration || 1)) *
           100
         : isCalisthenics
-        ? (((lastSession.maxReps || 0) - (firstSession.maxReps || 0)) /
-            (firstSession.maxReps || 1)) *
+        ? (((newestSession.maxReps || 0) - (oldestSession.maxReps || 0)) /
+            (oldestSession.maxReps || 1)) *
           100
-        : (((lastSession.maxWeight || 0) - (firstSession.maxWeight || 0)) /
-            (firstSession.maxWeight || 1)) *
+        : (((newestSession.maxWeight || 0) - (oldestSession.maxWeight || 0)) /
+            (oldestSession.maxWeight || 1)) *
           100
       : 0;
 
@@ -264,13 +268,13 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             <CardContent className="p-3 sm:p-4 text-center">
               <div className="text-xl sm:text-2xl font-bold text-primary break-all">
                 {isCardio
-                  ? averagePerformance > 0 ? `${Math.floor(averagePerformance)}:${String(Math.round((averagePerformance % 1) * 60)).padStart(2, '0')} /km` : 'N/A'
+                  ? firstPerformance > 0 ? `${Math.floor(firstPerformance)}:${String(Math.round((firstPerformance % 1) * 60)).padStart(2, '0')} /km` : 'N/A'
                   : isCalisthenics
-                  ? `${Math.round(averagePerformance)} reps`
-                  : `${formatWeight(convertWeight(averagePerformance, "metric", measurementSystem), measurementSystem)} ${getWeightUnit(measurementSystem)}`}
+                  ? `${firstPerformance} reps`
+                  : `${formatWeight(convertWeight(firstPerformance, "metric", measurementSystem), measurementSystem)} ${getWeightUnit(measurementSystem)}`}
               </div>
               <div className="text-xs text-muted-foreground">
-                {isCardio ? t("Average Pace") : isCalisthenics ? t("Avg Reps") : t("Average Performance")}
+                {isCardio ? t("First Pace") : isCalisthenics ? t("First Reps") : t("First Performance")}
               </div>
             </CardContent>
           </Card>
