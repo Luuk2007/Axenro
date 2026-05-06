@@ -192,30 +192,35 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
     : isCalisthenics
     ? Math.max(...exerciseHistory.map((e) => e.maxReps || 0))
     : Math.max(...exerciseHistory.map((e) => e.maxWeight || 0));
-  const averagePace = isCardio && exerciseHistory.some(e => e.pace)
-    ? exerciseHistory.filter(e => e.pace).reduce((sum, e) => sum + (e.pace || 0), 0) /
-      exerciseHistory.filter(e => e.pace).length
-    : 0;
-  const averagePerformance = isCardio
-    ? averagePace
-    : isCalisthenics
-    ? exerciseHistory.reduce((sum, e) => sum + (e.maxReps || 0), 0) / totalSessions
-    : exerciseHistory.reduce((sum, e) => sum + (e.maxWeight || 0), 0) / totalSessions;
 
-  const firstSession = exerciseHistory[exerciseHistory.length - 1];
-  const lastSession = exerciseHistory[0];
+  // Determine truly oldest session regardless of current sort order
+  const oldestSession = [...exerciseHistory].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  )[0];
+  const newestSession = [...exerciseHistory].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  )[0];
+
+  const firstPerformance = !oldestSession
+    ? 0
+    : isCardio
+    ? oldestSession.pace || 0
+    : isCalisthenics
+    ? oldestSession.maxReps || 0
+    : oldestSession.maxWeight || 0;
+
   const progressPercentage =
-    firstSession && lastSession
+    oldestSession && newestSession
       ? isCardio
-        ? (((lastSession.maxDuration || 0) - (firstSession.maxDuration || 0)) /
-            (firstSession.maxDuration || 1)) *
+        ? (((newestSession.maxDuration || 0) - (oldestSession.maxDuration || 0)) /
+            (oldestSession.maxDuration || 1)) *
           100
         : isCalisthenics
-        ? (((lastSession.maxReps || 0) - (firstSession.maxReps || 0)) /
-            (firstSession.maxReps || 1)) *
+        ? (((newestSession.maxReps || 0) - (oldestSession.maxReps || 0)) /
+            (oldestSession.maxReps || 1)) *
           100
-        : (((lastSession.maxWeight || 0) - (firstSession.maxWeight || 0)) /
-            (firstSession.maxWeight || 1)) *
+        : (((newestSession.maxWeight || 0) - (oldestSession.maxWeight || 0)) /
+            (oldestSession.maxWeight || 1)) *
           100
       : 0;
 
