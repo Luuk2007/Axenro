@@ -90,10 +90,11 @@ function App() {
                     <Route path="install-app" element={<InstallApp />} />
                     <Route path="*" element={<NotFound />} />
                   </Route>
+                  <Route path="/whats-new" element={<WhatsNew />} />
                 </Routes>
                 
                 <CookieConsentModal />
-                <UpdateSummaryNotice />
+                <SplashScreen />
                 <PasswordResetModal 
                   open={showPasswordReset}
                   onOpenChange={setShowPasswordReset}
