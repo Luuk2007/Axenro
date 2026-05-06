@@ -268,13 +268,13 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             <CardContent className="p-3 sm:p-4 text-center">
               <div className="text-xl sm:text-2xl font-bold text-primary break-all">
                 {isCardio
-                  ? averagePerformance > 0 ? `${Math.floor(averagePerformance)}:${String(Math.round((averagePerformance % 1) * 60)).padStart(2, '0')} /km` : 'N/A'
+                  ? firstPerformance > 0 ? `${Math.floor(firstPerformance)}:${String(Math.round((firstPerformance % 1) * 60)).padStart(2, '0')} /km` : 'N/A'
                   : isCalisthenics
-                  ? `${Math.round(averagePerformance)} reps`
-                  : `${formatWeight(convertWeight(averagePerformance, "metric", measurementSystem), measurementSystem)} ${getWeightUnit(measurementSystem)}`}
+                  ? `${firstPerformance} reps`
+                  : `${formatWeight(convertWeight(firstPerformance, "metric", measurementSystem), measurementSystem)} ${getWeightUnit(measurementSystem)}`}
               </div>
               <div className="text-xs text-muted-foreground">
-                {isCardio ? t("Average Pace") : isCalisthenics ? t("Avg Reps") : t("Average Performance")}
+                {isCardio ? t("First Pace") : isCalisthenics ? t("First Reps") : t("First Performance")}
               </div>
             </CardContent>
           </Card>
