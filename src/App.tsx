@@ -27,7 +27,8 @@ import CookieConsentModal from "@/components/cookies/CookieConsentModal";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import PasswordResetModal from "@/components/auth/PasswordResetModal";
-import UpdateSummaryNotice from "@/components/update/UpdateSummaryNotice";
+import SplashScreen from "@/components/update/SplashScreen";
+import WhatsNew from "@/pages/WhatsNew";
 
 const queryClient = new QueryClient();
 
