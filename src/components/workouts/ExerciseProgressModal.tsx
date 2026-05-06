@@ -122,7 +122,7 @@ const ExerciseProgressModal: React.FC<ExerciseProgressModalProps> = ({
             isPersonalRecord: false,
           });
         } else {
-          const validSets = exercise.sets.filter((set) => set.weight > 0);
+          const validSets = exercise.sets.filter((set) => set.weight > 0 && (set.reps || 0) > 0);
           if (validSets.length === 0) return;
           const bestSet = validSets.reduce((best, s) =>
             s.weight > best.weight || (s.weight === best.weight && (s.reps || 0) > (best.reps || 0))
