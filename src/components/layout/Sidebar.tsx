@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils, Sparkles, ChevronRight, Ruler, Weight, Trophy, Users } from 'lucide-react';
+import { BarChart3, Dumbbell, Home, LucideIcon, Settings, User2, Utensils, Sparkles, ChevronRight, Ruler, Weight, Trophy, Users, Shield } from 'lucide-react';
+import { useAdminAccess } from '@/hooks/useAdminAccess';
 import { useLanguage, TranslationKeys } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SubscriptionModal from '@/components/subscription/SubscriptionModal';
@@ -90,6 +91,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
   const { user } = useAuth();
   const { profile } = useUserProfile();
+  const { isAdmin } = useAdminAccess();
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
 
   // Load profile picture
@@ -191,12 +193,20 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
 
   // Filter navigation items based on subscription tier
   const currentTier = getCurrentTier();
-  const filteredNavItems = navItems.filter(item => {
-    if (item.requiresPremium) {
-      return currentTier === 'premium';
-    }
-    return true;
-  });
+  const filteredNavItems = [
+    ...navItems.filter(item => {
+      if (item.requiresPremium) {
+        return currentTier === 'premium';
+      }
+      return true;
+    }),
+    ...(isAdmin ? [{
+      titleKey: 'Beheer' as TranslationKeys,
+      href: '/beheer',
+      icon: Shield,
+      gradient: 'from-red-500 to-rose-500',
+    }] : []),
+  ];
   
   return (
     <>

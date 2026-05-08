@@ -143,14 +143,26 @@ export const useDashboardData = (selectedDate: Date) => {
         // Calculate workouts this week
         const weeklyGoal = profile?.weekly_workout_goal;
         const currentDate = new Date();
+        const dayOfWeek = currentDate.getDay(); // 0=Sun, 1=Mon...
+        const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
         const currentWeekStart = new Date(currentDate);
-        currentWeekStart.setDate(currentDate.getDate() - currentDate.getDay() + 1);
+        currentWeekStart.setDate(currentDate.getDate() - daysFromMonday);
+        currentWeekStart.setHours(0, 0, 0, 0);
         const currentWeekEnd = new Date(currentWeekStart);
         currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
-        
+        currentWeekEnd.setHours(23, 59, 59, 999);
+
         const workoutsThisWeek = allWorkouts.filter((workout) => {
           if (!workout.completed) return false;
-          const workoutDate = new Date(workout.date);
+          // Parse YYYY-MM-DD as local date to avoid timezone shifts
+          const dateStr = typeof workout.date === 'string' ? workout.date : '';
+          let workoutDate: Date;
+          if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+            const [y, m, d] = dateStr.substring(0, 10).split('-').map(Number);
+            workoutDate = new Date(y, m - 1, d);
+          } else {
+            workoutDate = new Date(workout.date);
+          }
           return workoutDate >= currentWeekStart && workoutDate <= currentWeekEnd;
         }).length;
 
