@@ -598,6 +598,16 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
         onOpenChange={setShowAddExercise}
         onAddExercise={handleAddExercise}
       />
+
+      <FocusMode
+        open={focusMode}
+        exercises={exercises}
+        onUpdateSet={handleUpdateSet}
+        onFinish={() => {
+          setFocusMode(false);
+          handleSaveWorkout(true);
+        }}
+      />
     </>
   );
 };
