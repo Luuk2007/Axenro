@@ -91,6 +91,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
   const { user } = useAuth();
   const { profile } = useUserProfile();
+  const { isAdmin } = useAdminAccess();
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
 
   // Load profile picture
