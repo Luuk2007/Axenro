@@ -193,12 +193,20 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
 
   // Filter navigation items based on subscription tier
   const currentTier = getCurrentTier();
-  const filteredNavItems = navItems.filter(item => {
-    if (item.requiresPremium) {
-      return currentTier === 'premium';
-    }
-    return true;
-  });
+  const filteredNavItems = [
+    ...navItems.filter(item => {
+      if (item.requiresPremium) {
+        return currentTier === 'premium';
+      }
+      return true;
+    }),
+    ...(isAdmin ? [{
+      titleKey: 'Beheer' as TranslationKeys,
+      href: '/beheer',
+      icon: Shield,
+      gradient: 'from-red-500 to-rose-500',
+    }] : []),
+  ];
   
   return (
     <>
