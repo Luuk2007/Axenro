@@ -242,16 +242,14 @@ const Beheer = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Shield className="h-8 w-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold">Beheer</h1>
-            <p className="text-muted-foreground">Admin dashboard voor Axenro</p>
-          </div>
+    <div className="space-y-6 animate-fade-in w-full max-w-full overflow-x-hidden">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">Beheer</h1>
+          <p className="text-sm text-muted-foreground mt-0.5 truncate">Admin dashboard voor Axenro</p>
         </div>
-        <Button onClick={loadData} variant="outline" className="gap-2">
+        <Button onClick={loadData} variant="outline" size="sm" className="rounded-xl gap-2 flex-shrink-0">
           <RefreshCw className="h-4 w-4" />
           Vernieuwen
         </Button>
