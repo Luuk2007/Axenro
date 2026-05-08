@@ -555,6 +555,15 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
             
             <div className="flex flex-col gap-2 pt-4">
               <Button
+                onClick={() => setFocusMode(true)}
+                disabled={exercises.length === 0}
+                variant="outline"
+                className="w-full border-primary/30 bg-primary/5 hover:bg-primary/10"
+              >
+                <Focus className="h-4 w-4 mr-2" />
+                {t("Start Focus Mode")}
+              </Button>
+              <Button
                 onClick={() => handleSaveWorkout(true)}
                 disabled={exercises.length === 0}
                 className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
