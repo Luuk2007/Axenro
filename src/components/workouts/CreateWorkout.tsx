@@ -36,6 +36,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   const [cardioMeasurements, setCardioMeasurements] = useState<Record<string, string>>({});
   // Cardio time inputs: exerciseId-setId -> { minutes, seconds }
   const [cardioTimeInputs, setCardioTimeInputs] = useState<Record<string, { minutes: string; seconds: string }>>({});
+  const [focusMode, setFocusMode] = useState(false);
 
   const generatedWorkoutName = useMemo(() => {
     return getWorkoutTitleFromExercises(exercises);
