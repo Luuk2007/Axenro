@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, X, Trash2, Dumbbell, ChevronUp, ChevronDown, GripVertical, CheckCircle2, Circle, Flag, Trophy } from 'lucide-react';
+import { Plus, X, Trash2, Dumbbell, ChevronUp, ChevronDown, GripVertical, CheckCircle2, Circle, Flag, Trophy, Focus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AddExerciseDialog from './AddExerciseDialog';
+import FocusMode from './FocusMode';
 import { Workout, Exercise, ExerciseSet } from '@/types/workout';
 import { useMeasurementSystem } from '@/hooks/useMeasurementSystem';
 import { convertWeight, getWeightUnit } from '@/utils/unitConversions';
@@ -35,6 +36,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   const [cardioMeasurements, setCardioMeasurements] = useState<Record<string, string>>({});
   // Cardio time inputs: exerciseId-setId -> { minutes, seconds }
   const [cardioTimeInputs, setCardioTimeInputs] = useState<Record<string, { minutes: string; seconds: string }>>({});
+  const [focusMode, setFocusMode] = useState(false);
 
   const generatedWorkoutName = useMemo(() => {
     return getWorkoutTitleFromExercises(exercises);
@@ -553,6 +555,15 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
             
             <div className="flex flex-col gap-2 pt-4">
               <Button
+                onClick={() => setFocusMode(true)}
+                disabled={exercises.length === 0}
+                variant="outline"
+                className="w-full border-primary/30 bg-primary/5 hover:bg-primary/10"
+              >
+                <Focus className="h-4 w-4 mr-2" />
+                {t("Start Focus Mode")}
+              </Button>
+              <Button
                 onClick={() => handleSaveWorkout(true)}
                 disabled={exercises.length === 0}
                 className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
@@ -586,6 +597,16 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
         open={showAddExercise}
         onOpenChange={setShowAddExercise}
         onAddExercise={handleAddExercise}
+      />
+
+      <FocusMode
+        open={focusMode}
+        exercises={exercises}
+        onUpdateSet={handleUpdateSet}
+        onFinish={() => {
+          setFocusMode(false);
+          handleSaveWorkout(true);
+        }}
       />
     </>
   );
