@@ -461,7 +461,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                           {exercise.sets.map((set, index) => {
                             const setKey = `${exercise.id}-${set.id}`;
                             const isCardio = exercise.muscleGroup === 'cardio';
-                            const prDetected = !isCardio && exercise.muscleGroup !== 'calisthenics' && isPRSet(setKey);
+                            const prDetected = !isCardio && isPRSet(setKey);
                             const measureType = cardioMeasurements[exercise.id] || 'time';
                             const timeKey = `${exercise.id}-${set.id}`;
                             const timeInput = cardioTimeInputs[timeKey] || { minutes: '0', seconds: '0' };
