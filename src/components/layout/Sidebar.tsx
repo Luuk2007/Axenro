@@ -9,6 +9,7 @@ import SubscriptionModal from '@/components/subscription/SubscriptionModal';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useWeightData } from '@/hooks/useWeightData';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
@@ -91,6 +92,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const { subscribed, subscription_tier, test_mode, test_subscription_tier, loading } = useSubscription();
   const { user } = useAuth();
   const { profile } = useUserProfile();
+  const { latestWeight } = useWeightData();
   const { isAdmin } = useAdminAccess();
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
 
@@ -251,10 +253,10 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                         {profile.height} cm
                       </span>
                     )}
-                    {profile?.weight && (
+                    {(latestWeight ?? profile?.weight) && (
                       <span className="text-[11px] text-muted-foreground flex items-center gap-0.5">
                         <Weight className="h-3 w-3" />
-                        {profile.weight} kg
+                        {(latestWeight ?? profile?.weight)} kg
                       </span>
                     )}
                   </div>

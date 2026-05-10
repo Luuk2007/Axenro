@@ -14,6 +14,7 @@ import { convertWeight, getWeightUnit } from '@/utils/unitConversions';
 import { getWorkoutTitleFromExercises } from '@/utils/workoutNaming';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWeightData } from '@/hooks/useWeightData';
 
 interface CreateWorkoutProps {
   open: boolean;
@@ -26,6 +27,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   const { t } = useLanguage();
   const { user } = useAuth();
   const { measurementSystem } = useMeasurementSystem();
+  const { latestWeight } = useWeightData();
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
@@ -185,15 +187,20 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   };
 
   const handleAddExercise = (exerciseData: any) => {
+    const isCalisthenics = exerciseData.muscleGroup === 'calisthenics';
+    const bodyweightDisplay = latestWeight
+      ? convertWeight(latestWeight, 'metric', measurementSystem)
+      : 0;
+    const defaultSets: ExerciseSet[] = exerciseData.sets || [
+      { id: 1, reps: 0, weight: isCalisthenics ? bodyweightDisplay : 0, completed: false },
+      { id: 2, reps: 0, weight: isCalisthenics ? bodyweightDisplay : 0, completed: false },
+      { id: 3, reps: 0, weight: isCalisthenics ? bodyweightDisplay : 0, completed: false }
+    ];
     const newExercise: Exercise = {
       id: Date.now().toString(),
       name: exerciseData.name,
       muscleGroup: exerciseData.muscleGroup,
-      sets: exerciseData.sets || [
-        { id: 1, reps: 0, weight: 0, completed: false },
-        { id: 2, reps: 0, weight: 0, completed: false },
-        { id: 3, reps: 0, weight: 0, completed: false }
-      ]
+      sets: defaultSets,
     };
     setExercises(prev => [...prev, newExercise]);
     if (exerciseData.muscleGroup === 'cardio') {
@@ -229,7 +236,16 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
       if (exercise.id === exerciseId) {
         const maxId = exercise.sets.reduce((m, s) => Math.max(m, s.id || 0), 0);
         const newSetId = maxId + 1;
-        const newSet: ExerciseSet = { id: newSetId, reps: 0, weight: 0, completed: false };
+        const isCalisthenics = exercise.muscleGroup === 'calisthenics';
+        const bodyweightDisplay = latestWeight
+          ? convertWeight(latestWeight, 'metric', measurementSystem)
+          : 0;
+        const newSet: ExerciseSet = {
+          id: newSetId,
+          reps: 0,
+          weight: isCalisthenics ? bodyweightDisplay : 0,
+          completed: false,
+        };
         // Initialize time input for new cardio set
         if (exercise.muscleGroup === 'cardio') {
           setCardioTimeInputs(prev => ({
@@ -445,13 +461,13 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                           {exercise.sets.map((set, index) => {
                             const setKey = `${exercise.id}-${set.id}`;
                             const isCardio = exercise.muscleGroup === 'cardio';
-                            const prDetected = !isCardio && exercise.muscleGroup !== 'calisthenics' && isPRSet(setKey);
+                            const prDetected = !isCardio && isPRSet(setKey);
                             const measureType = cardioMeasurements[exercise.id] || 'time';
                             const timeKey = `${exercise.id}-${set.id}`;
                             const timeInput = cardioTimeInputs[timeKey] || { minutes: '0', seconds: '0' };
                             
                             return (
-                            <div key={set.id} className={`flex items-center gap-2 text-sm ${prDetected ? 'bg-amber-500/10 rounded-lg px-1 py-0.5 border border-amber-500/30' : ''}`}>
+                            <div key={set.id} className={`flex items-center gap-2 text-sm rounded-md transition-colors ${prDetected ? 'bg-amber-500/15' : ''}`}>
                               <span className="w-10 text-muted-foreground flex-shrink-0">{t("Set")} {index + 1}</span>
                               
                               {isCardio && measureType === 'time' ? (
@@ -499,25 +515,17 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
                                     />
                                     <span className="text-xs text-muted-foreground">reps</span>
                                   </div>
-                                  {exercise.muscleGroup !== 'calisthenics' && (
-                                    <div className="flex items-center gap-1 flex-1 min-w-0">
-                                      <Input
-                                        type="number"
-                                        value={getInputValue(exercise.id, set.id, 'weight', set.weight)}
-                                        onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
-                                        onBlur={() => flagPR(exercise.name, setKey, set.weight)}
-                                        className={`w-full min-w-[60px] h-8 px-2 ${prDetected ? 'border-amber-500/50' : ''}`}
-                                        placeholder="Weight"
-                                      />
-                                      <span className="text-xs text-muted-foreground flex-shrink-0">{getWeightUnit(measurementSystem)}</span>
-                                      {prDetected && (
-                                        <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-600 dark:text-amber-400 flex-shrink-0">
-                                          <Trophy className="h-3 w-3" />
-                                          <span className="text-[10px] font-bold">PR</span>
-                                        </span>
-                                      )}
-                                    </div>
-                                  )}
+                                  <div className="flex items-center gap-1 flex-1 min-w-0">
+                                    <Input
+                                      type="number"
+                                      value={getInputValue(exercise.id, set.id, 'weight', set.weight)}
+                                      onChange={(e) => handleUpdateSet(exercise.id, set.id, 'weight', e.target.value)}
+                                      onBlur={() => flagPR(exercise.name, setKey, set.weight)}
+                                      className="w-full min-w-[60px] h-8 px-2"
+                                      placeholder="Weight"
+                                    />
+                                    <span className="text-xs text-muted-foreground flex-shrink-0">{getWeightUnit(measurementSystem)}</span>
+                                  </div>
                                 </>
                               )}
                               
