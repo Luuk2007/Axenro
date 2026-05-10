@@ -21,25 +21,73 @@ export const useWorkouts = () => {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('workouts')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: false });
+      const [{ data, error }, weightRes] = await Promise.all([
+        supabase
+          .from('workouts')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('date', { ascending: false }),
+        supabase
+          .from('weight_data')
+          .select('date, weight')
+          .eq('user_id', user.id)
+          .order('date', { ascending: true }),
+      ]);
 
       if (error) {
         console.error('Error loading workouts:', error);
         return;
       }
 
+      const weightEntries: { date: string; weight: number }[] = (weightRes.data || []).map((w: any) => ({
+        date: w.date,
+        weight: Number(w.weight),
+      }));
+
+      const getBodyweightForDate = (workoutDate: string): number => {
+        if (weightEntries.length === 0) return 0;
+        const target = new Date(workoutDate).getTime();
+        // Prefer most recent entry on or before workout date
+        let best: { date: string; weight: number } | null = null;
+        for (const entry of weightEntries) {
+          if (new Date(entry.date).getTime() <= target) {
+            if (!best || new Date(entry.date).getTime() > new Date(best.date).getTime()) {
+              best = entry;
+            }
+          }
+        }
+        // Fallback: nearest entry overall
+        if (!best) {
+          best = weightEntries.reduce((closest, entry) => {
+            if (!closest) return entry;
+            const dEntry = Math.abs(new Date(entry.date).getTime() - target);
+            const dClosest = Math.abs(new Date(closest.date).getTime() - target);
+            return dEntry < dClosest ? entry : closest;
+          }, null as { date: string; weight: number } | null);
+        }
+        return best ? best.weight : 0;
+      };
+
       if (data) {
         const formattedWorkouts: Workout[] = data.map((item: any) => {
           const rawExercises = (item as any).exercises;
-          const exercises: Exercise[] = Array.isArray(rawExercises)
+          const exercisesRaw: Exercise[] = Array.isArray(rawExercises)
             ? (rawExercises as Exercise[])
             : Array.isArray((rawExercises as any)?.exercises)
               ? ((rawExercises as any).exercises as Exercise[])
               : [];
+
+          const bodyweight = getBodyweightForDate(item.date);
+          const exercises: Exercise[] = exercisesRaw.map((ex: Exercise) => {
+            if (ex.muscleGroup !== 'calisthenics') return ex;
+            return {
+              ...ex,
+              sets: (ex.sets || []).map((s: any) => ({
+                ...s,
+                weight: !s.weight || s.weight === 0 ? bodyweight : s.weight,
+              })),
+            };
+          });
 
           const autoName = exercises.length > 0 ? getWorkoutTitleFromExercises(exercises) : '';
 
