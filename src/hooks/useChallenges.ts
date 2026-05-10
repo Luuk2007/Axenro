@@ -241,17 +241,32 @@ export function useChallenges() {
     if (challenge && pct >= challenge.badge_bronze_threshold) {
       const badgeType = pct >= challenge.badge_gold_threshold ? 'gold' :
                         pct >= challenge.badge_silver_threshold ? 'silver' : 'bronze';
-      await supabase.from('challenge_badges').insert({
+      const { error: badgeErr } = await supabase.from('challenge_badges').insert({
         user_id: user.id,
         challenge_id: challenge.id,
         badge_type: badgeType,
         completion_percentage: pct,
       });
+      if (badgeErr) console.error('Badge insert error:', badgeErr);
     }
 
-    await supabase.from('user_challenges').update({
-      status: 'abandoned',
-    }).eq('id', userChallengeId);
+    const { data, error } = await supabase
+      .from('user_challenges')
+      .update({ status: 'abandoned' })
+      .eq('id', userChallengeId)
+      .eq('user_id', user.id)
+      .select();
+
+    if (error) {
+      console.error('Abandon challenge error:', error);
+      toast.error(t('Error abandoning challenge') || 'Could not leave challenge');
+      return;
+    }
+
+    // Optimistically update local state so UI reflects immediately
+    setUserChallenges(prev => prev.map(u =>
+      u.id === userChallengeId ? { ...u, status: 'abandoned' } : u
+    ));
 
     toast.success(t('Challenge abandoned') || 'Challenge abandoned');
     await fetchUserChallenges();
