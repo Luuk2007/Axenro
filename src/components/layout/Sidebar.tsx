@@ -253,10 +253,10 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                         {profile.height} cm
                       </span>
                     )}
-                    {profile?.weight && (
+                    {(latestWeight ?? profile?.weight) && (
                       <span className="text-[11px] text-muted-foreground flex items-center gap-0.5">
                         <Weight className="h-3 w-3" />
-                        {profile.weight} kg
+                        {(latestWeight ?? profile?.weight)} kg
                       </span>
                     )}
                   </div>
