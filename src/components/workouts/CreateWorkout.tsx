@@ -14,6 +14,7 @@ import { convertWeight, getWeightUnit } from '@/utils/unitConversions';
 import { getWorkoutTitleFromExercises } from '@/utils/workoutNaming';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWeightData } from '@/hooks/useWeightData';
 
 interface CreateWorkoutProps {
   open: boolean;
