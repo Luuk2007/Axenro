@@ -27,6 +27,7 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   const { t } = useLanguage();
   const { user } = useAuth();
   const { measurementSystem } = useMeasurementSystem();
+  const { latestWeight } = useWeightData();
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
