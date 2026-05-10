@@ -236,7 +236,16 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
       if (exercise.id === exerciseId) {
         const maxId = exercise.sets.reduce((m, s) => Math.max(m, s.id || 0), 0);
         const newSetId = maxId + 1;
-        const newSet: ExerciseSet = { id: newSetId, reps: 0, weight: 0, completed: false };
+        const isCalisthenics = exercise.muscleGroup === 'calisthenics';
+        const bodyweightDisplay = latestWeight
+          ? convertWeight(latestWeight, 'metric', measurementSystem)
+          : 0;
+        const newSet: ExerciseSet = {
+          id: newSetId,
+          reps: 0,
+          weight: isCalisthenics ? bodyweightDisplay : 0,
+          completed: false,
+        };
         // Initialize time input for new cardio set
         if (exercise.muscleGroup === 'cardio') {
           setCardioTimeInputs(prev => ({
