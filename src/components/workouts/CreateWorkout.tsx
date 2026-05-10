@@ -187,15 +187,20 @@ const CreateWorkout = ({ open, onOpenChange, onSaveWorkout, editingWorkout }: Cr
   };
 
   const handleAddExercise = (exerciseData: any) => {
+    const isCalisthenics = exerciseData.muscleGroup === 'calisthenics';
+    const bodyweightDisplay = latestWeight
+      ? convertWeight(latestWeight, 'metric', measurementSystem)
+      : 0;
+    const defaultSets: ExerciseSet[] = exerciseData.sets || [
+      { id: 1, reps: 0, weight: isCalisthenics ? bodyweightDisplay : 0, completed: false },
+      { id: 2, reps: 0, weight: isCalisthenics ? bodyweightDisplay : 0, completed: false },
+      { id: 3, reps: 0, weight: isCalisthenics ? bodyweightDisplay : 0, completed: false }
+    ];
     const newExercise: Exercise = {
       id: Date.now().toString(),
       name: exerciseData.name,
       muscleGroup: exerciseData.muscleGroup,
-      sets: exerciseData.sets || [
-        { id: 1, reps: 0, weight: 0, completed: false },
-        { id: 2, reps: 0, weight: 0, completed: false },
-        { id: 3, reps: 0, weight: 0, completed: false }
-      ]
+      sets: defaultSets,
     };
     setExercises(prev => [...prev, newExercise]);
     if (exerciseData.muscleGroup === 'cardio') {
