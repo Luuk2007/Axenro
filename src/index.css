@@ -299,6 +299,16 @@
   }
 }
 
+@keyframes scanline {
+  0%   { transform: translateY(-70px); opacity: 0.2; }
+  50%  { opacity: 1; }
+  100% { transform: translateY(70px); opacity: 0.2; }
+}
+
+.animate-scanline {
+  animation: scanline 1.8s ease-in-out infinite;
+}
+
 .transition-all-ease {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

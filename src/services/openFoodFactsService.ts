@@ -106,60 +106,131 @@ export const fetchProductByBarcode = async (barcode: string, lang = 'nl'): Promi
 };
 
 /**
- * Search products by name
+ * Search products by name with improved relevance.
+ * - Uses Open Food Facts v2 search endpoint
+ * - Sorts by popularity (most-scanned products first)
+ * - Filters out products without nutrition data
+ * - Boosts exact / prefix name matches and products with images
  */
 export const searchProductsByName = async (query: string, lang = 'nl'): Promise<ProductDetails[]> => {
   try {
-    console.log(`Searching products with query: ${query}`);
-    const encodedQuery = encodeURIComponent(query);
-    const apiUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodedQuery}&json=true&page_size=20`;
-    
-    console.log('API URL:', apiUrl);
-    const response = await fetch(apiUrl);
-    
-    if (!response.ok) {
-      console.error('Error searching products:', response.statusText);
-      return [];
+    const trimmed = query.trim();
+    if (!trimmed) return [];
+    console.log(`Searching products with query: ${trimmed}`);
+
+    const country = lang === 'nl' ? 'netherlands'
+      : lang === 'fr' ? 'france'
+      : lang === 'de' ? 'germany'
+      : lang === 'es' ? 'spain'
+      : 'world';
+
+    const fields = [
+      'code', 'product_name', `product_name_${lang}`, 'brands',
+      'image_front_url', 'image_small_url', 'serving_size',
+      'nutriments', 'categories', 'countries_tags', 'unique_scans_n',
+    ].join(',');
+
+    const encoded = encodeURIComponent(trimmed);
+    // Try country-scoped popular results first
+    const primaryUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encoded}&search_simple=1&action=process&json=1&page_size=40&sort_by=unique_scans_n&fields=${fields}${country !== 'world' ? `&tagtype_0=countries&tag_contains_0=contains&tag_0=${country}` : ''}`;
+
+    let response = await fetch(primaryUrl);
+    let data: any = response.ok ? await response.json() : { products: [] };
+
+    // Fallback to global search if too few hits
+    if (!data.products || data.products.length < 5) {
+      const fallbackUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encoded}&search_simple=1&action=process&json=1&page_size=40&sort_by=unique_scans_n&fields=${fields}`;
+      try {
+        const fb = await fetch(fallbackUrl);
+        if (fb.ok) {
+          const fbData = await fb.json();
+          const seen = new Set((data.products || []).map((p: any) => p.code));
+          const merged = [...(data.products || []), ...((fbData.products || []).filter((p: any) => !seen.has(p.code)))];
+          data = { ...data, products: merged };
+        }
+      } catch (e) {
+        console.warn('Fallback search failed', e);
+      }
     }
 
-    const data = await response.json();
-    console.log('Search results count:', data.count);
-    
-    if (!data.products || !Array.isArray(data.products)) {
-      return [];
+    if (!data.products || !Array.isArray(data.products)) return [];
+
+    const q = trimmed.toLowerCase();
+
+    const mapped: (ProductDetails & { _score: number })[] = data.products
+      .map((product: any) => {
+        const nutrients = product.nutriments || {};
+        const nutrition: NutritionInfo = {
+          calories: nutrients['energy-kcal_100g'] || nutrients['energy-kcal'] || 0,
+          protein: nutrients.proteins_100g || nutrients.proteins || 0,
+          carbs: nutrients.carbohydrates_100g || nutrients.carbohydrates || 0,
+          fat: nutrients.fat_100g || nutrients.fat || 0,
+        };
+
+        const productName: string =
+          product[`product_name_${lang}`] || product.product_name || '';
+        if (!productName) return null;
+
+        // Filter out products without any nutrition data — they're useless to the user
+        if (nutrition.calories === 0 && nutrition.protein === 0 && nutrition.carbs === 0 && nutrition.fat === 0) {
+          return null;
+        }
+
+        const categories = product.categories
+          ? product.categories.split(',').map((c: string) => c.trim())
+          : [];
+        const foodAnalysis = analyzeFoodType(productName, categories, product.serving_size);
+
+        // Relevance score
+        const name = productName.toLowerCase();
+        let score = 0;
+        if (name === q) score += 100;
+        else if (name.startsWith(q)) score += 60;
+        else if (name.includes(q)) score += 30;
+        // Multi-word: every query word that appears in name adds points
+        for (const w of q.split(/\s+/).filter(Boolean)) {
+          if (w.length > 1 && name.includes(w)) score += 5;
+        }
+        if (product.image_front_url) score += 8;
+        if (product.brands) score += 2;
+        // Popularity (log scale)
+        const scans = Number(product.unique_scans_n) || 0;
+        if (scans > 0) score += Math.min(20, Math.log2(scans + 1) * 2);
+        // Country match
+        const countries: string[] = product.countries_tags || [];
+        if (country !== 'world' && countries.some((c) => c.includes(country))) score += 15;
+
+        return {
+          id: product.code || String(Date.now() + Math.random()),
+          name: productName,
+          description: product.ingredients_text || '',
+          brand: product.brands || 'Generic',
+          imageUrl: product.image_front_url || product.image_small_url || null,
+          servingSize: product.serving_size || '100g',
+          servings: 1,
+          nutrition,
+          foodAnalysis,
+          categories,
+          _score: score,
+        } as ProductDetails & { _score: number };
+      })
+      .filter(Boolean) as (ProductDetails & { _score: number })[];
+
+    mapped.sort((a, b) => b._score - a._score);
+
+    // Deduplicate by name+brand
+    const seen = new Set<string>();
+    const deduped: ProductDetails[] = [];
+    for (const p of mapped) {
+      const key = `${p.name.toLowerCase()}|${(p.brand || '').toLowerCase()}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const { _score, ...rest } = p as any;
+      deduped.push(rest);
+      if (deduped.length >= 20) break;
     }
 
-    return data.products.map((product: any) => {
-      const nutrients = product.nutriments || {};
-      
-      const nutrition: NutritionInfo = {
-        calories: nutrients['energy-kcal_100g'] || nutrients['energy-kcal'] || 0,
-        protein: nutrients.proteins_100g || nutrients.proteins || 0,
-        carbs: nutrients.carbohydrates_100g || nutrients.carbohydrates || 0,
-        fat: nutrients.fat_100g || nutrients.fat || 0
-      };
-
-      const productName = product[`product_name_${lang}`] || product.product_name || 'Unknown Product';
-      
-      // Extract categories for better food analysis
-      const categories = product.categories ? product.categories.split(',').map((cat: string) => cat.trim()) : [];
-      
-      // Analyze food type for appropriate units
-      const foodAnalysis = analyzeFoodType(productName, categories, product.serving_size);
-      
-      return {
-        id: product.code || String(Date.now()),
-        name: productName,
-        description: product.ingredients_text || '',
-        brand: product.brands || 'Generic',
-        imageUrl: product.image_front_url || null,
-        servingSize: product.serving_size || '100g',
-        servings: 1,
-        nutrition,
-        foodAnalysis,
-        categories
-      };
-    });
+    return deduped;
   } catch (error) {
     console.error('Error searching products:', error);
     return [];
