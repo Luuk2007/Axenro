@@ -2,6 +2,17 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
+// Auto-reload when a new service worker takes control so users always
+// see the latest deployed version without needing to manually refresh.
+if ('serviceWorker' in navigator) {
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloading) return;
+    reloading = true;
+    window.location.reload();
+  });
+}
+
 // Hide splash screen after app mounts
 const hideSplash = () => {
   const splash = document.getElementById('splash-screen');
